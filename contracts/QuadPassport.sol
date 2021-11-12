@@ -12,15 +12,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable {
     uint256 public PASSPORT_VERSION = 1;
 
     uint256 public mintPrice = 0.03 ether;
+    mapping(bytes32 => bool) private _usedHashes;
 
+    // Admin Functions
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleFields;
+    mapping(bytes32 => uint256) public pricePerField;
+    bytes32[] public supportedFields;
 
-    mapping(bytes32 => bool) private _usedHashes;
-    mapping(address => (mapping(uint256 => bytes))) public validSignatures;
+    // Passport fields
+    mapping(address => (mapping(uint256 => bytes))) private _validSignatures;
     mapping(bytes32 => (mapping(address => bytes32))) private _fields;
     mapping(bytes32 => (mapping(address => uint256))) private _fieldsUint;
-    mapping(bytes32 => uint256) public pricePerField;
 
 
     function initialize(address governance) public initializer {
@@ -42,11 +45,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable {
     ) external payable {
         require(msg.value == mintPrice, "INVALID_MINT_PRICE");
         require(eligibleTokenId[_id], "PASSPORT_ID_INVALID");
-        require(balanceOf(_msgSender(), _id), "PASSPORT_ALREADY_EXISTS");
+        require(balanceOf(_msgSender(), _id) == 0, "PASSPORT_ALREADY_EXISTS");
 
         _verifyIssuer(_msgSender(), _id, _quadId, _country, _issuedAt, _sig);
 
-        validSignatures[_msgSender()][_id] = _sig;
+        _validSignatures[_msgSender()][_id] = _sig;
         _fields[keccak256("COUNTRY")][_msgSender()] = _country;
         _fields[keccak256("DID")][_msgSender()] = _quadId;
         _fieldsUint[keccak256("ISSUED_TIMESTAMP")][_msgSender()] = _issuedAt;
@@ -57,7 +60,23 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable {
 
     }
 
-    function burnPassport() external {
+    function burnPassport(
+        uint256 _id
+    ) external {
+        require(balanceOf(_msgSender(), _id) == 1, "CANNOT_BURN_ZERO_BALANCE");
+        _burn(_msgSender(), _id, 1);
+
+        for (uint256 i = 0; i < supportedFields.length; i++) {
+           _fields[supportedFields[i]][_msgSender()] = bytes32(0);
+           _fieldsUint[supportedFields[i]][_msgSender()] = 0;
+        }
+    }
+
+    function getFields(
+        uint256 _id,
+        bytes32 _field,
+    ) external returns(bytes32) {
+        require(balanceOf(_msgSender(), _id) == 1, "PASSPORT_DOES_NOT_EXIST");
 
     }
 
@@ -75,6 +94,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable {
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessagehash(h);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
         require(hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+    }
+
+    function getPassportSignature(
+        uint256 _id
+    ) pure returns (bytes) {
+        return _validSignatures[_msgSender()][_id];
     }
 
     function _beforeTokenTransfer(
