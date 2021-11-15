@@ -21,4 +21,10 @@ module.exports = {
       { ignores: ["modules"] },
     ],
   },
+  "overrides": [{
+    "files": "utils/*.ts",
+    "rules": {
+        "node/no-unpublished-require": 0,
+    }
+  }]
 };
