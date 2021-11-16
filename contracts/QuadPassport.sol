@@ -1,41 +1,20 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./interfaces/IQuadPassport.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
+import "./interfaces/IQuadPassport.sol";
+import "./interfaces/IQuadGovernance.sol";
 
-contract QuadPassport is IQuadPassport, ERC1155Upgradeable, AccessControlUpgradeable {
-    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-    uint256 public passportVersion = 1;
+contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, IQuadPassport, IQuadGovernance  {
 
-    uint256 public mintPrice = 0.03 ether;
-    mapping(bytes32 => bool) private _usedHashes;
-
-    // Admin Functions
-    mapping(uint256 => bool) public eligibleTokenId;
-    mapping(bytes32 => bool) public eligibleAttributes;
-    // Price in $USD (1e2 decimals)
-    mapping(bytes32 => uint256) public pricePerAttribute;
-    bytes32[] public supportedAttributes;
-
-    // Passport attributes
-    mapping(address => mapping(uint256 => bytes)) private _validSignatures;
-    mapping(bytes32 => mapping(address => bytes32)) private _attributes;
-    mapping(bytes32 => mapping(address => uint256)) private _attributesUint;
-
-
-    function initialize(address governance) public initializer {
-        require(governance != address(0), "GOVERNANCE_ADDRESS_ZERO");
-
-        eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
-        _setupRole(GOVERNANCE_ROLE, governance);
-        _setRoleAdmin(GOVERNANCE_ROLE, DEFAULT_ADMIN_ROLE);
-        _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
-        _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
+    function initialize(address _governanceContract, address _adminAddr) public initializer {
+        require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
+        require(_adminAddr != address(0), "ADMIN_ADDRESS_ZERO");
+        governance = IQuadGovernance(_governanceContract);
+        owner = _adminAddr;
     }
 
     function mintPassport(
@@ -146,7 +125,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, AccessControlUpgrade
     require(
         (from == address(0) && to != address(0))
         || (from != address(0) && to == address(0)),
-        "ONLY_MINT_OR_BURN_TRANSFER_ALLOWED"
+        "ONLY_MINT_OR_BURN_ALLOWED"
     );
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
@@ -154,5 +133,22 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, AccessControlUpgrade
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155Upgradeable, AccessControlUpgradeable, IERC165Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
+}
+
+
+contract QuadPassportStore {
+    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+
+    IQuadGovernance public governance;
+
+    // Accounts Data
+    mapping(bytes32 => bool) internal _usedHashes;
+    mapping(address => mapping(uint256 => bytes)) internal _validSignatures;
+
+    // Passport attributes
+    mapping(bytes32 => mapping(address => bytes32)) internal _attributes;
+    mapping(bytes32 => mapping(address => uint256)) internal _attributesUint;
 }
 
