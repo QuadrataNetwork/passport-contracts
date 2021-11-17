@@ -1,40 +1,43 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract QuadGovernanceStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-    uint256 public passportVersion = 1;
-
-    uint256 public mintPrice = 0.03 ether;
+    uint256 public passportVersion;
+    uint256 public mintPrice;
 
     // Admin Functions
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
     // Price in $USD (1e2 decimals)
     mapping(bytes32 => uint256) public pricePerAttribute;
+    mapping(bytes32 => uint256) public mintPricePerAttribute;
     bytes32[] public supportedAttributes;
 }
 
-contract QuadGovernance is AccessControlUpgradeable, QuadGovernanceStore {
+contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
 
-    function initialize(address governance) public initializer {
-        require(governance != address(0), "GOVERNANCE_ADDRESS_ZERO");
+    function initialize(address _admin) public initializer {
+        require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
 
         eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
+        passportVersion = 1;
+        mintPrice = 0.03 ether;
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
-        _setupRole(GOVERNANCE_ROLE, governance);
-        _setupRole(DEFAULT_ADMIN_ROLE, governance);
+        _setupRole(GOVERNANCE_ROLE, _admin);
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     // Setters
@@ -91,6 +94,25 @@ contract QuadGovernance is AccessControlUpgradeable, QuadGovernanceStore {
         pricePerAttribute[_attribute] = _price;
 
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
+    }
+
+
+    function setAtributeMintPrice(bytes32 _attribute, uint256 _price) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(mintPricePerAttribute[_attribute] != _price, "ATTRIBUTE_MINT_PRICE_ALREADY_SET");
+        uint256 oldPrice = mintPricePerAttribute[_attribute];
+        mintPricePerAttribute[_attribute] = _price;
+
+        emit AttributeMintPriceUpdated(_attribute, oldPrice, _price);
+    }
+
+    // Getter
+    function getSupportedAttributesLength() external view returns(uint256) {
+        return supportedAttributes.length;
+    }
+
+    function _authorizeUpgrade(address) internal override view {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 }
 

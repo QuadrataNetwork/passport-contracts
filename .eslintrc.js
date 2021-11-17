@@ -25,6 +25,7 @@ module.exports = {
     "files": "utils/*.ts",
     "rules": {
         "node/no-unpublished-require": 0,
+        "node/no-unpublished-import": 0,
     }
   }]
 };
