@@ -14,7 +14,6 @@ export const deployPassport = async (
     { initializer: "initialize" }
   );
   await passport.deployed();
-  await passport.transferOwnership(admin.address);
   console.log(`QuadPassport is deployed: ${passport.address}`);
   return passport;
 };

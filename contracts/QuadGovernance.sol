@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "./interfaces/IQuadPassport.sol";
 
 contract QuadGovernanceStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
@@ -10,6 +11,7 @@ contract QuadGovernanceStore {
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     uint256 public passportVersion;
     uint256 public mintPrice;
+    IQuadPassport public passport;
 
     // Admin Functions
     mapping(uint256 => bool) public eligibleTokenId;
@@ -21,6 +23,7 @@ contract QuadGovernanceStore {
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
+    event PassportAddressUpdated(address _oldAddress, address _address);
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
@@ -41,6 +44,24 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
     // Setters
+    function setPassportContractAddress(address _passportAddr) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_passportAddr != address(0), "PASSPORT_ADDRESS_ZERO");
+        require(address(passport) != _passportAddr, "PASSPORT_ADDRESS_ALREADY_SET");
+        address _oldPassport = address(passport);
+        passport = IQuadPassport(_passportAddr);
+
+        emit PassportAddressUpdated(_oldPassport, address(passport));
+    }
+
+    function updateGovernanceInPassport(address _newGovernance) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_newGovernance != address(0), "PASSPORT_ADDRESS_ZERO");
+        require(address(passport) != address(0), "PASSPORT_NOT_SET");
+
+        passport.setGovernance(_newGovernance);
+    }
+
     function setPassportVersion(uint256 _version) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_version > passportVersion, "PASSPORT_VERSION_INCREMENTAL");

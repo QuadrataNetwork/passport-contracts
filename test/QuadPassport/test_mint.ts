@@ -9,7 +9,7 @@ const {
   deployPassport,
   deployGovernance,
 } = require("../../utils/deployment.ts");
-const { signMint, hash } = require("../utils/signature.ts");
+const { signMint } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
@@ -22,27 +22,36 @@ describe("QuadPassport", async () => {
   const tokenId = 1;
   const baseURI = "https://quadrata.io";
   let sig: any;
-  let quadDID: string = await hash("did:1:deadbeef");
-  let country: any = await hash("FRANCE");
+  let quadDID = ethers.utils.formatBytes32String(
+    "did:example:123456789abcdefghi"
+  );
+  let country = ethers.utils.formatBytes32String("FRANCE");
   let issuedAt = Math.floor(new Date().getTime() / 1000);
+  let mintPrice = ethers.utils.parseEther("0.03");
 
   describe("mintPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, minterA, minterB, issuer] = await ethers.getSigners();
       governance = await deployGovernance(admin);
-      console.log("HELLO 1");
       governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
-      console.log("HELLO 2");
       passport = await deployPassport(governance, admin, baseURI);
-      console.log("HELLO 3");
-      sig = await signMint(issuer, minterA, tokenId, quadDID, issuedAt);
-      console.log("HELLO 4");
+      governance.connect(admin).setPassportContractAddress(passport.address);
+      sig = await signMint(
+        issuer,
+        minterA,
+        tokenId,
+        quadDID,
+        country,
+        issuedAt
+      );
     });
 
     it("successfully mint", async () => {
       await passport
         .connect(minterA)
-        .mintPassport(tokenId, quadDID, country, issuedAt, sig);
+        .mintPassport(tokenId, quadDID, country, issuedAt, sig, {
+          value: mintPrice,
+        });
     });
 
     it("fail", async () => {
@@ -52,6 +61,7 @@ describe("QuadPassport", async () => {
       quadDID = "hello";
       country = "hello";
       issuedAt = 5;
+      mintPrice = ethers.utils.parseEther("0.02");
     });
   });
   // it("Should return the new greeting once it's changed", async function () {
