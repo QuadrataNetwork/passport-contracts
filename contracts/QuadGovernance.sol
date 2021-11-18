@@ -16,6 +16,7 @@ contract QuadGovernanceStore {
     // Admin Functions
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
+    mapping(bytes32 => bool) public eligibleAttributesByDID;
     // Price in $USD (1e2 decimals)
     mapping(bytes32 => uint256) public pricePerAttribute;
     mapping(bytes32 => uint256) public mintPricePerAttribute;
@@ -28,6 +29,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
+    event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
 
@@ -106,6 +108,15 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
         }
         emit EligibleAttributeUpdated(_attribute, _eligibleStatus);
+    }
+
+
+    function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(eligibleAttributesByDID[_attribute] != _eligibleStatus, "ATTRIBUTE_ELIGIBILITY_SET");
+
+        eligibleAttributesByDID[_attribute] = _eligibleStatus;
+        emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
     function setAtributePrice(bytes32 _attribute, uint256 _price) external {
