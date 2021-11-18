@@ -27,7 +27,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         bytes calldata _sig
     ) external payable {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_tokenId_INVALID");
+        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
         bytes32 hash = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
@@ -200,7 +200,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         bytes32 _attribute
     ) internal view returns(Attribute memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_tokenId_INVALID");
+        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
         require(governance.eligibleAttributes(_attribute), "FIELD_NOT_ELIGIBLE");
 
@@ -212,7 +212,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
     function getPassportSignature(
         uint256 _tokenId
     ) external view returns(bytes memory) {
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_tokenId_INVALID");
+        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         return _validSignatures[_msgSender()][_tokenId];
     }
 
