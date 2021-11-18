@@ -5,14 +5,15 @@ export const signMint = async (
   issuer: typeof Signer,
   minter: typeof Signer,
   tokenId: number,
-  quadDID: string,
-  country: string,
+  quadDID: typeof DataHexString,
+  aml: typeof DataHexString,
+  country: typeof DataHexString,
   issuedAt: number
 ): Promise<typeof DataHexString> => {
   const hash = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["address", "uint256", "bytes32", "bytes32", "uint256"],
-      [minter.address, tokenId, quadDID, country, issuedAt]
+      ["address", "uint256", "bytes32", "bytes32", "bytes32", "uint256"],
+      [minter.address, tokenId, quadDID, aml, country, issuedAt]
     )
   );
   const sig = await issuer.signMessage(ethers.utils.arrayify(hash));

@@ -21,6 +21,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
     function mintPassport(
         uint256 _tokenId,
         bytes32 _quadDID,
+        bytes32 _aml,
         bytes32 _country,
         uint256 _issuedAt,
         bytes calldata _sig
@@ -29,14 +30,14 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_tokenId_INVALID");
         require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
-        bytes32 hash = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _country, _issuedAt, _sig);
+        bytes32 hash = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
         _usedHashes[hash] = true;
         _validSignatures[_msgSender()][_tokenId] = _sig;
         _issuedEpoch[_msgSender()][_tokenId] = _issuedAt;
         _attributes[_msgSender()][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt});
         _attributes[_msgSender()][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt});
-        _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: LOW_RISK, epoch: _issuedAt});
+        _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt});
         _mint(_msgSender(), _tokenId, 1, "");
     }
 
@@ -219,11 +220,12 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         address _account,
         uint256 _tokenId,
         bytes32 _quadDID,
+        bytes32 _aml,
         bytes32 _country,
         uint256 _issuedAt,
         bytes calldata _sig
     ) internal view returns(bytes32){
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _country,  _issuedAt));
+        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,  _issuedAt));
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);

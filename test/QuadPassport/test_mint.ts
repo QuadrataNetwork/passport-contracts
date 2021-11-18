@@ -25,6 +25,7 @@ describe("QuadPassport", async () => {
   let quadDID = ethers.utils.formatBytes32String(
     "did:example:123456789abcdefghi"
   );
+  let aml = ethers.utils.formatBytes32String("LOW");
   let country = ethers.utils.formatBytes32String("FRANCE");
   let issuedAt = Math.floor(new Date().getTime() / 1000);
   let mintPrice = ethers.utils.parseEther("0.03");
@@ -41,6 +42,7 @@ describe("QuadPassport", async () => {
         minterA,
         tokenId,
         quadDID,
+        aml,
         country,
         issuedAt
       );
@@ -49,7 +51,7 @@ describe("QuadPassport", async () => {
     it("successfully mint", async () => {
       await passport
         .connect(minterA)
-        .mintPassport(tokenId, quadDID, country, issuedAt, sig, {
+        .mintPassport(tokenId, quadDID, aml, country, issuedAt, sig, {
           value: mintPrice,
         });
     });
@@ -62,6 +64,8 @@ describe("QuadPassport", async () => {
       country = "hello";
       issuedAt = 5;
       mintPrice = ethers.utils.parseEther("0.02");
+
+      aml = ethers.utils.formatBytes32String("MEDIUM");
     });
   });
   // it("Should return the new greeting once it's changed", async function () {

@@ -5,7 +5,6 @@ import "./QuadGovernance.sol";
 
 contract QuadPassportStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
-    bytes32 public constant LOW_RISK = "";
     QuadGovernance public governance;
 
     struct Attribute {
