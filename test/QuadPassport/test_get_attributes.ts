@@ -3,7 +3,11 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
-const { ISSUER_ROLE } = require("../../utils/constant.ts");
+const {
+  ATTRIBUTE_AML,
+  ATTRIBUTE_COUNTRY,
+  ISSUER_ROLE,
+} = require("../utils/constant.ts");
 
 const {
   deployPassport,
@@ -46,14 +50,32 @@ describe("QuadPassport", async () => {
         country,
         issuedAt
       );
-    });
 
-    it("successfully mint", async () => {
       await passport
         .connect(minterA)
         .mintPassport(tokenId, quadDID, aml, country, issuedAt, sig, {
           value: mintPrice,
         });
+    });
+
+    it("success - getAttribute(AML)", async () => {
+      const response = await passport.getAttribute(
+        minterA.address,
+        tokenId,
+        ATTRIBUTE_AML
+      );
+      expect(response[0]).to.equal(aml);
+      expect(response[1]).to.equal(issuedAt);
+    });
+
+    it("success - getAttribute(COUNTRY)", async () => {
+      const response = await passport.getAttribute(
+        minterA.address,
+        tokenId,
+        ATTRIBUTE_COUNTRY
+      );
+      expect(response[0]).to.equal(country);
+      expect(response[1]).to.equal(issuedAt);
     });
 
     it("fail", async () => {
