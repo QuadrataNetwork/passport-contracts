@@ -7,6 +7,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ISSUER_ROLE,
+  TOKEN_ID,
 } = require("../utils/constant.ts");
 
 const {
@@ -23,7 +24,6 @@ describe("QuadPassport", async () => {
     minterA: SignerWithAddress,
     minterB: SignerWithAddress,
     issuer: SignerWithAddress;
-  const tokenId = 1;
   const baseURI = "https://quadrata.io";
   let sig: any;
   let quadDID = ethers.utils.formatBytes32String(
@@ -44,7 +44,7 @@ describe("QuadPassport", async () => {
       sig = await signMint(
         issuer,
         minterA,
-        tokenId,
+        TOKEN_ID,
         quadDID,
         aml,
         country,
@@ -53,7 +53,7 @@ describe("QuadPassport", async () => {
 
       await passport
         .connect(minterA)
-        .mintPassport(tokenId, quadDID, aml, country, issuedAt, sig, {
+        .mintPassport(TOKEN_ID, quadDID, aml, country, issuedAt, sig, {
           value: mintPrice,
         });
     });
@@ -61,7 +61,7 @@ describe("QuadPassport", async () => {
     it("success - getAttribute(AML)", async () => {
       const response = await passport.getAttribute(
         minterA.address,
-        tokenId,
+        TOKEN_ID,
         ATTRIBUTE_AML
       );
       expect(response[0]).to.equal(aml);
@@ -71,7 +71,7 @@ describe("QuadPassport", async () => {
     it("success - getAttribute(COUNTRY)", async () => {
       const response = await passport.getAttribute(
         minterA.address,
-        tokenId,
+        TOKEN_ID,
         ATTRIBUTE_COUNTRY
       );
       expect(response[0]).to.equal(country);

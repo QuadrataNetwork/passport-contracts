@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
-const { ISSUER_ROLE } = require("../../utils/constant.ts");
+const { ISSUER_ROLE, TOKEN_ID } = require("../../utils/constant.ts");
 
 const {
   deployPassport,
@@ -19,7 +19,6 @@ describe("QuadPassport", async () => {
     minterA: SignerWithAddress,
     minterB: SignerWithAddress,
     issuer: SignerWithAddress;
-  const tokenId = 1;
   const baseURI = "https://quadrata.io";
   let sig: any;
   let quadDID = ethers.utils.formatBytes32String(
@@ -40,7 +39,7 @@ describe("QuadPassport", async () => {
       sig = await signMint(
         issuer,
         minterA,
-        tokenId,
+        TOKEN_ID,
         quadDID,
         aml,
         country,
@@ -51,7 +50,7 @@ describe("QuadPassport", async () => {
     it("successfully mint", async () => {
       await passport
         .connect(minterA)
-        .mintPassport(tokenId, quadDID, aml, country, issuedAt, sig, {
+        .mintPassport(TOKEN_ID, quadDID, aml, country, issuedAt, sig, {
           value: mintPrice,
         });
     });
