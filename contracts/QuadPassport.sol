@@ -5,8 +5,9 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "./QuadPassportStore.sol";
+import "./interfaces/IQuadPassport.sol";
 
-contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportStore {
+contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, QuadPassportStore {
     event GovernanceUpdated(address _oldGovernance, address _governance);
 
     function initialize(
@@ -25,7 +26,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         bytes32 _country,
         uint256 _issuedAt,
         bytes calldata _sig
-    ) external payable {
+    ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
@@ -47,7 +48,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         bytes32 _value,
         uint256 _issuedAt,
         bytes calldata _sig
-    ) external payable {
+    ) external payable override {
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
         bytes32 hash = _verifyIssuerSetAttr(_msgSender(), _tokenId, _attribute, _value, _issuedAt, _sig);
 
@@ -61,7 +62,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         bytes32 _attribute,
         bytes32 _value,
         uint256 _issuedAt
-    ) external {
+    ) external override {
         require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         _setAttributeInternal(_account, _tokenId, _attribute, _value, _issuedAt);
     }
@@ -94,7 +95,7 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
 
     function burnPassport(
         uint256 _tokenId
-    ) external {
+    ) external override {
         require(balanceOf(_msgSender(), _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
         _burn(_msgSender(), _tokenId, 1);
 
@@ -108,54 +109,60 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    ) external view returns(Attribute memory) {
+    ) external view override returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_IS_REQUIRING_PAYMENT");
-        return _getAttributeInternal(_account, _tokenId, _attribute);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
+        return (attribute.value, attribute.epoch);
     }
 
     function getAttributePayableETH(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    ) external payable returns(Attribute memory) {
+    ) external payable override returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == msg.value, "ATTRIBUTE_PAYMENT_INVALID");
-        return _getAttributeInternal(_account, _tokenId, _attribute);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
+        return (attribute.value, attribute.epoch);
     }
 
     function getBatchAttributes(
         address _account,
         uint256[] calldata _tokenIds,
         bytes32[] calldata _attributes
-    ) external view returns(Attribute[] memory) {
+    ) external view override returns(bytes32[] memory, uint256[] memory) {
         require(_tokenIds.length == _attributes.length, "BATCH_ATTRIBUTES_ERROR_LENGTH");
-        Attribute[] memory attributeResults = new Attribute[](_attributes.length);
+        bytes32[] memory attributeValues = new bytes32[](_attributes.length);
+        uint256[] memory attributeEpochs = new uint256[](_attributes.length);
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             require(governance.pricePerAttribute(_attributes[i]) == 0, "ATTRIBUTE_IS_REQUIRING_PAYMENT");
             Attribute memory attribute = _getAttributeInternal(_account, _tokenIds[i], _attributes[i]);
-            attributeResults[i] = attribute;
+            attributeValues[i] = attribute.value;
+            attributeEpochs[i] = attribute.epoch;
         }
 
-        return attributeResults;
+        return (attributeValues, attributeEpochs);
     }
 
     function getBatchAttributesPayableETH(
         address _account,
         uint256[] calldata _tokenIds,
         bytes32[] calldata _attributes
-    ) external payable returns(Attribute[] memory) {
+    ) external payable override returns(bytes32[] memory, uint256[] memory) {
         require(_tokenIds.length == _attributes.length, "BATCH_ATTRIBUTES_ERROR_LENGTH");
-        Attribute[] memory attributeResults = new Attribute[](_attributes.length);
+        bytes32[] memory attributeValues = new bytes32[](_attributes.length);
+        uint256[] memory attributeEpochs = new uint256[](_attributes.length);
         uint256 totalCost;
 
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             Attribute memory attribute = _getAttributeInternal(_account, _tokenIds[i], _attributes[i]);
-            attributeResults[i] = attribute;
+            attributeValues[i] = attribute.value;
+            attributeEpochs[i] = attribute.epoch;
             totalCost += governance.pricePerAttribute(_attributes[i]);
         }
         require(msg.value == totalCost, "ATTRIBUTE_PAYMENT_INVALID");
 
-        return attributeResults;
+        return (attributeValues, attributeEpochs);
     }
 
     // TODO: Payment in native Token
@@ -174,18 +181,18 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         );
         if (governance.eligibleAttributes(_attribute)) {
             return _attributes[_account][_attribute];
-        } else {
-            bytes32 dID = _attributes[_account][keccak256("DID")].value;
-            require(dID != bytes32(0), "DID_NOT_FOUND");
-            return _attributesByDID[dID][_attribute];
         }
+
+        bytes32 dID = _attributes[_account][keccak256("DID")].value;
+        require(dID != bytes32(0), "DID_NOT_FOUND");
+        return _attributesByDID[dID][_attribute];
     }
 
     // TODO: Get Payable Attributes
 
     function getPassportSignature(
         uint256 _tokenId
-    ) external view returns(bytes memory) {
+    ) external view override returns(bytes memory) {
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         return _validSignatures[_msgSender()][_tokenId];
     }
@@ -243,12 +250,12 @@ contract QuadPassport is ERC1155Upgradeable, OwnableUpgradeable, QuadPassportSto
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155Upgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155Upgradeable, IERC165Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
     // Admin function
-    function setGovernance(address _governanceContract) external {
+    function setGovernance(address _governanceContract) external override {
         require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
         require(_governanceContract != address(governance), "GOVERNANCE_ALREADY_SET");
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
