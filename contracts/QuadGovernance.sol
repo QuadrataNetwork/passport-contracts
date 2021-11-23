@@ -37,6 +37,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
 
         eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
+        eligibleAttributes[keccak256("DID")] = true;
+        eligibleAttributes[keccak256("COUNTRY")] = true;
+        eligibleAttributesByDID[keccak256("AML")] = true;
+        pricePerAttribute[keccak256("DID")] = 0.005 ether;
         passportVersion = 1;
         mintPrice = 0.03 ether;
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
