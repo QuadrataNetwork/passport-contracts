@@ -45,6 +45,13 @@ interface IQuadPassport is IERC1155Upgradeable {
         bytes32 _attribute
     ) external payable returns(bytes32, uint256);
 
+    function getAttributePayable(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address _tokenAddr
+    ) external payable returns(bytes32, uint256);
+
     function getBatchAttributes(
         address _account,
         uint256[] calldata _tokenIds,

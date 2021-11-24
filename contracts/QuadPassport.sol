@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
@@ -269,11 +269,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
     function _doTokenPayment(
         address _tokenPayment,
         bytes32 _attribute
-    ) internal view {
-        require(TokenPayment[_tokenPayment].isAllowed, "TOKEN_PAYMENT_NOT_ALLOWED");
-
-        IERC20Metadata erc20 = IERC20Metadata(_tokenPayment);
-        uint256 priceInUSD = governance.price(TokenPayment[_tokenPayment].symbol);
+    ) internal {
+        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
+        uint256 priceInUSD = governance.getPrice(_tokenPayment);
         uint256 amountUSD = governance.pricePerAttribute(_attribute) * priceInUSD;
         // Convert to Token Decimal
         uint256 amount = amountUSD / (10 ** (18 - erc20.decimals()));
@@ -281,7 +279,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
             erc20.allowance(_msgSender(), address(this)) >= amount,
             "INSUFFICIANT_PAYMENT_ALLOWANCE"
         );
-        erc20.safeTransferFrom(_msgSender(), governance.treasury(), amount);
+        erc20.transferFrom(_msgSender(), governance.treasury(), amount);
     }
 
     // Admin function
