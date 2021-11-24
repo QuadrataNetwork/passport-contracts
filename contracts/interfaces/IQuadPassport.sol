@@ -50,7 +50,7 @@ interface IQuadPassport is IERC1155Upgradeable {
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
-    ) external payable returns(bytes32, uint256);
+    ) external returns(bytes32, uint256);
 
     function getBatchAttributes(
         address _account,
@@ -63,6 +63,13 @@ interface IQuadPassport is IERC1155Upgradeable {
         uint256[] calldata _tokenIds,
         bytes32[] calldata _attributes
     ) external payable returns(bytes32[] memory, uint256[] memory);
+
+    function getBatchAttributesPayable(
+        address _account,
+        uint256[] calldata _tokenIds,
+        bytes32[] calldata _attributes,
+        address _tokenAddr
+    ) external returns(bytes32[] memory, uint256[] memory);
 
     function getPassportSignature(
         uint256 _tokenId
