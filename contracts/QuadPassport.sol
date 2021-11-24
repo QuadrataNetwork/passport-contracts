@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
@@ -121,6 +122,17 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         bytes32 _attribute
     ) external payable override returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == msg.value, "ATTRIBUTE_PAYMENT_INVALID");
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
+        return (attribute.value, attribute.epoch);
+    }
+
+    function getAttributePayable(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address _tokenAddr
+    ) external payable override returns(bytes32, uint256) {
+        _doTokenPayment(_tokenAddr, _attribute);
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
         return (attribute.value, attribute.epoch);
     }
@@ -252,6 +264,24 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155Upgradeable, IERC165Upgradeable) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function _doTokenPayment(
+        address _tokenPayment,
+        bytes32 _attribute
+    ) internal view {
+        require(TokenPayment[_tokenPayment].isAllowed, "TOKEN_PAYMENT_NOT_ALLOWED");
+
+        IERC20Metadata erc20 = IERC20Metadata(_tokenPayment);
+        uint256 priceInUSD = governance.price(TokenPayment[_tokenPayment].symbol);
+        uint256 amountUSD = governance.pricePerAttribute(_attribute) * priceInUSD;
+        // Convert to Token Decimal
+        uint256 amount = amountUSD / (10 ** (18 - erc20.decimals()));
+        require(
+            erc20.allowance(_msgSender(), address(this)) >= amount,
+            "INSUFFICIANT_PAYMENT_ALLOWANCE"
+        );
+        erc20.safeTransferFrom(_msgSender(), governance.treasury(), amount);
     }
 
     // Admin function
