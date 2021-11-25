@@ -1,9 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
+import "./interfaces/IUniswapAnchoredView.sol";
 
 contract QuadGovernanceStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
@@ -12,26 +14,33 @@ contract QuadGovernanceStore {
     uint256 public passportVersion;
     uint256 public mintPrice;
     IQuadPassport public passport;
+    address public oracle;
+    address public treasury;
 
     // Admin Functions
+    bytes32[] public supportedAttributes;
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
     mapping(bytes32 => bool) public eligibleAttributesByDID;
-    // Price in $USD (1e2 decimals)
+    // Price in $USD (1e6 decimals)
     mapping(bytes32 => uint256) public pricePerAttribute;
     mapping(bytes32 => uint256) public mintPricePerAttribute;
-    bytes32[] public supportedAttributes;
+
+    mapping(address => bool) public eligibleTokenPayments;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
-    event PassportAddressUpdated(address _oldAddress, address _address);
-    event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
-    event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
+    event AllowTokenPaymentEvent(address _tokenAddr, bool _isAllowed);
+    event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
-    event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
-    event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event PassportAddressUpdated(address _oldAddress, address _address);
+    event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
+    event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
+    event OracleUpdated(address _oldAddress, address _address);
+    event TreasuryUpdateEvent(address _oldAddress, address _address);
 
     function initialize(address _admin) public initializer {
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
@@ -50,6 +59,20 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
     // Setters
+    /**
+      * @notice This function is restricted to a TimelockController
+      * @dev Set the address of the treasury.
+      * @param _treasury address of the GnosisSafe
+      */
+    function setTreasury(address _treasury) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_treasury != address(0), "TREASURY_ADDRESS_ZERO");
+        require(_treasury != treasury, "TREASURY_ADDRESS_ALREADY_SET");
+        address oldTreasury = treasury;
+        treasury = _treasury;
+        emit TreasuryUpdateEvent(oldTreasury, _treasury);
+    }
+
     function setPassportContractAddress(address _passportAddr) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_passportAddr != address(0), "PASSPORT_ADDRESS_ZERO");
@@ -142,6 +165,40 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit AttributeMintPriceUpdated(_attribute, oldPrice, _price);
     }
 
+    function setOracle(address _oracleAddr) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_oracleAddr != address(0), "ORACLE_ADDRESS_ZERO");
+        require(oracle != _oracleAddr, "ORACLE_ADDRESS_ALREADY_SET");
+        address oldAddress = oracle;
+        oracle = _oracleAddr;
+        emit OracleUpdated(oldAddress, _oracleAddr);
+    }
+
+
+    /**
+      * @notice This function is restricted to a TimelockController
+      * @dev Authorize or Denied a payment to be received in Token.
+      * @param _tokenAddr address of the ERC20 token for payment
+      * @param _isAllowed authorize or deny this token
+      */
+    function allowTokenPayment(
+        address _tokenAddr,
+        bool _isAllowed
+    ) external  {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_tokenAddr != address(0), "TOKEN_PAYENT_ADDRESS_ZERO");
+        require(
+            eligibleTokenPayments[_tokenAddr] != _isAllowed,
+            "TOKEN_PAYMENT_STATUS_SET"
+        );
+        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
+        // SafeCheck call to make sure that _tokenAddr is a valid ERC20 address
+        erc20.totalSupply();
+
+        eligibleTokenPayments[_tokenAddr] = true;
+        emit AllowTokenPaymentEvent(_tokenAddr, _isAllowed);
+    }
+
     // Getter
     function getSupportedAttributesLength() external view returns(uint256) {
         return supportedAttributes.length;
@@ -149,6 +206,13 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
     function _authorizeUpgrade(address) internal override view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+    }
+
+    function getPrice(address _tokenAddr) external view returns (uint) {
+        require(oracle != address(0), "oracle_ADDRESS_ZERO");
+        require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
+        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
+        return IUniswapAnchoredView(oracle).price(erc20.symbol());
     }
 }
 
