@@ -344,6 +344,25 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         }
     }
 
+    function withdrawETH(address payable _to) external {
+       address sender = _msgSender();
+       uint256 currentBalance = _accountBalancesETH[sender];
+       require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
+       require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
+       _accountBalancesETH[sender] = 0;
+       _to.transfer(currentBalance);
+    }
+
+    function withdrawToken(address payable _to, address _token) external {
+       address sender = _msgSender();
+       uint256 currentBalance = _accountBalances[_token][sender];
+       require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
+       require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
+       _accountBalances[_token][sender] = 0;
+        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
+       erc20.transferFrom(address(this), _to, currentBalance);
+    }
+
     // Admin function
     function setGovernance(address _governanceContract) external override {
         require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
