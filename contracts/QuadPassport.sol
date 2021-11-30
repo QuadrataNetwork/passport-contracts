@@ -132,6 +132,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
     ) external payable override returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == msg.value, "ATTRIBUTE_PAYMENT_INVALID");
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
+        _doPaymentETH(_attribute, attribute.issuer);
         return (attribute.value, attribute.epoch);
     }
 
@@ -170,18 +171,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         uint256[] calldata _tokenIds,
         bytes32[] calldata _attributes
     ) external payable override returns(bytes32[] memory, uint256[] memory) {
-        require(_tokenIds.length == _attributes.length, "BATCH_ATTRIBUTES_ERROR_LENGTH");
-        bytes32[] memory attributeValues = new bytes32[](_attributes.length);
-        uint256[] memory attributeEpochs = new uint256[](_attributes.length);
-        uint256 totalCost;
-
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            Attribute memory attribute = _getAttributeInternal(_account, _tokenIds[i], _attributes[i]);
-            attributeValues[i] = attribute.value;
-            attributeEpochs[i] = attribute.epoch;
-            totalCost += governance.pricePerAttribute(_attributes[i]);
-        }
-        require(msg.value == totalCost, "ATTRIBUTE_PAYMENT_INVALID");
+        bytes32[] memory attributeValues;
+        uint256[] memory attributeEpochs;
+        address[] memory attributeIssuers;
+        (attributeValues, attributeEpochs, attributeIssuers) = _getBatchAttributes(_account, _tokenIds, _attributes)
+        _doPaymentETHBatch();
 
         return (attributeValues, attributeEpochs);
     }
@@ -192,6 +186,19 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         bytes32[] calldata _attributes,
         address _tokenAddr
     ) external override returns(bytes32[] memory, uint256[] memory) {
+        bytes32[] memory attributeValues;
+        uint256[] memory attributeEpochs;
+        address[] memory attributeIssuers;
+        (attributeValues, attributeEpochs, attributeIssuers) = _getBatchAttributes(_account, _tokenIds, _attributes)
+        _doTokenPayments(_tokenAddr, _attributes, attributeIssuers);
+        return (attributeValues, attributeEpochs, attributeIssuers);
+    }
+
+    function _getBatchAttributes(
+        address _account,
+        uint256[] calldata _tokenIds,
+        bytes32[] calldata _attributes
+    ) internal returns(bytes32[] memory, uint256[] memory) {
         require(_tokenIds.length == _attributes.length, "BATCH_ATTRIBUTES_ERROR_LENGTH");
         bytes32[] memory attributeValues = new bytes32[](_attributes.length);
         uint256[] memory attributeEpochs = new uint256[](_attributes.length);
@@ -204,8 +211,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
             attributeIssuers[i] = attribute.issuer;
         }
 
-        _doTokenPayments(_tokenAddr, _attributes, attributeIssuers);
-        return (attributeValues, attributeEpochs);
+        return (attributeValues, attributeEpochs, attributeIssuers);
     }
 
     function _getAttributeInternal(
@@ -294,24 +300,44 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         return super.supportsInterface(interfaceId);
     }
 
+    function _doPaymentETH(
+        bytes32 _attribute,
+        address _issuer,
+    ) internal {
+        uint256 tokenPrice = governance.getPriceETH();
+        uint256 amountETH = governance.pricePerAttribute(_attribute) * tokenPrice;
+        if (amountETH > 0) {
+            require(
+                 msg.value == amountETH,
+                "INSUFFICIANT_PAYMENT_ALLOWANCE"
+            );
+            uint256 amountIssuer = amountETH * governance.revSplitIssuer();
+            uint256 amountProtocol = amountETH - amountIssuer;
+            _accountBalancesETH[_issuer] += amountIssuer;
+            _accountBalancesETH[governance.treasury()] += amountProtocol;
+        }
+    }
+
+
     function _doTokenPayment(
         address _tokenPayment,
         bytes32 _attribute,
         address _issuer
     ) internal {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-        uint256 priceInUSD = governance.getPrice(_tokenPayment);
-        uint256 amountUSD = governance.pricePerAttribute(_attribute) * priceInUSD;
+        uint256 tokenPrice = governance.getPrice(_tokenPayment);
         // Convert to Token Decimal
-        uint256 amount = amountUSD / (10 ** (18 - erc20.decimals()));
-        require(
-            erc20.allowance(_msgSender(), address(this)) >= amount,
-            "INSUFFICIANT_PAYMENT_ALLOWANCE"
-        );
-        uint256 amountIssuer = amount * governance.revSplitIssuer();
-        uint256 amountProtocol = amount - amountIssuer;
-        _accountBalances[_tokenPayment][_issuer] += amountIssuer;
-        _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;
+        uint256 amountToken = (governance.pricePerAttribute(_attribute) * tokenPrice) / (10 ** (18 - erc20.decimals()));
+        if (amountToken > 0) {
+            require(
+                erc20.allowance(_msgSender(), address(this)) >= amountToken,
+                "INSUFFICIANT_PAYMENT_ALLOWANCE"
+            );
+            uint256 amountIssuer = amountToken * governance.revSplitIssuer();
+            uint256 amountProtocol = amountToken - amountIssuer;
+            _accountBalances[_tokenPayment][_issuer] += amountIssuer;
+            _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;
+        }
     }
 
 
@@ -321,24 +347,21 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         address[] calldata _issuers
     ) internal {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-        uint256 priceInUSD = governance.getPrice(_tokenPayment);
-        uint256 amountUSD;
+        uint256 tokenPrice = governance.getPrice(_tokenPayment);
+        uint256 totalAmountToken;
         for (uint256 i = 0; i < _attributes.length; i++) {
-            uint256 priceAttributeUSD = governance.pricePerAttribute(_attributes[i]) * priceInUSD;
-            if (priceAttributeUSD != 0) {
-                uint256 priceToken = priceAttributeUSD / (10 ** (18 - erc20.decimals()));
-                uint256 amountIssuer = priceToken * governance.revSplitIssuer();
+            uint256 amountToken = (governance.pricePerAttribute(_attributes[i]) * tokenPrice) / (10 ** (18 - erc20.decimals()));
+            if (amountToken > 0) {
+                uint256 amountIssuer = amountToken * governance.revSplitIssuer();
                 _accountBalances[_tokenPayment][_issuers[i]] += amountIssuer;
-                amountUSD += priceAttributeUSD;
+                totalAmountToken += amountToken;
             }
         }
-        // Convert to Token Decimal
-        uint256 amount = amountUSD / (10 ** (18 - erc20.decimals()));
         require(
-            erc20.allowance(_msgSender(), address(this)) >= amount,
+            erc20.allowance(_msgSender(), address(this)) >= totalAmountToken,
             "INSUFFICIANT_PAYMENT_ALLOWANCE"
         );
-        uint256 amountProtocol = amount - amount * governance.revSplitIssuer();
+        uint256 amountProtocol = totalAmountToken - totalAmountToken* governance.revSplitIssuer();
         _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;
     }
 

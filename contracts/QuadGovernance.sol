@@ -13,7 +13,7 @@ contract QuadGovernanceStore {
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
     mapping(bytes32 => bool) public eligibleAttributesByDID;
-    // Price in $USD (1e6 decimals)
+    // Price in $USD (1e18 decimals)
     mapping(bytes32 => uint256) public pricePerAttribute;
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
@@ -178,7 +178,6 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit OracleUpdated(oldAddress, _oracleAddr);
     }
 
-
     /**
       * @notice This function is restricted to a TimelockController
       * @dev Authorize or Denied a payment to be received in Token.
@@ -213,10 +212,15 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
     function getPrice(address _tokenAddr) external view returns (uint) {
-        require(oracle != address(0), "oracle_ADDRESS_ZERO");
+        require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
         return IUniswapAnchoredView(oracle).price(erc20.symbol());
+    }
+
+    function getPriceETH() external view returns (uint) {
+        require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
+        return IUniswapAnchoredView(oracle).price("ETH");
     }
 }
 
