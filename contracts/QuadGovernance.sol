@@ -8,15 +8,6 @@ import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
 
 contract QuadGovernanceStore {
-    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-    uint256 public passportVersion;
-    uint256 public mintPrice;
-    IQuadPassport public passport;
-    address public oracle;
-    address public treasury;
-
     // Admin Functions
     bytes32[] public supportedAttributes;
     mapping(uint256 => bool) public eligibleTokenId;
@@ -27,6 +18,18 @@ contract QuadGovernanceStore {
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
+
+    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+
+    uint256 public revSplitIssuer;  // percentage (2 decimals)
+    uint256 public passportVersion;
+    uint256 public mintPrice;
+    IQuadPassport public passport;
+    address public oracle;
+    address public treasury;
+
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
@@ -52,6 +55,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         pricePerAttribute[keccak256("DID")] = 0.005 ether;
         passportVersion = 1;
         mintPrice = 0.03 ether;
+        revSplitIssuer = 50;  // 50%
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
         _setupRole(GOVERNANCE_ROLE, _admin);
