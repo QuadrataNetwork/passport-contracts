@@ -36,35 +36,23 @@ interface IQuadPassport is IERC1155Upgradeable {
     function getAttribute(
         address _account,
         uint256 _tokenId,
-        bytes32 _attribute
-    ) external view returns(bytes32, uint256);
+        bytes32 _attribute,
+        address _tokenAddr
+    ) external returns(bytes32, uint256);
 
-    function getAttributePayableETH(
+    function getAttributeETH(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
     ) external payable returns(bytes32, uint256);
 
-    function getAttributePayable(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr
-    ) external returns(bytes32, uint256);
-
-    function getBatchAttributes(
-        address _account,
-        uint256[] calldata _tokenIds,
-        bytes32[] calldata _attributes
-    ) external view returns(bytes32[] memory, uint256[] memory);
-
-    function getBatchAttributesPayableETH(
+    function getBatchAttributesETH(
         address _account,
         uint256[] calldata _tokenIds,
         bytes32[] calldata _attributes
     ) external payable returns(bytes32[] memory, uint256[] memory);
 
-    function getBatchAttributesPayable(
+    function getBatchAttributes(
         address _account,
         uint256[] calldata _tokenIds,
         bytes32[] calldata _attributes,
