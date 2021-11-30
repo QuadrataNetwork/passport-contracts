@@ -280,7 +280,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
                  msg.value == amountETH,
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
-            uint256 amountIssuer = amountETH * governance.revSplitIssuer();
+            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountETH - amountIssuer;
             _accountBalancesETH[_issuer] += amountIssuer;
             _accountBalancesETH[governance.treasury()] += amountProtocol;
@@ -305,7 +305,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
             );
             for (uint256 i = 0; i < _attributes.length; i++) {
                 uint256 amountETH = governance.pricePerAttribute(_attributes[i]) * tokenPrice;
-                uint256 amountIssuer = amountETH * governance.revSplitIssuer();
+                uint256 amountIssuer = amountETH * governance.revSplitIssuer()  / 10 ** 2;
                 uint256 amountProtocol = amountETH - amountIssuer;
                 _accountBalancesETH[_issuers[i]] += amountIssuer;
                 _accountBalancesETH[governance.treasury()] += amountProtocol;
@@ -327,7 +327,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
                 erc20.transferFrom(_msgSender(), address(this), amountToken),
                 "INSUFFICIANT_PAYMENT_ALLOWANCE"
             );
-            uint256 amountIssuer = amountToken * governance.revSplitIssuer();
+            uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
             _accountBalances[_tokenPayment][_issuer] += amountIssuer;
             _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;

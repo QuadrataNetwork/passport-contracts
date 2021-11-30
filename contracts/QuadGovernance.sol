@@ -43,6 +43,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event OracleUpdated(address _oldAddress, address _address);
+    event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdateEvent(address _oldAddress, address _address);
 
     function initialize(address _admin) public initializer {
@@ -176,6 +177,16 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         address oldAddress = oracle;
         oracle = _oracleAddr;
         emit OracleUpdated(oldAddress, _oracleAddr);
+    }
+
+
+    function setRevSplitIssuer(uint256 _split) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
+        uint256 oldSplit = revSplitIssuer;
+        revSplitIssuer = _split;
+
+        emit RevenueSplitIssuerUpdated(oldSplit, _split);
     }
 
     /**
