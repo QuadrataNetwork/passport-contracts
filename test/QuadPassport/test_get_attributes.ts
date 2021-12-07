@@ -6,19 +6,18 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
-  ISSUER_ROLE,
   TOKEN_ID,
-} = require("../utils/constant.ts");
+} = require("../../utils/constant.ts");
 
 const {
-  deployPassport,
-  deployGovernance,
-} = require("../../utils/deployment.ts");
+  deployPassportAndGovernance,
+} = require("../utils/deployment_and_init.ts");
 const { signMint } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract;
+  let usdc: Contract;
   let deployer: SignerWithAddress,
     admin: SignerWithAddress,
     minterA: SignerWithAddress,
@@ -37,10 +36,11 @@ describe("QuadPassport", async () => {
   describe("mintPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, minterA, minterB, issuer] = await ethers.getSigners();
-      governance = await deployGovernance(admin);
-      governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
-      passport = await deployPassport(governance, admin, baseURI);
-      governance.connect(admin).setPassportContractAddress(passport.address);
+      [governance, passport, usdc] = await deployPassportAndGovernance(
+        admin,
+        issuer,
+        baseURI
+      );
       sig = await signMint(
         issuer,
         minterA,
@@ -59,20 +59,22 @@ describe("QuadPassport", async () => {
     });
 
     it("success - getAttribute(AML)", async () => {
-      const response = await passport.getAttribute(
+      const response = await passport.callStatic.getAttribute(
         minterA.address,
         TOKEN_ID,
-        ATTRIBUTE_AML
+        ATTRIBUTE_AML,
+        usdc.address
       );
       expect(response[0]).to.equal(aml);
       expect(response[1]).to.equal(issuedAt);
     });
 
     it("success - getAttribute(COUNTRY)", async () => {
-      const response = await passport.getAttribute(
+      const response = await passport.callStatic.getAttribute(
         minterA.address,
         TOKEN_ID,
-        ATTRIBUTE_COUNTRY
+        ATTRIBUTE_COUNTRY,
+        usdc.address
       );
       expect(response[0]).to.equal(country);
       expect(response[1]).to.equal(issuedAt);

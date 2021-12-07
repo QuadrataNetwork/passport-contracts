@@ -3,12 +3,10 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
-const { ISSUER_ROLE, TOKEN_ID } = require("../../utils/constant.ts");
-
+const { TOKEN_ID } = require("../../utils/constant.ts");
 const {
-  deployPassport,
-  deployGovernance,
-} = require("../../utils/deployment.ts");
+  deployPassportAndGovernance,
+} = require("../utils/deployment_and_init.ts");
 const { signMint } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
@@ -32,10 +30,11 @@ describe("QuadPassport", async () => {
   describe("mintPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, minterA, minterB, issuer] = await ethers.getSigners();
-      governance = await deployGovernance(admin);
-      governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
-      passport = await deployPassport(governance, admin, baseURI);
-      governance.connect(admin).setPassportContractAddress(passport.address);
+      [governance, passport] = await deployPassportAndGovernance(
+        admin,
+        issuer,
+        baseURI
+      );
       sig = await signMint(
         issuer,
         minterA,

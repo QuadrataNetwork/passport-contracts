@@ -136,6 +136,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         _doTokenPayment(_tokenAddr, _attribute, attribute.issuer);
         return (attribute.value, attribute.epoch);
     }
+
     function getBatchAttributesETH(
         address _account,
         uint256[] calldata _tokenIds,
@@ -345,20 +346,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
     }
 
     function withdrawETH(address payable _to) external {
-       address sender = _msgSender();
-       uint256 currentBalance = _accountBalancesETH[sender];
-       require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
-       _accountBalancesETH[sender] = 0;
+       uint256 currentBalance = _accountBalancesETH[_to];
+       require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
+       _accountBalancesETH[_to] = 0;
        _to.transfer(currentBalance);
     }
 
     function withdrawToken(address payable _to, address _token) external {
-       address sender = _msgSender();
-       uint256 currentBalance = _accountBalances[_token][sender];
-       require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
-       _accountBalances[_token][sender] = 0;
+       uint256 currentBalance = _accountBalances[_token][_to];
+       require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
+       _accountBalances[_token][_to] = 0;
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
        erc20.transferFrom(address(this), _to, currentBalance);
     }
