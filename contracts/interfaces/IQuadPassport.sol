@@ -61,10 +61,24 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function getPassportSignature(
         uint256 _tokenId
-    ) external view returns (bytes memory);
+    ) external view returns(bytes memory);
 
     function setGovernance(
         address _governanceContract
     ) external;
+
+    function calculatePaymentToken(
+        bytes32 _attribute,
+        address _tokenPayment
+    ) external view returns(uint256);
+
+    function calculatePaymentETH(
+        bytes32 _attribute
+    ) external view returns(uint256);
+
+
+    function withdrawETH(address payable _to) external;
+
+    function withdrawToken(address payable _to, address _token) external;
 }
 

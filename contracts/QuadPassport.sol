@@ -133,7 +133,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         address _tokenAddr
     ) external override returns(bytes32, uint256) {
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
-        _doTokenPayment(_tokenAddr, _attribute, attribute.issuer);
+        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer);
         return (attribute.value, attribute.epoch);
     }
 
@@ -274,8 +274,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         bytes32 _attribute,
         address _issuer
     ) internal {
-        uint256 tokenPrice = governance.getPriceETH();
-        uint256 amountETH = governance.pricePerAttribute(_attribute) * tokenPrice;
+        uint256 amountETH = calculatePaymentETH(_attribute);
         if (amountETH > 0) {
             require(
                  msg.value == amountETH,
@@ -315,15 +314,13 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
     }
 
     function _doTokenPayment(
-        address _tokenPayment,
         bytes32 _attribute,
+        address _tokenPayment,
         address _issuer
     ) internal {
-        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-        uint256 tokenPrice = governance.getPrice(_tokenPayment);
-        // Convert to Token Decimal
-        uint256 amountToken = (governance.pricePerAttribute(_attribute) * tokenPrice) / (10 ** (18 - erc20.decimals()));
+        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment);
         if (amountToken > 0) {
+            IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             require(
                 erc20.transferFrom(_msgSender(), address(this), amountToken),
                 "INSUFFICIANT_PAYMENT_ALLOWANCE"
@@ -341,11 +338,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         address[] memory _issuers
     ) internal {
         for (uint256 i = 0; i < _attributes.length; i++) {
-            _doTokenPayment(_tokenPayment, _attributes[i], _issuers[i]);
+            _doTokenPayment(_attributes[i], _tokenPayment, _issuers[i]);
         }
     }
 
-    function withdrawETH(address payable _to) external {
+    function withdrawETH(address payable _to) external override {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
        uint256 currentBalance = _accountBalancesETH[_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
@@ -353,13 +350,32 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
        _to.transfer(currentBalance);
     }
 
-    function withdrawToken(address payable _to, address _token) external {
+    function withdrawToken(address payable _to, address _token) external override {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
        uint256 currentBalance = _accountBalances[_token][_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalances[_token][_to] = 0;
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
        erc20.transferFrom(address(this), _to, currentBalance);
+    }
+
+    function calculatePaymentToken(
+        bytes32 _attribute,
+        address _tokenPayment
+    ) public view override returns(uint256) {
+        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
+        uint256 tokenPrice = governance.getPrice(_tokenPayment);
+        // Convert to Token Decimal
+        uint256 amountToken = (governance.pricePerAttribute(_attribute) * tokenPrice) / (10 ** (18 - erc20.decimals()));
+        return amountToken;
+    }
+
+    function calculatePaymentETH(
+        bytes32 _attribute
+    ) public view override returns(uint256) {
+        uint256 tokenPrice = governance.getPriceETH();
+        uint256 amountETH = governance.pricePerAttribute(_attribute) * tokenPrice;
+        return amountETH;
     }
 
     // Admin function
