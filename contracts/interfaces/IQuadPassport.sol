@@ -36,47 +36,36 @@ interface IQuadPassport is IERC1155Upgradeable {
     function getAttribute(
         address _account,
         uint256 _tokenId,
-        bytes32 _attribute
-    ) external view returns(bytes32, uint256);
+        bytes32 _attribute,
+        address _tokenAddr
+    ) external returns(bytes32, uint256);
 
-    function getAttributePayableETH(
+    function getAttributeETH(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
     ) external payable returns(bytes32, uint256);
 
-    function getAttributePayable(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr
-    ) external returns(bytes32, uint256);
-
-    function getBatchAttributes(
-        address _account,
-        uint256[] calldata _tokenIds,
-        bytes32[] calldata _attributes
-    ) external view returns(bytes32[] memory, uint256[] memory);
-
-    function getBatchAttributesPayableETH(
-        address _account,
-        uint256[] calldata _tokenIds,
-        bytes32[] calldata _attributes
-    ) external payable returns(bytes32[] memory, uint256[] memory);
-
-    function getBatchAttributesPayable(
-        address _account,
-        uint256[] calldata _tokenIds,
-        bytes32[] calldata _attributes,
-        address _tokenAddr
-    ) external returns(bytes32[] memory, uint256[] memory);
-
     function getPassportSignature(
         uint256 _tokenId
-    ) external view returns (bytes memory);
+    ) external view returns(bytes memory);
 
     function setGovernance(
         address _governanceContract
     ) external;
+
+    function calculatePaymentToken(
+        bytes32 _attribute,
+        address _tokenPayment
+    ) external view returns(uint256);
+
+    function calculatePaymentETH(
+        bytes32 _attribute
+    ) external view returns(uint256);
+
+
+    function withdrawETH(address payable _to) external;
+
+    function withdrawToken(address payable _to, address _token) external;
 }
 

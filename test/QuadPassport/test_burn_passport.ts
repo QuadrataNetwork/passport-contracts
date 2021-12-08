@@ -1,4 +1,4 @@
-// import { expect } from "chai";
+import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -8,11 +8,17 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_DID,
+  TOKEN_ID,
+  MINT_PRICE,
 } = require("../../utils/constant.ts");
+
 const {
   deployPassportAndGovernance,
 } = require("../utils/deployment_and_init.ts");
-const { assertMint, assertGetAttribute } = require("../utils/verify.ts");
+
+const { assertGetAttribute } = require("../utils/verify.ts");
+
+const { signMint } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
@@ -31,7 +37,7 @@ describe("QuadPassport", async () => {
   const country = formatBytes32String("FRANCE");
   const issuedAt = Math.floor(new Date().getTime() / 1000);
 
-  describe("mintPassport", async () => {
+  describe("burnPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, minterA, minterB, issuer, treasury] =
         await ethers.getSigners();
@@ -41,12 +47,28 @@ describe("QuadPassport", async () => {
         treasury,
         baseURI
       );
+
+      const sig = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
       await usdc.transfer(minterA.address, parseUnits("1000", 6));
       await usdc.transfer(minterB.address, parseUnits("1000", 6));
     });
 
-    it("successfully mint", async () => {
-      await assertMint(minterA, issuer, passport, did, aml, country, issuedAt);
+    it("success - burnPassport", async () => {
       await assertGetAttribute(
         minterA,
         usdc,
@@ -74,6 +96,35 @@ describe("QuadPassport", async () => {
         did,
         issuedAt
       );
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(minterA).burnPassport(TOKEN_ID);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_DID,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
   });
 });

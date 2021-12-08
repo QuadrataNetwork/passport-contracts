@@ -8,15 +8,6 @@ import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
 
 contract QuadGovernanceStore {
-    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-    uint256 public passportVersion;
-    uint256 public mintPrice;
-    IQuadPassport public passport;
-    address public oracle;
-    address public treasury;
-
     // Admin Functions
     bytes32[] public supportedAttributes;
     mapping(uint256 => bool) public eligibleTokenId;
@@ -27,6 +18,18 @@ contract QuadGovernanceStore {
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
+
+    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+
+    uint256 public revSplitIssuer;  // percentage (2 decimals)
+    uint256 public passportVersion;
+    uint256 public mintPrice;
+    IQuadPassport public passport;
+    address public oracle;
+    address public treasury;
+
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
@@ -40,6 +43,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event OracleUpdated(address _oldAddress, address _address);
+    event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdateEvent(address _oldAddress, address _address);
 
     function initialize(address _admin) public initializer {
@@ -49,9 +53,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         eligibleAttributes[keccak256("DID")] = true;
         eligibleAttributes[keccak256("COUNTRY")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
-        pricePerAttribute[keccak256("DID")] = 0.005 ether;
+        pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
+        mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
+        mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
         passportVersion = 1;
         mintPrice = 0.03 ether;
+        revSplitIssuer = 50;  // 50%
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
         _setupRole(GOVERNANCE_ROLE, _admin);
@@ -175,6 +182,15 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
 
+    function setRevSplitIssuer(uint256 _split) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
+        uint256 oldSplit = revSplitIssuer;
+        revSplitIssuer = _split;
+
+        emit RevenueSplitIssuerUpdated(oldSplit, _split);
+    }
+
     /**
       * @notice This function is restricted to a TimelockController
       * @dev Authorize or Denied a payment to be received in Token.
@@ -208,11 +224,21 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 
+    /**
+     * @notice Get the official price for a ERC20 token
+     * @param _tokenAddr Address of the ERC20 token
+     * @return Price denominated in USD, with 6 decimals
+     */
     function getPrice(address _tokenAddr) external view returns (uint) {
-        require(oracle != address(0), "oracle_ADDRESS_ZERO");
+        require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
         return IUniswapAnchoredView(oracle).price(erc20.symbol());
+    }
+
+    function getPriceETH() external view returns (uint) {
+        require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
+        return IUniswapAnchoredView(oracle).price("ETH");
     }
 }
 
