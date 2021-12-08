@@ -101,10 +101,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         }
     }
 
-    // function linkNewPassport() external payable {
-
-    // }
-
     function burnPassport(
         uint256 _tokenId
     ) external override {

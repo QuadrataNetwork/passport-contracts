@@ -1,86 +1,79 @@
-import { expect } from "chai";
+// import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { parseEther, formatBytes32String } from "ethers/lib/utils";
+import { parseUnits, formatBytes32String } from "ethers/lib/utils";
 
-const { TOKEN_ID } = require("../../utils/constant.ts");
+const {
+  ATTRIBUTE_AML,
+  ATTRIBUTE_COUNTRY,
+  ATTRIBUTE_DID,
+} = require("../../utils/constant.ts");
 const {
   deployPassportAndGovernance,
 } = require("../utils/deployment_and_init.ts");
-const { signMint } = require("../utils/signature.ts");
+const { assertMint, assertGetAttribute } = require("../utils/verify.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
-  let governance: Contract;
-  let deployer: SignerWithAddress,
+  let governance: Contract; // eslint-disable-line no-unused-vars
+  let usdc: Contract;
+  let defi: Contract;
+  let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
     minterA: SignerWithAddress,
-    minterB: SignerWithAddress,
+    minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress;
   const baseURI = "https://quadrata.io";
-  let sig: any;
-  let quadDID = formatBytes32String("did:quad:123456789abcdefghi");
-  let aml = formatBytes32String("LOW");
-  let country = formatBytes32String("FRANCE");
-  let issuedAt = Math.floor(new Date().getTime() / 1000);
-  let mintPrice = parseEther("0.03");
+  const did = formatBytes32String("did:quad:123456789abcdefghi");
+  const aml = formatBytes32String("LOW");
+  const country = formatBytes32String("FRANCE");
+  const issuedAt = Math.floor(new Date().getTime() / 1000);
 
   describe("mintPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, minterA, minterB, issuer, treasury] =
         await ethers.getSigners();
-      [governance, passport] = await deployPassportAndGovernance(
+      [governance, passport, usdc, defi] = await deployPassportAndGovernance(
         admin,
         issuer,
         treasury,
         baseURI
       );
-      sig = await signMint(
-        issuer,
-        minterA,
-        TOKEN_ID,
-        quadDID,
-        aml,
-        country,
-        issuedAt
-      );
+      await usdc.transfer(minterA.address, parseUnits("1000", 6));
+      await usdc.transfer(minterB.address, parseUnits("1000", 6));
     });
 
     it("successfully mint", async () => {
-      await passport
-        .connect(minterA)
-        .mintPassport(TOKEN_ID, quadDID, aml, country, issuedAt, sig, {
-          value: mintPrice,
-        });
-    });
-
-    it("fail", async () => {
-      console.log(deployer.address);
-      console.log(minterB.address);
-      console.log(governance.address);
-      expect(false).to.equal(true);
-      quadDID = "hello";
-      country = "hello";
-      issuedAt = 5;
-      mintPrice = ethers.utils.parseEther("0.02");
-
-      aml = ethers.utils.formatBytes32String("MEDIUM");
+      await assertMint(minterA, issuer, passport, did, aml, country, issuedAt);
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
     });
   });
-  // it("Should return the new greeting once it's changed", async function () {
-  //   const Greeter = await ethers.getContractFactory("Greeter");
-  //   const greeter = await Greeter.deploy("Hello, world!");
-  //   await greeter.deployed();
-
-  //   expect(await greeter.greet()).to.equal("Hello, world!");
-
-  //   const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
-
-  //   // wait until the transaction is mined
-  //   await setGreetingTx.wait();
-
-  //   expect(await greeter.greet()).to.equal("Hola, mundo!");
-  // });
 });

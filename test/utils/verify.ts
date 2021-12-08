@@ -3,7 +3,43 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { Contract } from "ethers";
 import { parseUnits, parseEther } from "ethers/lib/utils";
 
-const { PRICE_PER_ATTRIBUTES, TOKEN_ID } = require("../../utils/constant.ts");
+const {
+  MINT_PRICE,
+  PRICE_PER_ATTRIBUTES,
+  TOKEN_ID,
+} = require("../../utils/constant.ts");
+const { signMint } = require("./signature.ts");
+
+export const assertMint = async (
+  account: SignerWithAddress,
+  issuer: SignerWithAddress,
+  passport: Contract,
+  did: string,
+  aml: string,
+  country: string,
+  issuedAt: number
+) => {
+  const sig = await signMint(
+    issuer,
+    account,
+    TOKEN_ID,
+    did,
+    aml,
+    country,
+    issuedAt
+  );
+  expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(0);
+  const initialBalance = await passport.provider.getBalance(passport.address);
+  await passport
+    .connect(account)
+    .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+      value: MINT_PRICE,
+    });
+  expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
+  expect(await passport.provider.getBalance(passport.address)).to.equal(
+    initialBalance.add(MINT_PRICE)
+  );
+};
 
 export const assertGetAttribute = async (
   account: SignerWithAddress,
