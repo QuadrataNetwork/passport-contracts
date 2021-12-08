@@ -91,6 +91,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
                 issuer: _issuer
             });
         } else {
+            // Attribute grouped by DID
             bytes32 dID = _attributes[_account][keccak256("DID")].value;
             require(dID != bytes32(0), "DID_NOT_FOUND");
             _attributesByDID[dID][_attribute] = Attribute({
@@ -151,6 +152,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
             return _attributes[_account][_attribute];
         }
 
+        // Attribute grouped by DID
         bytes32 dID = _attributes[_account][keccak256("DID")].value;
         require(dID != bytes32(0), "DID_NOT_FOUND");
         return _attributesByDID[dID][_attribute];

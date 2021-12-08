@@ -124,4 +124,60 @@ describe("QuadPassport", async () => {
       );
     });
   });
+
+  describe("setAttributeIssuer", async () => {
+    it("success - setAttributeIssuer(AML)", async () => {
+      const newAML = formatBytes32String("HIGH");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          newAML,
+          newIssuedAt
+        );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        newAML,
+        newIssuedAt
+      );
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(
+        initialBalance
+      );
+    });
+
+    it("success - setAttribute(COUNTRY)", async () => {
+      const newCountry = formatBytes32String("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          newCountry,
+          newIssuedAt
+        );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        newCountry,
+        newIssuedAt
+      );
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(
+        initialBalance
+      );
+    });
+  });
 });
