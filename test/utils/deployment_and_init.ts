@@ -12,8 +12,9 @@ const {
 export const deployPassportAndGovernance = async (
   admin: SignerWithAddress,
   issuer: SignerWithAddress,
+  treasury: SignerWithAddress,
   uri: string
-): Promise<[Promise<Contract>, Promise<Contract>, any]> => {
+): Promise<[Promise<Contract>, Promise<Contract>, any, any]> => {
   // Deploy Governance
   const governance = await deployGovernance(admin, issuer);
   governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
@@ -37,5 +38,12 @@ export const deployPassportAndGovernance = async (
   // Deploy Governance
   governance.connect(admin).setOracle(oracle.address);
   governance.connect(admin).allowTokenPayment(usdc.address, true);
-  return [governance, passport, usdc];
+  governance.connect(admin).setTreasury(treasury.address);
+
+  // Deploy DeFi
+  const DeFi = await ethers.getContractFactory("DeFi");
+  const defi = await DeFi.deploy(passport.address);
+  await defi.deployed();
+
+  return [governance, passport, usdc, defi];
 };

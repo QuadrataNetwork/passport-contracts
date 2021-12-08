@@ -34,6 +34,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
+        _accountBalancesETH[issuer] += governance.mintPrice();
         _usedHashes[hash] = true;
         _validSignatures[_msgSender()][_tokenId] = _sig;
         _issuedEpoch[_msgSender()][_tokenId] = _issuedAt;
@@ -53,6 +54,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_msgSender(), _tokenId, _attribute, _value, _issuedAt, _sig);
 
+        _accountBalancesETH[issuer] += governance.mintPricePerAttribute(_attribute);
         _usedHashes[hash] = true;
         _setAttributeInternal(_msgSender(), _tokenId, _attribute, _value, _issuedAt, issuer);
     }
@@ -120,7 +122,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         uint256 _tokenId,
         bytes32 _attribute
     ) external payable override returns(bytes32, uint256) {
-        require(governance.pricePerAttribute(_attribute) == msg.value, "ATTRIBUTE_PAYMENT_INVALID");
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
         _doETHPayment(_attribute, attribute.issuer);
         return (attribute.value, attribute.epoch);
@@ -135,53 +136,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
         _doTokenPayment(_attribute, _tokenAddr, attribute.issuer);
         return (attribute.value, attribute.epoch);
-    }
-
-    function getBatchAttributesETH(
-        address _account,
-        uint256[] calldata _tokenIds,
-        bytes32[] calldata _attributes
-    ) external payable override returns(bytes32[] memory, uint256[] memory) {
-        bytes32[] memory attributeValues;
-        uint256[] memory attributeEpochs;
-        address[] memory attributeIssuers;
-        (attributeValues, attributeEpochs, attributeIssuers) = _getBatchAttributes(_account, _tokenIds, _attributes);
-        _doETHPaymentBatch(_attributes, attributeIssuers);
-        return (attributeValues, attributeEpochs);
-    }
-
-    function getBatchAttributes(
-        address _account,
-        uint256[] calldata _tokenIds,
-        bytes32[] calldata _attributes,
-        address _tokenAddr
-    ) external override returns(bytes32[] memory, uint256[] memory) {
-        bytes32[] memory attributeValues;
-        uint256[] memory attributeEpochs;
-        address[] memory attributeIssuers;
-        (attributeValues, attributeEpochs, attributeIssuers) = _getBatchAttributes(_account, _tokenIds, _attributes);
-        _doTokenPaymentBatch(_tokenAddr, _attributes, attributeIssuers);
-        return (attributeValues, attributeEpochs);
-    }
-
-    function _getBatchAttributes(
-        address _account,
-        uint256[] memory _tokenIds,
-        bytes32[] memory _attributes
-    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        require(_tokenIds.length == _attributes.length, "BATCH_ATTRIBUTES_ERROR_LENGTH");
-        bytes32[] memory attributeValues = new bytes32[](_attributes.length);
-        uint256[] memory attributeEpochs = new uint256[](_attributes.length);
-        address[] memory attributeIssuers = new address[](_attributes.length);
-
-        for (uint256 i = 0; i < _tokenIds.length; i++) {
-            Attribute memory attribute = _getAttributeInternal(_account, _tokenIds[i], _attributes[i]);
-            attributeValues[i] = attribute.value;
-            attributeEpochs[i] = attribute.epoch;
-            attributeIssuers[i] = attribute.issuer;
-        }
-
-        return (attributeValues, attributeEpochs, attributeIssuers);
     }
 
     function _getAttributeInternal(
@@ -280,7 +234,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
                  msg.value == amountETH,
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
-            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 10 ** 2;
+            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             _accountBalancesETH[_issuer] += amountIssuer;
             _accountBalancesETH[governance.treasury()] += amountProtocol;
@@ -332,16 +286,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         }
     }
 
-    function _doTokenPaymentBatch(
-        address _tokenPayment,
-        bytes32[] memory _attributes,
-        address[] memory _issuers
-    ) internal {
-        for (uint256 i = 0; i < _attributes.length; i++) {
-            _doTokenPayment(_attributes[i], _tokenPayment, _issuers[i]);
-        }
-    }
-
     function withdrawETH(address payable _to) external override {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
        uint256 currentBalance = _accountBalancesETH[_to];
@@ -356,7 +300,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalances[_token][_to] = 0;
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
-       erc20.transferFrom(address(this), _to, currentBalance);
+       erc20.transfer(_to, currentBalance);
     }
 
     function calculatePaymentToken(
@@ -366,7 +310,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
         // Convert to Token Decimal
-        uint256 amountToken = (governance.pricePerAttribute(_attribute) * tokenPrice) / (10 ** (18 - erc20.decimals()));
+        uint256 amountToken = (governance.pricePerAttribute(_attribute) * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
     }
 
@@ -374,7 +318,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         bytes32 _attribute
     ) public view override returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
-        uint256 amountETH = governance.pricePerAttribute(_attribute) * tokenPrice;
+        uint256 amountETH = (governance.pricePerAttribute(_attribute) * 1e18 / tokenPrice) ;
         return amountETH;
     }
 

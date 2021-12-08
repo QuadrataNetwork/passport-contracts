@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { parseEther, formatBytes32String } from "ethers/lib/utils";
 
 const { TOKEN_ID } = require("../../utils/constant.ts");
 const {
@@ -14,25 +15,26 @@ describe("QuadPassport", async () => {
   let governance: Contract;
   let deployer: SignerWithAddress,
     admin: SignerWithAddress,
+    treasury: SignerWithAddress,
     minterA: SignerWithAddress,
     minterB: SignerWithAddress,
     issuer: SignerWithAddress;
   const baseURI = "https://quadrata.io";
   let sig: any;
-  let quadDID = ethers.utils.formatBytes32String(
-    "did:example:123456789abcdefghi"
-  );
-  let aml = ethers.utils.formatBytes32String("LOW");
-  let country = ethers.utils.formatBytes32String("FRANCE");
+  let quadDID = formatBytes32String("did:quad:123456789abcdefghi");
+  let aml = formatBytes32String("LOW");
+  let country = formatBytes32String("FRANCE");
   let issuedAt = Math.floor(new Date().getTime() / 1000);
-  let mintPrice = ethers.utils.parseEther("0.03");
+  let mintPrice = parseEther("0.03");
 
   describe("mintPassport", async () => {
     beforeEach(async () => {
-      [deployer, admin, minterA, minterB, issuer] = await ethers.getSigners();
+      [deployer, admin, minterA, minterB, issuer, treasury] =
+        await ethers.getSigners();
       [governance, passport] = await deployPassportAndGovernance(
         admin,
         issuer,
+        treasury,
         baseURI
       );
       sig = await signMint(
@@ -57,6 +59,7 @@ describe("QuadPassport", async () => {
     it("fail", async () => {
       console.log(deployer.address);
       console.log(minterB.address);
+      console.log(governance.address);
       expect(false).to.equal(true);
       quadDID = "hello";
       country = "hello";

@@ -13,7 +13,7 @@ contract QuadGovernanceStore {
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
     mapping(bytes32 => bool) public eligibleAttributesByDID;
-    // Price in $USD (1e18 decimals)
+    // Price in $USD (1e6 decimals)
     mapping(bytes32 => uint256) public pricePerAttribute;
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
@@ -53,7 +53,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         eligibleAttributes[keccak256("DID")] = true;
         eligibleAttributes[keccak256("COUNTRY")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
-        pricePerAttribute[keccak256("DID")] = 0.005 ether;
+        pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
         passportVersion = 1;
         mintPrice = 0.03 ether;
         revSplitIssuer = 50;  // 50%
@@ -222,6 +222,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 
+    /**
+     * @notice Get the official price for a ERC20 token
+     * @param _tokenAddr Address of the ERC20 token
+     * @return Price denominated in USD, with 6 decimals
+     */
     function getPrice(address _tokenAddr) external view returns (uint) {
         require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
