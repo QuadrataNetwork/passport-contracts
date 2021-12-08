@@ -191,6 +191,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         bytes calldata _sig
     ) internal view returns(bytes32,address) {
         bytes32 hash = keccak256(abi.encode(_account, _tokenId, _attribute, _value, _issuedAt));
+
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);

@@ -54,6 +54,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         eligibleAttributes[keccak256("COUNTRY")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
+        mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
+        mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
         passportVersion = 1;
         mintPrice = 0.03 ether;
         revSplitIssuer = 50;  // 50%

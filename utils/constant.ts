@@ -17,5 +17,10 @@ export const PRICE_PER_ATTRIBUTES = {
   [ATTRIBUTE_DID]: 2,
 };
 
+export const PRICE_SET_ATTRIBUTE = {
+  [ATTRIBUTE_AML]: parseEther("0.01"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0.01"),
+};
+
 export const MINT_PRICE = parseEther("0.03");
 export const ISSUER_SPLIT = 50;
