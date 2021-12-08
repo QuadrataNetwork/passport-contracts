@@ -240,32 +240,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         }
     }
 
-    function _doETHPaymentBatch(
-        bytes32[] memory _attributes,
-        address[] memory _issuers
-    ) internal {
-        uint256 tokenPrice = governance.getPriceETH();
-        uint256 totalAmountETH;
-
-        for (uint256 i = 0; i < _attributes.length; i++) {
-            totalAmountETH += governance.pricePerAttribute(_attributes[i]) * tokenPrice;
-        }
-
-        if (totalAmountETH > 0) {
-            require(
-                 msg.value == totalAmountETH,
-                "INSUFFICIENT_PAYMENT_ALLOWANCE"
-            );
-            for (uint256 i = 0; i < _attributes.length; i++) {
-                uint256 amountETH = governance.pricePerAttribute(_attributes[i]) * tokenPrice;
-                uint256 amountIssuer = amountETH * governance.revSplitIssuer()  / 10 ** 2;
-                uint256 amountProtocol = amountETH - amountIssuer;
-                _accountBalancesETH[_issuers[i]] += amountIssuer;
-                _accountBalancesETH[governance.treasury()] += amountProtocol;
-            }
-        }
-    }
-
     function _doTokenPayment(
         bytes32 _attribute,
         address _tokenPayment,

@@ -35,7 +35,6 @@ describe("QuadPassport", async () => {
     minterB: SignerWithAddress,
     issuer: SignerWithAddress;
   const baseURI = "https://quadrata.io";
-  let sig: any;
   const did = formatBytes32String("did:quad:123456789abcdefghi");
   const aml = formatBytes32String("LOW");
   const country = formatBytes32String("FRANCE");
@@ -50,7 +49,7 @@ describe("QuadPassport", async () => {
       treasury,
       baseURI
     );
-    sig = await signMint(
+    const sig = await signMint(
       issuer,
       minterA,
       TOKEN_ID,
