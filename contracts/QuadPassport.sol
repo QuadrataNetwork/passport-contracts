@@ -124,6 +124,16 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return (attribute.value, attribute.epoch);
     }
 
+    function getAttributeFree(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute
+    ) external view override returns(bytes32, uint256) {
+        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
+        return (attribute.value, attribute.epoch);
+    }
+
     function getAttribute(
         address _account,
         uint256 _tokenId,
@@ -306,7 +316,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
-    function _authorizeUpgrade(address) internal override {
+    function _authorizeUpgrade(address) internal view override {
         require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 }
