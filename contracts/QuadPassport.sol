@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "./QuadPassportStore.sol";
 import "./interfaces/IQuadPassport.sol";
 
-contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, QuadPassportStore {
+contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     event GovernanceUpdated(address _oldGovernance, address _governance);
 
     function initialize(
@@ -304,6 +304,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, OwnableUpgradeable, 
         governance = QuadGovernance(_governanceContract);
 
         emit GovernanceUpdated(oldGov, address(governance));
+    }
+
+    function _authorizeUpgrade(address) internal override {
+        require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 }
 
