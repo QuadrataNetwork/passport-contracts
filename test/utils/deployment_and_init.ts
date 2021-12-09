@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
-import { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 
 const { ISSUER_ROLE } = require("../../utils/constant.ts");
 
@@ -15,7 +15,6 @@ export const deployPassportAndGovernance = async (
   treasury: SignerWithAddress,
   uri: string
 ): Promise<[Promise<Contract>, Promise<Contract>, any, any]> => {
-  // upgrades.silenceWarnings();
   // Deploy Governance
   const governance = await deployGovernance(admin, issuer);
   governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
