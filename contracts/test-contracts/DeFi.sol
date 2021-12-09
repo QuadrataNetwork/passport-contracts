@@ -19,12 +19,17 @@ contract DeFi {
         address _tokenPayment
     ) public returns(bytes32,uint256) {
         uint256 paymentAmount = passport.calculatePaymentToken(_attribute, _tokenPayment);
-        console.log("[doSomething] paymentAmount", paymentAmount);
-        if (paymentAmount > 0) {
-            IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
-            IERC20(_tokenPayment).approve(address(passport), paymentAmount);
-        }
+        IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
+        IERC20(_tokenPayment).approve(address(passport), paymentAmount);
         (bytes32 attrValue, uint256 epoch) = passport.getAttribute(msg.sender, 1, _attribute, _tokenPayment);
+        emit GetAttributeEvent(attrValue, epoch);
+        return (attrValue, epoch);
+    }
+
+    function doSomethingFree(
+        bytes32 _attribute
+    ) public returns(bytes32,uint256) {
+        (bytes32 attrValue, uint256 epoch) = passport.getAttributeFree(msg.sender, 1, _attribute);
         emit GetAttributeEvent(attrValue, epoch);
         return (attrValue, epoch);
     }

@@ -54,38 +54,36 @@ export const assertGetAttribute = async (
     PRICE_PER_ATTRIBUTES[attribute].toString(),
     await paymentToken.decimals()
   );
+
+  const initialBalance = await paymentToken.balanceOf(account.address);
   if (priceAttribute.gt(0)) {
     await paymentToken.connect(account).approve(defi.address, priceAttribute);
-  } else {
-    const response = await passport.callStatic.getAttribute(
-      account.address,
-      TOKEN_ID,
-      attribute,
-      paymentToken.address
-    );
-    expect(response[0]).to.equal(expectedAttributeValue);
-    expect(response[1]).to.equal(expectedIssuedAt);
-  }
-
-  // Test with potential actual transfer of Token
-  const initialBalance = await paymentToken.balanceOf(account.address);
-  await expect(
-    defi.connect(account).doSomething(attribute, paymentToken.address)
-  )
-    .to.emit(defi, "GetAttributeEvent")
-    .withArgs(expectedAttributeValue, expectedIssuedAt);
-  if (priceAttribute.eq(0)) {
-    expect(await paymentToken.balanceOf(account.address)).to.equal(
-      initialBalance
-    );
-    expect(await paymentToken.balanceOf(passport.address)).to.equal(0);
-  } else {
+    await expect(
+      defi.connect(account).doSomething(attribute, paymentToken.address)
+    )
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(expectedAttributeValue, expectedIssuedAt);
     expect(await paymentToken.balanceOf(account.address)).to.equal(
       initialBalance.sub(priceAttribute)
     );
     expect(await paymentToken.balanceOf(passport.address)).to.equal(
       priceAttribute
     );
+  } else {
+    const response = await passport.getAttributeFree(
+      account.address,
+      TOKEN_ID,
+      attribute
+    );
+    expect(response[0]).to.equal(expectedAttributeValue);
+    expect(response[1]).to.equal(expectedIssuedAt);
+    await expect(defi.connect(account).doSomethingFree(attribute))
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(expectedAttributeValue, expectedIssuedAt);
+    expect(await paymentToken.balanceOf(account.address)).to.equal(
+      initialBalance
+    );
+    expect(await paymentToken.balanceOf(passport.address)).to.equal(0);
   }
 };
 

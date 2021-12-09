@@ -40,6 +40,13 @@ interface IQuadPassport is IERC1155Upgradeable {
         address _tokenAddr
     ) external returns(bytes32, uint256);
 
+    function getAttributeFree(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute
+    ) external view returns(bytes32, uint256);
+
+
     function getAttributeETH(
         address _account,
         uint256 _tokenId,
