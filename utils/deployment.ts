@@ -11,7 +11,7 @@ export const deployPassport = async (
   const passport = await upgrades.deployProxy(
     QuadPassport,
     [governance.address, uri],
-    { initializer: "initialize" }
+    { initializer: "initialize", kind: "uups" }
   );
   await passport.deployed();
   // console.log(`QuadPassport is deployed: ${passport.address}`);
