@@ -92,7 +92,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
     function updateGovernanceInPassport(address _newGovernance) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_newGovernance != address(0), "PASSPORT_ADDRESS_ZERO");
+        require(_newGovernance != address(0), "GOVERNANCE_ADDRESS_ZERO");
         require(address(passport) != address(0), "PASSPORT_NOT_SET");
 
         passport.setGovernance(_newGovernance);
