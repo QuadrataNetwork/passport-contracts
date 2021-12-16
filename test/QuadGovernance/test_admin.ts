@@ -10,6 +10,7 @@ const {
   ATTRIBUTE_DID,
   DEFAULT_ADMIN_ROLE,
   GOVERNANCE_ROLE,
+  MINT_PRICE,
 } = require("../../utils/constant.ts");
 
 const {
@@ -118,61 +119,106 @@ describe("QuadGovernance", async () => {
     });
 
     it("fail (not admin)", async () => {
-
+      await expect(
+        await governance.setTreasury(deployer.address)
+      ).to.be.revertedWith("INVALID_ADMIN");
     });
 
     it("fail (address zero)", async () => {
-
+      await expect(
+        await governance.setTreasury(ethers.constants.AddressZero)
+      ).to.be.revertedWith("TREASURY_ADDRESS_ZERO");
     });
 
     it("fail (treasury already set)", async () => {
-
+      await expect(
+        await governance.connect(admin).setTreasury(deployer.address)
+      ).to.be.revertedWith("TREASURY_ADDRESS_ALREADY_SET");
     });
   });
 
   describe("setPassportContractAddress", async () => {
     it("succeed", async () => {
+      expect(await governance.passport()).to.equal(passport.address);
+      await expect(
+        governance.connect(admin).setPassportContractAddress(deployer.address)
+      )
+        .to.emit(governance, "PassportAddressUpdated")
+        .withArgs(passport.address, deployer.address);
+      expect(await governance.passport()).to.equal(deployer.address);
     });
 
     it("fail (not admin)", async () => {
-
+      await expect(
+        governance.setPassportContractAddress(deployer.address)
+      ).to.be.revertedWith("INVALID_ADMIN");
     });
 
     it("fail (address zero)", async () => {
-
+      await expect(
+        governance
+          .connect(admin)
+          .setPassportContractAddress(ethers.constants.AddressZero)
+      ).to.be.revertedWith("PASSPORT_ADDRESS_ZERO");
     });
 
     it("fail (passport already set)", async () => {
-
+      await expect(
+        governance.connect(admin).setPassportContractAddress(passport.address)
+      ).to.be.revertedWith("PASSPORT_ALREADY_SET");
     });
   });
 
   describe("setPassportVersion", async () => {
     it("succeed", async () => {
+      expect(await governance.passportVersion()).to.equal(1);
+      await expect(governance.connect(admin).setPassportVersion(2))
+        .to.emit(governance, "PassportVersionUpdated")
+        .withArgs(1, 2);
+      expect(await governance.passportVersion()).to.equal(2);
     });
 
     it("fail (not admin)", async () => {
-
+      await expect(governance.setPassportVersion(2)).to.be.revertedWith(
+        "INVALID_ADMIN"
+      );
     });
 
     it("fail (version non-incremental)", async () => {
-
+      await expect(
+        governance.connect(admin).setPassportVersion(0)
+      ).to.be.revertedWith("PASSPORT_VERSION_INCREMENTAL");
     });
   });
 
   describe("setMintPrice", async () => {
     it("succeed", async () => {
+      expect(await governance.mintPrice()).to.equal(MINT_PRICE);
+      const newMintPrice = parseEther("1");
+      await expect(governance.connect(admin).setMintPrice(newMintPrice))
+        .to.emit(governance, "PassportMintPriceUpdated")
+        .withArgs(MINT_PRICE, newMintPrice);
+      expect(await governance.mintPrice()).to.equal(newMintPrice);
     });
 
     it("succeed (price zero)", async () => {
+      const newMintPrice = parseEther("0");
+      await expect(governance.connect(admin).setMintPrice(newMintPrice))
+        .to.emit(governance, "PassportMintPriceUpdated")
+        .withArgs(MINT_PRICE, 0);
+      expect(await governance.mintPrice()).to.equal(newMintPrice);
     });
 
     it("fail (not admin)", async () => {
-
+      await expect(governance.setMintPrice(parseEther("1"))).to.be.revertedWith(
+        "INVALID_ADMIN"
+      );
     });
 
     it("fail (minting price already set)", async () => {
-
+      await expect(
+        governance.connect(admin).setMintPrice(MINT_PRICE)
+      ).to.be.revertedWith("MINT_PRICE_ALREADY_SET");
     });
   });
 
