@@ -50,15 +50,25 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
 
         eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
+        passportVersion = 1;  // Passport Version
+
+        // Add DID, COUNTRY, AML as valid attributes
         eligibleAttributes[keccak256("DID")] = true;
         eligibleAttributes[keccak256("COUNTRY")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
+        supportedAttributes.push(keccak256("DID"));
+        supportedAttributes.push(keccak256("COUNTRY"));
+
+        // Set pricing
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
         mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
         mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
-        passportVersion = 1;
         mintPrice = 0.03 ether;
+
+        // Revenue split with issuers
         revSplitIssuer = 50;  // 50%
+
+        // Set Roles
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
         _setupRole(GOVERNANCE_ROLE, _admin);
@@ -153,7 +163,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
-    function setAtributePrice(bytes32 _attribute, uint256 _price) external {
+    function setAttributePrice(bytes32 _attribute, uint256 _price) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(pricePerAttribute[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
         uint256 oldPrice = pricePerAttribute[_attribute];
@@ -163,7 +173,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
 
-    function setAtributeMintPrice(bytes32 _attribute, uint256 _price) external {
+    function setAttributeMintPrice(bytes32 _attribute, uint256 _price) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(mintPricePerAttribute[_attribute] != _price, "ATTRIBUTE_MINT_PRICE_ALREADY_SET");
         uint256 oldPrice = mintPricePerAttribute[_attribute];

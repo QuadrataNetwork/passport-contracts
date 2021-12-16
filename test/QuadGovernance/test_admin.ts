@@ -1,7 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
 import { Contract } from "ethers";
-import { parseEther } from "ethers/lib/utils";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 const {
   ATTRIBUTE_AML,
@@ -11,6 +11,7 @@ const {
   GOVERNANCE_ROLE,
   MINT_PRICE,
   TOKEN_ID,
+  PRICE_PER_ATTRIBUTES,
 } = require("../../utils/constant.ts");
 
 const {
@@ -119,20 +120,20 @@ describe("QuadGovernance", async () => {
     });
 
     it("fail (not admin)", async () => {
-      await expect(
-        await governance.setTreasury(deployer.address)
-      ).to.be.revertedWith("INVALID_ADMIN");
+      await expect(governance.setTreasury(deployer.address)).to.be.revertedWith(
+        "INVALID_ADMIN"
+      );
     });
 
     it("fail (address zero)", async () => {
       await expect(
-        await governance.setTreasury(ethers.constants.AddressZero)
+        governance.connect(admin).setTreasury(ethers.constants.AddressZero)
       ).to.be.revertedWith("TREASURY_ADDRESS_ZERO");
     });
 
     it("fail (treasury already set)", async () => {
       await expect(
-        await governance.connect(admin).setTreasury(deployer.address)
+        governance.connect(admin).setTreasury(treasury.address)
       ).to.be.revertedWith("TREASURY_ADDRESS_ALREADY_SET");
     });
   });
@@ -165,7 +166,7 @@ describe("QuadGovernance", async () => {
     it("fail (passport already set)", async () => {
       await expect(
         governance.connect(admin).setPassportContractAddress(passport.address)
-      ).to.be.revertedWith("PASSPORT_ALREADY_SET");
+      ).to.be.revertedWith("PASSPORT_ADDRESS_ALREADY_SET");
     });
   });
 
@@ -225,15 +226,15 @@ describe("QuadGovernance", async () => {
   describe("setEligibleTokenId", async () => {
     it("succeed", async () => {
       const newTokenID = 2;
-      expect(await governance.eligibileTokenId(TOKEN_ID)).to.equal(true);
-      expect(await governance.eligibileTokenId(newTokenID)).to.equal(false);
+      expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
+      expect(await governance.eligibleTokenId(newTokenID)).to.equal(false);
       await expect(
         governance.connect(admin).setEligibleTokenId(newTokenID, true)
       )
         .to.emit(governance, "EligibleTokenUpdated")
         .withArgs(newTokenID, true);
-      expect(await governance.eligibileTokenId(TOKEN_ID)).to.equal(true);
-      expect(await governance.eligibileTokenId(newTokenID)).to.equal(true);
+      expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
+      expect(await governance.eligibleTokenId(newTokenID)).to.equal(true);
       await expect(
         governance.connect(admin).setEligibleTokenId(newTokenID, false)
       )
@@ -249,47 +250,243 @@ describe("QuadGovernance", async () => {
 
     it("fail (token status already set)", async () => {
       await expect(
-        governance.setEligibleTokenId(TOKEN_ID, true)
+        governance.connect(admin).setEligibleTokenId(TOKEN_ID, true)
       ).to.be.revertedWith("TOKEN_ELIGIBILITY_ALREADY_SET");
     });
   });
 
   describe("setEligibleAttribute", async () => {
-    it("succeed", async () => {});
+    it("succeed (true)", async () => {
+      const newAttribute = ethers.utils.id("CREDIT");
+      expect(await governance.eligibleAttributes(newAttribute)).to.equal(false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+      await expect(
+        governance.connect(admin).setEligibleAttribute(newAttribute, true)
+      )
+        .to.emit(governance, "EligibleAttributeUpdated")
+        .withArgs(newAttribute, true);
+      expect(await governance.eligibleAttributes(newAttribute)).to.equal(true);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+    });
 
-    it("succeed (getSupportedAttributeLength)", async () => {});
+    it("succeed (turn false)", async () => {
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        true
+      );
+      expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.supportedAttributes(1)).to.equal(
+        ATTRIBUTE_COUNTRY
+      );
+      await expect(
+        governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false)
+      )
+        .to.emit(governance, "EligibleAttributeUpdated")
+        .withArgs(ATTRIBUTE_COUNTRY, false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        false
+      );
+      expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.supportedAttributes(1)).to.equal(0);
+      expect(await governance.getSupportedAttributesLength()).to.equal(1);
+    });
 
-    it("fail (not admin)", async () => {});
+    it("succeed (turn false  - first element)", async () => {
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        true
+      );
+      expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.supportedAttributes(1)).to.equal(
+        ATTRIBUTE_COUNTRY
+      );
+      await expect(
+        governance.connect(admin).setEligibleAttribute(ATTRIBUTE_DID, false)
+      )
+        .to.emit(governance, "EligibleAttributeUpdated")
+        .withArgs(ATTRIBUTE_DID, false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(
+        false
+      );
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        true
+      );
+      expect(await governance.supportedAttributes(0)).to.equal(
+        ATTRIBUTE_COUNTRY
+      );
+      expect(await governance.supportedAttributes(1)).to.equal(0);
+      expect(await governance.getSupportedAttributesLength()).to.equal(1);
+    });
 
-    it("fail (attribute status already set)", async () => {});
+    it("succeed (getSupportedAttributesLength)", async () => {
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      const newAttribute = ethers.utils.id("CREDIT");
+      expect(
+        await governance.connect(admin).setEligibleAttribute(newAttribute, true)
+      );
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+    });
+
+    it("fail (not admin)", async () => {
+      const newAttribute = ethers.utils.id("CREDIT");
+      await expect(
+        governance.setEligibleAttribute(newAttribute, true)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
+
+    it("fail (attribute status already set)", async () => {
+      await expect(
+        governance.connect(admin).setEligibleAttribute(ATTRIBUTE_DID, true)
+      ).to.be.revertedWith("ATTRIBUTE_ELIGIBILITY_SET");
+    });
   });
 
   describe("setEligibleAttributeByDID", async () => {
-    it("succeed", async () => {});
+    it("succeed", async () => {
+      const newAttribute = ethers.utils.id("CREDIT");
+      expect(await governance.eligibleAttributesByDID(newAttribute)).to.equal(
+        false
+      );
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(
+        true
+      );
+      expect(
+        await governance
+          .connect(admin)
+          .setEligibleAttributeByDID(newAttribute, true)
+      );
+      expect(await governance.eligibleAttributesByDID(newAttribute)).to.equal(
+        true
+      );
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(
+        true
+      );
+    });
 
-    it("fail (not admin)", async () => {});
+    it("fail (not admin)", async () => {
+      const newAttribute = ethers.utils.id("CREDIT");
+      await expect(
+        governance.setEligibleAttributeByDID(newAttribute, true)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
 
-    it("fail (attribute status already set)", async () => {});
+    it("fail (attribute status already set)", async () => {
+      await expect(
+        governance.connect(admin).setEligibleAttributeByDID(ATTRIBUTE_AML, true)
+      ).to.be.revertedWith("ATTRIBUTE_ELIGIBILITY_SET");
+    });
   });
 
   describe("setAttributePrice", async () => {
-    it("succeed", async () => {});
+    it("succeed", async () => {
+      expect(await governance.pricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), "6")
+      );
+      const newPrice = parseEther("1");
+      await expect(
+        governance.connect(admin).setAttributePrice(ATTRIBUTE_DID, newPrice)
+      )
+        .to.emit(governance, "AttributePriceUpdated")
+        .withArgs(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6),
+          newPrice
+        );
+      expect(await governance.pricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
 
-    it("succeed (price 0)", async () => {});
+    it("succeed (price 0)", async () => {
+      expect(await governance.pricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+      );
+      const newPrice = parseEther("0");
+      await expect(
+        governance.connect(admin).setAttributePrice(ATTRIBUTE_DID, newPrice)
+      )
+        .to.emit(governance, "AttributePriceUpdated")
+        .withArgs(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6),
+          newPrice
+        );
+      expect(await governance.pricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
 
-    it("fail (not admin)", async () => {});
+    it("fail (not admin)", async () => {
+      const newPrice = parseEther("0");
+      await expect(
+        governance.setAttributePrice(ATTRIBUTE_DID, newPrice)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
 
-    it("fail (price  already set)", async () => {});
+    it("fail (price already set)", async () => {
+      await expect(
+        governance.setAttributePrice(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+        )
+      ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
+    });
   });
 
   describe("setAttributeMintPrice", async () => {
-    it("succeed", async () => {});
+    it("succeed", async () => {
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+      );
+      const newPrice = parseEther("1");
+      await expect(
+        governance.connect(admin).setAttributeMintPrice(ATTRIBUTE_DID, newPrice)
+      )
+        .to.emit(governance, "AttributeMintPriceUpdated")
+        .withArgs(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+        );
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
 
-    it("succeed (price 0)", async () => {});
+    it("succeed (price 0)", async () => {
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+      );
+      const newPrice = parseEther("0");
+      await expect(
+        governance.connect(admin).setAttributeMintPrice(ATTRIBUTE_DID, newPrice)
+      )
+        .to.emit(governance, "AttributeMintPriceUpdated")
+        .withArgs(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+        );
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
 
-    it("fail (not admin)", async () => {});
+    it("fail (not admin)", async () => {
+      await expect(
+        governance.setAttributeMintPrice(ATTRIBUTE_DID, 0)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
 
-    it("fail (mint attribute price already set)", async () => {});
+    it("fail (mint attribute price already set)", async () => {
+      await expect(
+        governance.setAttributeMintPrice(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_ATTRIBUTES[(ATTRIBUTE_DID.toString(), 6)])
+        )
+      ).to.be.revertedWith("ATTRIBUTE_MINT_PRICE_ALREADY_SET");
+    });
   });
 
   describe("setOracle", async () => {
