@@ -1,9 +1,8 @@
-import { expect } from "chai";
-import { ethers } from "hardhat";
-import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { expect } from "chai";
+import { Contract } from "ethers";
 import { parseEther } from "ethers/lib/utils";
-
+import { ethers } from "hardhat";
 const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
@@ -11,6 +10,7 @@ const {
   DEFAULT_ADMIN_ROLE,
   GOVERNANCE_ROLE,
   MINT_PRICE,
+  TOKEN_ID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -40,7 +40,7 @@ describe("QuadGovernance", async () => {
 
   describe("initialize", async () => {
     it("success", async () => {
-      expect(await governance.eligibleTokenId(1)).to.equal(true);
+      expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributesByDID(ATTRIBUTE_DID)).to.equal(
         false
@@ -224,130 +224,103 @@ describe("QuadGovernance", async () => {
 
   describe("setEligibleTokenId", async () => {
     it("succeed", async () => {
+      const newTokenID = 2;
+      expect(await governance.eligibileTokenId(TOKEN_ID)).to.equal(true);
+      expect(await governance.eligibileTokenId(newTokenID)).to.equal(false);
+      await expect(
+        governance.connect(admin).setEligibleTokenId(newTokenID, true)
+      )
+        .to.emit(governance, "EligibleTokenUpdated")
+        .withArgs(newTokenID, true);
+      expect(await governance.eligibileTokenId(TOKEN_ID)).to.equal(true);
+      expect(await governance.eligibileTokenId(newTokenID)).to.equal(true);
+      await expect(
+        governance.connect(admin).setEligibleTokenId(newTokenID, false)
+      )
+        .to.emit(governance, "EligibleTokenUpdated")
+        .withArgs(newTokenID, false);
     });
 
     it("fail (not admin)", async () => {
-
+      await expect(governance.setEligibleTokenId(2, true)).to.be.revertedWith(
+        "INVALID_ADMIN"
+      );
     });
 
     it("fail (token status already set)", async () => {
-
+      await expect(
+        governance.setEligibleTokenId(TOKEN_ID, true)
+      ).to.be.revertedWith("TOKEN_ELIGIBILITY_ALREADY_SET");
     });
   });
 
   describe("setEligibleAttribute", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("succeed (getSupportedAttributeLength)", async () => {
-    });
+    it("succeed (getSupportedAttributeLength)", async () => {});
 
+    it("fail (not admin)", async () => {});
 
-    it("fail (not admin)", async () => {
-
-    });
-
-    it("fail (attribute status already set)", async () => {
-
-    });
+    it("fail (attribute status already set)", async () => {});
   });
 
   describe("setEligibleAttributeByDID", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("fail (not admin)", async () => {
+    it("fail (not admin)", async () => {});
 
-    });
-
-    it("fail (attribute status already set)", async () => {
-
-    });
+    it("fail (attribute status already set)", async () => {});
   });
 
   describe("setAttributePrice", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("succeed (price 0)", async () => {
-    });
+    it("succeed (price 0)", async () => {});
 
-    it("fail (not admin)", async () => {
+    it("fail (not admin)", async () => {});
 
-    });
-
-    it("fail (price  already set)", async () => {
-
-    });
+    it("fail (price  already set)", async () => {});
   });
 
   describe("setAttributeMintPrice", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("succeed (price 0)", async () => {
-    });
+    it("succeed (price 0)", async () => {});
 
-    it("fail (not admin)", async () => {
+    it("fail (not admin)", async () => {});
 
-    });
-
-    it("fail (mint attribute price already set)", async () => {
-
-    });
+    it("fail (mint attribute price already set)", async () => {});
   });
 
   describe("setOracle", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("fail (not admin)", async () => {
+    it("fail (not admin)", async () => {});
 
-    });
+    it("fail (oracle already set)", async () => {});
 
-    it("fail (oracle already set)", async () => {
-
-    });
-
-    it("fail (address zero)", async () => {
-
-    });
+    it("fail (address zero)", async () => {});
   });
 
   describe("setRevSplitIssuer", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("succeed (price 0)", async () => {
-    });
+    it("succeed (price 0)", async () => {});
 
-    it("fail (not admin)", async () => {
+    it("fail (not admin)", async () => {});
 
-    });
-
-    it("fail (rev split already set)", async () => {
-
-    });
+    it("fail (rev split already set)", async () => {});
   });
 
   describe("allowTokenPayment", async () => {
-    it("succeed", async () => {
-    });
+    it("succeed", async () => {});
 
-    it("fail (not admin)", async () => {
+    it("fail (not admin)", async () => {});
 
-    });
+    it("fail (token payment status already set)", async () => {});
 
-    it("fail (token payment status already set)", async () => {
+    it("fail (address zero)", async () => {});
 
-    });
-
-    it("fail (address zero)", async () => {
-
-    });
-
-    it("fail (not ERC20)", async () => {
-
-    });
+    it("fail (not ERC20)", async () => {});
   });
 });
