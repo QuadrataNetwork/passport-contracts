@@ -12,6 +12,8 @@ const {
   MINT_PRICE,
   TOKEN_ID,
   PRICE_PER_ATTRIBUTES,
+  PRICE_SET_ATTRIBUTE,
+  ISSUER_SPLIT,
 } = require("../../utils/constant.ts");
 
 const {
@@ -23,6 +25,8 @@ const { deployGovernance } = require("../../utils/deployment.ts");
 describe("QuadGovernance", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let oracle: Contract;
+  let usdc: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -31,7 +35,7 @@ describe("QuadGovernance", async () => {
 
   beforeEach(async () => {
     [deployer, admin, issuer, treasury] = await ethers.getSigners();
-    [governance, passport] = await deployPassportAndGovernance(
+    [governance, passport, usdc, , oracle] = await deployPassportAndGovernance(
       admin,
       issuer,
       treasury,
@@ -428,47 +432,40 @@ describe("QuadGovernance", async () => {
 
     it("fail (price already set)", async () => {
       await expect(
-        governance.setAttributePrice(
-          ATTRIBUTE_DID,
-          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
-        )
+        governance
+          .connect(admin)
+          .setAttributePrice(
+            ATTRIBUTE_DID,
+            parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+          )
       ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
     });
   });
 
   describe("setAttributeMintPrice", async () => {
     it("succeed", async () => {
-      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
-        parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
+        PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML]
       );
       const newPrice = parseEther("1");
       await expect(
-        governance.connect(admin).setAttributeMintPrice(ATTRIBUTE_DID, newPrice)
+        governance.connect(admin).setAttributeMintPrice(ATTRIBUTE_AML, newPrice)
       )
         .to.emit(governance, "AttributeMintPriceUpdated")
-        .withArgs(
-          ATTRIBUTE_DID,
-          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
-        );
-      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        .withArgs(ATTRIBUTE_AML, PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML], newPrice);
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
         newPrice
       );
     });
 
     it("succeed (price 0)", async () => {
-      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
-        parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
-      );
       const newPrice = parseEther("0");
       await expect(
-        governance.connect(admin).setAttributeMintPrice(ATTRIBUTE_DID, newPrice)
+        governance.connect(admin).setAttributeMintPrice(ATTRIBUTE_AML, newPrice)
       )
         .to.emit(governance, "AttributeMintPriceUpdated")
-        .withArgs(
-          ATTRIBUTE_DID,
-          parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
-        );
-      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(
+        .withArgs(ATTRIBUTE_AML, PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML], newPrice);
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
         newPrice
       );
     });
@@ -480,44 +477,143 @@ describe("QuadGovernance", async () => {
     });
 
     it("fail (mint attribute price already set)", async () => {
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
+        PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML]
+      );
       await expect(
-        governance.setAttributeMintPrice(
-          ATTRIBUTE_DID,
-          parseUnits(PRICE_PER_ATTRIBUTES[(ATTRIBUTE_DID.toString(), 6)])
-        )
+        governance
+          .connect(admin)
+          .setAttributeMintPrice(
+            ATTRIBUTE_AML,
+            PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML]
+          )
       ).to.be.revertedWith("ATTRIBUTE_MINT_PRICE_ALREADY_SET");
     });
   });
 
   describe("setOracle", async () => {
-    it("succeed", async () => {});
+    let newOracle: Contract;
+    beforeEach(async () => {
+      const UniswapAnchoredView = await ethers.getContractFactory(
+        "UniswapAnchoredView"
+      );
+      newOracle = await UniswapAnchoredView.deploy();
+      await newOracle.deployed();
+    });
+    it("succeed", async () => {
+      expect(await governance.oracle()).to.equal(oracle.address);
+      await expect(governance.connect(admin).setOracle(newOracle.address))
+        .to.emit(governance, "OracleUpdated")
+        .withArgs(oracle.address, newOracle.address);
+    });
 
-    it("fail (not admin)", async () => {});
+    it("fail (not a valid oracle)", async () => {
+      await expect(governance.connect(admin).setOracle(deployer.address)).to.be
+        .reverted;
+    });
 
-    it("fail (oracle already set)", async () => {});
+    it("fail (not admin)", async () => {
+      await expect(governance.setOracle(newOracle.address)).to.be.revertedWith(
+        "INVALID_ADMIN"
+      );
+    });
 
-    it("fail (address zero)", async () => {});
+    it("fail (oracle already set)", async () => {
+      await expect(
+        governance.connect(admin).setOracle(oracle.address)
+      ).to.be.revertedWith("ORACLE_ADDRESS_ALREADY_SET");
+    });
+
+    it("fail (address zero)", async () => {
+      await expect(
+        governance.connect(admin).setOracle(ethers.constants.AddressZero)
+      ).to.be.revertedWith("ORACLE_ADDRESS_ZERO");
+    });
   });
 
   describe("setRevSplitIssuer", async () => {
-    it("succeed", async () => {});
+    it("succeed", async () => {
+      expect(await governance.revSplitIssuer()).to.equal(ISSUER_SPLIT);
+      const newRevSplit = 25;
+      await expect(governance.connect(admin).setRevSplitIssuer(newRevSplit))
+        .to.emit(governance, "RevenueSplitIssuerUpdated")
+        .withArgs(ISSUER_SPLIT, newRevSplit);
 
-    it("succeed (price 0)", async () => {});
+      expect(await governance.revSplitIssuer()).to.equal(newRevSplit);
+    });
 
-    it("fail (not admin)", async () => {});
+    it("succeed (price 0)", async () => {
+      const newRevSplit = 0;
+      await expect(governance.connect(admin).setRevSplitIssuer(newRevSplit))
+        .to.emit(governance, "RevenueSplitIssuerUpdated")
+        .withArgs(ISSUER_SPLIT, newRevSplit);
 
-    it("fail (rev split already set)", async () => {});
+      expect(await governance.revSplitIssuer()).to.equal(newRevSplit);
+    });
+
+    it("fail (not admin)", async () => {
+      const newRevSplit = 0;
+      await expect(
+        governance.setRevSplitIssuer(newRevSplit)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
+
+    it("fail (rev split already set)", async () => {
+      await expect(
+        governance.connect(admin).setRevSplitIssuer(ISSUER_SPLIT)
+      ).to.be.revertedWith("REV_SPLIT_ALREADY_SET");
+    });
   });
 
   describe("allowTokenPayment", async () => {
-    it("succeed", async () => {});
+    let newToken: Contract;
+    beforeEach(async () => {
+      const ERC20 = await ethers.getContractFactory("USDC");
+      newToken = await ERC20.deploy();
+      await newToken.deployed();
+    });
 
-    it("fail (not admin)", async () => {});
+    it("succeed", async () => {
+      expect(await governance.eligibleTokenPayments(usdc.address)).to.equal(
+        true
+      );
+      expect(await governance.eligibleTokenPayments(newToken.address)).to.equal(
+        false
+      );
+      await expect(
+        governance.connect(admin).allowTokenPayment(newToken.address, true)
+      )
+        .to.emit(governance, "AllowTokenPaymentEvent")
+        .withArgs(newToken.address, true);
+      expect(await governance.eligibleTokenPayments(usdc.address)).to.equal(
+        true
+      );
+    });
 
-    it("fail (token payment status already set)", async () => {});
+    it("fail (not admin)", async () => {
+      await expect(
+        governance.allowTokenPayment(newToken.address, true)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
 
-    it("fail (address zero)", async () => {});
+    it("fail (token payment status already set)", async () => {
+      await expect(
+        governance.connect(admin).allowTokenPayment(usdc.address, true)
+      ).to.be.revertedWith("TOKEN_PAYMENT_STATUS_SET");
+    });
 
-    it("fail (not ERC20)", async () => {});
+    it("fail (address zero)", async () => {
+      await expect(
+        governance
+          .connect(admin)
+          .allowTokenPayment(ethers.constants.AddressZero, true)
+      ).to.be.revertedWith("TOKEN_PAYMENT_ADDRESS_ZERO");
+    });
+
+    it("fail (not ERC20)", async () => {
+      await expect(
+        governance.connect(admin).allowTokenPayment(deployer.address, true)
+      ).to.be.reverted;
+    });
   });
 });

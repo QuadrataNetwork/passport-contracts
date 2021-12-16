@@ -14,7 +14,7 @@ export const deployPassportAndGovernance = async (
   issuer: SignerWithAddress,
   treasury: SignerWithAddress,
   uri: string
-): Promise<[Promise<Contract>, Promise<Contract>, any, any]> => {
+): Promise<[Promise<Contract>, Promise<Contract>, any, any, any]> => {
   // Deploy Governance
   const governance = await deployGovernance(admin, issuer);
   governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
@@ -45,5 +45,5 @@ export const deployPassportAndGovernance = async (
   const defi = await DeFi.deploy(passport.address);
   await defi.deployed();
 
-  return [governance, passport, usdc, defi];
+  return [governance, passport, usdc, defi, oracle];
 };

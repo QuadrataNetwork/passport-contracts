@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
+import "hardhat/console.sol";
 
 contract QuadGovernanceStore {
     // Admin Functions
@@ -142,6 +143,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         if (_eligibleStatus) {
             supportedAttributes.push(_attribute);
         } else {
+            console.log("supportedAttributes", supportedAttributes.length);
             for (uint256 i = 0; i < supportedAttributes.length; i++) {
                 if (supportedAttributes[i] == _attribute) {
                     supportedAttributes[i] = supportedAttributes[supportedAttributes.length - 1];
@@ -149,7 +151,6 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
                     break;
                 }
             }
-
         }
         emit EligibleAttributeUpdated(_attribute, _eligibleStatus);
     }
@@ -186,6 +187,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_oracleAddr != address(0), "ORACLE_ADDRESS_ZERO");
         require(oracle != _oracleAddr, "ORACLE_ADDRESS_ALREADY_SET");
+        // Safety check to ensure that address is a valid Oracle
+        IUniswapAnchoredView(_oracleAddr).price("ETH");
         address oldAddress = oracle;
         oracle = _oracleAddr;
         emit OracleUpdated(oldAddress, _oracleAddr);
@@ -212,7 +215,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         bool _isAllowed
     ) external  {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_tokenAddr != address(0), "TOKEN_PAYENT_ADDRESS_ZERO");
+        require(_tokenAddr != address(0), "TOKEN_PAYMENT_ADDRESS_ZERO");
         require(
             eligibleTokenPayments[_tokenAddr] != _isAllowed,
             "TOKEN_PAYMENT_STATUS_SET"
