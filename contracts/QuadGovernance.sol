@@ -1,12 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
-import "hardhat/console.sol";
 
 contract QuadGovernanceStore {
     // Admin Functions
@@ -143,7 +142,6 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         if (_eligibleStatus) {
             supportedAttributes.push(_attribute);
         } else {
-            console.log("supportedAttributes", supportedAttributes.length);
             for (uint256 i = 0; i < supportedAttributes.length; i++) {
                 if (supportedAttributes[i] == _attribute) {
                     supportedAttributes[i] = supportedAttributes[supportedAttributes.length - 1];
