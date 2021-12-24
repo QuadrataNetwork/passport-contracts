@@ -20,7 +20,7 @@ export const deployPassportAndGovernance = async (
   governance.connect(admin).grantRole(ISSUER_ROLE, issuer.address);
 
   // Deploy Passport
-  const passport = await deployPassport(governance, admin, uri);
+  const passport = await deployPassport(governance, uri);
   governance.connect(admin).setPassportContractAddress(passport.address);
 
   // Deploy Oracle

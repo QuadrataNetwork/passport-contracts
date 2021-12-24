@@ -4,7 +4,6 @@ const { ethers, upgrades } = require("hardhat");
 
 export const deployPassport = async (
   governance: SignerWithAddress,
-  admin: SignerWithAddress,
   uri: string
 ): Promise<Contract> => {
   const QuadPassport = await ethers.getContractFactory("QuadPassport");

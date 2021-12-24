@@ -126,5 +126,66 @@ describe("QuadPassport", async () => {
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
+
+    it("success - burnPassportIssuer", async () => {
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport
+        .connect(issuer)
+        .burnPassportIssuer(minterA.address, TOKEN_ID);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_DID,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
   });
 });

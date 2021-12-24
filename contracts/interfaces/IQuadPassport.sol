@@ -33,6 +33,11 @@ interface IQuadPassport is IERC1155Upgradeable {
         uint256 _tokenId
     ) external;
 
+    function burnPassportIssuer(
+        address _account,
+        uint256 _tokenId
+    ) external;
+
     function getAttribute(
         address _account,
         uint256 _tokenId,
