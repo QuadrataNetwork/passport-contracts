@@ -96,7 +96,9 @@ describe("QuadPassport", async () => {
     });
 
     it("success (issuer)", async () => {
-      const initialBalance = await ethers.provider.getBalance(issuer.address);
+      const initialBalance = await ethers.provider.getBalance(
+        issuerTreasury.address
+      );
       expect(await ethers.provider.getBalance(passport.address)).to.equal(
         MINT_PRICE
       );
@@ -112,12 +114,12 @@ describe("QuadPassport", async () => {
       const initialBalancePassport = await ethers.provider.getBalance(
         passport.address
       );
-      await passport.withdrawETH(issuer.address);
+      await passport.withdrawETH(issuerTreasury.address);
       const expectedWithdrawAmount = priceAttribute
         .mul(ISSUER_SPLIT)
         .div(100)
         .add(MINT_PRICE);
-      expect(await ethers.provider.getBalance(issuer.address)).to.equal(
+      expect(await ethers.provider.getBalance(issuerTreasury.address)).to.equal(
         initialBalance.add(expectedWithdrawAmount)
       );
       expect(await ethers.provider.getBalance(passport.address)).to.equal(
@@ -155,9 +157,9 @@ describe("QuadPassport", async () => {
       await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
       expect(await usdc.balanceOf(passport.address)).to.equal(priceAttribute);
       const initialBalancePassport = await usdc.balanceOf(passport.address);
-      await passport.withdrawToken(issuer.address, usdc.address);
+      await passport.withdrawToken(issuerTreasury.address, usdc.address);
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
-      expect(await usdc.balanceOf(issuer.address)).to.equal(
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
         expectedWithdrawAmount
       );
       expect(await usdc.balanceOf(passport.address)).to.equal(

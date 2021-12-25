@@ -532,36 +532,26 @@ describe("QuadGovernance", async () => {
     });
   });
 
-  describe("setIssuerTreasury", async () => {
+  describe("addIssuer", async () => {
     it("succeed", async () => {
       expect(await governance.issuersTreasury(issuer.address)).to.equal(
         issuerTreasury.address
       );
       await expect(
-        governance
-          .connect(admin)
-          .setIssuerTreasury(issuer.address, admin.address)
+        governance.connect(admin).addIssuer(issuer.address, admin.address)
       )
-        .to.emit(governance, "IssuerTreasuryUpdated")
-        .withArgs(issuer.address, issuerTreasury.address, admin.address);
+        .to.emit(governance, "IssuerAdded")
+        .withArgs(issuer.address, admin.address);
       expect(await governance.issuersTreasury(issuer.address)).to.equal(
         admin.address
       );
-    });
-
-    it("fail (not issuer)", async () => {
-      await expect(
-        governance
-          .connect(admin)
-          .setIssuerTreasury(admin.address, admin.address)
-      ).to.revertedWith("NOT_ISSUER");
     });
 
     it("fail (issuer address (0))", async () => {
       await expect(
         governance
           .connect(admin)
-          .setIssuerTreasury(ethers.constants.AddressZero, admin.address)
+          .addIssuer(ethers.constants.AddressZero, admin.address)
       ).to.revertedWith("ISSUER_ADDRESS_ZERO");
     });
 
@@ -569,13 +559,13 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .setIssuerTreasury(issuer.address, ethers.constants.AddressZero)
+          .addIssuer(issuer.address, ethers.constants.AddressZero)
       ).to.revertedWith("TREASURY_ISSUER_ADDRESS_ZERO");
     });
 
     it("fail (not admin)", async () => {
       await expect(
-        governance.setIssuerTreasury(issuer.address, admin.address)
+        governance.addIssuer(issuer.address, admin.address)
       ).to.revertedWith("INVALID_ADMIN");
     });
   });

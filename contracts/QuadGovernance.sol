@@ -39,13 +39,13 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
+    event IssuerAdded(address _issuer, address _newTreasury);
     event PassportAddressUpdated(address _oldAddress, address _address);
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event OracleUpdated(address _oldAddress, address _address);
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdated(address _oldAddress, address _address);
-    event IssuerTreasuryUpdated(address _issuer, address _oldTreasury, address _newTreasury);
 
     function initialize(address _admin) public initializer {
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
@@ -203,15 +203,15 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit RevenueSplitIssuerUpdated(oldSplit, _split);
     }
 
-    function setIssuerTreasury(address _issuer, address _treasury) external {
+    function addIssuer(address _issuer, address _treasury) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(hasRole(ISSUER_ROLE, _issuer), "NOT_ISSUER");
 
-        address oldTreasury = issuersTreasury[_issuer];
+        grantRole(ISSUER_ROLE, _issuer);
         issuersTreasury[_issuer] = _treasury;
-        emit IssuerTreasuryUpdated(_issuer, oldTreasury, _treasury);
+
+        emit IssuerAdded(_issuer, _treasury);
     }
 
     /**
