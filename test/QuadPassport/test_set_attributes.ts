@@ -32,7 +32,8 @@ describe("QuadPassport", async () => {
     treasury: SignerWithAddress,
     minterA: SignerWithAddress,
     minterB: SignerWithAddress,
-    issuer: SignerWithAddress;
+    issuer: SignerWithAddress,
+    issuerTreasury: SignerWithAddress;
   const baseURI = "https://quadrata.io";
   let sig: any;
   const did = formatBytes32String("did:quad:123456789abcdefghi");
@@ -41,12 +42,13 @@ describe("QuadPassport", async () => {
   const issuedAt = Math.floor(new Date().getTime() / 1000);
 
   beforeEach(async () => {
-    [deployer, admin, minterA, minterB, issuer, treasury] =
+    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
     [governance, passport, usdc, defi] = await deployPassportAndGovernance(
       admin,
       issuer,
       treasury,
+      issuerTreasury,
       baseURI
     );
     sig = await signMint(

@@ -13,16 +13,19 @@ describe("QuadPassport", async () => {
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
-    issuer: SignerWithAddress;
+    issuer: SignerWithAddress,
+    issuerTreasury: SignerWithAddress;
   const baseURI = "https://quadrata.io";
 
   describe("setGovernance", async () => {
     beforeEach(async () => {
-      [deployer, admin, issuer, treasury] = await ethers.getSigners();
+      [deployer, admin, issuer, treasury, issuerTreasury] =
+        await ethers.getSigners();
       [governance, passport] = await deployPassportAndGovernance(
         admin,
         issuer,
         treasury,
+        issuerTreasury,
         baseURI
       );
     });
