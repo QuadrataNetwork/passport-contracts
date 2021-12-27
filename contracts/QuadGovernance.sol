@@ -18,6 +18,7 @@ contract QuadGovernanceStore {
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
+    mapping(address => address) public issuersTreasury;
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -29,22 +30,22 @@ contract QuadGovernanceStore {
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
-
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
-    event AllowTokenPaymentEvent(address _tokenAddr, bool _isAllowed);
+    event AllowTokenPayment(address _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
+    event IssuerAdded(address _issuer, address _newTreasury);
     event PassportAddressUpdated(address _oldAddress, address _address);
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
     event OracleUpdated(address _oldAddress, address _address);
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
-    event TreasuryUpdateEvent(address _oldAddress, address _address);
+    event TreasuryUpdated(address _oldAddress, address _address);
 
     function initialize(address _admin) public initializer {
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
@@ -87,7 +88,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(_treasury != treasury, "TREASURY_ADDRESS_ALREADY_SET");
         address oldTreasury = treasury;
         treasury = _treasury;
-        emit TreasuryUpdateEvent(oldTreasury, _treasury);
+        emit TreasuryUpdated(oldTreasury, _treasury);
     }
 
     function setPassportContractAddress(address _passportAddr) external {
@@ -202,6 +203,17 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit RevenueSplitIssuerUpdated(oldSplit, _split);
     }
 
+    function addIssuer(address _issuer, address _treasury) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
+        require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
+
+        grantRole(ISSUER_ROLE, _issuer);
+        issuersTreasury[_issuer] = _treasury;
+
+        emit IssuerAdded(_issuer, _treasury);
+    }
+
     /**
       * @notice This function is restricted to a TimelockController
       * @dev Authorize or Denied a payment to be received in Token.
@@ -223,7 +235,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         erc20.totalSupply();
 
         eligibleTokenPayments[_tokenAddr] = true;
-        emit AllowTokenPaymentEvent(_tokenAddr, _isAllowed);
+        emit AllowTokenPayment(_tokenAddr, _isAllowed);
     }
 
     // Getter

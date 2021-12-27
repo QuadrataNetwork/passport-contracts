@@ -34,7 +34,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
-        _accountBalancesETH[issuer] += governance.mintPrice();
+        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _validSignatures[_msgSender()][_tokenId] = _sig;
         _issuedEpoch[_msgSender()][_tokenId] = _issuedAt;
@@ -54,7 +54,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_msgSender(), _tokenId, _attribute, _value, _issuedAt, _sig);
 
-        _accountBalancesETH[issuer] += governance.mintPricePerAttribute(_attribute);
+        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
         _usedHashes[hash] = true;
         _setAttributeInternal(_msgSender(), _tokenId, _attribute, _value, _issuedAt, issuer);
     }
@@ -111,6 +111,20 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
             bytes32 attributeType = governance.supportedAttributes(i);
             delete _attributes[_msgSender()][attributeType];
+        }
+    }
+
+    function burnPassportIssuer(
+        address _account,
+        uint256 _tokenId
+    ) external override {
+        require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
+        _burn(_account, _tokenId, 1);
+
+        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
+            bytes32 attributeType = governance.supportedAttributes(i);
+            delete _attributes[_account][attributeType];
         }
     }
 
@@ -245,7 +259,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             );
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
-            _accountBalancesETH[_issuer] += amountIssuer;
+            _accountBalancesETH[governance.issuersTreasury(_issuer)] += amountIssuer;
             _accountBalancesETH[governance.treasury()] += amountProtocol;
         }
     }
@@ -264,7 +278,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             );
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
-            _accountBalances[_tokenPayment][_issuer] += amountIssuer;
+            _accountBalances[_tokenPayment][governance.issuersTreasury(_issuer)] += amountIssuer;
             _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;
         }
     }

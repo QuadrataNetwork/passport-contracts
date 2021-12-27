@@ -30,7 +30,8 @@ describe("QuadPassport", async () => {
     treasury: SignerWithAddress,
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
-    issuer: SignerWithAddress;
+    issuer: SignerWithAddress,
+    issuerTreasury: SignerWithAddress;
   const baseURI = "https://quadrata.io";
   const did = formatBytes32String("did:quad:123456789abcdefghi");
   const aml = formatBytes32String("LOW");
@@ -39,12 +40,13 @@ describe("QuadPassport", async () => {
 
   describe("burnPassport", async () => {
     beforeEach(async () => {
-      [deployer, admin, minterA, minterB, issuer, treasury] =
+      [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
         await ethers.getSigners();
       [governance, passport, usdc, defi] = await deployPassportAndGovernance(
         admin,
         issuer,
         treasury,
+        issuerTreasury,
         baseURI
       );
 
@@ -98,6 +100,67 @@ describe("QuadPassport", async () => {
       );
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterA).burnPassport(TOKEN_ID);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_DID,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("success - burnPassportIssuer", async () => {
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport
+        .connect(issuer)
+        .burnPassportIssuer(minterA.address, TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.getAttribute(

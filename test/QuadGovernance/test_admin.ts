@@ -30,15 +30,18 @@ describe("QuadGovernance", async () => {
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
-    issuer: SignerWithAddress;
+    issuer: SignerWithAddress,
+    issuerTreasury: SignerWithAddress;
   const baseURI = "https://quadrata.io";
 
   beforeEach(async () => {
-    [deployer, admin, issuer, treasury] = await ethers.getSigners();
+    [deployer, admin, issuer, treasury, issuerTreasury] =
+      await ethers.getSigners();
     [governance, passport, usdc, , oracle] = await deployPassportAndGovernance(
       admin,
       issuer,
       treasury,
+      issuerTreasury,
       baseURI
     );
   });
@@ -118,7 +121,7 @@ describe("QuadGovernance", async () => {
     it("succeed", async () => {
       expect(await governance.treasury()).to.equal(treasury.address);
       await expect(governance.connect(admin).setTreasury(deployer.address))
-        .to.emit(governance, "TreasuryUpdateEvent")
+        .to.emit(governance, "TreasuryUpdated")
         .withArgs(treasury.address, deployer.address);
       expect(await governance.treasury()).to.equal(deployer.address);
     });
@@ -529,6 +532,44 @@ describe("QuadGovernance", async () => {
     });
   });
 
+  describe("addIssuer", async () => {
+    it("succeed", async () => {
+      expect(await governance.issuersTreasury(issuer.address)).to.equal(
+        issuerTreasury.address
+      );
+      await expect(
+        governance.connect(admin).addIssuer(issuer.address, admin.address)
+      )
+        .to.emit(governance, "IssuerAdded")
+        .withArgs(issuer.address, admin.address);
+      expect(await governance.issuersTreasury(issuer.address)).to.equal(
+        admin.address
+      );
+    });
+
+    it("fail (issuer address (0))", async () => {
+      await expect(
+        governance
+          .connect(admin)
+          .addIssuer(ethers.constants.AddressZero, admin.address)
+      ).to.revertedWith("ISSUER_ADDRESS_ZERO");
+    });
+
+    it("fail (treasury address (0))", async () => {
+      await expect(
+        governance
+          .connect(admin)
+          .addIssuer(issuer.address, ethers.constants.AddressZero)
+      ).to.revertedWith("TREASURY_ISSUER_ADDRESS_ZERO");
+    });
+
+    it("fail (not admin)", async () => {
+      await expect(
+        governance.addIssuer(issuer.address, admin.address)
+      ).to.revertedWith("INVALID_ADMIN");
+    });
+  });
+
   describe("setRevSplitIssuer", async () => {
     it("succeed", async () => {
       expect(await governance.revSplitIssuer()).to.equal(ISSUER_SPLIT);
@@ -581,7 +622,7 @@ describe("QuadGovernance", async () => {
       await expect(
         governance.connect(admin).allowTokenPayment(newToken.address, true)
       )
-        .to.emit(governance, "AllowTokenPaymentEvent")
+        .to.emit(governance, "AllowTokenPayment")
         .withArgs(newToken.address, true);
       expect(await governance.eligibleTokenPayments(usdc.address)).to.equal(
         true
