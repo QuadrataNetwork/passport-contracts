@@ -169,6 +169,7 @@ export const assertSetAttribute = async (
   const initialBalanceIssuer = initialBalance.eq(0)
     ? initialBalance
     : await passport.callStatic.withdrawETH(issuerTreasury.address);
+
   await passport
     .connect(account)
     .setAttribute(TOKEN_ID, attribute, attributeValue, issuedAt, sig, {
