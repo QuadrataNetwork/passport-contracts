@@ -398,7 +398,7 @@ describe("QuadPassport", async () => {
           .setAttribute(TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY],
           })
-      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
     it("fail - invalid mint price per attribute", async () => {
@@ -416,7 +416,7 @@ describe("QuadPassport", async () => {
           .setAttribute(TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
             value: parseEther("1"),
           })
-      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
     });
 
     it("fail - signature already used", async () => {
@@ -443,22 +443,127 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterA)
           .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
-            value: PRICE_SET_ATTRIBUTE(ATTRIBUTE_AML),
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
-      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      ).to.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
-    it("fail - using someone else signature", async () => {});
+    it("fail - using someone else signature", async () => {
+      const newAML = id("HIGH");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);      
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        newAML,
+        newIssuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
 
-    it("fail - not issuer role", async () => {});
+    it("fail - not issuer role", async () => {
+      const newIssuer = ethers.Wallet.createRandom();
+      const newAML = id("HIGH");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);      
+      const sig = await signSetAttribute(
+        newIssuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        newAML,
+        newIssuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
 
-    it("fail - invalid sig (tokenId)", async () => {});
+    it("fail - invalid sig (tokenId)", async () => {      
+      const wrongTokenId = 2;      
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(wrongTokenId, ATTRIBUTE_AML, aml, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
 
-    it("fail - invalid sig (attribute type)", async () => {});
+    it("fail - invalid sig (attribute type)", async () => {
+      const wrongAttribute = ATTRIBUTE_COUNTRY;      
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(TOKEN_ID, ATTRIBUTE_COUNTRY, aml, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
 
-    it("fail - invalid sig (attribute value)", async () => {});
+    it("fail - invalid sig (attribute value)", async () => {
+      const wrongAML = id("HIGH");      
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, wrongAML, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
 
-    it("fail - invalid sig (issuedAt)", async () => {});
+    it("fail - invalid sig (issuedAt)", async () => {
+      const wrongIssuedAt = issuedAt + 1;      
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, aml, wrongIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
   });
 
   describe("setAttributeIssuer", async () => {
@@ -490,6 +595,7 @@ describe("QuadPassport", async () => {
     });
 
     it("success - setAttribute(COUNTRY)", async () => {
+      await passport.withdrawETH(issuerTreasury.address);
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const initialBalance = await ethers.provider.getBalance(passport.address);
@@ -514,19 +620,136 @@ describe("QuadPassport", async () => {
       expect(await ethers.provider.getBalance(passport.address)).to.equal(
         initialBalance
       );
+      await expect(passport.withdrawETH(issuerTreasury.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
     });
 
-    it("success - accurate balance", async () => {});
+    it("succes - two issuers", async () => {
+      const issuerBTreasury = ethers.Wallet.createRandom();
+      await governance
+        .connect(admin)
+        .addIssuer(minterB.address, issuerBTreasury.address);
+      let newCountry = id("USA");
+      let newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          newCountry,
+          newIssuedAt
+        );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        newCountry,
+        newIssuedAt
+      );
+      
+      newCountry = id("FRANCE");
+      newIssuedAt = Math.floor(new Date().getTime() / 1000) + 100;
+      
+      await passport
+        .connect(minterB)
+        .setAttributeIssuer(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          newCountry,
+          newIssuedAt
+        );
+      await assertGetAttribute(
+        minterA,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        newCountry,
+        newIssuedAt
+      );
+    });
 
-    it("succes - two issuers", async () => {});
+    it("fail - passport tokenId invalid", async () => {
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const wrongTokenId = 2;
+      
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            minterA.address,
+            wrongTokenId,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
 
-    it("fail - passport tokenId invalid", async () => {});
+    it("fail - no passport", async () => {
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            minterB.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
 
-    it("fail - no passport", async () => {});
+    it("fail - attribute not eligible", async () => {
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        true
+      );
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        false
+      );
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
 
-    it("fail - attribute not eligible", async () => {});
-
-    it("fail - invalid issuer role", async () => {});
+    it("fail - invalid issuer role", async () => {
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      await expect(
+        passport
+          .connect(admin)
+          .setAttributeIssuer(
+            minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("INVALID_ISSUER");
+    });
 
     it("fail - setAttribute(DID)", async () => {
       const newDid = formatBytes32String("did:1:newdid");
