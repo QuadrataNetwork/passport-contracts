@@ -79,7 +79,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _issuer
     ) internal {
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXISTS");
+        require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
+        require(_attribute != keccak256("DID"), "MUST_BURN_AND_MINT");
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
@@ -283,21 +284,23 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         }
     }
 
-    function withdrawETH(address payable _to) external override {
+    function withdrawETH(address payable _to) external override returns(uint256) {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
        uint256 currentBalance = _accountBalancesETH[_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalancesETH[_to] = 0;
        _to.transfer(currentBalance);
+       return currentBalance;
     }
 
-    function withdrawToken(address payable _to, address _token) external override {
+    function withdrawToken(address payable _to, address _token) external override returns(uint256) {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
        uint256 currentBalance = _accountBalances[_token][_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalances[_token][_to] = 0;
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
        erc20.transfer(_to, currentBalance);
+       return currentBalance;
     }
 
     function calculatePaymentToken(

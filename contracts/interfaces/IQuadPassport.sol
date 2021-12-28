@@ -76,8 +76,8 @@ interface IQuadPassport is IERC1155Upgradeable {
     ) external view returns(uint256);
 
 
-    function withdrawETH(address payable _to) external;
+    function withdrawETH(address payable _to) external returns(uint256);
 
-    function withdrawToken(address payable _to, address _token) external;
+    function withdrawToken(address payable _to, address _token) external returns(uint256);
 }
 

@@ -16,11 +16,13 @@ export const deployPassportAndGovernance = async (
 ): Promise<[Promise<Contract>, Promise<Contract>, any, any, any]> => {
   // Deploy Governance
   const governance = await deployGovernance(admin, issuer);
-  governance.connect(admin).addIssuer(issuer.address, issuerTreasury.address);
+  await governance
+    .connect(admin)
+    .addIssuer(issuer.address, issuerTreasury.address);
 
   // Deploy Passport
   const passport = await deployPassport(governance, uri);
-  governance.connect(admin).setPassportContractAddress(passport.address);
+  await governance.connect(admin).setPassportContractAddress(passport.address);
 
   // Deploy Oracle
   const UniswapAnchoredView = await ethers.getContractFactory(
@@ -35,9 +37,9 @@ export const deployPassportAndGovernance = async (
   await usdc.deployed();
 
   // Deploy Governance
-  governance.connect(admin).setOracle(oracle.address);
-  governance.connect(admin).allowTokenPayment(usdc.address, true);
-  governance.connect(admin).setTreasury(treasury.address);
+  await governance.connect(admin).setOracle(oracle.address);
+  await governance.connect(admin).allowTokenPayment(usdc.address, true);
+  await governance.connect(admin).setTreasury(treasury.address);
 
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");
