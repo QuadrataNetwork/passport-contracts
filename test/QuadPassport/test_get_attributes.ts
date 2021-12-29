@@ -14,6 +14,7 @@ const {
 
 const {
   assertGetAttribute,
+  assertGetAttributeFree,
   assertGetAttributeETH,
 } = require("../utils/verify.ts");
 
@@ -73,9 +74,8 @@ describe("QuadPassport", async () => {
 
   describe("getAttribute", async () => {
     it("success - getAttribute(AML)", async () => {
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
@@ -85,9 +85,8 @@ describe("QuadPassport", async () => {
     });
 
     it("success - getAttribute(COUNTRY)", async () => {
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -99,6 +98,9 @@ describe("QuadPassport", async () => {
     it("success - getAttribute(DID) - Payable", async () => {
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -111,28 +113,6 @@ describe("QuadPassport", async () => {
 
   // getAttributeETH tests
   describe("getAttributeETH", async () => {
-    it("success - getAttributeETH(AML)", async () => {
-      await assertGetAttributeETH(
-        minterA,
-        defi,
-        passport,
-        ATTRIBUTE_AML,
-        aml,
-        issuedAt
-      );
-    });
-
-    it("success - getAttributeETH(COUNTRY)", async () => {
-      await assertGetAttributeETH(
-        minterA,
-        defi,
-        passport,
-        ATTRIBUTE_COUNTRY,
-        country,
-        issuedAt
-      );
-    });
-
     it("success - getAttributeETH(DID) - Payable", async () => {
       await assertGetAttributeETH(
         minterA,
