@@ -256,7 +256,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         if (amountETH > 0) {
             require(
                  msg.value == amountETH,
-                "INSUFFICIENT_PAYMENT_ALLOWANCE"
+                "INSUFFICIENT_PAYMENT_AMOUNT"
             );
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
@@ -275,7 +275,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             require(
                 erc20.transferFrom(_msgSender(), address(this), amountToken),
-                "INSUFFICIANT_PAYMENT_ALLOWANCE"
+                "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
