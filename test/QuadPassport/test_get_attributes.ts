@@ -2,7 +2,12 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { parseEther, parseUnits, formatBytes32String } from "ethers/lib/utils";
+import {
+  parseEther,
+  parseUnits,
+  formatBytes32String,
+  id,
+} from "ethers/lib/utils";
 
 const {
   ATTRIBUTE_AML,
@@ -37,13 +42,20 @@ describe("QuadPassport", async () => {
     minterB: SignerWithAddress,
     issuer: SignerWithAddress,
     issuerTreasury: SignerWithAddress;
-  const baseURI = "https://quadrata.io";
-  const did = formatBytes32String("did:quad:123456789abcdefghi");
-  const aml = formatBytes32String("LOW");
-  const country = formatBytes32String("FRANCE");
-  const issuedAt = Math.floor(new Date().getTime() / 1000);
+
+  let baseURI: string;
+  let did: string;
+  let aml: string;
+  let country: string;
+  let issuedAt: number;
 
   beforeEach(async () => {
+    baseURI = "https://quadrata.io";
+    did = formatBytes32String("did:quad:123456789abcdefghi");
+    aml = id("LOW");
+    country = id("FRANCE");
+    issuedAt = Math.floor(new Date().getTime() / 1000);
+
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
     [governance, passport, usdc, defi] = await deployPassportAndGovernance(
