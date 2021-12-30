@@ -2,7 +2,12 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { parseUnits, formatBytes32String, id } from "ethers/lib/utils";
+import {
+  parseEther,
+  parseUnits,
+  formatBytes32String,
+  id,
+} from "ethers/lib/utils";
 
 const {
   ATTRIBUTE_AML,
@@ -120,5 +125,28 @@ describe("QuadPassport", async () => {
     });
   });
 
-  describe("calculatePaymentETH", async () => {});
+  describe("calculatePaymentETH", async () => {
+    it("success (AML)", async () => {
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_AML)).to.equal(0);
+    });
+
+    it("success (COUNTRY)", async () => {
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY)).to.equal(0);
+    });
+
+    it("success (DID)", async () => {
+      const priceAttribute = parseEther(
+        (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
+      );
+
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID)).to.equal(
+        priceAttribute
+      );
+    });
+
+    it("fail - governance incorrectly set", async () => {
+      await governance.connect(admin).updateGovernanceInPassport(admin.address);
+      await expect(passport.calculatePaymentETH(ATTRIBUTE_DID)).to.reverted;
+    });
+  });
 });
