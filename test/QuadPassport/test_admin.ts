@@ -1,7 +1,9 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+
+const { GOVERNANCE_ROLE } = require("../../utils/constant.ts");
 
 const {
   deployPassportAndGovernance,
@@ -55,6 +57,29 @@ describe("QuadPassport", async () => {
       await expect(
         governance.connect(admin).updateGovernanceInPassport(governance.address)
       ).to.be.revertedWith("GOVERNANCE_ALREADY_SET");
+    });
+  });
+
+  describe("upgrade", async () => {
+    it("succeed", async () => {
+      const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
+      await governance
+        .connect(admin)
+        .grantRole(GOVERNANCE_ROLE, deployer.address);
+      const passportv2 = await upgrades.upgradeProxy(
+        passport.address,
+        QuadPassportV2
+      );
+      expect(await passportv2.foo()).to.equal(1337);
+      expect(passport.address).to.equal(passportv2.address);
+      expect(await passportv2.governance()).to.equal(governance.address);
+    });
+
+    it("fail (not admin)", async () => {
+      const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
+      await expect(
+        upgrades.upgradeProxy(passport.address, QuadPassportV2)
+      ).to.revertedWith("INVALID_ADMIN");
     });
   });
 });

@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { parseEther, parseUnits } from "ethers/lib/utils";
-import { ethers } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
@@ -653,6 +653,33 @@ describe("QuadGovernance", async () => {
       await expect(
         governance.connect(admin).allowTokenPayment(deployer.address, true)
       ).to.be.reverted;
+    });
+  });
+
+  describe("upgrade", async () => {
+    it("succeed", async () => {
+      const QuadGovernanceV2 = await ethers.getContractFactory(
+        "QuadGovernanceV2"
+      );
+      await governance
+        .connect(admin)
+        .grantRole(GOVERNANCE_ROLE, deployer.address);
+      const governanceV2 = await upgrades.upgradeProxy(
+        governance.address,
+        QuadGovernanceV2
+      );
+      expect(await governanceV2.getPriceETHV2()).to.equal(1337);
+      expect(await governanceV2.oracle()).to.equal(oracle.address);
+      expect(governanceV2.address).to.equal(governance.address);
+    });
+
+    it("fail (not admin)", async () => {
+      const QuadGovernanceV2 = await ethers.getContractFactory(
+        "QuadGovernanceV2"
+      );
+      await expect(
+        upgrades.upgradeProxy(governance.address, QuadGovernanceV2)
+      ).to.revertedWith("INVALID_ADMIN");
     });
   });
 });
