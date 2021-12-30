@@ -61,6 +61,12 @@ describe("QuadPassport", async () => {
   });
 
   describe("upgrade", async () => {
+    it("fail (not admin)", async () => {
+      const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
+      await expect(
+        upgrades.upgradeProxy(passport.address, QuadPassportV2)
+      ).to.revertedWith("INVALID_ADMIN");
+    });
     it("succeed", async () => {
       const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
       await governance
@@ -73,13 +79,6 @@ describe("QuadPassport", async () => {
       expect(await passportv2.foo()).to.equal(1337);
       expect(passport.address).to.equal(passportv2.address);
       expect(await passportv2.governance()).to.equal(governance.address);
-    });
-
-    it("fail (not admin)", async () => {
-      const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
-      await expect(
-        upgrades.upgradeProxy(passport.address, QuadPassportV2)
-      ).to.revertedWith("INVALID_ADMIN");
     });
   });
 });
