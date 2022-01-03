@@ -20,7 +20,11 @@ const { signMint } = require("../utils/signature.ts");
 const {
   deployPassportAndGovernance,
 } = require("../utils/deployment_and_init.ts");
-const { assertMint, assertGetAttribute } = require("../utils/verify.ts");
+const {
+  assertMint,
+  assertGetAttribute,
+  assertGetAttributeFree,
+} = require("../utils/verify.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
@@ -72,18 +76,16 @@ describe("QuadPassport", async () => {
         country,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -92,6 +94,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -123,18 +128,16 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       for (const wallet of [minterA, minterB]) {
-        await assertGetAttribute(
+        await assertGetAttributeFree(
           wallet,
-          usdc,
           defi,
           passport,
           ATTRIBUTE_AML,
           aml,
           issuedAt
         );
-        await assertGetAttribute(
+        await assertGetAttributeFree(
           wallet,
-          usdc,
           defi,
           passport,
           ATTRIBUTE_COUNTRY,
@@ -143,6 +146,9 @@ describe("QuadPassport", async () => {
         );
         await assertGetAttribute(
           wallet,
+          treasury,
+          issuer,
+          issuerTreasury,
           usdc,
           defi,
           passport,
@@ -150,6 +156,8 @@ describe("QuadPassport", async () => {
           did,
           issuedAt
         );
+        await passport.withdrawToken(issuerTreasury.address, usdc.address);
+        await passport.withdrawToken(treasury.address, usdc.address);
       }
     });
 
@@ -181,34 +189,51 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       for (const wallet of [minterA, minterB]) {
-        await assertGetAttribute(
+        await assertGetAttributeFree(
           wallet,
-          usdc,
           defi,
           passport,
           ATTRIBUTE_AML,
           aml,
           issuedAt
         );
-        await assertGetAttribute(
+        await assertGetAttributeFree(
           wallet,
-          usdc,
           defi,
           passport,
           ATTRIBUTE_COUNTRY,
           country,
           issuedAt
         );
-        await assertGetAttribute(
-          wallet,
-          usdc,
-          defi,
-          passport,
-          ATTRIBUTE_DID,
-          did,
-          issuedAt
-        );
       }
+
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+
+      await passport.withdrawToken(treasury.address, usdc.address);
+
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuerB,
+        issuerBTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
     });
 
     it("success - mint with mint price (0)", async () => {
@@ -246,18 +271,16 @@ describe("QuadPassport", async () => {
         country,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -266,6 +289,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -302,9 +328,8 @@ describe("QuadPassport", async () => {
         newTokenId
       );
       for (const tokenId of [TOKEN_ID, newTokenId]) {
-        await assertGetAttribute(
+        await assertGetAttributeFree(
           minterA,
-          usdc,
           defi,
           passport,
           ATTRIBUTE_AML,
@@ -312,9 +337,8 @@ describe("QuadPassport", async () => {
           issuedAt,
           tokenId
         );
-        await assertGetAttribute(
+        await assertGetAttributeFree(
           minterA,
-          usdc,
           defi,
           passport,
           ATTRIBUTE_COUNTRY,
@@ -322,8 +346,12 @@ describe("QuadPassport", async () => {
           issuedAt,
           tokenId
         );
+
         await assertGetAttribute(
           minterA,
+          treasury,
+          issuer,
+          issuerTreasury,
           usdc,
           defi,
           passport,
@@ -332,6 +360,8 @@ describe("QuadPassport", async () => {
           issuedAt,
           tokenId
         );
+        await passport.withdrawToken(issuerTreasury.address, usdc.address);
+        await passport.withdrawToken(treasury.address, usdc.address);
       }
     });
 
@@ -352,18 +382,16 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -372,6 +400,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        newIssuerTreasury,
         usdc,
         defi,
         passport,

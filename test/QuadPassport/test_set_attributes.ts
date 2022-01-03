@@ -22,6 +22,7 @@ const { signSetAttribute } = require("../utils/signature.ts");
 
 const {
   assertGetAttribute,
+  assertGetAttributeFree,
   assertSetAttribute,
 } = require("../utils/verify.ts");
 
@@ -98,9 +99,8 @@ describe("QuadPassport", async () => {
         newAML,
         newIssuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
@@ -108,9 +108,8 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
       // OK Fetching old value
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -120,6 +119,9 @@ describe("QuadPassport", async () => {
       // OK Fetching old value
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -142,9 +144,8 @@ describe("QuadPassport", async () => {
         newCountry,
         newIssuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -153,9 +154,8 @@ describe("QuadPassport", async () => {
       );
 
       // OK Fetching old value
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
@@ -165,6 +165,9 @@ describe("QuadPassport", async () => {
       // OK Fetching old value
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -200,9 +203,8 @@ describe("QuadPassport", async () => {
         .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
           value: parseEther("0"),
         });
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
@@ -249,9 +251,8 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
@@ -259,9 +260,8 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -289,9 +289,8 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -450,7 +449,7 @@ describe("QuadPassport", async () => {
 
     it("fail - using someone else signature", async () => {
       const newAML = id("HIGH");
-      const newIssuedAt = Math.floor(new Date().getTime() / 1000);      
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const sig = await signSetAttribute(
         issuer,
         minterA,
@@ -471,7 +470,7 @@ describe("QuadPassport", async () => {
     it("fail - not issuer role", async () => {
       const newIssuer = ethers.Wallet.createRandom();
       const newAML = id("HIGH");
-      const newIssuedAt = Math.floor(new Date().getTime() / 1000);      
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const sig = await signSetAttribute(
         newIssuer,
         minterA,
@@ -489,8 +488,8 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - invalid sig (tokenId)", async () => {      
-      const wrongTokenId = 2;      
+    it("fail - invalid sig (tokenId)", async () => {
+      const wrongTokenId = 2;
       const sig = await signSetAttribute(
         issuer,
         minterA,
@@ -509,7 +508,7 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - invalid sig (attribute type)", async () => {
-      const wrongAttribute = ATTRIBUTE_COUNTRY;      
+      const wrongAttribute = ATTRIBUTE_COUNTRY;
       const sig = await signSetAttribute(
         issuer,
         minterA,
@@ -521,14 +520,14 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_COUNTRY, aml, issuedAt, sig, {
+          .setAttribute(TOKEN_ID, wrongAttribute, aml, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
     });
 
     it("fail - invalid sig (attribute value)", async () => {
-      const wrongAML = id("HIGH");      
+      const wrongAML = id("HIGH");
       const sig = await signSetAttribute(
         issuer,
         minterA,
@@ -547,7 +546,7 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - invalid sig (issuedAt)", async () => {
-      const wrongIssuedAt = issuedAt + 1;      
+      const wrongIssuedAt = issuedAt + 1;
       const sig = await signSetAttribute(
         issuer,
         minterA,
@@ -580,9 +579,8 @@ describe("QuadPassport", async () => {
           newAML,
           newIssuedAt
         );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
@@ -608,9 +606,8 @@ describe("QuadPassport", async () => {
           newCountry,
           newIssuedAt
         );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -620,9 +617,9 @@ describe("QuadPassport", async () => {
       expect(await ethers.provider.getBalance(passport.address)).to.equal(
         initialBalance
       );
-      await expect(passport.withdrawETH(issuerTreasury.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
-      );
+      await expect(
+        passport.withdrawETH(issuerTreasury.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
     it("succes - two issuers", async () => {
@@ -641,19 +638,18 @@ describe("QuadPassport", async () => {
           newCountry,
           newIssuedAt
         );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
         newCountry,
         newIssuedAt
       );
-      
+
       newCountry = id("FRANCE");
       newIssuedAt = Math.floor(new Date().getTime() / 1000) + 100;
-      
+
       await passport
         .connect(minterB)
         .setAttributeIssuer(
@@ -663,9 +659,8 @@ describe("QuadPassport", async () => {
           newCountry,
           newIssuedAt
         );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -678,7 +673,7 @@ describe("QuadPassport", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const wrongTokenId = 2;
-      
+
       await expect(
         passport
           .connect(issuer)
@@ -695,7 +690,7 @@ describe("QuadPassport", async () => {
     it("fail - no passport", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
-      
+
       await expect(
         passport
           .connect(issuer)
@@ -721,7 +716,7 @@ describe("QuadPassport", async () => {
       );
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
-      
+
       await expect(
         passport
           .connect(issuer)

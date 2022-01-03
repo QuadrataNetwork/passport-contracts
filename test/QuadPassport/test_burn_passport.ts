@@ -16,7 +16,10 @@ const {
   deployPassportAndGovernance,
 } = require("../utils/deployment_and_init.ts");
 
-const { assertGetAttribute } = require("../utils/verify.ts");
+const {
+  assertGetAttribute,
+  assertGetAttributeFree,
+} = require("../utils/verify.ts");
 
 const { signMint } = require("../utils/signature.ts");
 
@@ -77,18 +80,16 @@ describe("QuadPassport", async () => {
 
   describe("burnPassport", async () => {
     it("success - burnPassport", async () => {
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -97,6 +98,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -157,18 +161,16 @@ describe("QuadPassport", async () => {
           value: MINT_PRICE,
         });
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -177,6 +179,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -195,18 +200,16 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -215,6 +218,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -235,18 +241,16 @@ describe("QuadPassport", async () => {
 
   describe("burnPassportIssuer", async () => {
     it("success - burnPassportIssuer", async () => {
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -255,6 +259,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -320,18 +327,16 @@ describe("QuadPassport", async () => {
           value: MINT_PRICE,
         });
 
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -340,6 +345,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
@@ -359,18 +367,16 @@ describe("QuadPassport", async () => {
           .burnPassportIssuer(minterA.address, wrongTokenId)
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
-      await assertGetAttribute(
+      await assertGetAttributeFree(
         minterA,
-        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -379,6 +385,9 @@ describe("QuadPassport", async () => {
       );
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
