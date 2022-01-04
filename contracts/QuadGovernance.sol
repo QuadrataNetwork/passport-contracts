@@ -7,6 +7,9 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
 
+/// @title Governance Contract for Quadrata Passport
+/// @author Fabrice Cheng
+/// @notice All admin functions to govern the QuadPassport contract
 contract QuadGovernanceStore {
     // Admin Functions
     bytes32[] public supportedAttributes;
@@ -15,6 +18,7 @@ contract QuadGovernanceStore {
     mapping(bytes32 => bool) public eligibleAttributesByDID;
     // Price in $USD (1e6 decimals)
     mapping(bytes32 => uint256) public pricePerAttribute;
+    // Price in $ETH
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
@@ -24,9 +28,9 @@ contract QuadGovernanceStore {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
-    uint256 public revSplitIssuer;  // percentage (2 decimals)
+    uint256 public revSplitIssuer; // 50 means 50%;
     uint256 public passportVersion;
-    uint256 public mintPrice;
+    uint256 public mintPrice; // Price in $ETH
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
@@ -47,6 +51,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdated(address _oldAddress, address _address);
 
+    /// @dev Initializer (constructor)
+    /// @param _admin address of the admin account
     function initialize(address _admin) public initializer {
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
 
@@ -76,12 +82,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
-    // Setters
-    /**
-      * @notice This function is restricted to a TimelockController
-      * @dev Set the address of the treasury.
-      * @param _treasury address of the GnosisSafe
-      */
+    /// @dev Set QuadPassport treasury wallet to withdraw the protocol fees
+    /// @notice Restricted behind a TimelockController
+    /// @param _treasury address of the treasury
     function setTreasury(address _treasury) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ADDRESS_ZERO");
@@ -91,6 +94,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit TreasuryUpdated(oldTreasury, _treasury);
     }
 
+    /// @dev Set QuadPassport contract address
+    /// @notice Restricted behind a TimelockController
+    /// @param _passportAddr address of the QuadPassport contract
     function setPassportContractAddress(address _passportAddr) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_passportAddr != address(0), "PASSPORT_ADDRESS_ZERO");
@@ -101,6 +107,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit PassportAddressUpdated(_oldPassport, address(passport));
     }
 
+    /// @dev Set the QuadGovernance address in the QuadPassport contract
+    /// @notice Restricted behind a TimelockController
+    /// @param _newGovernance address of the QuadGovernance contract
     function updateGovernanceInPassport(address _newGovernance) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_newGovernance != address(0), "GOVERNANCE_ADDRESS_ZERO");
@@ -109,6 +118,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         passport.setGovernance(_newGovernance);
     }
 
+    /// @dev Set the QuadPassport deployed version
+    /// @notice Restricted behind a TimelockController
+    /// @param _version current version of the QuadPassport
     function setPassportVersion(uint256 _version) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_version > passportVersion, "PASSPORT_VERSION_INCREMENTAL");
@@ -118,6 +130,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit PassportVersionUpdated(oldVersion, passportVersion);
     }
 
+    /// @dev Set the price for minting the QuadPassport
+    /// @notice Restricted behind a TimelockController
+    /// @param _mintPrice price in wei for minting a passport
     function setMintPrice(uint256 _mintPrice) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(mintPrice != _mintPrice, "MINT_PRICE_ALREADY_SET");
@@ -127,6 +142,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit PassportMintPriceUpdated(oldMintPrice, mintPrice);
     }
 
+    /// @dev Set the eligibility status for a tokenId passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _tokenId tokenId of the passport
+    /// @param _eligibleStatus eligiblity boolean for the tokenId
     function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleTokenId[_tokenId] != _eligibleStatus, "TOKEN_ELIGIBILITY_ALREADY_SET");
@@ -135,6 +154,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }
 
+    /// @dev Set the eligibility status for an attribute type
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _eligibleStatus eligiblity boolean for the attribute
     function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleAttributes[_attribute] != _eligibleStatus, "ATTRIBUTE_ELIGIBILITY_SET");
@@ -155,6 +178,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
 
+    /// @dev Set the eligibility status for an attribute type grouped by DID (Applicable to AML only for now)
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("AML"))
+    /// @param _eligibleStatus eligiblity boolean for the attribute
     function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleAttributesByDID[_attribute] != _eligibleStatus, "ATTRIBUTE_ELIGIBILITY_SET");
@@ -163,6 +190,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
+    /// @dev Set the price to update/set a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (wei)
     function setAttributePrice(bytes32 _attribute, uint256 _price) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(pricePerAttribute[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
@@ -173,6 +204,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
 
+    /// @dev Set the price to update/set a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (wei)
     function setAttributeMintPrice(bytes32 _attribute, uint256 _price) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(mintPricePerAttribute[_attribute] != _price, "ATTRIBUTE_MINT_PRICE_ALREADY_SET");
@@ -182,6 +217,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit AttributeMintPriceUpdated(_attribute, oldPrice, _price);
     }
 
+    /// @dev Set the UniswapAnchorView oracle (Using Compound)
+    /// @notice Restricted behind a TimelockController
+    /// @param _oracleAddr address of UniswapAnchorView contract
     function setOracle(address _oracleAddr) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_oracleAddr != address(0), "ORACLE_ADDRESS_ZERO");
@@ -194,6 +232,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
 
+    /// @dev Set the revenue split percentage between Issuers and Quadrata Protocol
+    /// @notice Restricted behind a TimelockController
+    /// @param _split percentage split (`50` equals 50%)
     function setRevSplitIssuer(uint256 _split) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
@@ -203,6 +244,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit RevenueSplitIssuerUpdated(oldSplit, _split);
     }
 
+    /// @dev Add a new issuer
+    /// @notice Restricted behind a TimelockController
+    /// @param _issuer address generating the signature authorizing minting/setting attributes
+    /// @param _treasury address of the issuer treasury to withdraw the fees
     function addIssuer(address _issuer, address _treasury) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
@@ -214,12 +259,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit IssuerAdded(_issuer, _treasury);
     }
 
-    /**
-      * @notice This function is restricted to a TimelockController
-      * @dev Authorize or Denied a payment to be received in Token.
-      * @param _tokenAddr address of the ERC20 token for payment
-      * @param _isAllowed authorize or deny this token
-      */
+    /// @dev Authorize or Denied a payment to be received in Toke
+    /// @notice Restricted behind a TimelockController
+    /// @param _tokenAddr address of the ERC20 token for payment
+    /// @param _isAllowed authorize or deny this token
     function allowTokenPayment(
         address _tokenAddr,
         bool _isAllowed
@@ -238,7 +281,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit AllowTokenPayment(_tokenAddr, _isAllowed);
     }
 
-    // Getter
+    /// @dev Get number of eligible attributes currently supported
+    /// @notice Restricted behind a TimelockController
+    /// @return length of eligible attributes
     function getSupportedAttributesLength() external view returns(uint256) {
         return supportedAttributes.length;
     }
@@ -252,6 +297,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
      * @param _tokenAddr Address of the ERC20 token
      * @return Price denominated in USD, with 6 decimals
      */
+
+    /// @dev Get the price in USD of a token using UniswapAnchorView
+    /// @param _tokenAddr address of the ERC20 token
+    /// @return price in USD
     function getPrice(address _tokenAddr) external view returns (uint) {
         require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
@@ -259,6 +308,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         return IUniswapAnchoredView(oracle).price(erc20.symbol());
     }
 
+    /// @dev Get the price in USD for $ETH using UniswapAnchorView
+    /// @return price in USD for $ETH
     function getPriceETH() external view returns (uint) {
         require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
         return IUniswapAnchoredView(oracle).price("ETH");
