@@ -22,5 +22,5 @@ export const PRICE_SET_ATTRIBUTE = {
   [ATTRIBUTE_COUNTRY]: parseEther("0.01"),
 };
 
-export const MINT_PRICE = parseEther("0.03");
+export const MINT_PRICE = parseEther("0.01");
 export const ISSUER_SPLIT = 50;
