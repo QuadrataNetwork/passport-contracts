@@ -99,6 +99,10 @@ export const assertGetAttribute = async (
   expectedIssuedAt: number,
   tokenId: number = TOKEN_ID
 ) => {
+  try {
+    await passport.withdrawToken(treasury.address, paymentToken.address);
+    await passport.withdrawToken(issuerTreasury.address, paymentToken.address);
+  } catch (err) {}
   const priceAttribute = parseUnits(
     PRICE_PER_ATTRIBUTES[attribute].toString(),
     await paymentToken.decimals()

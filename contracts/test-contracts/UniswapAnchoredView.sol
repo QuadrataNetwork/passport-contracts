@@ -9,9 +9,9 @@ contract UniswapAnchoredView  {
      */
     function price(string memory symbol) external view returns (uint) {
         if (keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("ETH"))) {
-            return 4000000000;
+            return 4000e6;
         } else {
-            return 1000000;
+            return 1e6;
         }
     }
 }
