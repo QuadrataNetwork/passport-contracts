@@ -108,8 +108,12 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
       // OK Fetching old value
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -144,8 +148,12 @@ describe("QuadPassport", async () => {
         newCountry,
         newIssuedAt
       );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -260,8 +268,12 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -289,8 +301,12 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        newIssuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -606,8 +622,12 @@ describe("QuadPassport", async () => {
           newCountry,
           newIssuedAt
         );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -638,8 +658,12 @@ describe("QuadPassport", async () => {
           newCountry,
           newIssuedAt
         );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -659,8 +683,12 @@ describe("QuadPassport", async () => {
           newCountry,
           newIssuedAt
         );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        minterB,
+        issuerBTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,

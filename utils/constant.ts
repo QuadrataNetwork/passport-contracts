@@ -13,7 +13,7 @@ export const TOKEN_ID = 1;
 
 export const PRICE_PER_ATTRIBUTES = {
   [ATTRIBUTE_AML]: 0,
-  [ATTRIBUTE_COUNTRY]: 0,
+  [ATTRIBUTE_COUNTRY]: 1,
   [ATTRIBUTE_DID]: 2,
 };
 

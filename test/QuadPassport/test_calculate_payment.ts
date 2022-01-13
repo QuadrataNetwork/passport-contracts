@@ -89,7 +89,12 @@ describe("QuadPassport", async () => {
     it("success (COUNTRY)", async () => {
       expect(
         await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address)
-      ).to.equal(0);
+      ).to.equal(
+        parseUnits(
+          PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
+          await usdc.decimals()
+        )
+      );
     });
 
     it("success (DID)", async () => {
@@ -131,7 +136,12 @@ describe("QuadPassport", async () => {
     });
 
     it("success (COUNTRY)", async () => {
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY)).to.equal(0);
+      const priceAttribute = parseEther(
+        (PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
+      );
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY)).to.equal(
+        priceAttribute
+      );
     });
 
     it("success (DID)", async () => {

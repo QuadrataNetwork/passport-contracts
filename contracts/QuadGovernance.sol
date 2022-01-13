@@ -68,6 +68,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
         // Set pricing
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
+        pricePerAttribute[keccak256("COUNTRY")] = 1 * 1e6; // $1
         mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
         mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
         mintPrice = 0.01 ether;

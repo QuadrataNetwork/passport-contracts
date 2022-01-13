@@ -253,28 +253,10 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("success - getAttributeFree(COUNTRY)", async () => {
-      await assertGetAttributeFree(
-        minterA,
-        defi,
-        passport,
-        ATTRIBUTE_COUNTRY,
-        country,
-        issuedAt
-      );
-    });
-
     it("fail - getAttributeFree(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         passport.getAttributeFree(wallet.address, TOKEN_ID, ATTRIBUTE_AML)
-      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
-    });
-
-    it("fail - getAttributeFree(COUNTRY) - wallet not found", async () => {
-      const wallet = ethers.Wallet.createRandom();
-      await expect(
-        passport.getAttributeFree(wallet.address, TOKEN_ID, ATTRIBUTE_COUNTRY)
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
@@ -301,15 +283,6 @@ describe("QuadPassport", async () => {
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
         passport.getAttributeFree(minterA.address, TOKEN_ID, ATTRIBUTE_AML)
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
-    });
-
-    it("fail - getAttributeFree ineligible attribute (Country)", async () => {
-      await governance
-        .connect(admin)
-        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
-      await expect(
-        passport.getAttributeFree(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY)
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 

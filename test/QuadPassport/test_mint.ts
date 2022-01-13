@@ -84,8 +84,12 @@ describe("QuadPassport", async () => {
         aml,
         issuedAt
       );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -136,8 +140,12 @@ describe("QuadPassport", async () => {
           aml,
           issuedAt
         );
-        await assertGetAttributeFree(
+        await assertGetAttribute(
           wallet,
+          treasury,
+          issuer,
+          issuerTreasury,
+          usdc,
           defi,
           passport,
           ATTRIBUTE_COUNTRY,
@@ -156,8 +164,6 @@ describe("QuadPassport", async () => {
           did,
           issuedAt
         );
-        await passport.withdrawToken(issuerTreasury.address, usdc.address);
-        await passport.withdrawToken(treasury.address, usdc.address);
       }
     });
 
@@ -197,16 +203,32 @@ describe("QuadPassport", async () => {
           aml,
           issuedAt
         );
-        await assertGetAttributeFree(
-          wallet,
-          defi,
-          passport,
-          ATTRIBUTE_COUNTRY,
-          country,
-          issuedAt
-        );
       }
 
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuerB,
+        issuerBTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
       await assertGetAttribute(
         minterA,
         treasury,
@@ -219,9 +241,6 @@ describe("QuadPassport", async () => {
         did,
         issuedAt
       );
-
-      await passport.withdrawToken(treasury.address, usdc.address);
-
       await assertGetAttribute(
         minterB,
         treasury,
@@ -279,8 +298,12 @@ describe("QuadPassport", async () => {
         aml,
         issuedAt
       );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
@@ -337,8 +360,12 @@ describe("QuadPassport", async () => {
           issuedAt,
           tokenId
         );
-        await assertGetAttributeFree(
+        await assertGetAttribute(
           minterA,
+          treasury,
+          issuer,
+          issuerTreasury,
+          usdc,
           defi,
           passport,
           ATTRIBUTE_COUNTRY,
@@ -360,8 +387,6 @@ describe("QuadPassport", async () => {
           issuedAt,
           tokenId
         );
-        await passport.withdrawToken(issuerTreasury.address, usdc.address);
-        await passport.withdrawToken(treasury.address, usdc.address);
       }
     });
 
@@ -390,8 +415,12 @@ describe("QuadPassport", async () => {
         aml,
         issuedAt
       );
-      await assertGetAttributeFree(
+      await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        newIssuerTreasury,
+        usdc,
         defi,
         passport,
         ATTRIBUTE_COUNTRY,
