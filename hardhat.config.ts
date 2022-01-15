@@ -8,6 +8,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
+import "@nomiclabs/hardhat-ethers";
 
 dotenv.config();
 
@@ -46,6 +47,13 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+  },
+  typechain: {
+    outDir: "types",
+    target: "ethers-v5",
+    // should overloads with full signatures like deposit(uint256) be generated always,
+    // even if there are no overloads?
+    alwaysGenerateOverloads: false,
   },
 };
 
