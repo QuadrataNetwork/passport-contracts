@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
 import { parseUnits, parseEther } from "ethers/lib/utils";
+import { signMintOnBehalfOf } from "./signature";
 
 const {
   MINT_PRICE,
@@ -46,6 +47,51 @@ export const assertMint = async (
     });
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(1);
   expect(await passport.provider.getBalance(passport.address)).to.equal(
+    initialBalance.add(MINT_PRICE)
+  );
+  expect(
+    await passport.callStatic.withdrawETH(issuerTreasury.address)
+  ).to.equal(MINT_PRICE.add(initialBalanceIssuer));
+};
+
+export const assertMintOnBehalfOf = async (
+  account: SignerWithAddress,
+  recipient: SignerWithAddress,
+  issuer: SignerWithAddress,
+  issuerTreasury: SignerWithAddress,
+  passport: Contract,
+  did: string,
+  aml: string,
+  country: string,
+  issuedAt: number,
+  tokenId: number = TOKEN_ID
+) => {
+  const sig = await signMintOnBehalfOf(
+    issuer,
+    account,
+    recipient,
+    tokenId,
+    did,
+    aml,
+    country,
+    issuedAt
+  );
+  expect(await passport.balanceOf(account.address, tokenId)).to.equal(0);
+  expect(await passport.balanceOf(recipient.address, tokenId)).to.equal(0);
+
+  const initialBalance = await passport.provider.getBalance(passport.address);
+  const initialBalanceIssuer = initialBalance.eq(0)
+    ? initialBalance
+    : await passport.callStatic.withdrawETH(issuerTreasury.address);
+  await passport
+    .connect(account)
+    .mintPassportOnBehalfOf(recipient.address, tokenId, did, aml, country, issuedAt, sig, {
+      value: MINT_PRICE,
+    });
+    expect(await passport.balanceOf(account.address, tokenId)).to.equal(0);
+    expect(await passport.balanceOf(recipient.address, tokenId)).to.equal(1);
+
+    expect(await passport.provider.getBalance(passport.address)).to.equal(
     initialBalance.add(MINT_PRICE)
   );
   expect(

@@ -21,6 +21,27 @@ export const signMint = async (
   return sig;
 };
 
+export const signMintOnBehalfOf = async (
+  issuer: typeof Signer,
+  minter: typeof Signer,
+  recipient: typeof Signer,
+  tokenId: number,
+  quadDID: typeof DataHexString,
+  aml: typeof DataHexString,
+  country: typeof DataHexString,
+  issuedAt: number
+): Promise<typeof DataHexString> => {
+  const hash = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["address", "address", "uint256", "bytes32", "bytes32", "bytes32", "uint256"],
+      [minter.address, recipient.address, tokenId, quadDID, aml, country, issuedAt]
+    )
+  );
+  const sig = await issuer.signMessage(ethers.utils.arrayify(hash));
+
+  return sig;
+};
+
 export const signSetAttribute = async (
   issuer: typeof Signer,
   account: typeof Signer,
