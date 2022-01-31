@@ -49,7 +49,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
-         b(_msgSender(), _tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
+         _executeMint(_msgSender(), _tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
     }
 
     /// @notice Claim and mint a Quadrata Passport on behalf of another account
@@ -76,11 +76,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         (bytes32 hash, address issuer) = _verifyIssuerMintOnBehalfOf(_msgSender(), _recipient, _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
-        b(_recipient,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
+        _executeMint(_recipient,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
 
     }
 
-    function b(address _account,uint256 _tokenId,bytes32 _aml,bytes32 _quadDID,bytes32 _country,uint256 _issuedAt, bytes32 hash, address issuer) internal {
+    function _executeMint(address _account,uint256 _tokenId,bytes32 _aml,bytes32 _quadDID,bytes32 _country,uint256 _issuedAt, bytes32 hash, address issuer) internal {
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _issuedEpoch[_account][_tokenId] = _issuedAt;
@@ -287,7 +287,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) internal view returns(bytes32,address){
         bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,  _issuedAt));
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
-        return (hash, a(hash, _sig));
+        return (hash, _extractIssuer(hash, _sig));
     }
 
     function _verifyIssuerMintOnBehalfOf(
@@ -302,10 +302,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) internal view returns(bytes32,address){
         bytes32 hash = keccak256(abi.encode(_minter, _recipient, _tokenId, _quadDID, _aml, _country,  _issuedAt));
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
-        return (hash, a(hash, _sig));
+        return (hash, _extractIssuer(hash, _sig));
     }
 
-    function a(bytes32 hash, bytes calldata _sig) internal view returns (address){
+    function _extractIssuer(bytes32 hash, bytes calldata _sig) internal view returns (address){
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
         require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
