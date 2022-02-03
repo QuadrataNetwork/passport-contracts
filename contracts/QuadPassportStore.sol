@@ -25,6 +25,10 @@ contract QuadPassportStore {
     mapping(address => mapping(bytes32 => Attribute)) internal _attributes;
     // DID => (AttributeType => Attribute(value, epoch))
     mapping(bytes32 => mapping(bytes32 => Attribute)) internal _attributesByDID;
+
+    // DID hashset
+    mapping(bytes32 => address) internal _didHashSet;
+
     // Wallet => (TokenId => IssuanceEpoch)
     mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
 

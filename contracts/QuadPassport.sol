@@ -47,9 +47,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
-        // check if _quadDID is unique or if it already exists
-        Attribute memory attribute = _attributesByDID[_quadDID][keccak256("AML")];
-        require(isAttributeNull(attribute), "QUAD_DID_ALREADY_EXISTS");
+        // check if _quadDID is unique
+        require(_didHashSet[_quadDID] == address(0) || _didHashSet[_quadDID] == _msgSender(), "QUAD_DID_ALREADY_EXISTS");
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
@@ -60,6 +59,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributes[_msgSender()][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
         _attributes[_msgSender()][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
         _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
+        _didHashSet[_quadDID] = _msgSender();
         _mint(_msgSender(), _tokenId, 1, "");
     }
 
@@ -409,10 +409,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     function _authorizeUpgrade(address) internal view override {
         require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-    }
-
-    function isAttributeNull(Attribute memory attribute) internal pure returns(bool) {
-        return attribute.value == bytes32(0) && attribute.epoch == 0 && attribute.issuer == address(0);
     }
 }
 
