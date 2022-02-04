@@ -244,6 +244,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function setRevSplitIssuer(uint256 _split) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
+        require(_split < 100, "SPLIT_MUST_BE_LESS_THAN_100");
+
         uint256 oldSplit = revSplitIssuer;
         revSplitIssuer = _split;
 
