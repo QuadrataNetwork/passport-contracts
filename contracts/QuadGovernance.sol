@@ -13,7 +13,6 @@ import "./interfaces/IUniswapAnchoredView.sol";
 contract QuadGovernanceStore {
     // Admin Functions
     bytes32[] public supportedAttributes;
-    mapping(bytes32 => bool) public supportedAttributesHashSet;
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
     mapping(bytes32 => bool) public eligibleAttributesByDID;
@@ -163,18 +162,15 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleAttributes[_attribute] != _eligibleStatus, "ATTRIBUTE_ELIGIBILITY_SET");
-        require(!supportedAttributesHashSet[_attribute], "ATTRIBUTE_ALREADY_SUPPORTED");
 
         eligibleAttributes[_attribute] = _eligibleStatus;
         if (_eligibleStatus) {
             supportedAttributes.push(_attribute);
-            supportedAttributesHashSet[_attribute] = true;
         } else {
             for (uint256 i = 0; i < supportedAttributes.length; i++) {
                 if (supportedAttributes[i] == _attribute) {
                     supportedAttributes[i] = supportedAttributes[supportedAttributes.length - 1];
                     supportedAttributes.pop();
-                    supportedAttributesHashSet[_attribute] = false;
                     break;
                 }
             }
