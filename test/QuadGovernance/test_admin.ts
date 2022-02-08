@@ -602,6 +602,12 @@ describe("QuadGovernance", async () => {
         governance.connect(admin).setRevSplitIssuer(ISSUER_SPLIT)
       ).to.be.revertedWith("REV_SPLIT_ALREADY_SET");
     });
+
+    it("fail (rev split > 100)", async () => {
+      await expect(
+        governance.connect(admin).setRevSplitIssuer(101)
+      ).to.be.revertedWith("SPLIT_MUST_BE_LESS_THAN_100");
+    });
   });
 
   describe("allowTokenPayment", async () => {
