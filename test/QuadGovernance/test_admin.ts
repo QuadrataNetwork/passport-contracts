@@ -621,11 +621,18 @@ describe("QuadGovernance", async () => {
       );
       await expect(
         governance.connect(admin).allowTokenPayment(newToken.address, true)
-      )
-        .to.emit(governance, "AllowTokenPayment")
-        .withArgs(newToken.address, true);
+      ).to.emit(governance, "AllowTokenPayment").withArgs(newToken.address, true);
+
       expect(await governance.eligibleTokenPayments(usdc.address)).to.equal(
         true
+      );
+
+      await expect(
+        governance.connect(admin).allowTokenPayment(newToken.address, false)
+      ).to.emit(governance, "AllowTokenPayment").withArgs(newToken.address, false);
+
+      expect(await governance.eligibleTokenPayments(newToken.address)).to.equal(
+        false
       );
     });
 
