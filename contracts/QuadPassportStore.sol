@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./QuadGovernance.sol";
+import "./QuadPassportHelper.sol";
 
 contract QuadPassportStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
@@ -16,7 +17,7 @@ contract QuadPassportStore {
     }
 
     // Hash => bool
-    mapping(bytes32 => bool) internal _usedHashes;
+    mapping(bytes32 => bool) public _usedHashes;
     // Wallet => (TokenId => Signatures)
     mapping(address => mapping(uint256 => bytes)) internal _validSignatures;
 
@@ -32,5 +33,7 @@ contract QuadPassportStore {
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
+
+    QuadPassportHelper public _quadPassportHelper;
 }
 
