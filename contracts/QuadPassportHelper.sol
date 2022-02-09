@@ -2,6 +2,7 @@ pragma solidity 0.8.4;
 
 import "./QuadGovernance.sol";
 import "./QuadPassport.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 contract QuadPassportHelper {
 
@@ -119,13 +120,31 @@ contract QuadPassportHelper {
         bytes32 _value,
         uint256 _issuedAt,
         bytes calldata _sig
-    ) external payable override {
+    ) external payable {
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
-        (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_msgSender(), _tokenId, _attribute, _value, _issuedAt, _sig);
+        (bytes32 hash, address issuer) = _verifyIssuerSetAttr(msg.sender, _tokenId, _attribute, _value, _issuedAt, _sig);
 
-        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
-        _usedHashes[hash] = true;
-        _setAttributeInternal(_msgSender(), _tokenId, _attribute, _value, _issuedAt, issuer);
+        passport.setAccountBalancesEth(governance.issuersTreasury(issuer), governance.mintPricePerAttribute(_attribute));
+        passport._useHash(hash);
+        passport._setAttributeInternal(msg.sender, _tokenId, _attribute, _value, _issuedAt, issuer);
     }
 
+    function _verifyIssuerSetAttr(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        bytes32 _value,
+        uint256 _issuedAt,
+        bytes calldata _sig
+    ) internal view returns(bytes32,address) {
+        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _attribute, _value, _issuedAt));
+
+        require(!passport._usedHashes(hash), "SIGNATURE_ALREADY_USED");
+
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
+        address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
+        require(governance.hasRole(passport.ISSUER_ROLE(), issuer), "INVALID_ISSUER");
+
+        return (hash, issuer);
+    }
 }

@@ -28,7 +28,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     function _executeMint(address _account,uint256 _tokenId,bytes32 _aml,bytes32 _quadDID,bytes32 _country,uint256 _issuedAt, bytes32 hash, address issuer) public {
-        require(address(_quadPassportHelper) == msg.sender, "ONLY_PASSPORT_HELPER_CAN_MINT");
+        require(msg.sender == address(quadPassportHelper), "ONLY_PASSPORT_CAN_MINT");
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _issuedEpoch[_account][_tokenId] = _issuedAt;
@@ -65,7 +65,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _value,
         uint256 _issuedAt,
         address _issuer
-    ) internal {
+    ) public {
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
         require(_attribute != keccak256("DID"), "MUST_BURN_AND_MINT");
@@ -205,25 +205,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
 
-    function _verifyIssuerSetAttr(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        bytes32 _value,
-        uint256 _issuedAt,
-        bytes calldata _sig
-    ) internal view returns(bytes32,address) {
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _attribute, _value, _issuedAt));
-
-        require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
-
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
-        address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
-        require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
-
-        return (hash, issuer);
-    }
-
     function _beforeTokenTransfer(
         address operator,
         address from,
@@ -346,6 +327,16 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     function _authorizeUpgrade(address) internal view override {
         require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+    }
+
+    function _useHash(bytes32 value) public {
+        require(msg.sender == address(quadPassportHelper), "ONLY_HELPER_CAN_USE_HASH");
+        _usedHashes[value] = true;
+    }
+
+    function setAccountBalancesEth(address key, uint256 value) public {
+        require(msg.sender == address(quadPassportHelper), "ONLY_HELPER_CAN_SET_BALANCE_ETH");
+        _accountBalancesETH[key] += value;
     }
 }
 
