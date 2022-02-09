@@ -278,7 +278,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         // SafeCheck call to make sure that _tokenAddr is a valid ERC20 address
         erc20.totalSupply();
 
-        eligibleTokenPayments[_tokenAddr] = true;
+        eligibleTokenPayments[_tokenAddr] = _isAllowed;
         emit AllowTokenPayment(_tokenAddr, _isAllowed);
     }
 
