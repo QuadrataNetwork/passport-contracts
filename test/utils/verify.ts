@@ -20,6 +20,7 @@ export const assertMint = async (
   issuer: SignerWithAddress,
   issuerTreasury: SignerWithAddress,
   passport: Contract,
+  passportHelper: Contract,
   did: string,
   aml: string,
   country: string,
@@ -40,7 +41,7 @@ export const assertMint = async (
   const initialBalanceIssuer = initialBalance.eq(0)
     ? initialBalance
     : await passport.callStatic.withdrawETH(issuerTreasury.address);
-  await passport
+  await passportHelper
     .connect(account)
     .mintPassport(tokenId, did, aml, country, issuedAt, sig, {
       value: MINT_PRICE,

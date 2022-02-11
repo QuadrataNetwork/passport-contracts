@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 const { ethers, upgrades } = require("hardhat");
 
 export const deployPassport = async (
-  governance: SignerWithAddress,
+  governance: Contract,
   uri: string
 ): Promise<Contract> => {
   const QuadPassport = await ethers.getContractFactory("QuadPassport");
@@ -29,4 +29,16 @@ export const deployGovernance = async (
   await governance.deployed();
   // console.log(`QuadGovernance is deployed: ${governance.address}`);
   return governance;
+};
+
+export const deployPassportHelper = async(
+  passport: Contract,
+  governance: Contract
+): Promise<Contract> => {
+
+  const PassportHelper = await ethers.getContractFactory("QuadPassportHelper");
+  const passportHelper = await PassportHelper.deploy(passport.address, governance.address);
+  await passportHelper.deployed();
+
+  return passportHelper;
 };

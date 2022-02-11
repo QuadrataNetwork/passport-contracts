@@ -2,10 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-const {
-  deployPassport,
-  deployGovernance,
-} = require("../../utils/deployment.ts");
+import { deployPassport, deployGovernance, deployPassportHelper } from "../../utils/deployment";
 
 export const deployPassportAndGovernance = async (
   admin: SignerWithAddress,
@@ -13,9 +10,9 @@ export const deployPassportAndGovernance = async (
   treasury: SignerWithAddress,
   issuerTreasury: SignerWithAddress,
   uri: string
-): Promise<[Promise<Contract>, Promise<Contract>, any, any, any]> => {
+): Promise<[Contract, Contract, Contract, any, any, any]> => {
   // Deploy Governance
-  const governance = await deployGovernance(admin, issuer);
+  const governance = await deployGovernance(admin);
   await governance
     .connect(admin)
     .addIssuer(issuer.address, issuerTreasury.address);
@@ -41,10 +38,14 @@ export const deployPassportAndGovernance = async (
   await governance.connect(admin).allowTokenPayment(usdc.address, true);
   await governance.connect(admin).setTreasury(treasury.address);
 
+  // Deploy PassportHelper
+  const passportHelper = await deployPassportHelper(passport, governance);
+
+
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");
   const defi = await DeFi.deploy(passport.address);
   await defi.deployed();
 
-  return [governance, passport, usdc, defi, oracle];
+  return [governance, passport, passportHelper, usdc, defi, oracle];
 };
