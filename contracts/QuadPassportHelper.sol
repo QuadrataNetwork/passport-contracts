@@ -147,4 +147,15 @@ contract QuadPassportHelper {
 
         return (hash, issuer);
     }
+
+        /// @notice Burn your Quadrata passport
+    /// @dev Only owner of the passport
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    function burnPassport(
+        uint256 _tokenId
+    ) external {
+        require(passport.balanceOf(msg.sender, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
+        passport._executeBurn(_tokenId, msg.sender);
+    }
+
 }

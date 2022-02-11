@@ -38,6 +38,16 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _mint(_account, _tokenId, 1, "");
     }
 
+    function _executeBurn(uint256 _tokenId, address _user) public {
+        require(msg.sender == address(quadPassportHelper), "ONLY_PASSPORT_CAN_BURN");
+
+        _burn(_user, _tokenId, 1);
+
+        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
+            bytes32 attributeType = governance.supportedAttributes(i);
+            delete _attributes[_user][attributeType];
+        }
+    }
 
 
     /// @notice (only Issuer) Update or set a new attribute for an existing passport
@@ -91,20 +101,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         }
     }
 
-    /// @notice Burn your Quadrata passport
-    /// @dev Only owner of the passport
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    function burnPassport(
-        uint256 _tokenId
-    ) external override {
-        require(balanceOf(_msgSender(), _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
-        _burn(_msgSender(), _tokenId, 1);
 
-        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
-            bytes32 attributeType = governance.supportedAttributes(i);
-            delete _attributes[_msgSender()][attributeType];
-        }
-    }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
     /// @dev Only issuer role
