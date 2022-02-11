@@ -3,14 +3,17 @@ pragma solidity 0.8.4;
 import "./QuadGovernance.sol";
 import "./QuadPassport.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract QuadPassportHelper {
+contract QuadPassportHelper is Ownable {
 
     QuadGovernance public governance;
     QuadPassport public passport;
 
-    constructor () {
 
+    constructor(QuadGovernance _governance, QuadPassport _passport) Ownable() {
+        governance = _governance;
+        passport = _passport;
     }
 
 
@@ -67,9 +70,6 @@ contract QuadPassportHelper {
         passport._executeMint(_recipient,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
 
     }
-
-
-
 
     function _verifyIssuerMint(
         address _account,
@@ -158,4 +158,11 @@ contract QuadPassportHelper {
         passport._executeBurn(_tokenId, msg.sender);
     }
 
+    function setGovernance(QuadGovernance _governance) external onlyOwner {
+        governance = _governance;
+    }
+
+    function setPassport(QuadPassport _passport) external onlyOwner {
+        passport = _passport;
+    }
 }
