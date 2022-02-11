@@ -39,7 +39,7 @@ contract QuadPassportHelper is Ownable {
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(msg.sender, _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
-         passport._executeMint(msg.sender, _tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
+         passport.executeMint(msg.sender, _tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
     }
 
 
@@ -67,7 +67,7 @@ contract QuadPassportHelper is Ownable {
 
         (bytes32 hash, address issuer) = _verifyIssuerMintOnBehalfOf(msg.sender, _recipient, _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
-        passport._executeMint(_recipient,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
+        passport.executeMint(_recipient,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
 
     }
 
@@ -125,8 +125,8 @@ contract QuadPassportHelper is Ownable {
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(msg.sender, _tokenId, _attribute, _value, _issuedAt, _sig);
 
         passport.setAccountBalancesEth(governance.issuersTreasury(issuer), governance.mintPricePerAttribute(_attribute));
-        passport._useHash(hash);
-        passport._setAttributeInternal(msg.sender, _tokenId, _attribute, _value, _issuedAt, issuer);
+        passport.useHash(hash);
+        passport.executeSetAttribute(msg.sender, _tokenId, _attribute, _value, _issuedAt, issuer);
     }
 
     function _verifyIssuerSetAttr(
@@ -148,14 +148,14 @@ contract QuadPassportHelper is Ownable {
         return (hash, issuer);
     }
 
-        /// @notice Burn your Quadrata passport
+    /// @notice Burn your Quadrata passport
     /// @dev Only owner of the passport
     /// @param _tokenId tokenId of the Passport (1 for now)
     function burnPassport(
         uint256 _tokenId
     ) external {
         require(passport.balanceOf(msg.sender, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
-        passport._executeBurn(_tokenId, msg.sender);
+        passport.executeBurn(_tokenId, msg.sender);
     }
 
     function setGovernance(QuadGovernance _governance) external onlyOwner {

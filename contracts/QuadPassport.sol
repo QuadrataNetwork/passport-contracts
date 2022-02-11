@@ -27,18 +27,32 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         governance = QuadGovernance(_governanceContract);
     }
 
-    function _executeMint(address _account,uint256 _tokenId,bytes32 _aml,bytes32 _quadDID,bytes32 _country,uint256 _issuedAt, bytes32 hash, address issuer) public {
+    /// @notice Execute the creation of a Quadrata Passport
+    /// @dev Only when authorized by an eligible issuer
+    /// @param _account user to recieve NFT
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _quadDID Quadrata Decentralized Identity (raw value)
+    /// @param _aml keccak256 of the AML status value
+    /// @param _country keccak256 of the country value
+    /// @param _issuedAt epoch when the passport has been issued by the Issuer
+    /// @param _hash the verified issuer mint
+    /// @param _issuer the extracted issuer from the hash
+    function executeMint(address _account,uint256 _tokenId,bytes32 _aml,bytes32 _quadDID,bytes32 _country,uint256 _issuedAt, bytes32 _hash, address _issuer) external {
         require(msg.sender == address(quadPassportHelper), "ONLY_PASSPORT_CAN_MINT");
-        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
-        _usedHashes[hash] = true;
+        _accountBalancesETH[governance.issuersTreasury(_issuer)] += governance.mintPrice();
+        _usedHashes[_hash] = true;
         _issuedEpoch[_account][_tokenId] = _issuedAt;
-        _attributes[_account][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
-        _attributes[_account][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
-        _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
+        _attributes[_account][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt, issuer: _issuer});
+        _attributes[_account][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: _issuer});
+        _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt, issuer: _issuer});
         _mint(_account, _tokenId, 1, "");
     }
 
-    function _executeBurn(uint256 _tokenId, address _user) public {
+    /// @notice Burn your Quadrata passport
+    /// @dev Only owner of the passport
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _user the wallet/contract to be burned
+    function executeBurn(uint256 _tokenId, address _user) external {
         require(msg.sender == address(quadPassportHelper), "ONLY_PASSPORT_CAN_BURN");
 
         _burn(_user, _tokenId, 1);
@@ -65,10 +79,17 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _issuedAt
     ) external override {
         require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
-        _setAttributeInternal(_account, _tokenId, _attribute, _value, _issuedAt, _msgSender());
+        executeSetAttribute(_account, _tokenId, _attribute, _value, _issuedAt, _msgSender());
     }
 
-    function _setAttributeInternal(
+    /// @notice Update or set a new attribute for your existing passport
+    /// @dev Only when authorized by an eligible issuer
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @param _value keccak256 of the value of the attribute (ex: keccak256("FRANCE"))
+    /// @param _issuedAt epoch when the operation has been authorized by the Issuer
+    /// @param _issuer the issuer of the attribute
+    function executeSetAttribute(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -326,12 +347,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 
-    function _useHash(bytes32 value) public {
+
+    /// @dev Util function for the QuadPassportHelper
+    /// @param value a hash to flag as true
+    function useHash(bytes32 value) external {
         require(msg.sender == address(quadPassportHelper), "ONLY_HELPER_CAN_USE_HASH");
         _usedHashes[value] = true;
     }
 
-    function setAccountBalancesEth(address key, uint256 value) public {
+    /// @dev Util function for the QuadPassportHelper
+    /// @param key the user to increament
+    /// @param value the amount to increase account balances by
+    function setAccountBalancesEth(address key, uint256 value) external {
         require(msg.sender == address(quadPassportHelper), "ONLY_HELPER_CAN_SET_BALANCE_ETH");
         _accountBalancesETH[key] += value;
     }
