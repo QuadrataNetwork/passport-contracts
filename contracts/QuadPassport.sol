@@ -14,6 +14,7 @@ import "./interfaces/IQuadPassport.sol";
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     event GovernanceUpdated(address _oldGovernance, address _governance);
+    event PassportHelperUpdated(address _oldPassportHelper, address _passportHelper);
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the QuadGovernance contract
@@ -343,6 +344,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
+    /// @dev Admin function to set the address of the QuadPassportHelper contract
+    /// @param _passportHelper contract address of QuadPassportHelper
+    function setPassportHelper(address _passportHelper) external override {
+        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
+        require(_passportHelper != address(governance), "PASSPORT_HELPER_ALREADY_SET");
+        require(_passportHelper != address(0), "PASSPORT_HELPER_ADDRESS_ZERO");
+        address oldPassportHelper = address(quadPassportHelper);
+        quadPassportHelper = QuadPassportHelper(_passportHelper);
+
+        emit PassportHelperUpdated(oldPassportHelper, address(quadPassportHelper));
+    }
+
     function _authorizeUpgrade(address) internal view override {
         require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
@@ -350,7 +363,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @dev Util function for the QuadPassportHelper
     /// @param value a hash to flag as true
-    function useHash(bytes32 value) external {
+    function useHash(bytes32 value) external override {
         require(msg.sender == address(quadPassportHelper), "ONLY_HELPER_CAN_USE_HASH");
         _usedHashes[value] = true;
     }
@@ -358,7 +371,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @dev Util function for the QuadPassportHelper
     /// @param key the user to increament
     /// @param value the amount to increase account balances by
-    function setAccountBalancesEth(address key, uint256 value) external {
+    function setAccountBalancesEth(address key, uint256 value) external override {
         require(msg.sender == address(quadPassportHelper), "ONLY_HELPER_CAN_SET_BALANCE_ETH");
         _accountBalancesETH[key] += value;
     }

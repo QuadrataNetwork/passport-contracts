@@ -48,6 +48,10 @@ interface IQuadPassport is IERC1155Upgradeable {
         address _governanceContract
     ) external;
 
+    function setPassportHelper(
+        address _governanceContract
+    ) external;
+
     function calculatePaymentToken(
         bytes32 _attribute,
         address _tokenPayment
@@ -56,6 +60,10 @@ interface IQuadPassport is IERC1155Upgradeable {
     function calculatePaymentETH(
         bytes32 _attribute
     ) external view returns(uint256);
+
+    function useHash(bytes32 value) external;
+
+    function setAccountBalancesEth(address key, uint256 value) external;
 
 
     function withdrawETH(address payable _to) external returns(uint256);

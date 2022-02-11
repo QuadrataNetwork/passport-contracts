@@ -7,6 +7,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract QuadPassportHelper is Ownable {
 
+    event QuadGovernanceUpdated(address oldGovernance, address newGovernance);
+    event QuadPassportUpdated(address oldPassport, address newPassport);
+
     QuadGovernance public governance;
     QuadPassport public passport;
 
@@ -159,10 +162,12 @@ contract QuadPassportHelper is Ownable {
     }
 
     function setGovernance(QuadGovernance _governance) external onlyOwner {
+        emit QuadGovernanceUpdated(address(governance), address(_governance));
         governance = _governance;
     }
 
     function setPassport(QuadPassport _passport) external onlyOwner {
+        emit QuadPassportUpdated(address(passport), address(_passport));
         passport = _passport;
     }
 }
