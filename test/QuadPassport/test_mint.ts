@@ -272,7 +272,7 @@ describe("QuadPassport", async () => {
         country,
         issuedAt
       );
-      await passport
+      await passportHelper
         .connect(minterA)
         .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
           value: parseEther("0"),
@@ -575,7 +575,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await expect(
-        passport
+        passportHelper
           .connect(minterA)
           .mintPassport(TOKEN_ID, did, wrongAML, country, issuedAt, sig, {
             value: MINT_PRICE,
@@ -595,7 +595,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await expect(
-        passport
+        passportHelper
           .connect(minterA)
           .mintPassport(TOKEN_ID, did, wrongAML, country, issuedAt, sig, {
             value: MINT_PRICE,
@@ -615,7 +615,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await expect(
-        passport
+        passportHelper
           .connect(minterA)
           .mintPassport(TOKEN_ID, did, aml, wrongCountry, issuedAt, sig, {
             value: MINT_PRICE,

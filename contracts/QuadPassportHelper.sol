@@ -4,6 +4,7 @@ import "./QuadGovernance.sol";
 import "./QuadPassport.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract QuadPassportHelper is Ownable {
 
@@ -36,6 +37,11 @@ contract QuadPassportHelper is Ownable {
         uint256 _issuedAt,
         bytes calldata _sig
     ) external payable {
+        console.logAddress(address(governance));
+        console.logBytes32(governance.ISSUER_ROLE());
+        console.log(governance.oracle());
+        console.log(governance.revSplitIssuer());
+        console.log(governance.mintPrice());
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(passport.balanceOf(msg.sender, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
