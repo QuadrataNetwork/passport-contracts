@@ -30,7 +30,7 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 999,
+        runs: 1000,
       },
     },
   },
@@ -40,10 +40,6 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-
-    hardhat: {
-      allowUnlimitedContractSize: false
-    }
   },
   gasReporter: {
     enabled: true,

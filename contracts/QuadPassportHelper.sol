@@ -15,6 +15,9 @@ contract QuadPassportHelper is Ownable {
     QuadPassport public passport;
 
 
+    /// @dev Init quad pointers
+    /// @param _passport address of new Quad Passport
+    /// @param _governance address of new Quad Gov
     constructor(QuadGovernance _governance, QuadPassport _passport) Ownable() {
         governance = _governance;
         passport = _passport;
@@ -167,11 +170,15 @@ contract QuadPassportHelper is Ownable {
         passport.executeBurn(_tokenId, msg.sender);
     }
 
+    /// @dev Set Quad Governance pointer
+    /// @param _governance address of new Quad Gov
     function setGovernance(QuadGovernance _governance) external onlyOwner {
         emit QuadGovernanceUpdated(address(governance), address(_governance));
         governance = _governance;
     }
 
+    /// @dev Set Quad Passport pointer
+    /// @param _passport address of new Quad Passport
     function setPassport(QuadPassport _passport) external onlyOwner {
         emit QuadPassportUpdated(address(passport), address(_passport));
         passport = _passport;
