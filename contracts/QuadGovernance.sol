@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -280,7 +280,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         // SafeCheck call to make sure that _tokenAddr is a valid ERC20 address
         erc20.totalSupply();
 
-        eligibleTokenPayments[_tokenAddr] = true;
+        eligibleTokenPayments[_tokenAddr] = _isAllowed;
         emit AllowTokenPayment(_tokenAddr, _isAllowed);
     }
 
