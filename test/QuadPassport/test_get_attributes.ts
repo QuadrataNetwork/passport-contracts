@@ -187,7 +187,7 @@ describe("QuadPassport", async () => {
           ATTRIBUTE_DID,
           usdc.address
         )
-      ).to.revertedWith("ERC20: transfer amount exceeds allowance");
+      ).to.revertedWith("'ERC20: insufficient allowance'");
     });
 
     it("fail - getAttribute from address(0)", async () => {
