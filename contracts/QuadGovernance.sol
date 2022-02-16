@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -239,6 +239,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function setRevSplitIssuer(uint256 _split) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
+        require(_split <= 100, "SPLIT_MUST_BE_LESS_THAN_100");
+
         uint256 oldSplit = revSplitIssuer;
         revSplitIssuer = _split;
 
