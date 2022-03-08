@@ -34,6 +34,10 @@ contract QuadGovernanceStore {
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
+
+
+    // Append this (KYB)
+    mapping(bytes32 => uint256) public pricePerContractAttribute;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {

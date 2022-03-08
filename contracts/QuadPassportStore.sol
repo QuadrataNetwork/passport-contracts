@@ -20,17 +20,24 @@ contract QuadPassportStore {
     // Wallet => (TokenId => Signatures)
     mapping(address => mapping(uint256 => bytes)) internal _validSignatures;
 
-    // Passport attributes
-    // Wallet => (Attribute Name => Attribute)
+    // (Legacy) Passport attributes
+    // (Legacy) User => (Attribute Name => Attribute)
     mapping(address => mapping(bytes32 => Attribute)) internal _attributes;
-    // DID => (AttributeType => Attribute(value, epoch))
+    // (Legacy) DID => (AttributeType => Attribute(value, epoch))
     mapping(bytes32 => mapping(bytes32 => Attribute)) internal _attributesByDID;
-    // Wallet => (TokenId => IssuanceEpoch)
+
+    // User => (TokenId => IssuanceEpoch)
     mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
 
     // Accounting
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
+
+    // Passport attributes
+    // Append This (Multiple Issuers)
+    mapping(address => mapping(uint256 => mapping(bytes32 => Attribute))) internal _attributesV2;
+    // Append This (Multiple Issuers)
+    mapping(bytes32 => mapping(uint256 => mapping(bytes32 => Attribute))) internal _attributesByDIDV2;
 }
 
