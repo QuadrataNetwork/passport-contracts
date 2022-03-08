@@ -276,6 +276,33 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
     });
 
+    it("fail (revert from duplicate element)", async () => {
+      const newAttribute = ethers.utils.id("CREDIT");
+      expect(await governance.eligibleAttributes(newAttribute)).to.equal(false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+      await expect(
+        governance.connect(admin).setEligibleAttribute(newAttribute, true)
+      ).to.emit(governance, "EligibleAttributeUpdated").withArgs(newAttribute, true);
+      await expect(
+        governance.connect(admin).setEligibleAttribute(newAttribute, true)
+      ).to.be.revertedWith("ATTRIBUTE_ELIGIBILITY_SET")
+
+      expect(await governance.eligibleAttributes(newAttribute)).to.equal(true);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+    });
+
+    it("fail (revert from duplicate element)", async () => {
+      const newAttribute = ethers.utils.id("CREDIT");
+      expect(await governance.eligibleAttributes(newAttribute)).to.equal(false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+      await expect(
+        governance.connect(admin).setEligibleAttribute(newAttribute, false)
+      ).to.be.revertedWith("ATTRIBUTE_ELIGIBILITY_SET")
+
+      expect(await governance.eligibleAttributes(newAttribute)).to.equal(false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
+    });
+
     it("succeed (turn false)", async () => {
       expect(await governance.getSupportedAttributesLength()).to.equal(2);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
@@ -601,6 +628,12 @@ describe("QuadGovernance", async () => {
       await expect(
         governance.connect(admin).setRevSplitIssuer(ISSUER_SPLIT)
       ).to.be.revertedWith("REV_SPLIT_ALREADY_SET");
+    });
+
+    it("fail (rev split > 100)", async () => {
+      await expect(
+        governance.connect(admin).setRevSplitIssuer(101)
+      ).to.be.revertedWith("SPLIT_MUST_BE_LESS_THAN_100");
     });
   });
 
