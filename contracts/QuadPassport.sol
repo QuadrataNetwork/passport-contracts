@@ -54,7 +54,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @notice Claim and mint a Quadrata Passport on behalf of another account
     /// @dev Only when authorized by an eligible issuer
-    /// @param _recipient the awardee to recieve the passport
+    /// @param _account the awardee to recieve the passport
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _quadDID Quadrata Decentralized Identity (raw value)
     /// @param _aml keccak256 of the AML status value
@@ -62,7 +62,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _issuedAt epoch when the passport has been issued by the Issuer
     /// @param _sig ECDSA signature computed by an eligible issuer to authorize the mint
     function mintPassportOnBehalfOf(
-        address _recipient,
+        address _account,
         uint256 _tokenId,
         bytes32 _quadDID,
         bytes32 _aml,
@@ -72,11 +72,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external payable {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(balanceOf(_recipient, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
+        require(balanceOf(_account, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
-        (bytes32 hash, address issuer) = _verifyIssuerMintOnBehalfOf(_msgSender(), _recipient, _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
+        (bytes32 hash, address issuer) = _verifyIssuerMintOnBehalfOf(_msgSender(), _account, _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
-        _executeMint(_recipient,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
+        _executeMint(_account,_tokenId, _aml, _quadDID, _country, _issuedAt, hash, issuer);
 
     }
 
