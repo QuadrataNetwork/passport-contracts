@@ -33,6 +33,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _quadDID Quadrata Decentralized Identity (raw value)
     /// @param _aml keccak256 of the AML status value
     /// @param _country keccak256 of the country value
+    /// @param _kyb keccak256 of the buisness status
     /// @param _issuedAt epoch when the passport has been issued by the Issuer
     /// @param _sig ECDSA signature computed by an eligible issuer to authorize the mint
     function mintPassport(
@@ -40,6 +41,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _quadDID,
         bytes32 _aml,
         bytes32 _country,
+        bytes32 _kyb,
         uint256 _issuedAt,
         bytes calldata _sig
     ) external payable override {
@@ -47,7 +49,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
-        (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
+        (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country,_kyb, _issuedAt, _sig);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
@@ -56,6 +58,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributes[_msgSender()][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
         _attributes[_msgSender()][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
         _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
+        _attributes[_msgSender()][keccak256("KYB")] = Attribute({value: _kyb, epoch: _issuedAt, issuer: issuer});
         _mint(_msgSender(), _tokenId, 1, "");
     }
 
@@ -176,7 +179,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute
     ) external payable override returns(bytes32, uint256) {
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
-        _doETHPayment(_attribute, attribute.issuer);
+        _doETHPayment(_attribute, attribute.issuer, _account);
         return (attribute.value, attribute.epoch);
     }
 
@@ -208,7 +211,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _tokenAddr
     ) external override returns(bytes32, uint256) {
         Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute);
-        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer);
+        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _account);
         return (attribute.value, attribute.epoch);
     }
 
@@ -251,10 +254,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _quadDID,
         bytes32 _aml,
         bytes32 _country,
+        bytes32 _kyb,
         uint256 _issuedAt,
         bytes calldata _sig
     ) internal view returns(bytes32,address){
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,  _issuedAt));
+        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,_kyb,  _issuedAt));
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
@@ -305,9 +309,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     function _doETHPayment(
         bytes32 _attribute,
-        address _issuer
+        address _issuer,
+        address _account
     ) internal {
-        uint256 amountETH = calculatePaymentETH(_attribute);
+        uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
             require(
                  msg.value == amountETH,
@@ -323,9 +328,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function _doTokenPayment(
         bytes32 _attribute,
         address _tokenPayment,
-        address _issuer
+        address _issuer,
+        address _account
     ) internal {
-        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment);
+        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             require(
@@ -368,26 +374,32 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @dev Calculate the amount of token required to call `getAttribute`
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @param _tokenPayment address of the ERC20 tokens to use as payment
+    /// @param _account account getting requested for attributes
     /// @return the amount of ERC20 necessary to query the attribute
     function calculatePaymentToken(
         bytes32 _attribute,
-        address _tokenPayment
+        address _tokenPayment,
+        address _account
     ) public view override returns(uint256) {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
+        uint256 price = _attributes[_account][keccak256("KYB")].value == keccak256("true") ? governance.pricePerBuisnessAttribute(_attribute, 0) : governance.pricePerAttribute(_attribute);
         // Convert to Token Decimal
-        uint256 amountToken = (governance.pricePerAttribute(_attribute) * (10 ** (erc20.decimals())) / tokenPrice) ;
+        uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
     }
 
     /// @dev Calculate the amount of $ETH required to call `getAttributeETH`
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @param _account account getting requested for attributes
     /// @return the amount of $ETH necessary to query the attribute
     function calculatePaymentETH(
-        bytes32 _attribute
+        bytes32 _attribute,
+        address _account
     ) public view override returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
-        uint256 amountETH = (governance.pricePerAttribute(_attribute) * 1e18 / tokenPrice) ;
+        uint256 price = _attributes[_account][keccak256("KYB")].value == keccak256("true") ? governance.pricePerBuisnessAttribute(_attribute, 0) : governance.pricePerAttribute(_attribute);
+        uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
     }
 

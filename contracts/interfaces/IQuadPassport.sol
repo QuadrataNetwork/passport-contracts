@@ -9,6 +9,7 @@ interface IQuadPassport is IERC1155Upgradeable {
         bytes32 _quadDID,
         bytes32 _aml,
         bytes32 _country,
+        bytes32 _kyb,
         uint256 _issuedAt,
         bytes calldata _sig
     ) external payable;
@@ -68,11 +69,13 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function calculatePaymentToken(
         bytes32 _attribute,
-        address _tokenPayment
+        address _tokenPayment,
+        address _account
     ) external view returns(uint256);
 
     function calculatePaymentETH(
-        bytes32 _attribute
+        bytes32 _attribute,
+        address _account
     ) external view returns(uint256);
 
 

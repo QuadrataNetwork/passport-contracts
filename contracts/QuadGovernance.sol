@@ -34,11 +34,15 @@ contract QuadGovernanceStore {
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
+
+    // Price in $USD (1e6 decimals) pricePerBuisnessAttribute["AML"][ISSUER_ID] => $1
+    mapping(bytes32 => mapping(uint256 => uint256)) public pricePerBuisnessAttribute;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
     event AllowTokenPayment(address _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event BuisnessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price, uint256 issuerID);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
@@ -202,6 +206,22 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         pricePerAttribute[_attribute] = _price;
 
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
+    }
+
+    /// @dev Set the price to update/set a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param issuerID the issuer
+    /// @param _price price (wei)
+    function setBuisnessAttributePrice(bytes32 _attribute, uint256 issuerID, uint256 _price) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(pricePerBuisnessAttribute[_attribute][issuerID] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
+        // this implies issuers can set each other's values :/
+        // do we want this behavior?
+        uint256 oldPrice = pricePerBuisnessAttribute[_attribute][issuerID];
+        pricePerBuisnessAttribute[_attribute][issuerID] = _price;
+
+        emit BuisnessAttributePriceUpdated(_attribute, oldPrice, _price,issuerID);
     }
 
 
