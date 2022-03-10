@@ -9,7 +9,6 @@ interface IQuadPassport is IERC1155Upgradeable {
         bytes32 _quadDID,
         bytes32 _aml,
         bytes32 _country,
-        bytes32 _kyb,
         uint256 _issuedAt,
         bytes calldata _sig
     ) external payable;
