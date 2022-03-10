@@ -47,7 +47,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
-        (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
+        (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, bytes32(0), _issuedAt, _sig, false);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
@@ -82,9 +82,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external payable {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
+        require(balanceOf(_account, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
-        (bytes32 hash, address issuer) = _verifyIssuerMint(_account, _tokenId, _quadDID, _aml, _country,_kyb, _issuedAt, _sig);
+        (bytes32 hash, address issuer) = _verifyIssuerMint(_account, _tokenId, _quadDID, _aml, _country,_kyb, _issuedAt, _sig, true);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
@@ -289,30 +289,17 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _quadDID,
         bytes32 _aml,
         bytes32 _country,
-        uint256 _issuedAt,
-        bytes calldata _sig
-    ) internal view returns(bytes32,address){
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,  _issuedAt));
-        require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
-
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
-        address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
-        require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
-
-        return (hash, issuer);
-    }
-
-    function _verifyIssuerMint(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _quadDID,
-        bytes32 _aml,
-        bytes32 _country,
         bytes32 _kyb,
         uint256 _issuedAt,
-        bytes calldata _sig
+        bytes calldata _sig,
+        bool encodeKyb
     ) internal view returns(bytes32,address){
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,_kyb,  _issuedAt));
+        bytes32 hash;
+        if(encodeKyb) {
+            hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,_kyb,  _issuedAt));
+        } else{
+            hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,  _issuedAt));
+        }
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
