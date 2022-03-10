@@ -60,7 +60,42 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _mint(_msgSender(), _tokenId, 1, "");
     }
 
-    //mintPassportForRecepient, same input add KYB bytes32
+    /// @notice Claim and mint a wallet account Quadrata Passport, same input add KYB bytes32
+    /// @dev Only when authorized by an eligible issuer
+    /// @param _account EOA/Contract to recieve the passport
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _quadDID Quadrata Decentralized Identity (raw value)
+    /// @param _aml keccak256 of the AML status value
+    /// @param _country keccak256 of the country value
+    /// @param _kyb flag for if user is a buisness
+    /// @param _issuedAt epoch when the passport has been issued by the Issuer
+    /// @param _sig ECDSA signature computed by an eligible issuer to authorize the mint
+    function mintPassportForRecipient(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _quadDID,
+        bytes32 _aml,
+        bytes32 _country,
+        bytes32 _kyb,
+        uint256 _issuedAt,
+        bytes calldata _sig
+    ) external payable {
+        require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
+        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
+        require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
+
+        (bytes32 hash, address issuer) = _verifyIssuerMint(_account, _tokenId, _quadDID, _aml, _country,_kyb, _issuedAt, _sig);
+
+        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
+        _usedHashes[hash] = true;
+        _validSignatures[_account][_tokenId] = _sig;
+        _issuedEpoch[_account][_tokenId] = _issuedAt;
+        _attributes[_account][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
+        _attributes[_account][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
+        _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
+        _attributes[_account][keccak256("KYB")] = Attribute({value: _kyb, epoch: _issuedAt, issuer: issuer});
+        _mint(_account, _tokenId, 1, "");
+    }
 
     /// @notice Update or set a new attribute for your existing passport
     /// @dev Only when authorized by an eligible issuer
@@ -258,6 +293,26 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sig
     ) internal view returns(bytes32,address){
         bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,  _issuedAt));
+        require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
+
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
+        address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
+        require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+
+        return (hash, issuer);
+    }
+
+    function _verifyIssuerMint(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _quadDID,
+        bytes32 _aml,
+        bytes32 _country,
+        bytes32 _kyb,
+        uint256 _issuedAt,
+        bytes calldata _sig
+    ) internal view returns(bytes32,address){
+        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,_kyb,  _issuedAt));
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
