@@ -47,7 +47,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _kyb,
         uint256 _issuedAt,
         bytes calldata _sig
-    ) external payable {
+    ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
