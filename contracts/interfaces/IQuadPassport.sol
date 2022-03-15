@@ -4,14 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
 
 interface IQuadPassport is IERC1155Upgradeable {
-    function mintPassport(
-        uint256 _tokenId,
-        bytes32 _quadDID,
-        bytes32 _aml,
-        bytes32 _country,
-        uint256 _issuedAt,
-        bytes calldata _sig
-    ) external payable;
+
 
     function setAttribute(
         uint256 _tokenId,

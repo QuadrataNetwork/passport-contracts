@@ -35,14 +35,14 @@ contract QuadGovernanceStore {
     address public oracle;
     address public treasury;
 
-    // Price in $USD (1e6 decimals) pricePerBuisnessAttribute["AML"][ISSUER_ID] => $1
-    mapping(bytes32 => mapping(uint256 => uint256)) public pricePerBuisnessAttribute;
+    // Price in $USD (1e6 decimals) pricePerBusinessAttribute["AML"][ISSUER_ID] => $1
+    mapping(bytes32 => mapping(uint256 => uint256)) public pricePerBusinessAttribute;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
     event AllowTokenPayment(address _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
-    event BuisnessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price, uint256 issuerID);
+    event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price, uint256 issuerID);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
@@ -77,8 +77,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
         pricePerAttribute[keccak256("COUNTRY")] = 1 * 1e6; // $1
 
-        pricePerBuisnessAttribute[keccak256("DID")][0] = 2 * 1e6;
-        pricePerBuisnessAttribute[keccak256("COUNTRY")][0] = 1 * 1e6;
+        pricePerBusinessAttribute[keccak256("DID")][0] = 2 * 1e6;
+        pricePerBusinessAttribute[keccak256("COUNTRY")][0] = 1 * 1e6;
 
         mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
         mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
@@ -220,15 +220,13 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param issuerID the issuer
     /// @param _price price (wei)
-    function setBuisnessAttributePrice(bytes32 _attribute, uint256 issuerID, uint256 _price) external {
+    function setBusinessAttributePrice(bytes32 _attribute, uint256 issuerID, uint256 _price) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(pricePerBuisnessAttribute[_attribute][issuerID] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
-        // this implies issuers can set each other's values :/
-        // do we want this behavior?
-        uint256 oldPrice = pricePerBuisnessAttribute[_attribute][issuerID];
-        pricePerBuisnessAttribute[_attribute][issuerID] = _price;
+        require(pricePerBusinessAttribute[_attribute][issuerID] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = pricePerBusinessAttribute[_attribute][issuerID];
+        pricePerBusinessAttribute[_attribute][issuerID] = _price;
 
-        emit BuisnessAttributePriceUpdated(_attribute, oldPrice, _price,issuerID);
+        emit BusinessAttributePriceUpdated(_attribute, oldPrice, _price,issuerID);
     }
 
 
