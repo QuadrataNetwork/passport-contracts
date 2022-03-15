@@ -51,6 +51,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
+        require(_account.code.length > 0, "CONTRACTS_CANT_RECIEVE_PASSPORT");
         // only allow businesses to mint passports to contracts
         // different prices per issuer per attribute
         // how does the price for the attribute values array get distributed to issuers
