@@ -65,12 +65,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         // Add DID, COUNTRY, AML as valid attributes
         eligibleAttributes[keccak256("DID")] = true;
         eligibleAttributes[keccak256("COUNTRY")] = true;
-        eligibleAttributes[keccak256("KYB")] = true;
+        eligibleAttributes[keccak256("IS_BUSINESS")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
 
         supportedAttributes.push(keccak256("DID"));
         supportedAttributes.push(keccak256("COUNTRY"));
-        supportedAttributes.push(keccak256("KYB"));
+        supportedAttributes.push(keccak256("IS_BUSINESS"));
 
         // Set pricing
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2

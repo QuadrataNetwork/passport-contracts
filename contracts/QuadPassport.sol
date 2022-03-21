@@ -65,7 +65,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributes[_account][keccak256("COUNTRY")] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
         _attributes[_account][keccak256("DID")] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
         _attributesByDID[_quadDID][keccak256("AML")] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
-        _attributes[_account][keccak256("KYB")] = Attribute({value: _kyb, epoch: _issuedAt, issuer: issuer});
+        _attributes[_account][keccak256("IS_BUSINESS")] = Attribute({value: _kyb, epoch: _issuedAt, issuer: issuer});
         _mint(_account, _tokenId, 1, "");
     }
 
@@ -391,7 +391,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) public view override returns(uint256) {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
-        uint256 price = _attributes[_account][keccak256("KYB")].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         // Convert to Token Decimal
         uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
@@ -406,7 +406,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account
     ) public view override returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
-        uint256 price = _attributes[_account][keccak256("KYB")].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
     }
