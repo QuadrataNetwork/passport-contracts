@@ -53,7 +53,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(balanceOf(_account, _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
         if(_isBusiness == keccak256("FALSE"))
-            require(_account.code.length == 0, "ONLY_BUSINESSES_RECIEVE_PASSPORT");
+            require(_account.code.length == 0, "NON-BUSINESS_MUST_BE_EOA");
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_account, _tokenId, _quadDID, _aml, _country,_isBusiness, _issuedAt, _sig);
 
