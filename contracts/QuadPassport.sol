@@ -35,7 +35,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _quadDID Quadrata Decentralized Identity (raw value)
     /// @param _aml keccak256 of the AML status value
     /// @param _country keccak256 of the country value
-    /// @param _kyb flag for if user is a business
+    /// @param _kyb flag identifying if a wallet is a business or individual
     /// @param _issuedAt epoch when the passport has been issued by the Issuer
     /// @param _sig ECDSA signature computed by an eligible issuer to authorize the mint
     function mintPassport(
@@ -262,7 +262,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _issuedAt,
         bytes calldata _sig
     ) internal view returns(bytes32,address){
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country,_kyb,  _issuedAt));
+        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country, _kyb, _issuedAt));
 
         require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
 
