@@ -35,7 +35,6 @@ contract QuadGovernanceStore {
     address public oracle;
     address public treasury;
 
-    // Price in $USD (1e6 decimals) pricePerBusinessAttribute["AML"][ISSUER_ID] => $1
     mapping(bytes32 => uint256) public pricePerBusinessAttribute;
 }
 
