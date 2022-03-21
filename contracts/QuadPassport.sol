@@ -35,7 +35,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _quadDID Quadrata Decentralized Identity (raw value)
     /// @param _aml keccak256 of the AML status value
     /// @param _country keccak256 of the country value
-    /// @param _kyb flag for if user is a business
+    /// @param _kyb flag identifying if a wallet is a business or individual
     /// @param _issuedAt epoch when the passport has been issued by the Issuer
     /// @param _sig ECDSA signature computed by an eligible issuer to authorize the mint
     function mintPassport(
