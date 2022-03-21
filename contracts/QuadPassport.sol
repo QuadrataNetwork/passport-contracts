@@ -28,7 +28,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
 
-    /// @notice Claim and mint a wallet account Quadrata Passport, same input add KYB bytes32
+    /// @notice Claim and mint a wallet account Quadrata Passport
     /// @dev Only when authorized by an eligible issuer
     /// @param _account EOA/Contract to recieve the passport
     /// @param _tokenId tokenId of the Passport (1 for now)
