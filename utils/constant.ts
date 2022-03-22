@@ -18,6 +18,12 @@ export const PRICE_PER_ATTRIBUTES = {
   [ATTRIBUTE_DID]: 2,
 };
 
+export const PRICE_PER_BUSINESS_ATTRIBUTES = {
+  [ATTRIBUTE_AML]: 0,
+  [ATTRIBUTE_COUNTRY]: 2,
+  [ATTRIBUTE_DID]: 3,
+};
+
 export const PRICE_SET_ATTRIBUTE = {
   [ATTRIBUTE_AML]: parseEther("0.01"),
   [ATTRIBUTE_COUNTRY]: parseEther("0.01"),

@@ -16,6 +16,7 @@ const {
   TOKEN_ID,
   MINT_PRICE,
   PRICE_PER_ATTRIBUTES,
+  PRICE_PER_BUSINESS_ATTRIBUTES,
 } = require("../../utils/constant.ts");
 
 const {
@@ -75,9 +76,27 @@ describe("QuadPassport", async () => {
 
     await passport
       .connect(issuer)
-      .mintPassport(minterA.address, TOKEN_ID, did, aml, country,isBusiness, issuedAt, sig, {
+      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
         value: MINT_PRICE,
       });
+
+    const sigBusiness = await signMint(
+      issuer,
+      defi,
+      TOKEN_ID,
+      did,
+      aml,
+      country,
+      id("TRUE"),
+      issuedAt
+    );
+
+    await passport
+      .connect(minterA)
+      .mintPassport(defi.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sigBusiness, {
+        value: MINT_PRICE,
+      });
+
 
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
@@ -87,6 +106,10 @@ describe("QuadPassport", async () => {
     it("success (AML)", async () => {
       expect(
         await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, minterA.address)
+      ).to.equal(0);
+
+      expect(
+        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, defi.address)
       ).to.equal(0);
     });
 
@@ -99,6 +122,15 @@ describe("QuadPassport", async () => {
           await usdc.decimals()
         )
       );
+
+      expect(
+        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, defi.address)
+      ).to.equal(
+        parseUnits(
+          PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
+          await usdc.decimals()
+        )
+      );
     });
 
     it("success (DID)", async () => {
@@ -107,6 +139,15 @@ describe("QuadPassport", async () => {
       ).to.equal(
         parseUnits(
           PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(),
+          await usdc.decimals()
+        )
+      );
+
+      expect(
+        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, defi.address)
+      ).to.equal(
+        parseUnits(
+          PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(),
           await usdc.decimals()
         )
       );
@@ -146,6 +187,13 @@ describe("QuadPassport", async () => {
       expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
         priceAttribute
       );
+
+      const priceBusinessAttribute = parseEther(
+        (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
+      );
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, defi.address)).to.equal(
+        priceBusinessAttribute
+      );
     });
 
     it("success (DID)", async () => {
@@ -155,6 +203,14 @@ describe("QuadPassport", async () => {
 
       expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.equal(
         priceAttribute
+      );
+
+      const priceBusniessAttribute = parseEther(
+        (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
+      );
+
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, defi.address)).to.equal(
+        priceBusniessAttribute
       );
     });
 
