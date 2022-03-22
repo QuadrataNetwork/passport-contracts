@@ -726,4 +726,64 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
   });
+
+  describe("KYB", async () => {
+    it("fail - mint passport to contract if not a business", async () => {
+
+      const DeFi = await ethers.getContractFactory("DeFi");
+      const defi = await DeFi.deploy(passport.address);
+      await defi.deployed();
+
+      const sig = await signMint(
+        issuer,
+        defi,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const promise = passport
+        .connect(minterA)
+        .mintPassport(defi.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
+      await expect(promise).to.be.revertedWith("NON-BUSINESS_MUST_BE_EOA")
+
+
+    });
+
+    it("success - mint passport to contract", async () => {
+
+      const newIsBusiness = id("TRUE")
+
+      const DeFi = await ethers.getContractFactory("DeFi");
+      const defi = await DeFi.deploy(passport.address);
+      await defi.deployed();
+
+      const sig = await signMint(
+        issuer,
+        defi,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        newIsBusiness,
+        issuedAt
+      );
+
+      const promise = passport
+        .connect(minterA)
+        .mintPassport(defi.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
+      await promise;
+
+
+    });
+  })
 });
