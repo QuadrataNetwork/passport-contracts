@@ -41,6 +41,7 @@ describe("QuadPassport", async () => {
   let did: string;
   let aml: string;
   let country: string;
+  let isBusiness: string;
   let issuedAt: number;
 
   beforeEach(async () => {
@@ -48,6 +49,8 @@ describe("QuadPassport", async () => {
     did = formatBytes32String("did:quad:123456789abcdefghi");
     aml = id("LOW");
     country = id("FRANCE");
+    isBusiness = id("FALSE");
+
     issuedAt = Math.floor(new Date().getTime() / 1000);
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
@@ -66,12 +69,13 @@ describe("QuadPassport", async () => {
       did,
       aml,
       country,
+      isBusiness,
       issuedAt
     );
 
     await passport
-      .connect(minterA)
-      .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+      .connect(issuer)
+      .mintPassport(minterA.address, TOKEN_ID, did, aml, country,isBusiness, issuedAt, sig, {
         value: MINT_PRICE,
       });
 
@@ -82,13 +86,13 @@ describe("QuadPassport", async () => {
   describe("calculatePaymentToken", async () => {
     it("success (AML)", async () => {
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address)
+        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, minterA.address)
       ).to.equal(0);
     });
 
     it("success (COUNTRY)", async () => {
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address)
+        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, minterA.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
@@ -99,7 +103,7 @@ describe("QuadPassport", async () => {
 
     it("success (DID)", async () => {
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address)
+        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(),
@@ -113,33 +117,33 @@ describe("QuadPassport", async () => {
       const wbtc = await ERC20.deploy();
       await wbtc.deployed();
       await expect(
-        passport.calculatePaymentToken(ATTRIBUTE_DID, wbtc.address)
+        passport.calculatePaymentToken(ATTRIBUTE_DID, wbtc.address, minterA.address)
       ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
     });
 
     it("fail - wrong erc20", async () => {
       await expect(
-        passport.calculatePaymentToken(ATTRIBUTE_DID, admin.address)
+        passport.calculatePaymentToken(ATTRIBUTE_DID, admin.address, minterA.address)
       ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
     });
 
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
-      await expect(passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address))
+      await expect(passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address))
         .to.reverted;
     });
   });
 
   describe("calculatePaymentETH", async () => {
     it("success (AML)", async () => {
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_AML)).to.equal(0);
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_AML, minterA.address)).to.equal(0);
     });
 
     it("success (COUNTRY)", async () => {
       const priceAttribute = parseEther(
         (PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
       );
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY)).to.equal(
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
         priceAttribute
       );
     });
@@ -149,14 +153,14 @@ describe("QuadPassport", async () => {
         (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
       );
 
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID)).to.equal(
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.equal(
         priceAttribute
       );
     });
 
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
-      await expect(passport.calculatePaymentETH(ATTRIBUTE_DID)).to.reverted;
+      await expect(passport.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
     });
   });
 });
