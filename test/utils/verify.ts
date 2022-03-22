@@ -22,6 +22,7 @@ export const assertMint = async (
   did: string,
   aml: string,
   country: string,
+  isBusiness: string,
   issuedAt: number,
   tokenId: number = TOKEN_ID
 ) => {
@@ -32,6 +33,7 @@ export const assertMint = async (
     did,
     aml,
     country,
+    isBusiness,
     issuedAt
   );
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(0);
@@ -41,7 +43,7 @@ export const assertMint = async (
     : await passport.callStatic.withdrawETH(issuerTreasury.address);
   await passport
     .connect(account)
-    .mintPassport(tokenId, did, aml, country, issuedAt, sig, {
+    .mintPassport(account.address, tokenId, did, aml, country, isBusiness, issuedAt, sig, {
       value: MINT_PRICE,
     });
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(1);
