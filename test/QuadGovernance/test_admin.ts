@@ -304,7 +304,7 @@ describe("QuadGovernance", async () => {
     });
 
     it("succeed (turn false)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -327,7 +327,7 @@ describe("QuadGovernance", async () => {
     });
 
     it("succeed (turn false  - first element)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -354,7 +354,7 @@ describe("QuadGovernance", async () => {
     });
 
     it("succeed (getSupportedAttributesLength)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
       const newAttribute = ethers.utils.id("CREDIT");
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)

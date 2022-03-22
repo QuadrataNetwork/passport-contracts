@@ -8,12 +8,13 @@ export const signMint = async (
   quadDID: typeof DataHexString,
   aml: typeof DataHexString,
   country: typeof DataHexString,
+  isBusiness: typeof DataHexString,
   issuedAt: number
 ): Promise<typeof DataHexString> => {
   const hash = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["address", "uint256", "bytes32", "bytes32", "bytes32", "uint256"],
-      [minter.address, tokenId, quadDID, aml, country, issuedAt]
+      ["address", "uint256", "bytes32", "bytes32", "bytes32", "bytes32", "uint256"],
+      [minter.address, tokenId, quadDID, aml, country, isBusiness, issuedAt]
     )
   );
   const sig = await issuer.signMessage(ethers.utils.arrayify(hash));
