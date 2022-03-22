@@ -9,6 +9,7 @@ export const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 export const ATTRIBUTE_AML = ethers.utils.id("AML");
 export const ATTRIBUTE_COUNTRY = ethers.utils.id("COUNTRY");
 export const ATTRIBUTE_DID = ethers.utils.id("DID");
+export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
 export const TOKEN_ID = 1;
 
 export const PRICE_PER_ATTRIBUTES = {

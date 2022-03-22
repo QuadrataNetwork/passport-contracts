@@ -14,6 +14,7 @@ const {
   PRICE_PER_ATTRIBUTES,
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
+  ATTRIBUTE_IS_BUSINESS,
 } = require("../../utils/constant.ts");
 
 const {
@@ -323,7 +324,7 @@ describe("QuadGovernance", async () => {
         false
       );
       expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.getSupportedAttributesLength()).to.equal(1);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
     });
 
     it("succeed (turn false  - first element)", async () => {
@@ -348,9 +349,9 @@ describe("QuadGovernance", async () => {
         true
       );
       expect(await governance.supportedAttributes(0)).to.equal(
-        ATTRIBUTE_COUNTRY
+        ATTRIBUTE_IS_BUSINESS
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(1);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
     });
 
     it("succeed (getSupportedAttributesLength)", async () => {
@@ -359,7 +360,7 @@ describe("QuadGovernance", async () => {
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getSupportedAttributesLength()).to.equal(4);
     });
 
     it("fail (not admin)", async () => {
