@@ -15,6 +15,7 @@ const {
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
   ATTRIBUTE_IS_BUSINESS,
+  PRICE_PER_BUSINESS_ATTRIBUTES
 } = require("../../utils/constant.ts");
 
 const {
@@ -431,6 +432,20 @@ describe("QuadGovernance", async () => {
       expect(await governance.pricePerAttribute(ATTRIBUTE_DID)).to.equal(
         newPrice
       );
+
+      const newBusinessPrice = parseEther("3.14");
+      await expect(
+        governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, newBusinessPrice)
+      )
+        .to.emit(governance, "BusinessAttributePriceUpdated")
+        .withArgs(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6),
+          newBusinessPrice
+        );
+      expect(await governance.pricePerBusinessAttribute(ATTRIBUTE_DID)).to.equal(
+        newBusinessPrice
+      );
     });
 
     it("succeed (price 0)", async () => {
@@ -450,12 +465,29 @@ describe("QuadGovernance", async () => {
       expect(await governance.pricePerAttribute(ATTRIBUTE_DID)).to.equal(
         newPrice
       );
+
+      await expect(
+        governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, newPrice)
+      )
+        .to.emit(governance, "BusinessAttributePriceUpdated")
+        .withArgs(
+          ATTRIBUTE_DID,
+          parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6),
+          newPrice
+        );
+      expect(await governance.pricePerBusinessAttribute(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
     });
 
     it("fail (not admin)", async () => {
       const newPrice = parseEther("0");
       await expect(
         governance.setAttributePrice(ATTRIBUTE_DID, newPrice)
+      ).to.be.revertedWith("INVALID_ADMIN");
+
+      await expect(
+        governance.setBusinessAttributePrice(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
@@ -466,6 +498,15 @@ describe("QuadGovernance", async () => {
           .setAttributePrice(
             ATTRIBUTE_DID,
             parseUnits(PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+          )
+      ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
+
+      await expect(
+        governance
+          .connect(admin)
+          .setBusinessAttributePrice(
+            ATTRIBUTE_DID,
+            parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
           )
       ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
     });
