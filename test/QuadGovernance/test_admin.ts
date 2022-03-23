@@ -350,9 +350,9 @@ describe("QuadGovernance", async () => {
         true
       );
       expect(await governance.supportedAttributes(0)).to.equal(
-        ATTRIBUTE_DID
+        ATTRIBUTE_COUNTRY
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(1);
     });
 
     it("succeed (getSupportedAttributesLength)", async () => {
