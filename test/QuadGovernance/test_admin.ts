@@ -306,7 +306,7 @@ describe("QuadGovernance", async () => {
     });
 
     it("succeed (turn false)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -325,11 +325,11 @@ describe("QuadGovernance", async () => {
         false
       );
       expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(1);
     });
 
     it("succeed (turn false  - first element)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -350,18 +350,18 @@ describe("QuadGovernance", async () => {
         true
       );
       expect(await governance.supportedAttributes(0)).to.equal(
-        ATTRIBUTE_IS_BUSINESS
+        ATTRIBUTE_DID
       );
       expect(await governance.getSupportedAttributesLength()).to.equal(2);
     });
 
     it("succeed (getSupportedAttributesLength)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
       const newAttribute = ethers.utils.id("CREDIT");
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(4);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
     });
 
     it("fail (not admin)", async () => {
