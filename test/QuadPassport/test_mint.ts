@@ -272,6 +272,52 @@ describe("QuadPassport", async () => {
       );
     });
 
+    it("success mint -- EOA that is a business", async () => {
+      await assertMint(
+        minterB,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+      await assertGetAttributeFree(
+        minterB,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    });
+
     it("success - mint with mint price (0)", async () => {
       await governance.connect(admin).setMintPrice(0);
       const sig = await signMint(
