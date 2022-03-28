@@ -19,7 +19,8 @@ contract DeFi {
         bytes32 _attribute,
         address _tokenPayment
     ) public returns(bytes32,uint256) {
-        uint256 paymentAmount = passport.calculatePaymentToken(_attribute, _tokenPayment, address(this));
+        uint256 paymentAmount = passport.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
+        console.log(paymentAmount);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(passport), paymentAmount);
         (bytes32 attrValue, uint256 epoch) = passport.getAttribute(msg.sender, 1, _attribute, _tokenPayment);
@@ -36,7 +37,7 @@ contract DeFi {
     }
 
     function doSomethingETH(bytes32 _attribute) public payable returns(bytes32, uint256) {
-        uint256 paymentAmount = passport.calculatePaymentETH(_attribute, address(this));
+        uint256 paymentAmount = passport.calculatePaymentETH(_attribute, msg.sender);
         console.log("[doSomethingETH] paymentAmount", paymentAmount);
         console.log("[doSomethingETH] msg.value", msg.value);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");

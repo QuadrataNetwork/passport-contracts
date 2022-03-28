@@ -62,11 +62,10 @@ export const assertGetAttributeFree = async (
   attribute: string,
   expectedAttributeValue: string,
   expectedIssuedAt: number,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
 ) => {
-  const priceAttribute = parseEther(
-    (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
-  );
+  const priceAttribute = await passport.calculatePaymentETH(attribute, account.address)
+
   expect(priceAttribute).to.equal(parseEther("0"));
 
   const initialBalancePassport = await passport.provider.getBalance(
@@ -99,16 +98,14 @@ export const assertGetAttribute = async (
   attribute: string,
   expectedAttributeValue: string,
   expectedIssuedAt: number,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
+  opts: any
 ) => {
   try {
     await passport.withdrawToken(treasury.address, paymentToken.address);
     await passport.withdrawToken(issuerTreasury.address, paymentToken.address);
   } catch (err) {}
-  const priceAttribute = parseUnits(
-    PRICE_PER_ATTRIBUTES[attribute].toString(),
-    await paymentToken.decimals()
-  );
+  const priceAttribute = await passport.calculatePaymentToken(attribute, paymentToken.address, account.address)
   expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Retrieve initialBalances

@@ -10,6 +10,7 @@ const {
   ATTRIBUTE_DID,
   TOKEN_ID,
   MINT_PRICE,
+  PRICE_PER_BUSINESS_ATTRIBUTES
 } = require("../../utils/constant.ts");
 
 const {
@@ -78,12 +79,15 @@ describe("QuadPassport", async () => {
         value: MINT_PRICE,
       });
 
+    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
+    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
+
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
 
   describe("burnPassport", async () => {
-    it("success - burnPassport", async () => {
+    it("success - burnPassport, KYB: FALSE", async () => {
       await assertGetAttributeFree(
         minterA,
         defi,
@@ -140,6 +144,93 @@ describe("QuadPassport", async () => {
       await expect(
         passport.getAttribute(
           minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_DID,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("success - burnPassport, KYB: TRUE", async () => {
+
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport(minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
+      await assertGetAttributeFree(
+        minterB,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1,
+        {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY]}
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1,
+        {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID]}
+      );
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(minterB).burnPassport(TOKEN_ID);
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+      await expect(
+        passport.getAttribute(
+          minterB.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterB.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          minterB.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
           usdc.address
