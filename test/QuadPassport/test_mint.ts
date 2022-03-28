@@ -15,6 +15,7 @@ const {
   ATTRIBUTE_DID,
   TOKEN_ID,
   MINT_PRICE,
+  PRICE_PER_BUSINESS_ATTRIBUTES,
 } = require("../../utils/constant.ts");
 const { signMint } = require("../utils/signature.ts");
 const {
@@ -31,6 +32,7 @@ describe("QuadPassport", async () => {
   let governance: Contract; // eslint-disable-line no-unused-vars
   let usdc: Contract;
   let defi: Contract;
+  let mockBusiness: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -63,6 +65,14 @@ describe("QuadPassport", async () => {
         issuerTreasury,
         baseURI
       );
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
+      await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
+
       await usdc.transfer(minterA.address, parseUnits("1000", 6));
       await usdc.transfer(minterB.address, parseUnits("1000", 6));
     });
@@ -736,7 +746,7 @@ describe("QuadPassport", async () => {
 
       const sig = await signMint(
         issuer,
-        defi,
+        mockBusiness,
         TOKEN_ID,
         did,
         aml,
@@ -747,7 +757,7 @@ describe("QuadPassport", async () => {
 
       const promise = passport
         .connect(minterA)
-        .mintPassport(defi.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
           value: MINT_PRICE,
         });
 
@@ -766,7 +776,7 @@ describe("QuadPassport", async () => {
 
       const sig = await signMint(
         issuer,
-        defi,
+        mockBusiness,
         TOKEN_ID,
         did,
         aml,
@@ -777,7 +787,7 @@ describe("QuadPassport", async () => {
 
       const promise = passport
         .connect(minterA)
-        .mintPassport(defi.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt, sig, {
+        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt, sig, {
           value: MINT_PRICE,
         });
 

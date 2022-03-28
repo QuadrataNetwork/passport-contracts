@@ -30,6 +30,7 @@ describe("QuadPassport", async () => {
   let governance: Contract; // eslint-disable-line no-unused-vars
   let usdc: Contract;
   let defi: Contract; // eslint-disable-line no-unused-vars
+  let mockBusiness: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -64,6 +65,10 @@ describe("QuadPassport", async () => {
       baseURI
     );
 
+    const MockBusiness = await ethers.getContractFactory('MockBusiness')
+    mockBusiness = await MockBusiness.deploy(defi.address)
+    await mockBusiness.deployed()
+
     await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
     await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
 
@@ -86,7 +91,7 @@ describe("QuadPassport", async () => {
 
     const sigBusiness = await signMint(
       issuer,
-      defi,
+      mockBusiness,
       TOKEN_ID,
       did,
       aml,
@@ -97,7 +102,7 @@ describe("QuadPassport", async () => {
 
     await passport
       .connect(minterA)
-      .mintPassport(defi.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sigBusiness, {
+      .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sigBusiness, {
         value: MINT_PRICE,
       });
 
@@ -113,7 +118,7 @@ describe("QuadPassport", async () => {
       ).to.equal(0);
 
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, defi.address)
+        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, mockBusiness.address)
       ).to.equal(0);
     });
 
@@ -128,7 +133,7 @@ describe("QuadPassport", async () => {
       );
 
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, defi.address)
+        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, mockBusiness.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
@@ -148,7 +153,7 @@ describe("QuadPassport", async () => {
       );
 
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, defi.address)
+        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, mockBusiness.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(),
@@ -195,7 +200,7 @@ describe("QuadPassport", async () => {
       const priceBusinessAttribute = parseEther(
         (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
       );
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, defi.address)).to.equal(
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, mockBusiness.address)).to.equal(
         priceBusinessAttribute
       );
     });
@@ -213,7 +218,7 @@ describe("QuadPassport", async () => {
         (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
       );
 
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, defi.address)).to.equal(
+      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, mockBusiness.address)).to.equal(
         priceBusniessAttribute
       );
     });

@@ -20,7 +20,6 @@ contract DeFi {
         address _tokenPayment
     ) public returns(bytes32,uint256) {
         uint256 paymentAmount = passport.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
-        console.log(paymentAmount);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(passport), paymentAmount);
         (bytes32 attrValue, uint256 epoch) = passport.getAttribute(msg.sender, 1, _attribute, _tokenPayment);
