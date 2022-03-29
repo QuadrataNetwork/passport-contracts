@@ -80,9 +80,16 @@ export const assertGetAttributeFree = async (
   expect(response[0]).to.equal(expectedAttributeValue);
   expect(response[1]).to.equal(expectedIssuedAt);
 
-  await expect(defi.connect(opts?.signer || account).doSomethingFree(attribute))
-    .to.emit(defi, "GetAttributeEvent")
-    .withArgs(response[0], response[1]);
+  if (opts?.mockBusiness) {
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute))
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(response[0], response[1]);
+  } else {
+    await expect(defi.connect(opts?.signer || account).doSomethingFree(attribute))
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(response[0], response[1]);
+
+  }
 
   expect(await passport.provider.getBalance(passport.address)).to.equal(
     initialBalancePassport
@@ -106,8 +113,9 @@ export const assertGetAttribute = async (
   try {
     await passport.withdrawToken(treasury.address, paymentToken.address);
     await passport.withdrawToken(issuerTreasury.address, paymentToken.address);
-  } catch (err) {}
+  } catch (err) { }
   const priceAttribute = await passport.calculatePaymentToken(attribute, paymentToken.address, account.address)
+  const priceAttributeETH = await passport.calculatePaymentETH(attribute, account.address)
   expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Retrieve initialBalances
@@ -123,47 +131,55 @@ export const assertGetAttribute = async (
 
   // GetAttribute function
   await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
-  await expect(
-    defi.connect(opts?.signer || account).doSomething(attribute, paymentToken.address)
-  )
-    .to.emit(defi, "GetAttributeEvent")
-    .withArgs(expectedAttributeValue, expectedIssuedAt);
 
-  // Check Balance
-  expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
-    initialBalance.sub(priceAttribute)
-  );
-  expect(await paymentToken.balanceOf(passport.address)).to.equal(
-    priceAttribute.add(initialBalancePassport)
-  );
-  expect(await paymentToken.balanceOf(issuer.address)).to.equal(
-    initialBalanceIssuer
-  );
-  expect(await paymentToken.balanceOf(issuerTreasury.address)).to.equal(
-    initialBalanceIssuerTreasury
-  );
-  expect(await paymentToken.balanceOf(treasury.address)).to.equal(
-    initialBalanceProtocolTreasury
-  );
-  await expect(
-    passport.withdrawToken(issuer.address, paymentToken.address)
-  ).to.revertedWith("NOT_ENOUGH_BALANCE");
-  await expect(
-    passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
-  ).to.revertedWith("NOT_ENOUGH_BALANCE");
+  if (opts?.mockBusiness) {
+    await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeETH }))
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(expectedAttributeValue, expectedIssuedAt);
+  } else {
+    await expect(
+      defi.connect(opts?.signer || account).doSomething(attribute, paymentToken.address)
+    )
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(expectedAttributeValue, expectedIssuedAt);
+    // Check Balance
+    expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
+      initialBalance.sub(priceAttribute)
+    );
+    expect(await paymentToken.balanceOf(passport.address)).to.equal(
+      priceAttribute.add(initialBalancePassport)
+    );
+    expect(await paymentToken.balanceOf(issuer.address)).to.equal(
+      initialBalanceIssuer
+    );
+    expect(await paymentToken.balanceOf(issuerTreasury.address)).to.equal(
+      initialBalanceIssuerTreasury
+    );
+    expect(await paymentToken.balanceOf(treasury.address)).to.equal(
+      initialBalanceProtocolTreasury
+    );
+    await expect(
+      passport.withdrawToken(issuer.address, paymentToken.address)
+    ).to.revertedWith("NOT_ENOUGH_BALANCE");
+    await expect(
+      passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
+    ).to.revertedWith("NOT_ENOUGH_BALANCE");
 
-  expect(
-    await passport.callStatic.withdrawToken(
-      issuerTreasury.address,
-      paymentToken.address
-    )
-  ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
-  expect(
-    await passport.callStatic.withdrawToken(
-      treasury.address,
-      paymentToken.address
-    )
-  ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+    expect(
+      await passport.callStatic.withdrawToken(
+        issuerTreasury.address,
+        paymentToken.address
+      )
+    ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+    expect(
+      await passport.callStatic.withdrawToken(
+        treasury.address,
+        paymentToken.address
+      )
+    ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+  }
+
 };
 
 export const assertGetAttributeETH = async (

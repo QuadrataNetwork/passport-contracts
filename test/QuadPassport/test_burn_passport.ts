@@ -121,7 +121,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassport(TOKEN_ID);
+      await passport.connect(minterA).burnPassport(TOKEN_ID, minterA.address);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.getAttribute(
@@ -151,7 +151,112 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - burnPassport, KYB: TRUE", async () => {
+    it("success - burnPassport(KYB: TRUE, Smart Contract)", async () => {
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
+      await assertGetAttributeFree(
+        mockBusiness,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt,
+        1,
+        {
+          signer: minterB,
+          mockBusiness: mockBusiness
+        }
+      );
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1,
+        {
+          ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY],
+          signer: minterB,
+          mockBusiness: mockBusiness
+        }
+      );
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1,
+        {
+          ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID],
+          signer: minterB,
+          mockBusiness: mockBusiness
+        }
+      );
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(admin).burnPassport(TOKEN_ID, mockBusiness.address);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
+
+      await expect(
+        passport.getAttribute(
+          mockBusiness.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          mockBusiness.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+      await expect(
+        passport.getAttribute(
+          mockBusiness.address,
+          TOKEN_ID,
+          ATTRIBUTE_DID,
+          usdc.address
+        )
+      ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("success - burnPassport(KYB: TRUE, EOA)", async () => {
 
       const sig = await signMint(
         issuer,
@@ -208,7 +313,7 @@ describe("QuadPassport", async () => {
         {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID]}
       );
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterB).burnPassport(TOKEN_ID);
+      await passport.connect(minterB).burnPassport(TOKEN_ID, minterB.address);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.getAttribute(
@@ -239,7 +344,7 @@ describe("QuadPassport", async () => {
     });
 
     it("success - can remint after burn", async () => {
-      await passport.connect(minterA).burnPassport(TOKEN_ID);
+      await passport.connect(minterA).burnPassport(TOKEN_ID, minterA.address);
 
       const newIssuedAt = issuedAt + 1;
       const newAML = id("HIGH");
@@ -300,7 +405,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       const wrongTokenId = 2;
       await expect(
-        passport.connect(minterA).burnPassport(wrongTokenId)
+        passport.connect(minterA).burnPassport(wrongTokenId, minterA.address)
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
@@ -341,10 +446,88 @@ describe("QuadPassport", async () => {
     it("fail - passport non-existent", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.connect(minterB).burnPassport(TOKEN_ID)
+        passport.connect(minterB).burnPassport(TOKEN_ID, minterB.address)
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
+  });
+
+  it("fail - burnPassport(KYB: TRUE, Smart Contract): invalid sender", async () => {
+
+    const MockBusiness = await ethers.getContractFactory('MockBusiness')
+    const mockBusiness = await MockBusiness.deploy(defi.address)
+    await mockBusiness.deployed()
+
+    const sig = await signMint(
+      issuer,
+      mockBusiness,
+      TOKEN_ID,
+      did,
+      aml,
+      country,
+      id("TRUE"),
+      issuedAt
+    );
+
+
+    await passport
+      .connect(minterB)
+      .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sig, {
+        value: MINT_PRICE,
+      });
+
+    await assertGetAttributeFree(
+      mockBusiness,
+      defi,
+      passport,
+      ATTRIBUTE_AML,
+      aml,
+      issuedAt,
+      1,
+      {
+        signer: minterB,
+        mockBusiness: mockBusiness
+      }
+    );
+    await assertGetAttribute(
+      mockBusiness,
+      treasury,
+      issuer,
+      issuerTreasury,
+      usdc,
+      defi,
+      passport,
+      ATTRIBUTE_COUNTRY,
+      country,
+      issuedAt,
+      1,
+      {
+        ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY],
+        signer: minterB,
+        mockBusiness: mockBusiness
+      }
+    );
+    await assertGetAttribute(
+      mockBusiness,
+      treasury,
+      issuer,
+      issuerTreasury,
+      usdc,
+      defi,
+      passport,
+      ATTRIBUTE_DID,
+      did,
+      issuedAt,
+      1,
+      {
+        ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID],
+        signer: minterB,
+        mockBusiness: mockBusiness
+      }
+    );
+    expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+    await expect(passport.connect(minterB).burnPassport(TOKEN_ID, mockBusiness.address)).to.be.revertedWith("NOT_ALLOWED_TO_BURN");
+    expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
   });
 
   describe("burnPassportIssuer", async () => {
