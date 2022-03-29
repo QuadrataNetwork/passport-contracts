@@ -22,7 +22,9 @@ contract QuadGovernanceStore {
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
-    mapping(address => address) public issuersTreasury;
+    mapping(address => mapping(uint256 => address)) public issuersTreasury;
+
+    mapping(address => uint256) public issuerIds;
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -34,6 +36,7 @@ contract QuadGovernanceStore {
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
+    uint256 public issuerCounter;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
@@ -257,7 +260,8 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
         grantRole(ISSUER_ROLE, _issuer);
-        issuersTreasury[_issuer] = _treasury;
+        issuerIds[_issuer] = ++issuerCounter;
+        issuersTreasury[_issuer][issuerCounter] = _treasury;
 
         emit IssuerAdded(_issuer, _treasury);
     }
