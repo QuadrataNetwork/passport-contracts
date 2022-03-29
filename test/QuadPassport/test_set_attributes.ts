@@ -59,7 +59,7 @@ describe("QuadPassport", async () => {
     aml = id("LOW");
     country = id("FRANCE");
     isBusiness = id("FALSE");
-    issuedAt = Math.floor(new Date().getTime() / 1000);
+    issuedAt = 1000;
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
@@ -148,7 +148,7 @@ describe("QuadPassport", async () => {
 
     it("success - setAttribute(IS_BUSINESS) EOA", async () => {
       const newIsBusiness = id("TRUE");
-      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const newIssuedAt = 1010;
       await assertSetAttribute(
         minterA,
         issuer,
@@ -197,7 +197,7 @@ describe("QuadPassport", async () => {
 
     it("success - setAttribute(IS_BUSINESS) Smart Contract", async () => {
       const newIsBusiness = id("FALSE");
-      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const newIssuedAt = 1010;
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)

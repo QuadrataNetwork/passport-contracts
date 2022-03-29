@@ -77,8 +77,8 @@ export const assertGetAttributeFree = async (
     tokenId,
     attribute
   );
-  expect(response[0] - expectedAttributeValue).to.lessThanOrEqual(2);
-  expect(response[1] - expectedIssuedAt).to.lessThanOrEqual(2);
+  expect(response[0]).to.equal(expectedAttributeValue);
+  expect(response[1]).to.equal(expectedIssuedAt);
   await expect(defi.connect(opts?.signer || account).doSomethingFree(attribute))
     .to.emit(defi, "GetAttributeEvent")
     .withArgs(response[0], response[1]);
