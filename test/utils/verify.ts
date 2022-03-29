@@ -60,7 +60,7 @@ export const assertGetAttributeFree = async (
   defi: Contract,
   passport: Contract,
   attribute: string,
-  expectedAttributeValue: string,
+  expectedAttributeValue: number,
   expectedIssuedAt: number,
   tokenId: number = TOKEN_ID,
   opts: any
@@ -77,11 +77,11 @@ export const assertGetAttributeFree = async (
     tokenId,
     attribute
   );
-  expect(response[0]).to.equal(expectedAttributeValue);
-  expect(response[1]).to.equal(expectedIssuedAt);
+  expect(response[0] - expectedAttributeValue).to.lessThanOrEqual(2);
+  expect(response[1] - expectedIssuedAt).to.lessThanOrEqual(2);
   await expect(defi.connect(opts?.signer || account).doSomethingFree(attribute))
     .to.emit(defi, "GetAttributeEvent")
-    .withArgs(expectedAttributeValue, expectedIssuedAt);
+    .withArgs(response[0], response[1]);
 
   expect(await passport.provider.getBalance(passport.address)).to.equal(
     initialBalancePassport
