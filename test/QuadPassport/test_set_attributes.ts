@@ -164,7 +164,7 @@ describe("QuadPassport", async () => {
         passport,
         ATTRIBUTE_IS_BUSINESS,
         newIsBusiness,
-        issuedAt
+        newIssuedAt
       );
 
       // OK Fetching old value
@@ -197,7 +197,6 @@ describe("QuadPassport", async () => {
 
     it("success - setAttribute(IS_BUSINESS) Smart Contract", async () => {
       const newIsBusiness = id("FALSE");
-      const newIssuedAt = 1010;
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -227,7 +226,7 @@ describe("QuadPassport", async () => {
         passport,
         ATTRIBUTE_IS_BUSINESS,
         newIsBusiness,
-        newIssuedAt,
+        issuedAt,
         {signer: minterA}
       );
       await assertGetAttributeFree(
@@ -238,7 +237,9 @@ describe("QuadPassport", async () => {
         newIsBusiness,
         issuedAt,
         1,
-        {signer: minterA}
+        { signer: minterA,
+          isContract: true
+        }
       );
 
       // OK Fetching old value
