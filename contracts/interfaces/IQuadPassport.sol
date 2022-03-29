@@ -16,6 +16,7 @@ interface IQuadPassport is IERC1155Upgradeable {
     ) external payable;
 
     function setAttribute(
+        address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         bytes32 _value,

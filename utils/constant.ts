@@ -16,17 +16,20 @@ export const PRICE_PER_ATTRIBUTES = {
   [ATTRIBUTE_AML]: 0,
   [ATTRIBUTE_COUNTRY]: 1,
   [ATTRIBUTE_DID]: 2,
+  [ATTRIBUTE_IS_BUSINESS]: 0
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES = {
   [ATTRIBUTE_AML]: 0,
   [ATTRIBUTE_COUNTRY]: 2,
   [ATTRIBUTE_DID]: 3,
+  [ATTRIBUTE_IS_BUSINESS]: 0
 };
 
 export const PRICE_SET_ATTRIBUTE = {
   [ATTRIBUTE_AML]: parseEther("0.01"),
   [ATTRIBUTE_COUNTRY]: parseEther("0.01"),
+  [ATTRIBUTE_IS_BUSINESS]: parseEther("0.00"),
 };
 
 export const MINT_PRICE = parseEther("0.01");
