@@ -11,10 +11,6 @@ import "@openzeppelin/contracts-upgradeable/utils/introspection/IERC165Upgradeab
  * _Available since v3.1._
  */
 interface IERC1155Upgradeable is IERC165Upgradeable {
-    /**
-     * @dev Emitted when failure occurs in `_doSafeBatchTransferAcceptanceCheck`
-     */
-    event SafeTransferAcceptanceCheckFailure(string message);
 
     /**
      * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.

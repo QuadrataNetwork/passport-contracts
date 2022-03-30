@@ -32,11 +32,13 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
     /**
      * @dev See {_setURI}.
      */
-    function __ERC1155_init(string memory uri_) internal onlyInitializing {
+    function __ERC1155_init(string memory uri_) internal initializer {
+        __Context_init_unchained();
+        __ERC165_init_unchained();
         __ERC1155_init_unchained(uri_);
     }
 
-    function __ERC1155_init_unchained(string memory uri_) internal onlyInitializing {
+    function __ERC1155_init_unchained(string memory uri_) internal initializer {
         _setURI(uri_);
     }
 
@@ -105,7 +107,10 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
      * @dev See {IERC1155-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved) public virtual override {
-        _setApprovalForAll(_msgSender(), operator, approved);
+        require(_msgSender() != operator, "ERC1155: setting approval status for self");
+
+        _operatorApprovals[_msgSender()][operator] = approved;
+        emit ApprovalForAll(_msgSender(), operator, approved);
     }
 
     /**
@@ -251,32 +256,32 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
     }
 
     /**
-     * @dev Creates `amount` tokens of token type `id`, and assigns them to `to`.
+     * @dev Creates `amount` tokens of token type `id`, and assigns them to `account`.
      *
      * Emits a {TransferSingle} event.
      *
      * Requirements:
      *
-     * - `to` cannot be the zero address.
-     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
+     * - `account` cannot be the zero address.
+     * - If `account` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the
      * acceptance magic value.
      */
     function _mint(
-        address to,
+        address account,
         uint256 id,
         uint256 amount,
         bytes memory data
     ) internal virtual {
-        require(to != address(0), "ERC1155: mint to the zero address");
+        require(account != address(0), "ERC1155: mint to the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, address(0), to, _asSingletonArray(id), _asSingletonArray(amount), data);
+        _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), data);
 
-        _balances[id][to] += amount;
-        emit TransferSingle(operator, address(0), to, id, amount);
+        _balances[id][account] += amount;
+        emit TransferSingle(operator, address(0), account, id, amount);
 
-        _doSafeTransferAcceptanceCheck(operator, address(0), to, id, amount, data);
+        _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);
     }
 
     /**
@@ -311,31 +316,31 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
     }
 
     /**
-     * @dev Destroys `amount` tokens of token type `id` from `from`
+     * @dev Destroys `amount` tokens of token type `id` from `account`
      *
      * Requirements:
      *
-     * - `from` cannot be the zero address.
-     * - `from` must have at least `amount` tokens of token type `id`.
+     * - `account` cannot be the zero address.
+     * - `account` must have at least `amount` tokens of token type `id`.
      */
     function _burn(
-        address from,
+        address account,
         uint256 id,
         uint256 amount
     ) internal virtual {
-        require(from != address(0), "ERC1155: burn from the zero address");
+        require(account != address(0), "ERC1155: burn from the zero address");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, from, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
+        _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
 
-        uint256 fromBalance = _balances[id][from];
-        require(fromBalance >= amount, "ERC1155: burn amount exceeds balance");
+        uint256 accountBalance = _balances[id][account];
+        require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
         unchecked {
-            _balances[id][from] = fromBalance - amount;
+            _balances[id][account] = accountBalance - amount;
         }
 
-        emit TransferSingle(operator, from, address(0), id, amount);
+        emit TransferSingle(operator, account, address(0), id, amount);
     }
 
     /**
@@ -346,44 +351,29 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
      * - `ids` and `amounts` must have the same length.
      */
     function _burnBatch(
-        address from,
+        address account,
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal virtual {
-        require(from != address(0), "ERC1155: burn from the zero address");
+        require(account != address(0), "ERC1155: burn from the zero address");
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, from, address(0), ids, amounts, "");
+        _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
 
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
 
-            uint256 fromBalance = _balances[id][from];
-            require(fromBalance >= amount, "ERC1155: burn amount exceeds balance");
+            uint256 accountBalance = _balances[id][account];
+            require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
             unchecked {
-                _balances[id][from] = fromBalance - amount;
+                _balances[id][account] = accountBalance - amount;
             }
         }
 
-        emit TransferBatch(operator, from, address(0), ids, amounts);
-    }
-
-    /**
-     * @dev Approve `operator` to operate on all of `owner` tokens
-     *
-     * Emits a {ApprovalForAll} event.
-     */
-    function _setApprovalForAll(
-        address owner,
-        address operator,
-        bool approved
-    ) internal virtual {
-        require(owner != operator, "ERC1155: setting approval status for self");
-        _operatorApprovals[owner][operator] = approved;
-        emit ApprovalForAll(owner, operator, approved);
+        emit TransferBatch(operator, account, address(0), ids, amounts);
     }
 
     /**
@@ -465,11 +455,5 @@ contract ERC1155Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradea
 
         return array;
     }
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
     uint256[47] private __gap;
 }
