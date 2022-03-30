@@ -45,7 +45,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(balanceOf(_msgSender(), _tokenId) == 0, "PASSPORT_ALREADY_EXISTS");
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_msgSender(), _tokenId, _quadDID, _aml, _country, _issuedAt, _sig);
 
@@ -59,7 +58,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributes[_msgSender()][keccak256("COUNTRY")][issuerId] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
         _attributes[_msgSender()][keccak256("DID")][issuerId] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
         _attributesByDID[_quadDID][keccak256("AML")][issuerId] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
-        _mint(_msgSender(), _tokenId, 1, "");
+
+        if(balanceOf(_msgSender(), _tokenId) == 0)
+            _mint(_msgSender(), _tokenId, 1, "");
     }
 
     /// @notice Update or set a new attribute for your existing passport
@@ -201,10 +202,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        uint256 _issuerId
     ) external view override returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, _issuerId);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, 1);
         return (attribute.value, attribute.epoch);
     }
 
@@ -213,19 +213,19 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _issuerId the identification number of an issuer
     /// @return the value of the attribute
     function getAttribute(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address _tokenAddr,
-        uint256 _issuerId
+        address _tokenAddr
     ) external override returns(bytes32, uint256) {
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute,_issuerId);
-        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _issuerId);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute,1);
+        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, 1);
         return (attribute.value, attribute.epoch);
     }
+
+    // execluteIssuerAttribute
 
     function _getAttributeInternal(
         address _account,
