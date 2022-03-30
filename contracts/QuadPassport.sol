@@ -144,20 +144,17 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     /// @notice Burn your Quadrata passport
-    /// @dev Only owners of the passports may burn, and contracts that have passports may be burned by governor
+    /// @dev Only owner of the passport
     /// @param _tokenId tokenId of the Passport (1 for now)
     function burnPassport(
-        uint256 _tokenId,
-        address _account
+        uint256 _tokenId
     ) external override {
-        bool isContract = address(_account).code.length > 0;
-        require((_msgSender() == _account) || (isContract && (governance.hasRole(GOVERNANCE_ROLE, _msgSender()))), "NOT_ALLOWED_TO_BURN");
-        require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
-        _burn(_account, _tokenId, 1);
+        require(balanceOf(_msgSender(), _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
+        _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
             bytes32 attributeType = governance.supportedAttributes(i);
-            delete _attributes[_account][attributeType];
+            delete _attributes[_msgSender()][attributeType];
         }
     }
 
