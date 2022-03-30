@@ -28,6 +28,26 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         governance = QuadGovernance(_governanceContract);
     }
 
+    /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155BatchReceived` and recieving a passport
+    function _doSafeBatchTransferAcceptanceCheck(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
+    ) internal override {}
+
+    /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155Received` and recieving a passport
+    function _doSafeTransferAcceptanceCheck(
+        address operator,
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal override {}
+
 
     /// @notice Claim and mint a wallet account Quadrata Passport
     /// @dev Only when authorized by an eligible issuer

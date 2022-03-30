@@ -19,14 +19,4 @@ contract MockBusiness {
     function burn() public {
         IQuadPassport(defi.passport()).burnPassport(1);
     }
-
-
-    // Must be implemented otherwise tx will revert.
-    // See here: https://eips.ethereum.org/EIPS/eip-1155
-    function onERC1155Received(address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data) external returns(bytes4) {
-        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
-    }
-
-
-
 }
