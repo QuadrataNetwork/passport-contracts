@@ -258,17 +258,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address[] calldata _exclusions
     ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
         (
-            uint256 newLength,
-            bytes32[] memory oldAttributes,
-            uint256[] memory oldEpochs,
-            address[] memory oldIssuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
-
-        (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _formatAttributesBytesArray(newLength, oldAttributes, oldEpochs, oldIssuers);
+        ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
 
         return (attributes, epochs, issuers);
     }
@@ -307,41 +300,59 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return false;
     }
 
-    function _getAttributeArrayTupleVars(
-    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        return (
-            new bytes32[](governance.getIssuersLength()),
-            new uint256[](governance.getIssuersLength()),
-            new address[](governance.getIssuersLength())
-         );
+    function _getIncludedIssuers(
+        address[] calldata _exclusions
+    ) internal view returns(address[] memory) {
+        uint256 continuations = 0;
+        address[] memory issuers  = new address[](governance.getIssuersLength());
+
+        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
+            if(_hasIssuer(governance.issuers(i), _exclusions)) {
+                continuations++;
+                continue;
+            }
+
+            issuers[i] = governance.issuers(i);
+        }
+
+        // close the gap(s)
+        uint256 newLength = governance.getIssuersLength() - continuations;
+
+        address[] memory newIssuers  = new address[](newLength);
+        uint256 formattedIndex = 0;
+        for(uint256 i = 0; i < issuers.length; i++) {
+            if(issuers[i] == address(0)){
+                continue;
+            }
+
+            newIssuers[formattedIndex++] = issuers[i];
+        }
+
+
+
+        return issuers;
     }
 
     function _filterAttributes(
         address _account,
         bytes32 _attribute,
         address[] calldata _exclusions
-    ) internal view returns (uint256, bytes32[] memory, uint256[] memory, address[] memory) {
-        (bytes32[] memory attributes,
-        uint256[] memory epochs,
-        address[] memory issuers) = _getAttributeArrayTupleVars();
+    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
+        (address[] memory issuers)  = _getIncludedIssuers(_exclusions);
 
-        uint256 continuations = 0;
+        bytes32[] memory attributes = new bytes32[](issuers.length);
+        uint256[] memory epochs = new uint256[](issuers.length);
+
         Attribute memory attribute;
 
-        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            // governance.issuers(i) cannot be reused as local variable
-            if(_hasIssuer(governance.issuers(i), _exclusions)) {
-                continuations++;
-                continue;
-            }
-            attribute = _attributes[_account][_attribute][governance.issuers(i)];
+        for(uint256 i = 0; i < issuers.length; i++) {
+            attribute = _attributes[_account][_attribute][issuers[i]];
+
             attributes[i] = attribute.value;
             epochs[i] = attribute.epoch;
-            issuers[i] = governance.issuers(i);
         }
 
         return (
-            governance.getIssuersLength() - continuations,
             attributes,
             epochs,
             issuers
@@ -353,7 +364,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _exclusions
-    ) internal view returns(uint256, bytes32[] memory, uint256[] memory, address[] memory) {
+    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
