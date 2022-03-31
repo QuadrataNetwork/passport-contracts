@@ -34,11 +34,14 @@ contract QuadGovernanceStore {
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
+
+    mapping(bytes32 => uint256) public pricePerBusinessAttribute;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
     event AllowTokenPayment(address _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
@@ -63,12 +66,14 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         eligibleAttributes[keccak256("DID")] = true;
         eligibleAttributes[keccak256("COUNTRY")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
+
         supportedAttributes.push(keccak256("DID"));
         supportedAttributes.push(keccak256("COUNTRY"));
 
         // Set pricing
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
         pricePerAttribute[keccak256("COUNTRY")] = 1 * 1e6; // $1
+
         mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
         mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
         mintPrice = 0.01 ether;
@@ -202,6 +207,19 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         pricePerAttribute[_attribute] = _price;
 
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
+    }
+
+    /// @dev Set the price to update/set a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (wei)
+    function setBusinessAttributePrice(bytes32 _attribute, uint256 _price) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(pricePerBusinessAttribute[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = pricePerBusinessAttribute[_attribute];
+        pricePerBusinessAttribute[_attribute] = _price;
+
+        emit BusinessAttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
 

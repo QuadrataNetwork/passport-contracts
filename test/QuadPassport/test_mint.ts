@@ -15,6 +15,7 @@ const {
   ATTRIBUTE_DID,
   TOKEN_ID,
   MINT_PRICE,
+  PRICE_PER_BUSINESS_ATTRIBUTES,
 } = require("../../utils/constant.ts");
 const { signMint } = require("../utils/signature.ts");
 const {
@@ -31,6 +32,7 @@ describe("QuadPassport", async () => {
   let governance: Contract; // eslint-disable-line no-unused-vars
   let usdc: Contract;
   let defi: Contract;
+  let mockBusiness: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -42,6 +44,7 @@ describe("QuadPassport", async () => {
   let did: string;
   let aml: string;
   let country: string;
+  let isBusiness: string;
   let issuedAt: number;
 
   describe("mintPassport", async () => {
@@ -50,6 +53,7 @@ describe("QuadPassport", async () => {
       did = formatBytes32String("did:quad:123456789abcdefghi");
       aml = id("LOW");
       country = id("FRANCE");
+      isBusiness = id("FALSE");
       issuedAt = Math.floor(new Date().getTime() / 1000);
 
       [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
@@ -61,6 +65,14 @@ describe("QuadPassport", async () => {
         issuerTreasury,
         baseURI
       );
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
+      await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
+
       await usdc.transfer(minterA.address, parseUnits("1000", 6));
       await usdc.transfer(minterB.address, parseUnits("1000", 6));
     });
@@ -74,6 +86,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await assertGetAttributeFree(
@@ -119,6 +132,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await assertMint(
@@ -129,6 +143,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       for (const wallet of [minterA, minterB]) {
@@ -181,6 +196,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await passport.connect(issuer).withdrawETH(issuerTreasury.address);
@@ -192,6 +208,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       for (const wallet of [minterA, minterB]) {
@@ -255,6 +272,52 @@ describe("QuadPassport", async () => {
       );
     });
 
+    it("success mint -- EOA that is a business", async () => {
+      await assertMint(
+        minterB,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+      await assertGetAttributeFree(
+        minterB,
+        defi,
+        passport,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    });
+
     it("success - mint with mint price (0)", async () => {
       await governance.connect(admin).setMintPrice(0);
       const sig = await signMint(
@@ -264,11 +327,12 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await passport
         .connect(minterA)
-        .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+        .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
           value: parseEther("0"),
         });
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
@@ -288,6 +352,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await assertGetAttributeFree(
@@ -336,6 +401,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
 
@@ -347,6 +413,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt,
         newTokenId
       );
@@ -404,6 +471,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
 
@@ -452,6 +520,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       const wrongMintPrice = parseEther("1");
@@ -459,7 +528,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: wrongMintPrice,
           })
       ).to.be.revertedWith("INVALID_MINT_PRICE");
@@ -474,12 +543,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(badTokenId, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
@@ -494,6 +564,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
 
@@ -504,12 +575,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt + 1
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("PASSPORT_ALREADY_EXISTS");
@@ -530,6 +602,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
 
@@ -540,12 +613,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt + 1
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("PASSPORT_ALREADY_EXISTS");
@@ -560,12 +634,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, wrongAML, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -580,12 +655,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, wrongAML, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -600,12 +676,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, wrongCountry, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -620,12 +697,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, country, wrongIssuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, wrongIssuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -640,12 +718,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -660,6 +739,7 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       const sig = await signMint(
@@ -669,12 +749,13 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterB)
-          .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterB.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -689,15 +770,76 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
+        isBusiness,
         issuedAt
       );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
     });
   });
+
+  describe("KYB", async () => {
+    it("fail - mint passport to contract if not a business", async () => {
+
+      const DeFi = await ethers.getContractFactory("DeFi");
+      const defi = await DeFi.deploy(passport.address);
+      await defi.deployed();
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const promise = passport
+        .connect(minterA)
+        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
+      await expect(promise).to.be.revertedWith("NON-BUSINESS_MUST_BE_EOA")
+
+
+    });
+
+    it("success - mint passport to contract", async () => {
+
+      const newIsBusiness = id("TRUE")
+
+      const DeFi = await ethers.getContractFactory("DeFi");
+      const defi = await DeFi.deploy(passport.address);
+      await defi.deployed();
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        newIsBusiness,
+        issuedAt
+      );
+
+      const promise = passport
+        .connect(minterA)
+        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt, sig, {
+          value: MINT_PRICE,
+        });
+
+      await promise;
+
+
+    });
+  })
 });

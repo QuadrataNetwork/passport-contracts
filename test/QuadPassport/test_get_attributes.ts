@@ -47,6 +47,7 @@ describe("QuadPassport", async () => {
   let did: string;
   let aml: string;
   let country: string;
+  let isBusiness: string;
   let issuedAt: number;
 
   beforeEach(async () => {
@@ -54,6 +55,7 @@ describe("QuadPassport", async () => {
     did = formatBytes32String("did:quad:123456789abcdefghi");
     aml = id("LOW");
     country = id("FRANCE");
+    isBusiness = id("FALSE");
     issuedAt = Math.floor(new Date().getTime() / 1000);
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
@@ -72,12 +74,13 @@ describe("QuadPassport", async () => {
       did,
       aml,
       country,
+      isBusiness,
       issuedAt
     );
 
     await passport
       .connect(minterA)
-      .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
         value: MINT_PRICE,
       });
 
