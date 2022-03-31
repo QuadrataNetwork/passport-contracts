@@ -22,9 +22,13 @@ contract QuadPassportStore {
 
     // Passport attributes
     // Wallet => (Attribute Name => Attribute)
-    mapping(address => mapping(bytes32 => mapping(uint256 => Attribute))) internal _attributes;
+
+    /**
+    WILL CHANGING DIMENSIONALITY OF MAPPINGS CREATE STORAGE UPGRADE CONFLICT???
+     */
+    mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
     // DID => (AttributeType => Attribute(value, epoch))
-    mapping(bytes32 => mapping(bytes32 => mapping(uint256 => Attribute))) internal _attributesByDID;
+    mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
     // Wallet => (TokenId => IssuanceEpoch)
     mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
 

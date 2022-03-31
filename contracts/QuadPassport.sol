@@ -77,16 +77,13 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         (bytes32 hash, address issuer) = _verifyIssuerMint(_account, _tokenId, _quadDID, _aml, _country,_isBusiness, _issuedAt, _sig);
 
-        uint256 issuerId = governance.issuerIds(issuer);
-        require(issuerId != 0, "ISSUER_NOT_DEFINED");
-
-        _accountBalancesETH[governance.issuersTreasury(issuer, issuerId)] += governance.mintPrice();
+        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _validSignatures[_msgSender()][_tokenId] = _sig;
         _issuedEpoch[_msgSender()][_tokenId] = _issuedAt;
-        _attributes[_msgSender()][keccak256("COUNTRY")][issuerId] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
-        _attributes[_msgSender()][keccak256("DID")][issuerId] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
-        _attributesByDID[_quadDID][keccak256("AML")][issuerId] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
+        _attributes[_msgSender()][keccak256("COUNTRY")][issuer] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
+        _attributes[_msgSender()][keccak256("DID")][issuer] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
+        _attributesByDID[_quadDID][keccak256("AML")][issuer] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
 
         if(balanceOf(_msgSender(), _tokenId) == 0)
             _mint(_msgSender(), _tokenId, 1, "");
@@ -110,9 +107,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external payable override {
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_msgSender(), _tokenId, _attribute, _value, _issuedAt, _sig);
-        uint256 issuerId = governance.issuerIds(issuer);
-        require(issuerId != 0, "ISSUER_NOT_DEFINED");
-        _accountBalancesETH[governance.issuersTreasury(issuer, issuerId)] += governance.mintPricePerAttribute(_attribute);
+        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
         _usedHashes[hash] = true;
         _setAttributeInternal(_account, _tokenId, _attribute, _value, _issuedAt, issuer);
     }
@@ -150,20 +145,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
-        uint256 issuerId = governance.issuerIds(_issuer);
-        require(issuerId != 0, "ISSUER_NOT_DEFINED");
 
         if (governance.eligibleAttributes(_attribute)) {
-            _attributes[_account][_attribute][issuerId] = Attribute({
+            _attributes[_account][_attribute][_issuer] = Attribute({
                 value: _value,
                 epoch: _issuedAt,
                 issuer: _issuer
             });
         } else {
             // Attribute grouped by DID
-            bytes32 dID = _attributes[_account][keccak256("DID")][issuerId].value;
+            bytes32 dID = _attributes[_account][keccak256("DID")][_issuer].value;
             require(dID != bytes32(0), "DID_NOT_FOUND");
-            _attributesByDID[dID][_attribute][issuerId] = Attribute({
+            _attributesByDID[dID][_attribute][_issuer] = Attribute({
                 value: _value,
                 epoch: _issuedAt,
                 issuer: _issuer
@@ -181,9 +174,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
-            for(uint256 j = 1; j < governance.issuerCounter() + 1; j++) {
+            for(uint256 j = 1; j < governance.getIssuersLength(); j++) {
                 bytes32 attributeType = governance.supportedAttributes(i);
-                delete _attributes[_msgSender()][attributeType][j];
+                delete _attributes[_msgSender()][attributeType][governance.issuers(j)];
             }
         }
     }
@@ -200,10 +193,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
         _burn(_account, _tokenId, 1);
 
+        // TODO: Just delete attributes issued from sender
+        // TODO: Only call _burn if all attribute are default value
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
-                for(uint256 j = 1; j < governance.issuerCounter() + 1; j++) {
+            for(uint256 j = 1; j < governance.getIssuersLength(); j++) {
                 bytes32 attributeType = governance.supportedAttributes(i);
-                delete _attributes[_account][attributeType][j];
+                delete _attributes[_msgSender()][attributeType][governance.issuers(j)];
             }
         }
     }
@@ -216,11 +211,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function getAttributeETH(
         address _account,
         uint256 _tokenId,
-        bytes32 _attribute,
-        uint256 _issuerId
+        bytes32 _attribute
     ) external payable override returns(bytes32, uint256) {
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute,_issuerId);
-        _doETHPayment(_attribute, attribute.issuer,_issuerId);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
+        _doETHPayment(_attribute, attribute.issuer, _account);
         return (attribute.value, attribute.epoch);
     }
 
@@ -235,7 +229,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute
     ) external view override returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, 1);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
         return (attribute.value, attribute.epoch);
     }
 
@@ -251,8 +245,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _tokenAddr
     ) external override returns(bytes32, uint256) {
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute,1);
-        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, 1);
+        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute,governance.issuers(0));
+        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _account);
         return (attribute.value, attribute.epoch);
     }
 
@@ -262,7 +256,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        uint256 _issuerId
+        address _issuer
     ) internal view returns(Attribute memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
@@ -273,13 +267,13 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         );
         if (governance.eligibleAttributes(_attribute)) {
-            return _attributes[_account][_attribute][_issuerId];
+            return _attributes[_account][_attribute][_issuer];
         }
 
         // Attribute grouped by DID
-        bytes32 dID = _attributes[_account][keccak256("DID")][_issuerId].value;
+        bytes32 dID = _attributes[_account][keccak256("DID")][_issuer].value;
         require(dID != bytes32(0), "DID_NOT_FOUND");
-        return _attributesByDID[dID][_attribute][_issuerId];
+        return _attributesByDID[dID][_attribute][_issuer];
     }
 
     /// @dev Retrieve a signature for an existing passport minted (to be used across chain)
@@ -355,7 +349,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function _doETHPayment(
         bytes32 _attribute,
         address _issuer,
-        uint256 _issuerId
+        address _account
     ) internal {
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
@@ -365,7 +359,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             );
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
-            _accountBalancesETH[governance.issuersTreasury(_issuer, _issuerId)] += amountIssuer;
+            _accountBalancesETH[governance.issuersTreasury(_issuer)] += amountIssuer;
             _accountBalancesETH[governance.treasury()] += amountProtocol;
         }
     }
@@ -374,7 +368,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _tokenPayment,
         address _issuer,
-        uint256 _issuerId
+        address _account
     ) internal {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
@@ -385,7 +379,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             );
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
-            _accountBalances[_tokenPayment][governance.issuersTreasury(_issuer,_issuerId)] += amountIssuer;
+            _accountBalances[_tokenPayment][governance.issuersTreasury(_issuer)] += amountIssuer;
             _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;
         }
     }
@@ -428,7 +422,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) public view override returns(uint256) {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
-        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
+        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")][governance.issuers(0)].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         // Convert to Token Decimal
         uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
@@ -443,7 +438,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account
     ) public view override returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
-        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
+        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")][governance.issuers(0)].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
     }

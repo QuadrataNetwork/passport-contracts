@@ -22,9 +22,7 @@ contract QuadGovernanceStore {
     mapping(bytes32 => uint256) public mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
-    mapping(address => mapping(uint256 => address)) public issuersTreasury;
-
-    mapping(address => uint256) public issuerIds;
+    mapping(address => address) public issuersTreasury;
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -36,9 +34,11 @@ contract QuadGovernanceStore {
     IQuadPassport public passport;
     address public oracle;
     address public treasury;
-    uint256 public issuerCounter;
 
     mapping(bytes32 => uint256) public pricePerBusinessAttribute;
+
+    address[] public issuers;
+    mapping(address => uint256) internal issuerIndices;
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
@@ -50,6 +50,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
     event IssuerAdded(address _issuer, address _newTreasury);
+    event IssuerDeleted(address _issuer);
     event PassportAddressUpdated(address _oldAddress, address _address);
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
@@ -278,10 +279,30 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
         grantRole(ISSUER_ROLE, _issuer);
-        issuerIds[_issuer] = ++issuerCounter;
-        issuersTreasury[_issuer][issuerCounter] = _treasury;
+        issuersTreasury[_issuer] = _treasury;
+        issuerIndices[_issuer] = issuers.length;
+        issuers.push(_issuer);
 
         emit IssuerAdded(_issuer, _treasury);
+    }
+
+    /// @dev Delete issuer
+    /// @notice Restricted behind a TimelockController
+    /// @param _issuer address to remove
+    function deleteIssuer(address _issuer) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
+        require(issuerIndices[_issuer] < issuers.length, "OUT_OF_BOUNDS");
+
+        revokeRole(ISSUER_ROLE, _issuer);
+        // don't need to delete treasury
+        issuers[issuerIndices[_issuer]] = issuers[issuers.length-1];
+        issuerIndices[issuers[issuers.length-1]] = issuerIndices[_issuer];
+
+        delete issuerIndices[_issuer];
+        issuers.pop();
+
+        emit IssuerDeleted(_issuer);
     }
 
     /// @dev Authorize or Denied a payment to be received in Toke
@@ -338,6 +359,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function getPriceETH() external view returns (uint) {
         require(oracle != address(0), "ORACLE_ADDRESS_ZERO");
         return IUniswapAnchoredView(oracle).price("ETH");
+    }
+
+    /// @dev Get the length of issuers array
+    /// @return length
+    function getIssuersLength() public view returns (uint256) {
+        return issuers.length;
     }
 }
 
