@@ -28,7 +28,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         governance = QuadGovernance(_governanceContract);
     }
 
-    /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155BatchReceived` and recieving a passport
+    /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155BatchReceived` and receiving a passport
     function _doSafeBatchTransferAcceptanceCheck(
         address operator,
         address from,
