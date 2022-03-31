@@ -292,9 +292,22 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return (attributes, epochs, issuers);
     }
 
-    function _hasIssuer(address issuer, address[] memory issuers) internal pure returns(bool) {
+    function _hasIssuer(
+        address issuer,
+        address[] memory issuers
+    ) internal pure returns(bool) {
         for(uint256 i = 0; i < issuers.length; i++) {
             if(issuer == issuers[i])
+                return true;
+        }
+        return false;
+    }
+
+    function _hasValidAttribute(
+        bytes32[] memory attributes
+    ) internal pure returns(bool) {
+        for(uint256 i = 0; i < attributes.length; i++) {
+            if(attributes[i] != bytes32(0))
                 return true;
         }
         return false;
@@ -336,7 +349,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function _filterAttributes(
         address _account,
         bytes32 _attribute,
-        address[] calldata _exclusions
+        address[] calldata _exclusions,
+        bool groupByDID
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
         (address[] memory issuers)  = _getIncludedIssuers(_exclusions);
 
@@ -346,10 +360,26 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         Attribute memory attribute;
 
         for(uint256 i = 0; i < issuers.length; i++) {
-            attribute = _attributes[_account][_attribute][issuers[i]];
+            if(groupByDID) {
+                bytes32 dID = _attributes[_account][keccak256("DID")][issuers[i]].value;
+                if(dID != bytes32(0)) {
+                    continue;
+                }
 
+                attribute = _attributesByDID[dID][_attribute][issuers[i]];
+                attributes[i] = attribute.value;
+                epochs[i] = attribute.epoch;
+                continue;
+            }
+
+
+            attribute =_attributes[_account][_attribute][issuers[i]];
             attributes[i] = attribute.value;
             epochs[i] = attribute.epoch;
+        }
+
+        if(groupByDID) {
+            require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 
         return (
@@ -376,11 +406,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
 
         if (governance.eligibleAttributes(_attribute)) {
-            return _filterAttributes(_account, _attribute, _exclusions);
+            return _filterAttributes(_account, _attribute, _exclusions,false);
         }
 
         // Attribute grouped by DID
-        //return _filterAttributesByDId(_account, _attribute, _exclusions);
+        return _filterAttributes(_account, _attribute, _exclusions, true);
 
     }
 
