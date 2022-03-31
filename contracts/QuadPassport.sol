@@ -250,9 +250,84 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return (attribute.value, attribute.epoch);
     }
 
-    // execluteIssuerAttribute
+    function getAttributes(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address _tokenAddr,
+        address[] calldata _exclusions
+    ) external returns(bytes[] memory) {
 
-    function _getAttributeInternal(
+
+    }
+
+    function _getAttributesInternal(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address[] calldata _exclusions
+    ) internal view returns(bytes[] memory) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
+        require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
+        require(governance.eligibleAttributes(_attribute)
+            || governance.eligibleAttributesByDID(_attribute),
+            "ATTRIBUTE_NOT_ELIGIBLE"
+
+        );
+
+        bytes[] memory attributeValues = new bytes[](governance.getIssuersLength()*3);
+
+        if (governance.eligibleAttributes(_attribute)) {
+            for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
+                address issuer = governance.issuers(i);
+                bool shouldContinue = false;
+                for(uint256 j = 0; j < _exclusions.length; j++) {
+                    if(issuer == _exclusions[j]) {
+                        shouldContinue = true;
+                        break;
+                    }
+                }
+                if(shouldContinue)
+                    continue;
+
+                Attribute memory attribute = _attributes[_account][_attribute][issuer];
+                attributeValues[i] = abi.encode(attribute.value);
+                attributeValues[i*2] = abi.encode(attribute.epoch);
+                attributeValues[i*3] = abi.encode(issuer);
+            }
+            return attributeValues;
+        }
+
+        // Attribute grouped by DID
+        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
+           address issuer = governance.issuers(i);
+           bool shouldContinue = false;
+            for(uint256 j = 0; j < _exclusions.length; j++) {
+                if(issuer == _exclusions[j]) {
+                    shouldContinue = true;
+                    break;
+                }
+            }
+            if(shouldContinue)
+                continue;
+
+
+           Attribute memory attribute = _attributes[_account][keccak256("DID")][issuer];
+           if(attribute.value == bytes32(0)) {
+               continue;
+           }
+           attributeValues[i] = abi.encode(attribute.value);
+           attributeValues[i*2] = abi.encode(attribute.epoch);
+           attributeValues[i*3] = abi.encode(issuer);
+        }
+        require(attributeValues.length != 0, "DID_NOT_FOUND");
+
+        return attributeValues;
+
+    }
+
+        function _getAttributeInternal(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
