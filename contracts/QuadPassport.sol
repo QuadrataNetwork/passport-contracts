@@ -316,9 +316,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function _getIncludedIssuers(
         address[] calldata _exclusions
     ) internal view returns(address[] memory) {
-        uint256 continuations = 0;
         address[] memory issuers  = new address[](governance.getIssuersLength());
 
+        uint256 continuations = 0;
         for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
             if(_hasIssuer(governance.issuers(i), _exclusions)) {
                 continuations++;
