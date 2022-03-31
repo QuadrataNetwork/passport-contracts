@@ -257,24 +257,36 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _tokenAddr,
         address[] calldata _exclusions
     ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        bytes[] memory attributes = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
+        (
+            uint256 newLength,
+            bytes32[] memory oldAttributes,
+            uint256[] memory oldEpochs,
+            address[] memory oldIssuers
+        ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
 
-        return _formatAttributesBytesArray(attributes);
+        (
+            bytes32[] memory attributes,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = _formatAttributesBytesArray(newLength, oldAttributes, oldEpochs, oldIssuers);
+
+        return (attributes, epochs, issuers);
     }
 
     function _formatAttributesBytesArray(
-        bytes[] memory _attributeData
-    ) internal returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        uint256 newLength = abi.decode(_attributeData[0], (uint256));
+            uint256 newLength,
+            bytes32[] memory oldAttributes,
+            uint256[] memory oldEpochs,
+            address[] memory oldIssuers
+    ) internal pure returns (bytes32[] memory, uint256[] memory, address[] memory) {
         bytes32[] memory attributes = new bytes32[](newLength);
         uint256[] memory epochs = new uint256[](newLength);
         address[] memory issuers = new address[](newLength);
-
         uint256 formattedIndex = 0;
-        for(uint256 i = 1; i < _attributeData.length; i+=3) {
-            bytes32 attribute = abi.decode(_attributeData[i], (bytes32));
-            uint256 epoch = abi.decode(_attributeData[i+1], (uint256));
-            address issuer = abi.decode(_attributeData[i+2], (address));
+        for(uint256 i = 0; i < oldAttributes.length; i++) {
+            bytes32 attribute = oldAttributes[i];
+            uint256 epoch = oldEpochs[i];
+            address issuer = oldIssuers[i];
             if(attribute == bytes32(0) && epoch == 0 && issuer == address(0))
                 continue;
 
@@ -292,7 +304,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _exclusions
-    ) internal view returns(bytes[] memory) {
+    ) internal view returns(uint256 newLength, bytes32[] memory, uint256[] memory, address[] memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
@@ -302,11 +314,14 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         );
 
-        bytes[] memory attributeValues = new bytes[](governance.getIssuersLength()*3 + 1);
+        bytes32[] memory attributes = new bytes32[](governance.getIssuersLength());
+        uint256[] memory epochs = new uint256[](governance.getIssuersLength());
+        address[] memory issuers = new address[](governance.getIssuersLength());
+
         uint256 continuations = 0;
 
         if (governance.eligibleAttributes(_attribute)) {
-            for(uint256 i = 1; i < governance.getIssuersLength()+1; i++) {
+            for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
                 address issuer = governance.issuers(i);
                 bool shouldContinue = false;
                 for(uint256 j = 0; j < _exclusions.length; j++) {
@@ -321,12 +336,16 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
                 }
 
                 Attribute memory attribute = _attributes[_account][_attribute][issuer];
-                attributeValues[i] = abi.encode(attribute.value);
-                attributeValues[i*2] = abi.encode(attribute.epoch);
-                attributeValues[i*3] = abi.encode(issuer);
+                attributes[i] = attribute.value;
+                epochs[i] = attribute.epoch;
+                issuers[i] = issuer;
             }
-            attributeValues[0] = abi.encode(governance.getIssuersLength() - continuations);
-            return attributeValues;
+            return (
+                governance.getIssuersLength() - continuations,
+                attributes,
+                epochs,
+                issuers
+            );
         }
 
         // Attribute grouped by DID
@@ -346,18 +365,22 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             }
 
 
-           Attribute memory attribute = _attributes[_account][keccak256("DID")][issuer];
-           if(attribute.value == bytes32(0)) {
-               continue;
-           }
-           attributeValues[i] = abi.encode(attribute.value);
-           attributeValues[i*2] = abi.encode(attribute.epoch);
-           attributeValues[i*3] = abi.encode(issuer);
+            Attribute memory attribute = _attributes[_account][keccak256("DID")][issuer];
+            if(attribute.value == bytes32(0)) {
+                continue;
+            }
+            attributes[i] = attribute.value;
+            epochs[i] = attribute.epoch;
+            issuers[i] = issuer;
         }
         require(governance.getIssuersLength() != continuations, "DID_NOT_FOUND");
 
-        attributeValues[0] = abi.encode(governance.getIssuersLength() - continuations);
-        return attributeValues;
+        return (
+            governance.getIssuersLength() - continuations,
+            attributes,
+            epochs,
+            issuers
+        );
 
     }
 
