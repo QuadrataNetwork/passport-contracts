@@ -38,7 +38,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes memory data
     ) internal override {}
 
-    /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155Received` and recieving a passport
+    /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155Received` and receiving a passport
     function _doSafeTransferAcceptanceCheck(
         address operator,
         address from,
