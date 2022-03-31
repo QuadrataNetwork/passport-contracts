@@ -299,12 +299,61 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return (attributes, epochs, issuers);
     }
 
+    function _hasIssuer(address issuer, address[] memory issuers) internal pure returns(bool) {
+        for(uint256 i = 0; i < issuers.length; i++) {
+            if(issuer == issuers[i])
+                return true;
+        }
+        return false;
+    }
+
+    function _getAttributeArrayTupleVars(
+    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
+        return (
+            new bytes32[](governance.getIssuersLength()),
+            new uint256[](governance.getIssuersLength()),
+            new address[](governance.getIssuersLength())
+         );
+    }
+
+    function _filterAttributes(
+        address _account,
+        bytes32 _attribute,
+        address[] calldata _exclusions
+    ) internal view returns (uint256, bytes32[] memory, uint256[] memory, address[] memory) {
+        (bytes32[] memory attributes,
+        uint256[] memory epochs,
+        address[] memory issuers) = _getAttributeArrayTupleVars();
+
+        uint256 continuations = 0;
+        Attribute memory attribute;
+
+        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
+            // governance.issuers(i) cannot be reused as local variable
+            if(_hasIssuer(governance.issuers(i), _exclusions)) {
+                continuations++;
+                continue;
+            }
+            attribute = _attributes[_account][_attribute][governance.issuers(i)];
+            attributes[i] = attribute.value;
+            epochs[i] = attribute.epoch;
+            issuers[i] = governance.issuers(i);
+        }
+
+        return (
+            governance.getIssuersLength() - continuations,
+            attributes,
+            epochs,
+            issuers
+        );
+    }
+
     function _getAttributesInternal(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _exclusions
-    ) internal view returns(uint256 newLength, bytes32[] memory, uint256[] memory, address[] memory) {
+    ) internal view returns(uint256, bytes32[] memory, uint256[] memory, address[] memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
@@ -314,73 +363,13 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         );
 
-        bytes32[] memory attributes = new bytes32[](governance.getIssuersLength());
-        uint256[] memory epochs = new uint256[](governance.getIssuersLength());
-        address[] memory issuers = new address[](governance.getIssuersLength());
-
-        uint256 continuations = 0;
 
         if (governance.eligibleAttributes(_attribute)) {
-            for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-                address issuer = governance.issuers(i);
-                bool shouldContinue = false;
-                for(uint256 j = 0; j < _exclusions.length; j++) {
-                    if(issuer == _exclusions[j]) {
-                        shouldContinue = true;
-                        break;
-                    }
-                }
-                if(shouldContinue) {
-                    continuations++;
-                    continue;
-                }
-
-                Attribute memory attribute = _attributes[_account][_attribute][issuer];
-                attributes[i] = attribute.value;
-                epochs[i] = attribute.epoch;
-                issuers[i] = issuer;
-            }
-            return (
-                governance.getIssuersLength() - continuations,
-                attributes,
-                epochs,
-                issuers
-            );
+            return _filterAttributes(_account, _attribute, _exclusions);
         }
 
         // Attribute grouped by DID
-        for(uint256 i = 1; i < governance.getIssuersLength()+1; i++) {
-            address issuer = governance.issuers(i);
-            bool shouldContinue = false;
-
-            for(uint256 j = 0; j < _exclusions.length; j++) {
-                if(issuer == _exclusions[j]) {
-                    shouldContinue = true;
-                    break;
-                }
-            }
-            if(shouldContinue) {
-                continuations++;
-                continue;
-            }
-
-
-            Attribute memory attribute = _attributes[_account][keccak256("DID")][issuer];
-            if(attribute.value == bytes32(0)) {
-                continue;
-            }
-            attributes[i] = attribute.value;
-            epochs[i] = attribute.epoch;
-            issuers[i] = issuer;
-        }
-        require(governance.getIssuersLength() != continuations, "DID_NOT_FOUND");
-
-        return (
-            governance.getIssuersLength() - continuations,
-            attributes,
-            epochs,
-            issuers
-        );
+        //return _filterAttributesByDId(_account, _attribute, _exclusions);
 
     }
 
