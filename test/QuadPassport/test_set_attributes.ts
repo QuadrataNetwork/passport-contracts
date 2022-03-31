@@ -16,6 +16,8 @@ const {
   TOKEN_ID,
   MINT_PRICE,
   PRICE_SET_ATTRIBUTE,
+  ATTRIBUTE_IS_BUSINESS,
+  PRICE_PER_BUSINESS_ATTRIBUTES
 } = require("../../utils/constant.ts");
 
 const { signSetAttribute } = require("../utils/signature.ts");
@@ -48,6 +50,7 @@ describe("QuadPassport", async () => {
   let did: string;
   let aml: string;
   let country: string;
+  let isBusiness: string;
   let issuedAt: number;
 
   beforeEach(async () => {
@@ -55,7 +58,8 @@ describe("QuadPassport", async () => {
     did = formatBytes32String("did:quad:123456789abcdefghi");
     aml = id("LOW");
     country = id("FRANCE");
-    issuedAt = Math.floor(new Date().getTime() / 1000);
+    isBusiness = id("FALSE");
+    issuedAt = 1000;
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
@@ -66,6 +70,12 @@ describe("QuadPassport", async () => {
       issuerTreasury,
       baseURI
     );
+
+    await governance.connect(admin).setEligibleAttribute(id("IS_BUSINESS"), true)
+    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
+    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
+
+
     const sig = await signMint(
       issuer,
       minterA,
@@ -73,12 +83,13 @@ describe("QuadPassport", async () => {
       did,
       aml,
       country,
+      isBusiness,
       issuedAt
     );
 
     await passport
       .connect(minterA)
-      .mintPassport(TOKEN_ID, did, aml, country, issuedAt, sig, {
+      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
         value: MINT_PRICE,
       });
 
@@ -134,6 +145,135 @@ describe("QuadPassport", async () => {
         issuedAt
       );
     });
+
+    it("success - setAttribute(IS_BUSINESS) EOA", async () => {
+      const newIsBusiness = id("TRUE");
+      const newIssuedAt = 1010;
+      await assertSetAttribute(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      await assertGetAttributeFree(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    });
+
+    it("success - setAttribute(IS_BUSINESS) Smart Contract", async () => {
+      const newIsBusiness = id("FALSE");
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sigBusiness, {
+          value: MINT_PRICE,
+        });
+
+      await assertSetAttribute(
+        mockBusiness,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        issuedAt,
+        {signer: minterA}
+      );
+      await assertGetAttributeFree(
+        mockBusiness,
+        defi,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        issuedAt,
+        1,
+        { signer: minterA,
+          isContract: true
+        }
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1,
+        {signer: minterA}
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1,
+        {signer: minterA}
+      );
+    });
+
 
     it("success - setAttribute(COUNTRY)", async () => {
       const newCountry = id("USA");
@@ -208,7 +348,7 @@ describe("QuadPassport", async () => {
       );
       await passport
         .connect(minterA)
-        .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+        .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
           value: parseEther("0"),
         });
       await assertGetAttributeFree(
@@ -332,7 +472,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_DID, newDid, issuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_DID, newDid, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_DID],
           })
       ).to.revertedWith("MUST_BURN_AND_MINT");
@@ -354,6 +494,7 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterA)
           .setAttribute(
+            minterA.address,
             invalidTokenId,
             ATTRIBUTE_COUNTRY,
             newCountry,
@@ -379,6 +520,7 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterB)
           .setAttribute(
+            minterB.address,
             TOKEN_ID,
             ATTRIBUTE_COUNTRY,
             newCountry,
@@ -410,7 +552,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY],
           })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -428,7 +570,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
             value: parseEther("1"),
           })
       ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
@@ -457,13 +599,13 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
-    it("fail - using someone else signature", async () => {
+    it("success - anyone may sign for minterB", async () => {
       const newAML = id("HIGH");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const sig = await signSetAttribute(
@@ -474,13 +616,11 @@ describe("QuadPassport", async () => {
         newAML,
         newIssuedAt
       );
-      await expect(
-        passport
+      await passport
           .connect(minterB)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
-      ).to.revertedWith("INVALID_ISSUER");
     });
 
     it("fail - not issuer role", async () => {
@@ -498,7 +638,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
@@ -517,7 +657,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(wrongTokenId, ATTRIBUTE_AML, aml, issuedAt, sig, {
+          .setAttribute(minterA.address, wrongTokenId, ATTRIBUTE_AML, aml, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
@@ -536,7 +676,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, wrongAttribute, aml, issuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, wrongAttribute, aml, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
@@ -555,7 +695,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, wrongAML, issuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, wrongAML, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
@@ -574,7 +714,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .setAttribute(TOKEN_ID, ATTRIBUTE_AML, aml, wrongIssuedAt, sig, {
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, aml, wrongIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
