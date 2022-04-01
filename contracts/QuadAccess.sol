@@ -7,6 +7,10 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./QuadPassport.sol";
 import "./QuadGovernance.sol";
 
+
+/// @title Data Accessor Contract for Quadrata Passport
+/// @author Fabrice Cheng, Theodore Clapp
+/// @notice All accessor functions for reading and pricing quadrata attributes
 contract QuadAccessStore {
 
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
@@ -292,6 +296,7 @@ contract QuadAccessStore {
         address[] memory _issuers,
         address _account
     ) internal {
+        //TODO: filter out issuers reporting null data for a given attribute to ensure they don't get paid
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account) / _issuers.length;
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
@@ -340,6 +345,15 @@ contract QuadAccessStore {
         uint256 price = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0)).value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
+    }
+
+    function isDataAvailable(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) internal view returns(bool) {
+        QuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
+        return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
  }

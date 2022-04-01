@@ -8,7 +8,7 @@ import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
 
 /// @title Governance Contract for Quadrata Passport
-/// @author Fabrice Cheng
+/// @author Fabrice Cheng, Theodore Clapp
 /// @notice All admin functions to govern the QuadPassport contract
 contract QuadGovernanceStore {
     // Admin Functions

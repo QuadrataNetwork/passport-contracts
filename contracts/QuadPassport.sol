@@ -9,6 +9,10 @@ import "./ERC1155/ERC1155Upgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./QuadGovernance.sol";
 
+/// @title Quadrata Web3 Identity Passport
+/// @author Fabrice Cheng, Theodore Clapp
+/// @notice This represents wallet accounts Web3 Passport
+/// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassportStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
@@ -46,13 +50,6 @@ contract QuadPassportStore {
     bytes32 public constant ACCESSOR_ROLE = keccak256("ACCESSOR_ROLE");
 
 }
-
-
-
-/// @title Quadrata Web3 Identity Passport
-/// @author Fabrice Cheng
-/// @notice This represents wallet accounts Web3 Passport
-/// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     event GovernanceUpdated(address _oldGovernance, address _governance);
 
@@ -231,16 +228,28 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external override {
         require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
-        _burn(_account, _tokenId, 1);
 
-        // TODO: Just delete attributes issued from sender
-        // TODO: Only call _burn if all attribute are default value
+        // TODO: Should this function delete DID values too???
+
+        // only delete attributes from sender
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
-            for(uint256 j = 1; j < governance.getIssuersLength(); j++) {
-                bytes32 attributeType = governance.supportedAttributes(i);
-                delete _attributes[_msgSender()][attributeType][governance.issuers(j)];
+            bytes32 attributeType = governance.supportedAttributes(i);
+            delete _attributes[_account][attributeType][_msgSender()];
+        }
+
+        // if another attribute is found, keep the passport, otherwise burn if all values are null
+        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
+            bytes32 attributeType = governance.supportedAttributes(i);
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+                Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j)];
+                if(attribute.value != bytes32(0) && attribute.epoch != 0) {
+                    return;
+                }
+
             }
         }
+
+        _burn(_account, _tokenId, 1);
     }
 
 
