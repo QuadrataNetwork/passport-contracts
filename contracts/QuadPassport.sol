@@ -6,8 +6,45 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "./ERC1155/ERC1155Upgradeable.sol";
-import "./QuadPassportStore.sol";
 import "./interfaces/IQuadPassport.sol";
+import "./QuadGovernance.sol";
+
+contract QuadPassportStore {
+    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
+    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+
+    QuadGovernance public governance;
+
+    struct Attribute {
+        bytes32 value;
+        uint256 epoch;
+        address issuer;
+    }
+
+    // Hash => bool
+    mapping(bytes32 => bool) internal _usedHashes;
+    // Wallet => (TokenId => Signatures)
+    mapping(address => mapping(uint256 => bytes)) internal _validSignatures;
+
+    // Passport attributes
+    // Wallet => (Attribute Name => Attribute)
+
+    /**
+    TODO: WILL CHANGING DIMENSIONALITY OF MAPPINGS CREATE STORAGE UPGRADE CONFLICT???
+     */
+    mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
+    // DID => (AttributeType => Attribute(value, epoch))
+    mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
+    // Wallet => (TokenId => IssuanceEpoch)
+    mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
+
+    // Accounting
+    // ERC20 => Account => balance
+    mapping(address => mapping(address => uint256)) internal _accountBalances;
+    mapping(address => uint256) internal _accountBalancesETH;
+}
+
+
 
 /// @title Quadrata Web3 Identity Passport
 /// @author Fabrice Cheng
