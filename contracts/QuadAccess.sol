@@ -96,6 +96,8 @@ contract QuadAccessStore {
             address[] memory issuers
         ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
 
+        _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
+
         return (attributes, epochs, issuers);
     }
 
@@ -280,6 +282,28 @@ contract QuadAccessStore {
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
             passport.accountBalances(_tokenPayment,governance.issuersTreasury(_issuer), amountIssuer);
+            passport.accountBalances(_tokenPayment,governance.treasury(), amountProtocol);
+        }
+    }
+
+    function _doTokenPayments(
+        bytes32 _attribute,
+        address _tokenPayment,
+        address[] memory _issuers,
+        address _account
+    ) internal {
+        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account) / _issuers.length;
+        if (amountToken > 0) {
+            IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
+            require(
+                erc20.transferFrom(msg.sender, address(this), amountToken),
+                "INSUFFICIENT_PAYMENT_ALLOWANCE"
+            );
+            uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
+            uint256 amountProtocol = amountToken - amountIssuer;
+            for(uint256 i = 0; i < _issuers.length; i++) {
+                passport.accountBalances(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer);
+            }
             passport.accountBalances(_tokenPayment,governance.treasury(), amountProtocol);
         }
     }
