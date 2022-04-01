@@ -147,9 +147,6 @@ contract QuadAccessStore {
 
             newIssuers[formattedIndex++] = issuers[i];
         }
-
-
-
         return issuers;
     }
 

@@ -216,6 +216,18 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
+    /// @dev swaps `_issuer` with the fist element of `issuers` issuers[0] is the promoted issuer. It is used as the selected issuer in payments
+    /// @notice Restricted behind a TimelockController
+    /// @param _issuer the issuer to be promoted
+    function promoteIssuerToPrimary(address _issuer) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+
+        address tmp = issuers[issuerIndices[_issuer]-1];
+        issuers[issuerIndices[_issuer]-1] = issuers[0];
+        issuers[0] = tmp;
+
+    }
+
     /// @dev Set the price to update/set a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
@@ -278,13 +290,14 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @param _treasury address of the issuer treasury to withdraw the fees
     function addIssuer(address _issuer, address _treasury) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(issuerIndices[_issuer] == 0, "ISSUER_ALREADY_SET");
         require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
         grantRole(ISSUER_ROLE, _issuer);
         issuersTreasury[_issuer] = _treasury;
-        issuerIndices[_issuer] = issuers.length;
         issuers.push(_issuer);
+        issuerIndices[_issuer] = issuers.length;
 
         emit IssuerAdded(_issuer, _treasury);
     }
@@ -299,7 +312,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
         revokeRole(ISSUER_ROLE, _issuer);
         // don't need to delete treasury
-        issuers[issuerIndices[_issuer]] = issuers[issuers.length-1];
+        issuers[issuerIndices[_issuer]-1] = issuers[issuers.length-1];
         issuerIndices[issuers[issuers.length-1]] = issuerIndices[_issuer];
 
         delete issuerIndices[_issuer];
