@@ -266,32 +266,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return (attributes, epochs, issuers);
     }
 
-    function _formatAttributesBytesArray(
-            uint256 newLength,
-            bytes32[] memory oldAttributes,
-            uint256[] memory oldEpochs,
-            address[] memory oldIssuers
-    ) internal pure returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        bytes32[] memory attributes = new bytes32[](newLength);
-        uint256[] memory epochs = new uint256[](newLength);
-        address[] memory issuers = new address[](newLength);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < oldAttributes.length; i++) {
-            bytes32 attribute = oldAttributes[i];
-            uint256 epoch = oldEpochs[i];
-            address issuer = oldIssuers[i];
-            if(attribute == bytes32(0) && epoch == 0 && issuer == address(0))
-                continue;
-
-            attributes[formattedIndex] = attribute;
-            epochs[formattedIndex] = epoch;
-            issuers[formattedIndex] = issuer;
-            formattedIndex++;
-        }
-
-        return (attributes, epochs, issuers);
-    }
-
     function _hasIssuer(
         address issuer,
         address[] memory issuers
