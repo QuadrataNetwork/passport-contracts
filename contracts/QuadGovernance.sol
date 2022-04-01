@@ -216,9 +216,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
-    /// @dev swaps `_issuer` with the fist element of `issuers` issuers[0] is the promoted issuer. It is used as the selected issuer in payments
-    /// @notice Restricted behind a TimelockController
-    /// @param _issuer the issuer to be promoted
+    /**
+    * @dev swaps `_issuer` with the fist element of `issuers` (issuers[0] is the promoted issuer).
+    * It is used as the selected issuer in payments and in first iteration getAttribute functions
+    * @notice Restricted behind a TimelockController
+    * @param _issuer the issuer to be promoted
+    */
     function promoteIssuerToPrimary(address _issuer) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
 
@@ -353,12 +356,6 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function _authorizeUpgrade(address) internal override view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
-
-    /**
-     * @notice Get the official price for a ERC20 token
-     * @param _tokenAddr Address of the ERC20 token
-     * @return Price denominated in USD, with 6 decimals
-     */
 
     /// @dev Get the price in USD of a token using UniswapAnchorView
     /// @param _tokenAddr address of the ERC20 token
