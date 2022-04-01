@@ -359,20 +359,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         bytes32 _attribute,
         address _issuer
-    ) public view returns (bytes32, uint256) {
+    ) public view returns (Attribute memory) {
         require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
-        Attribute memory attrib = _attributes[_account][_attribute][_issuer];
-        return (attrib.value, attrib.epoch);
+        return _attributes[_account][_attribute][_issuer];
     }
 
     function attributesByDID(
         bytes32 _dID,
         bytes32 _attribute,
         address _issuer
-    ) public view returns (bytes32, uint256) {
+    ) public view returns (Attribute memory) {
         require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
-        Attribute memory attrib = _attributesByDID[_dID][_attribute][_issuer];
-        return (attrib.value, attrib.epoch);
+        return _attributesByDID[_dID][_attribute][_issuer];
     }
 
     function accountBalancesETH(

@@ -46,9 +46,9 @@ contract QuadAccessStore {
         uint256 _tokenId,
         bytes32 _attribute
     ) external payable returns(bytes32, uint256) {
-        (bytes32 value, uint256 epoch, address issuer) = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
-        _doETHPayment(_attribute, issuer, _account);
-        return (value, epoch);
+        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
+        _doETHPayment(_attribute, attribute.issuer, _account);
+        return (attribute.value, attribute.epoch);
     }
 
     /// @notice Query the value of an attribute for a passport holder (free)
@@ -62,8 +62,8 @@ contract QuadAccessStore {
         bytes32 _attribute
     ) external view returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        (bytes32 value, uint256 epoch,) =  _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
-        return (value, epoch);
+        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
+        return (attribute.value, attribute.epoch);
     }
 
     /// @notice Query the value of an attribute for a passport holder (payable with ERC20)
@@ -78,9 +78,9 @@ contract QuadAccessStore {
         bytes32 _attribute,
         address _tokenAddr
     ) external returns(bytes32, uint256) {
-        (bytes32 value, uint256 epoch, address issuer) =  _getAttributeInternal(_account, _tokenId, _attribute,governance.issuers(0));
-        _doTokenPayment(_attribute, _tokenAddr, issuer, _account);
-        return (value, epoch);
+        QuadPassport.Attribute memory attribute =  _getAttributeInternal(_account, _tokenId, _attribute,governance.issuers(0));
+        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _account);
+        return (attribute.value, attribute.epoch);
     }
 
     function getAttributes(
@@ -164,26 +164,25 @@ contract QuadAccessStore {
         bytes32[] memory attributes = new bytes32[](issuers.length);
         uint256[] memory epochs = new uint256[](issuers.length);
 
-        bytes32 value;
-        uint256 epoch;
+        QuadPassport.Attribute memory attribute;
 
         for(uint256 i = 0; i < issuers.length; i++) {
             if(groupByDID) {
-                (bytes32 dID,) = passport.attributes(_account,keccak256("DID"),issuers[i]);
-                if(dID != bytes32(0)) {
+                QuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),issuers[i]);
+                if(dID.value != bytes32(0)) {
                     continue;
                 }
 
-                (value, epoch) = passport.attributesByDID(dID,_attribute,issuers[i]);
-                attributes[i] = value;
-                epochs[i] = epoch;
+                attribute = passport.attributesByDID(dID.value,_attribute,issuers[i]);
+                attributes[i] = attribute.value;
+                epochs[i] = attribute.epoch;
                 continue;
             }
 
 
-          (value, epoch) = passport.attributes(_account,_attribute,issuers[i]);
-            attributes[i] = value;
-            epochs[i] = epoch;
+            attribute = passport.attributes(_account,_attribute,issuers[i]);
+            attributes[i] = attribute.value;
+            epochs[i] = attribute.epoch;
         }
 
         if(groupByDID) {
@@ -229,7 +228,7 @@ contract QuadAccessStore {
         uint256 _tokenId,
         bytes32 _attribute,
         address _issuer
-    ) internal view returns(bytes32, uint256, address) {
+    ) internal view returns(QuadPassport.Attribute memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(passport.balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
@@ -239,18 +238,14 @@ contract QuadAccessStore {
 
         );
 
-        bytes32 value;
-        uint256 epoch;
-
         if (governance.eligibleAttributes(_attribute)) {
-            (value, epoch) = passport.attributes(_account,_attribute,_issuer);
-            return (value, epoch, _issuer);
+            return passport.attributes(_account,_attribute,_issuer);
         }
 
         // Attribute grouped by DID
-        (value, epoch) = passport.attributes(_account,keccak256("DID"),_issuer);
-        require(value != bytes32(0), "DID_NOT_FOUND");
-        return (value, epoch, _issuer);
+        QuadPassport.Attribute memory attribute = passport.attributes(_account,keccak256("DID"),_issuer);
+        require(attribute.value != bytes32(0), "DID_NOT_FOUND");
+        return attribute;
     }
 
 
@@ -305,8 +300,7 @@ contract QuadAccessStore {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
         // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
-        (bytes32 value,) = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0));
-        uint256 price = value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0)).value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         // Convert to Token Decimal
         uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
@@ -322,8 +316,7 @@ contract QuadAccessStore {
     ) public view returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
         // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
-        (bytes32 value,) = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0));
-        uint256 price = value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0)).value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
     }
