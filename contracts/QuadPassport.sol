@@ -42,6 +42,9 @@ contract QuadPassportStore {
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
+
+    bytes32 public constant ACCESSOR_ROLE = keccak256("ACCESSOR_ROLE");
+
 }
 
 
@@ -240,214 +243,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         }
     }
 
-    /// @notice Query the value of an attribute for a passport holder (pay with ETH)
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @return the value of the attribute
-    function getAttributeETH(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    ) external payable override returns(bytes32, uint256) {
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
-        _doETHPayment(_attribute, attribute.issuer, _account);
-        return (attribute.value, attribute.epoch);
-    }
-
-    /// @notice Query the value of an attribute for a passport holder (free)
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @return the value of the attribute
-    function getAttributeFree(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    ) external view override returns(bytes32, uint256) {
-        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
-        return (attribute.value, attribute.epoch);
-    }
-
-    /// @notice Query the value of an attribute for a passport holder (payable with ERC20)
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @return the value of the attribute
-    function getAttribute(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr
-    ) external override returns(bytes32, uint256) {
-        Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute,governance.issuers(0));
-        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _account);
-        return (attribute.value, attribute.epoch);
-    }
-
-    function getAttributes(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr,
-        address[] calldata _exclusions
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
-
-        return (attributes, epochs, issuers);
-    }
-
-    function _hasIssuer(
-        address issuer,
-        address[] memory issuers
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuer == issuers[i])
-                return true;
-        }
-        return false;
-    }
-
-    function _hasValidAttribute(
-        bytes32[] memory attributes
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < attributes.length; i++) {
-            if(attributes[i] != bytes32(0))
-                return true;
-        }
-        return false;
-    }
-
-    function _getIncludedIssuers(
-        address[] calldata _exclusions
-    ) internal view returns(address[] memory) {
-        address[] memory issuers  = new address[](governance.getIssuersLength());
-
-        uint256 continuations = 0;
-        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            if(_hasIssuer(governance.issuers(i), _exclusions)) {
-                continuations++;
-                continue;
-            }
-
-            issuers[i] = governance.issuers(i);
-        }
-
-        // close the gap(s)
-        uint256 newLength = governance.getIssuersLength() - continuations;
-
-        address[] memory newIssuers  = new address[](newLength);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
-                continue;
-            }
-
-            newIssuers[formattedIndex++] = issuers[i];
-        }
 
 
-
-        return issuers;
-    }
-
-    function _filterAttributes(
-        address _account,
-        bytes32 _attribute,
-        address[] calldata _exclusions,
-        bool groupByDID
-    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        (address[] memory issuers)  = _getIncludedIssuers(_exclusions);
-
-        bytes32[] memory attributes = new bytes32[](issuers.length);
-        uint256[] memory epochs = new uint256[](issuers.length);
-
-        Attribute memory attribute;
-
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(groupByDID) {
-                bytes32 dID = _attributes[_account][keccak256("DID")][issuers[i]].value;
-                if(dID != bytes32(0)) {
-                    continue;
-                }
-
-                attribute = _attributesByDID[dID][_attribute][issuers[i]];
-                attributes[i] = attribute.value;
-                epochs[i] = attribute.epoch;
-                continue;
-            }
-
-
-            attribute =_attributes[_account][_attribute][issuers[i]];
-            attributes[i] = attribute.value;
-            epochs[i] = attribute.epoch;
-        }
-
-        if(groupByDID) {
-            require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
-        }
-
-        return (
-            attributes,
-            epochs,
-            issuers
-        );
-    }
-
-    function _getAttributesInternal(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] calldata _exclusions
-    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-
-        );
-
-
-        if (governance.eligibleAttributes(_attribute)) {
-            return _filterAttributes(_account, _attribute, _exclusions,false);
-        }
-
-        // Attribute grouped by DID
-        return _filterAttributes(_account, _attribute, _exclusions, true);
-
-    }
-
-    function _getAttributeInternal(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(Attribute memory) {
-        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-
-        );
-        if (governance.eligibleAttributes(_attribute)) {
-            return _attributes[_account][_attribute][_issuer];
-        }
-
-        // Attribute grouped by DID
-        bytes32 dID = _attributes[_account][keccak256("DID")][_issuer].value;
-        require(dID != bytes32(0), "DID_NOT_FOUND");
-        return _attributesByDID[dID][_attribute][_issuer];
-    }
 
     /// @dev Retrieve a signature for an existing passport minted (to be used across chain)
     /// @param _tokenId tokenId of the Passport (1 for now)
@@ -519,43 +316,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return super.supportsInterface(interfaceId);
     }
 
-    function _doETHPayment(
-        bytes32 _attribute,
-        address _issuer,
-        address _account
-    ) internal {
-        uint256 amountETH = calculatePaymentETH(_attribute, _account);
-        if (amountETH > 0) {
-            require(
-                 msg.value == amountETH,
-                "INSUFFICIENT_PAYMENT_AMOUNT"
-            );
-            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
-            uint256 amountProtocol = amountETH - amountIssuer;
-            _accountBalancesETH[governance.issuersTreasury(_issuer)] += amountIssuer;
-            _accountBalancesETH[governance.treasury()] += amountProtocol;
-        }
-    }
-
-    function _doTokenPayment(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address _issuer,
-        address _account
-    ) internal {
-        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
-        if (amountToken > 0) {
-            IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-            require(
-                erc20.transferFrom(_msgSender(), address(this), amountToken),
-                "INSUFFICIENT_PAYMENT_ALLOWANCE"
-            );
-            uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
-            uint256 amountProtocol = amountToken - amountIssuer;
-            _accountBalances[_tokenPayment][governance.issuersTreasury(_issuer)] += amountIssuer;
-            _accountBalances[_tokenPayment][governance.treasury()] += amountProtocol;
-        }
-    }
 
     /// @dev Allow an issuer's treasury or the Quadrata treasury to withdraw $ETH
     /// @param _to address of either an issuer's treasury or the Quadrata treasury
@@ -583,40 +343,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        return currentBalance;
     }
 
-    /// @dev Calculate the amount of token required to call `getAttribute`
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @param _tokenPayment address of the ERC20 tokens to use as payment
-    /// @param _account account getting requested for attributes
-    /// @return the amount of ERC20 necessary to query the attribute
-    function calculatePaymentToken(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address _account
-    ) public view override returns(uint256) {
-        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-        uint256 tokenPrice = governance.getPrice(_tokenPayment);
-        // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
-        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")][governance.issuers(0)].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
-        // Convert to Token Decimal
-        uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
-        return amountToken;
-    }
-
-    /// @dev Calculate the amount of $ETH required to call `getAttributeETH`
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @param _account account getting requested for attributes
-    /// @return the amount of $ETH necessary to query the attribute
-    function calculatePaymentETH(
-        bytes32 _attribute,
-        address _account
-    ) public view override returns(uint256) {
-        uint256 tokenPrice = governance.getPriceETH();
-        // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
-        uint256 price = _attributes[_account][keccak256("IS_BUSINESS")][governance.issuers(0)].value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
-        uint256 amountETH = (price * 1e18 / tokenPrice) ;
-        return amountETH;
-    }
-
     /// @dev Admin function to set the address of the QuadGovernance contract
     /// @param _governanceContract contract address of QuadGovernance
     function setGovernance(address _governanceContract) external override {
@@ -627,6 +353,43 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         governance = QuadGovernance(_governanceContract);
 
         emit GovernanceUpdated(oldGov, address(governance));
+    }
+
+    function attributes(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) public view returns (bytes32, uint256) {
+        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        Attribute memory attrib = _attributes[_account][_attribute][_issuer];
+        return (attrib.value, attrib.epoch);
+    }
+
+    function attributesByDID(
+        bytes32 _dID,
+        bytes32 _attribute,
+        address _issuer
+    ) public view returns (bytes32, uint256) {
+        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        Attribute memory attrib = _attributesByDID[_dID][_attribute][_issuer];
+        return (attrib.value, attrib.epoch);
+    }
+
+    function accountBalancesETH(
+        address _account,
+        uint256 _amount
+    ) public {
+        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        _accountBalancesETH[_account] += _amount;
+    }
+
+    function accountBalances(
+        address _token,
+        address _account,
+        uint256 _amount
+    ) public {
+        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        _accountBalances[_token][_account] += _amount;
     }
 
     function _authorizeUpgrade(address) internal view override {

@@ -39,6 +39,9 @@ contract QuadGovernanceStore {
 
     address[] public issuers;
     mapping(address => uint256) internal issuerIndices;
+
+    bytes32 public constant ACCESSOR_ROLE = keccak256("ACCESSOR_ROLE");
+
 }
 
 contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
