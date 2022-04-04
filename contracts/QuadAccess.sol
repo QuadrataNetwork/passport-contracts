@@ -48,9 +48,10 @@ contract QuadAccessStore {
     function getAttributeETH(
         address _account,
         uint256 _tokenId,
-        bytes32 _attribute
+        bytes32 _attribute,
+        address _issuer
     ) external payable returns(bytes32, uint256) {
-        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
+        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, _issuer);
         _doETHPayment(_attribute, attribute.issuer, _account);
         return (attribute.value, attribute.epoch);
     }
@@ -63,10 +64,11 @@ contract QuadAccessStore {
     function getAttributeFree(
         address _account,
         uint256 _tokenId,
-        bytes32 _attribute
+        bytes32 _attribute,
+        address _issuer
     ) external view returns(bytes32, uint256) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, governance.issuers(0));
+        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, _issuer);
         return (attribute.value, attribute.epoch);
     }
 
@@ -80,9 +82,10 @@ contract QuadAccessStore {
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address _tokenAddr
+        address _tokenAddr,
+        address _issuer
     ) external returns(bytes32, uint256) {
-        QuadPassport.Attribute memory attribute =  _getAttributeInternal(_account, _tokenId, _attribute,governance.issuers(0));
+        QuadPassport.Attribute memory attribute =  _getAttributeInternal(_account, _tokenId, _attribute, _issuer);
         _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _account);
         return (attribute.value, attribute.epoch);
     }
@@ -313,6 +316,23 @@ contract QuadAccessStore {
         }
     }
 
+    /// @dev Used to determine if issuers have an attribute
+    /// @param _attribute the value to check existsance on
+    /// @param _account account getting requested for attributes
+    /// @return unique bytes32 hash or bytes32(0) if issuers have the attribute
+    function issuersContain(
+        address _account,
+        bytes32 _attribute
+    ) public view returns(bytes32) {
+        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
+            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i)).value;
+            if(value != bytes32(0)) {
+                return value;
+            }
+        }
+        return bytes32(0);
+    }
+
     /// @dev Calculate the amount of token required to call `getAttribute`
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @param _tokenPayment address of the ERC20 tokens to use as payment
@@ -325,8 +345,8 @@ contract QuadAccessStore {
     ) public view returns(uint256) {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
-        // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
-        uint256 price = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0)).value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+
+        uint256 price = issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         // Convert to Token Decimal
         uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
@@ -342,7 +362,7 @@ contract QuadAccessStore {
     ) public view returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
         // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
-        uint256 price = passport.attributes(_account,keccak256("IS_BUSINESS"),governance.issuers(0)).value == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
     }

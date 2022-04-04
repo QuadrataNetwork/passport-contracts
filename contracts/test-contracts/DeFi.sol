@@ -12,10 +12,12 @@ contract DeFi {
 
     IQuadPassport public passport;
     QuadAccess public access;
+    address public issuer;
 
-    constructor(address _passport, QuadAccess _access) {
+    constructor(address _passport, QuadAccess _access, address _issuer) {
        passport = IQuadPassport(_passport);
        access = _access;
+       issuer=  _issuer;
     }
 
     function doSomething(
@@ -25,7 +27,7 @@ contract DeFi {
         uint256 paymentAmount = access.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(passport), paymentAmount);
-        (bytes32 attrValue, uint256 epoch) = access.getAttribute(msg.sender, 1, _attribute, _tokenPayment);
+        (bytes32 attrValue, uint256 epoch) = access.getAttribute(msg.sender, 1, _attribute, _tokenPayment, issuer);
         emit GetAttributeEvent(attrValue, epoch);
         return (attrValue, epoch);
     }
@@ -33,7 +35,7 @@ contract DeFi {
     function doSomethingFree(
         bytes32 _attribute
     ) public returns(bytes32,uint256) {
-        (bytes32 attrValue, uint256 epoch) = access.getAttributeFree(msg.sender, 1, _attribute);
+        (bytes32 attrValue, uint256 epoch) = access.getAttributeFree(msg.sender, 1, _attribute, issuer);
         emit GetAttributeEvent(attrValue, epoch);
         return (attrValue, epoch);
     }
@@ -43,7 +45,7 @@ contract DeFi {
         console.log("[doSomethingETH] paymentAmount", paymentAmount);
         console.log("[doSomethingETH] msg.value", msg.value);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32 attrValue, uint256 epoch) = access.getAttributeETH{value: paymentAmount}(msg.sender, 1, _attribute);
+        (bytes32 attrValue, uint256 epoch) = access.getAttributeETH{value: paymentAmount}(msg.sender, 1, _attribute, issuer);
         emit GetAttributeEvent(attrValue, epoch);
         return (attrValue, epoch);
     }

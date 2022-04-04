@@ -216,21 +216,6 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
-    /**
-    * @dev swaps `_issuer` with the fist element of `issuers` (issuers[0] is the promoted issuer).
-    * It is used as the selected issuer in payments and in first iteration getAttribute functions
-    * @notice Restricted behind a TimelockController
-    * @param _issuer the issuer to be promoted
-    */
-    function promoteIssuerToPrimary(address _issuer) external {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-
-        address tmp = issuers[issuerIndices[_issuer]-1];
-        issuers[issuerIndices[_issuer]-1] = issuers[0];
-        issuers[0] = tmp;
-
-    }
-
     /// @dev Set the price to update/set a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
