@@ -4,17 +4,17 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "../interfaces/IQuadPassport.sol";
-import "../QuadAccess.sol";
+import "../QuadPassportReader.sol";
 import "hardhat/console.sol";
 
 contract DeFi {
     event GetAttributeEvent(bytes32 _value, uint256 _epoch);
 
     IQuadPassport public passport;
-    QuadAccess public access;
+    QuadPassportReader public access;
     address[] public issuers;
 
-    constructor(address _passport, QuadAccess _access, address[] memory _issuers) {
+    constructor(address _passport, QuadPassportReader _access, address[] memory _issuers) {
        passport = IQuadPassport(_passport);
        access = _access;
        issuers=  _issuers;

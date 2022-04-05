@@ -8,10 +8,10 @@ import "./QuadPassport.sol";
 import "./QuadGovernance.sol";
 
 
-/// @title Data Accessor Contract for Quadrata Passport
+/// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
-contract QuadAccessStore {
+contract QuadPassportReaderStore {
 
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
@@ -20,7 +20,7 @@ contract QuadAccessStore {
 
 }
 
- contract QuadAccess is UUPSUpgradeable, QuadAccessStore {
+ contract QuadPassportReader is UUPSUpgradeable, QuadPassportReaderStore {
 
     /// @dev initializer (constructor)
     /// @param _governance address of the QuadGovernance contract
