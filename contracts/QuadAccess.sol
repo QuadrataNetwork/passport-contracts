@@ -104,7 +104,7 @@ contract QuadAccessStore {
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
-    /// @return the values of the attributes from all issuers ignoring the excluded list
+    /// @return the values of the attribute from all issuers ignoring the excluded list
     function getAttributes(
         address _account,
         uint256 _tokenId,
@@ -239,27 +239,6 @@ contract QuadAccessStore {
         return (attributes, epochs, issuers);
     }
 
-    function _hasIssuer(
-        address issuer,
-        address[] memory issuers
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuer == issuers[i])
-                return true;
-        }
-        return false;
-    }
-
-    function _hasValidAttribute(
-        bytes32[] memory attributes
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < attributes.length; i++) {
-            if(attributes[i] != bytes32(0))
-                return true;
-        }
-        return false;
-    }
-
     function _getIncludedIssuers(
         address[] calldata _issuers,
         bool _shouldExclude
@@ -304,7 +283,7 @@ contract QuadAccessStore {
         // find number of gaps
         uint256 gaps;
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(!isDataAvailable(_account, _attributes[i], _issuers[i])) {
+            if(!_isDataAvailable(_account, _attributes[i], _issuers[i])) {
                 gaps++;
             }
         }
@@ -314,7 +293,7 @@ contract QuadAccessStore {
         uint256 counter;
         // rewrite data into new trimmed arrays
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(isDataAvailable(_account, _attributes[i], _issuers[i])) {
+            if(_isDataAvailable(_account, _attributes[i], _issuers[i])) {
                 newAttributes[counter] = _attributes[i];
                 newEpochs[counter] = _epochs[i];
                 newIssuers[counter] = _issuers[i];
@@ -328,10 +307,10 @@ contract QuadAccessStore {
     function _applyFilter(
         address _account,
         bytes32 _attribute,
-        address[] calldata _excludedIssuers,
+        address[] calldata _issuers,
         FilterData memory _filterData
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        (address[] memory issuers)  = _getIncludedIssuers(_excludedIssuers, _filterData.shouldExclude);
+        (address[] memory issuers)  = _getIncludedIssuers(_issuers, _filterData.shouldExclude);
 
         bytes32[] memory attributes = new bytes32[](issuers.length);
         uint256[] memory epochs = new uint256[](issuers.length);
@@ -495,22 +474,6 @@ contract QuadAccessStore {
         }
     }
 
-    /// @dev Used to determine if issuers have an attribute
-    /// @param _attribute the value to check existsance on
-    /// @param _account account getting requested for attributes
-    /// @return unique bytes32 hash or bytes32(0) if issuers have the attribute
-    function issuersContain(
-        address _account,
-        bytes32 _attribute
-    ) internal view returns(bytes32) {
-        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i)).value;
-            if(value != bytes32(0)) {
-                return value;
-            }
-        }
-        return bytes32(0);
-    }
 
     /// @dev Calculate the amount of token required to call `getAttribute`
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
@@ -525,7 +488,7 @@ contract QuadAccessStore {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
 
-        uint256 price = issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         // Convert to Token Decimal
         uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
         return amountToken;
@@ -540,18 +503,57 @@ contract QuadAccessStore {
         address _account
     ) public view returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
-        uint256 price = issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
     }
 
-    function isDataAvailable(
+    function _isDataAvailable(
         address _account,
         bytes32 _attribute,
         address _issuer
     ) internal view returns(bool) {
         QuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
+    }
+
+    /// @dev Used to determine if issuers have an attribute
+    /// @param _attribute the value to check existsance on
+    /// @param _account account getting requested for attributes
+    /// @return unique bytes32 hash or bytes32(0) if issuers have the attribute
+    function _issuersContain(
+        address _account,
+        bytes32 _attribute
+    ) internal view returns(bytes32) {
+        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
+            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i)).value;
+            if(value != bytes32(0)) {
+                return value;
+            }
+        }
+        return bytes32(0);
+    }
+
+    function _hasValidAttribute(
+        bytes32[] memory attributes
+    ) internal pure returns(bool) {
+        for(uint256 i = 0; i < attributes.length; i++) {
+            if(attributes[i] != bytes32(0))
+                return true;
+        }
+        return false;
+    }
+
+
+    function _hasIssuer(
+        address issuer,
+        address[] memory issuers
+    ) internal pure returns(bool) {
+        for(uint256 i = 0; i < issuers.length; i++) {
+            if(issuer == issuers[i])
+                return true;
+        }
+        return false;
     }
 
  }
