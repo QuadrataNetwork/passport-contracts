@@ -12,12 +12,12 @@ contract DeFi {
 
     IQuadPassport public passport;
     QuadAccess public access;
-    address public issuer;
+    address[] public issuers;
 
-    constructor(address _passport, QuadAccess _access, address _issuer) {
+    constructor(address _passport, QuadAccess _access, address[] memory _issuers) {
        passport = IQuadPassport(_passport);
        access = _access;
-       issuer=  _issuer;
+       issuers=  _issuers;
     }
 
     function doSomething(
@@ -27,17 +27,17 @@ contract DeFi {
         uint256 paymentAmount = access.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(passport), paymentAmount);
-        (bytes32 attrValue, uint256 epoch) = access.getAttribute(msg.sender, 1, _attribute, _tokenPayment, issuer);
-        emit GetAttributeEvent(attrValue, epoch);
-        return (attrValue, epoch);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = access.getAttributesExcluding(msg.sender, 1, _attribute, _tokenPayment, issuers);
+        emit GetAttributeEvent(attrValue[0], epoch[1]);
+        return (attrValue[0], epoch[0]);
     }
 
     function doSomethingFree(
         bytes32 _attribute
     ) public returns(bytes32,uint256) {
-        (bytes32 attrValue, uint256 epoch) = access.getAttributeFree(msg.sender, 1, _attribute, issuer);
-        emit GetAttributeEvent(attrValue, epoch);
-        return (attrValue, epoch);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = access.getAttributesFreeExcluding(msg.sender, 1, _attribute, issuers);
+        emit GetAttributeEvent(attrValue[0], epoch[0]);
+        return (attrValue[0], epoch[0]);
     }
 
     function doSomethingETH(bytes32 _attribute) public payable returns(bytes32, uint256) {
@@ -45,8 +45,8 @@ contract DeFi {
         console.log("[doSomethingETH] paymentAmount", paymentAmount);
         console.log("[doSomethingETH] msg.value", msg.value);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32 attrValue, uint256 epoch) = access.getAttributeETH{value: paymentAmount}(msg.sender, 1, _attribute, issuer);
-        emit GetAttributeEvent(attrValue, epoch);
-        return (attrValue, epoch);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = access.getAttributesETHExcluding{value: paymentAmount}(msg.sender, 1, _attribute, issuers);
+        emit GetAttributeEvent(attrValue[0], epoch[0]);
+        return (attrValue[0], epoch[0]);
     }
 }

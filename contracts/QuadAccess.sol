@@ -13,11 +13,6 @@ import "./QuadGovernance.sol";
 /// @notice All accessor functions for reading and pricing quadrata attributes
 contract QuadAccessStore {
 
-    struct FilterData {
-        bool groupByDID;
-        bool shouldExclude;
-    }
-
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
 
     QuadGovernance public governance;
@@ -45,59 +40,6 @@ contract QuadAccessStore {
         require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 
-    /// @notice Query the value of an attribute for a passport holder (pay with ETH)
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuer address of the issuer
-    /// @return the value of the attribute
-    function getAttributeETH(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _issuer
-    ) external payable returns(bytes32, uint256) {
-        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, _issuer);
-        _doETHPayment(_attribute, attribute.issuer, _account);
-        return (attribute.value, attribute.epoch);
-    }
-
-    /// @notice Query the value of an attribute for a passport holder (free)
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuer address of the issuer
-    /// @return the value of the attribute
-    function getAttributeFree(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _issuer
-    ) external view returns(bytes32, uint256) {
-        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        QuadPassport.Attribute memory attribute = _getAttributeInternal(_account, _tokenId, _attribute, _issuer);
-        return (attribute.value, attribute.epoch);
-    }
-
-    /// @notice Query the value of an attribute for a passport holder (payable with ERC20)
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _issuer address of the issuer
-    /// @return the value of the attribute
-    function getAttribute(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr,
-        address _issuer
-    ) external returns(bytes32, uint256) {
-        QuadPassport.Attribute memory attribute =  _getAttributeInternal(_account, _tokenId, _attribute, _issuer);
-        _doTokenPayment(_attribute, _tokenAddr, attribute.issuer, _account);
-        return (attribute.value, attribute.epoch);
-    }
-
     /// @notice Query the values of an attribute for a passport holder (payable with ERC20)
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
@@ -105,7 +47,7 @@ contract QuadAccessStore {
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
     /// @return the values of the attribute from all issuers ignoring the excluded list
-    function getAttributes(
+    function getAttributesExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -116,7 +58,7 @@ contract QuadAccessStore {
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _excludedIssuers, true);
+        ) = _getAttributesFromExclusionFilterInternal(_account, _tokenId, _attribute, _excludedIssuers);
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -129,7 +71,7 @@ contract QuadAccessStore {
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
     /// @return the values of the attribute from all issuers ignoring the excluded list
-    function getAttributesFree(
+    function getAttributesFreeExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -140,7 +82,7 @@ contract QuadAccessStore {
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _excludedIssuers, true);
+        ) = _getAttributesFromExclusionFilterInternal(_account, _tokenId, _attribute, _excludedIssuers);
         return (attributes, epochs, issuers);
     }
 
@@ -150,17 +92,17 @@ contract QuadAccessStore {
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
     /// @return the values of an attribute from all issuers ignoring the excluded list
-    function getAttributesETH(
+    function getAttributesETHExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _excludedIssuers
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _excludedIssuers, true);
+        ) = _getAttributesFromExclusionFilterInternal(_account, _tokenId, _attribute, _excludedIssuers);
 
         _doETHPayments(_attribute, issuers, _account);
 
@@ -172,21 +114,21 @@ contract QuadAccessStore {
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _issuers The list of issuers to query from
+    /// @param _onlyIssuers The list of issuers to query from
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesFromOnly(
+    function getAttributesIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr,
-        address[] calldata _issuers
+        address[] calldata _onlyIssuers
     ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
 
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _issuers, false);
+        ) = _getAttributesFromInclusionFilterInternal(_account, _tokenId, _attribute, _onlyIssuers);
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -197,13 +139,13 @@ contract QuadAccessStore {
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The list of issuers to query from
+    /// @param _onlyIssuers The list of issuers to query from
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesFreeFromOnly(
+    function getAttributesFreeIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _issuers
+        address[] calldata _onlyIssuers
     ) external view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
 
@@ -211,7 +153,7 @@ contract QuadAccessStore {
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _issuers, false);
+        ) = _getAttributesFromInclusionFilterInternal(_account, _tokenId, _attribute, _onlyIssuers);
 
         return (attributes, epochs, issuers);
     }
@@ -220,32 +162,28 @@ contract QuadAccessStore {
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The list of issuers to query from
+    /// @param _onlyIssuers The list of issuers to query from
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesETHFromOnly(
+    function getAttributesETHIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _issuers
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        address[] calldata _onlyIssuers
+    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesInternal(_account, _tokenId, _attribute, _issuers, false);
+        ) = _getAttributesFromInclusionFilterInternal(_account, _tokenId, _attribute, _onlyIssuers);
 
         _doETHPayments(_attribute, issuers, _account);
 
         return (attributes, epochs, issuers);
     }
 
-    function _getIncludedIssuers(
-        address[] calldata _issuers,
-        bool _shouldExclude
+    function _getExcludedIssuers(
+        address[] calldata _issuers
     ) internal view returns(address[] memory) {
-        if(!_shouldExclude) {
-            return _issuers;
-        }
         address[] memory issuers  = new address[](governance.getIssuersLength());
 
         uint256 continuations = 0;
@@ -304,68 +242,108 @@ contract QuadAccessStore {
         return (newAttributes, newEpochs, newIssuers);
     }
 
-    function _applyFilter(
+    function _applyInclusionFilter(
         address _account,
         bytes32 _attribute,
         address[] calldata _issuers,
-        FilterData memory _filterData
-    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        (address[] memory issuers)  = _getIncludedIssuers(_issuers, _filterData.shouldExclude);
+        bool _groupByDID
+    )internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
+        bytes32[] memory attributes = new bytes32[](_issuers.length);
+        uint256[] memory epochs = new uint256[](_issuers.length);
+        return _applyFilter(_account, _attribute, attributes, epochs, _issuers, _groupByDID);
+    }
 
+    function _applyExclusionFilter(
+        address _account,
+        bytes32 _attribute,
+        address[] calldata _issuers,
+        bool _groupByDID
+    )internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
+        (address[] memory issuers)  = _getExcludedIssuers(_issuers);
         bytes32[] memory attributes = new bytes32[](issuers.length);
         uint256[] memory epochs = new uint256[](issuers.length);
+        return _applyFilter(_account, _attribute, attributes, epochs, issuers, _groupByDID);
+    }
 
+    function _applyFilter(
+        address _account,
+        bytes32 _attribute,
+        bytes32[] memory _attributes,
+        uint256[] memory _epochs,
+        address[] memory _issuers,
+        bool _groupByDID
+    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
         QuadPassport.Attribute memory attribute;
-
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(_filterData.groupByDID) {
-                QuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),issuers[i]);
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            if(_groupByDID) {
+                QuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
                 if(dID.value != bytes32(0)) {
                     continue;
                 }
 
-                attribute = passport.attributesByDID(dID.value,_attribute,issuers[i]);
-                attributes[i] = attribute.value;
-                epochs[i] = attribute.epoch;
+                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
+                _attributes[i] = attribute.value;
+                _epochs[i] = attribute.epoch;
                 continue;
             }
 
 
-            attribute = passport.attributes(_account,_attribute,issuers[i]);
-            attributes[i] = attribute.value;
-            epochs[i] = attribute.epoch;
+            attribute = passport.attributes(_account,_attribute, _issuers[i]);
+            _attributes[i] = attribute.value;
+            _epochs[i] = attribute.epoch;
         }
 
-        if(_filterData.groupByDID) {
-            require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
+        if(_groupByDID) {
+            require(_hasValidAttribute(_attributes), "DIDS_NOT_FOUND");
         }
 
-        return _closeGaps(_account, attributes, epochs, issuers);
+        return _closeGaps(_account, _attributes, _epochs, _issuers);
+    }
+
+    function _getAttributesFromInclusionFilterInternal(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address[] calldata _issuers
+    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        _getAttributesInternal(_account, _tokenId, _attribute);
+
+        if (governance.eligibleAttributes(_attribute)) {
+            return _applyInclusionFilter(_account, _attribute, _issuers, false);
+        }
+
+        // Attribute grouped by DID
+        return _applyInclusionFilter(_account, _attribute, _issuers, true);
+    }
+
+    function _getAttributesFromExclusionFilterInternal(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address[] calldata _issuers
+    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        _getAttributesInternal(_account, _tokenId, _attribute);
+
+        if (governance.eligibleAttributes(_attribute)) {
+            return _applyExclusionFilter(_account, _attribute, _issuers, false);
+        }
+
+        // Attribute grouped by DID
+        return _applyExclusionFilter(_account, _attribute, _issuers, true);
     }
 
     function _getAttributesInternal(
         address _account,
         uint256 _tokenId,
-        bytes32 _attribute,
-        address[] calldata _issuers,
-        bool shouldExclude
-    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        bytes32 _attribute
+    ) internal view {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(passport.balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
-
         );
-
-        if (governance.eligibleAttributes(_attribute)) {
-            return _applyFilter(_account, _attribute, _issuers, FilterData(false, shouldExclude));
-        }
-
-        // Attribute grouped by DID
-        return _applyFilter(_account, _attribute, _issuers, FilterData(true, shouldExclude));
-
     }
 
     function _getAttributeInternal(
@@ -429,26 +407,6 @@ contract QuadAccessStore {
                 passport.accountBalancesETH(governance.issuersTreasury(_issuers[i]), amountIssuer);
             }
             passport.accountBalancesETH(governance.treasury(), amountProtocol);
-        }
-    }
-
-    function _doTokenPayment(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address _issuer,
-        address _account
-    ) internal {
-        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
-        if (amountToken > 0) {
-            IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-            require(
-                erc20.transferFrom(msg.sender, address(this), amountToken),
-                "INSUFFICIENT_PAYMENT_ALLOWANCE"
-            );
-            uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
-            uint256 amountProtocol = amountToken - amountIssuer;
-            passport.accountBalances(_tokenPayment,governance.issuersTreasury(_issuer), amountIssuer);
-            passport.accountBalances(_tokenPayment,governance.treasury(), amountProtocol);
         }
     }
 
