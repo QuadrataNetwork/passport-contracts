@@ -326,7 +326,6 @@ contract QuadAccessStore {
         address[] memory _issuers,
         address _account
     ) internal {
-        //TODO: filter out issuers reporting null data for a given attribute to ensure they don't get paid
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account) / _issuers.length;
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
@@ -388,7 +387,6 @@ contract QuadAccessStore {
         address _account
     ) public view returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
-        // TODO: Do we always  want to get IS_BUSINESS from Spring Labs?
         uint256 price = issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
