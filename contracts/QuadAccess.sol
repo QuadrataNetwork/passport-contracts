@@ -177,7 +177,7 @@ contract QuadAccessStore {
         uint256[] memory newEpochs = new uint256[](_issuers.length - gaps);
         address[] memory newIssuers  = new address[](_issuers.length - gaps);
         uint256 counter;
-        // rewrite data into new arrays
+        // rewrite data into new trimmed arrays
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(isDataAvailable(_account, _attributes[i], _issuers[i])) {
                 newAttributes[counter] = _attributes[i];
@@ -244,7 +244,6 @@ contract QuadAccessStore {
 
         );
 
-
         if (governance.eligibleAttributes(_attribute)) {
             return _filterAttributes(_account, _attribute, _exclusions,false);
         }
@@ -253,8 +252,6 @@ contract QuadAccessStore {
         return _filterAttributes(_account, _attribute, _exclusions, true);
 
     }
-
-
 
     function _getAttributeInternal(
         address _account,
@@ -349,7 +346,7 @@ contract QuadAccessStore {
     function issuersContain(
         address _account,
         bytes32 _attribute
-    ) public view returns(bytes32) {
+    ) internal view returns(bytes32) {
         for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
             bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i)).value;
             if(value != bytes32(0)) {
