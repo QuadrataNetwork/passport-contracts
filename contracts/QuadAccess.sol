@@ -190,7 +190,7 @@ contract QuadAccessStore {
         return (newAttributes, newEpochs, newIssuers);
     }
 
-    function _filterAttributes(
+    function _applyExclusionsFilter(
         address _account,
         bytes32 _attribute,
         address[] calldata _exclusions,
@@ -245,11 +245,11 @@ contract QuadAccessStore {
         );
 
         if (governance.eligibleAttributes(_attribute)) {
-            return _filterAttributes(_account, _attribute, _exclusions,false);
+            return _applyExclusionsFilter(_account, _attribute, _exclusions,false);
         }
 
         // Attribute grouped by DID
-        return _filterAttributes(_account, _attribute, _exclusions, true);
+        return _applyExclusionsFilter(_account, _attribute, _exclusions, true);
 
     }
 
