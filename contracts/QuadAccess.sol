@@ -108,6 +108,38 @@ contract QuadAccessStore {
         return (attributes, epochs, issuers);
     }
 
+    function getAttributesFree(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address[] calldata _exclusions
+    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
+        (
+            bytes32[] memory attributes,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
+        return (attributes, epochs, issuers);
+    }
+
+    function getAttributesETH(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address[] calldata _exclusions
+    ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        (
+            bytes32[] memory attributes,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = _getAttributesInternal(_account, _tokenId, _attribute, _exclusions);
+
+        _doETHPayments(_attribute, issuers, _account);
+
+        return (attributes, epochs, issuers);
+    }
+
     function _hasIssuer(
         address issuer,
         address[] memory issuers
@@ -293,6 +325,26 @@ contract QuadAccessStore {
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             passport.accountBalancesETH(governance.issuersTreasury(_issuer), amountIssuer);
+            passport.accountBalancesETH(governance.treasury(), amountProtocol);
+        }
+    }
+
+    function _doETHPayments(
+        bytes32 _attribute,
+        address[] memory _issuers,
+        address _account
+    ) internal {
+        uint256 amountETH = calculatePaymentETH(_attribute, _account) / _issuers.length;
+        if (amountETH > 0) {
+            require(
+                 msg.value == amountETH,
+                "INSUFFICIENT_PAYMENT_AMOUNT"
+            );
+            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
+            uint256 amountProtocol = amountETH - amountIssuer;
+            for(uint256 i = 0; i < _issuers.length; i++) {
+                passport.accountBalancesETH(governance.issuersTreasury(_issuers[i]), amountIssuer);
+            }
             passport.accountBalancesETH(governance.treasury(), amountProtocol);
         }
     }

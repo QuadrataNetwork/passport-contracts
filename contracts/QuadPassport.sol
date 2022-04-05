@@ -229,8 +229,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
-        // TODO: Should this function delete DID values too???
-
         // only delete attributes from sender
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
             bytes32 attributeType = governance.supportedAttributes(i);
