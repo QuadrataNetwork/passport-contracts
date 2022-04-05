@@ -159,6 +159,37 @@ contract QuadAccessStore {
         return issuers;
     }
 
+    function _closeGaps(
+        address _account,
+        bytes32[] memory _attributes,
+        uint256[] memory _epochs,
+        address[] memory _issuers
+    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        require(_issuers.length == _attributes.length && _issuers.length == _epochs.length, "ARRAY_LENGTH_MISMATCH");
+        // find number of gaps
+        uint256 gaps;
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            if(!isDataAvailable(_account, _attributes[i], _issuers[i])) {
+                gaps++;
+            }
+        }
+        bytes32[] memory newAttributes = new bytes32[](_issuers.length - gaps);
+        uint256[] memory newEpochs = new uint256[](_issuers.length - gaps);
+        address[] memory newIssuers  = new address[](_issuers.length - gaps);
+        uint256 counter;
+        // rewrite data into new arrays
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            if(isDataAvailable(_account, _attributes[i], _issuers[i])) {
+                newAttributes[counter] = _attributes[i];
+                newEpochs[counter] = _epochs[i];
+                newIssuers[counter] = _issuers[i];
+                counter++;
+            }
+        }
+
+        return (newAttributes, newEpochs, newIssuers);
+    }
+
     function _filterAttributes(
         address _account,
         bytes32 _attribute,
@@ -195,11 +226,7 @@ contract QuadAccessStore {
             require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 
-        return (
-            attributes,
-            epochs,
-            issuers
-        );
+        return _closeGaps(_account, attributes, epochs, issuers);
     }
 
     function _getAttributesInternal(
