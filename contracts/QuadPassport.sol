@@ -7,54 +7,18 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20Metadat
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "./ERC1155/ERC1155Upgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
-import "./QuadGovernance.sol";
+import "./interfaces/IQuadGovernance.sol";
+import "./storage/QuadPassportStore.sol";
 
 /// @title Quadrata Web3 Identity Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice This represents wallet accounts Web3 Passport
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
-contract QuadPassportStore {
-    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-
-    QuadGovernance public governance;
-
-    struct Attribute {
-        bytes32 value;
-        uint256 epoch;
-        address issuer;
-    }
-
-    // Hash => bool
-    mapping(bytes32 => bool) internal _usedHashes;
-    // Wallet => (TokenId => Signatures)
-    mapping(address => mapping(uint256 => bytes)) internal _validSignatures;
-
-    // Passport attributes
-    // Wallet => (Attribute Name => Attribute)
-
-    /**
-    TODO: WILL CHANGING DIMENSIONALITY OF MAPPINGS CREATE STORAGE UPGRADE CONFLICT???
-     */
-    mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
-    // DID => (AttributeType => Attribute(value, epoch))
-    mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
-    // Wallet => (TokenId => IssuanceEpoch)
-    mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
-
-    // Accounting
-    // ERC20 => Account => balance
-    mapping(address => mapping(address => uint256)) internal _accountBalances;
-    mapping(address => uint256) internal _accountBalancesETH;
-
-    bytes32 public constant ACCESSOR_ROLE = keccak256("ACCESSOR_ROLE");
-
-}
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     event GovernanceUpdated(address _oldGovernance, address _governance);
 
     /// @dev initializer (constructor)
-    /// @param _governanceContract address of the QuadGovernance contract
+    /// @param _governanceContract address of the IQuadGovernance contract
     /// @param _uri URI of the Quadrata Passport
     function initialize(
         address _governanceContract,
@@ -62,7 +26,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) public initializer {
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
         __ERC1155_init(_uri);
-        governance = QuadGovernance(_governanceContract);
+        governance = IQuadGovernance(_governanceContract);
     }
 
     /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155BatchReceived` and receiving a passport
@@ -350,14 +314,14 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        return currentBalance;
     }
 
-    /// @dev Admin function to set the address of the QuadGovernance contract
-    /// @param _governanceContract contract address of QuadGovernance
+    /// @dev Admin function to set the address of the IQuadGovernance contract
+    /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
         require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
         require(_governanceContract != address(governance), "GOVERNANCE_ALREADY_SET");
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
         address oldGov = address(governance);
-        governance = QuadGovernance(_governanceContract);
+        governance = IQuadGovernance(_governanceContract);
 
         emit GovernanceUpdated(oldGov, address(governance));
     }
@@ -366,7 +330,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         bytes32 _attribute,
         address _issuer
-    ) public view returns (Attribute memory) {
+    ) public view override returns (Attribute memory) {
         require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
         return _attributes[_account][_attribute][_issuer];
     }
@@ -375,7 +339,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _dID,
         bytes32 _attribute,
         address _issuer
-    ) public view returns (Attribute memory) {
+    ) public view override returns (Attribute memory) {
         require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
         return _attributesByDID[_dID][_attribute][_issuer];
     }
@@ -383,7 +347,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function accountBalancesETH(
         address _account,
         uint256 _amount
-    ) public {
+    ) public override {
         require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
         _accountBalancesETH[_account] += _amount;
     }
@@ -392,7 +356,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _token,
         address _account,
         uint256 _amount
-    ) public {
+    ) public override {
         require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
         _accountBalances[_token][_account] += _amount;
     }

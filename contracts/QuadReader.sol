@@ -4,27 +4,20 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import "./QuadPassport.sol";
-import "./QuadGovernance.sol";
+import "./interfaces/IQuadPassport.sol";
+import "./interfaces/IQuadGovernance.sol";
+import "./storage/QuadReaderStore.sol";
 
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
-contract QuadPassportReaderStore {
 
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-
-    QuadGovernance public governance;
-    QuadPassport public passport;
-
-}
-
- contract QuadPassportReader is UUPSUpgradeable, QuadPassportReaderStore {
+ contract QuadReader is UUPSUpgradeable, QuadReaderStore {
 
     /// @dev initializer (constructor)
-    /// @param _governance address of the QuadGovernance contract
-    /// @param _passport address of the QuadPassport contract
+    /// @param _governance address of the IQuadGovernance contract
+    /// @param _passport address of the IQuadPassport contract
     function initialize(
         address _governance,
         address _passport
@@ -32,8 +25,8 @@ contract QuadPassportReaderStore {
         require(_governance != address(0), "GOVERNANCE_ADDRESS_ZERO");
         require(_passport != address(0), "PASSPORT_ADDRESS_ZERO");
 
-        governance = QuadGovernance(_governance);
-        passport = QuadPassport(_passport);
+        governance = IQuadGovernance(_governance);
+        passport = IQuadPassport(_passport);
     }
 
     function _authorizeUpgrade(address) internal view override {
@@ -273,10 +266,10 @@ contract QuadPassportReaderStore {
         address[] memory _issuers,
         bool _groupByDID
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        QuadPassport.Attribute memory attribute;
+        IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(_groupByDID) {
-                QuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
                 if(dID.value != bytes32(0)) {
                     continue;
                 }
@@ -351,7 +344,7 @@ contract QuadPassportReaderStore {
         uint256 _tokenId,
         bytes32 _attribute,
         address _issuer
-    ) internal view returns(QuadPassport.Attribute memory) {
+    ) internal view returns(IQuadPassport.Attribute memory) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(passport.balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
@@ -366,7 +359,7 @@ contract QuadPassportReaderStore {
         }
 
         // Attribute grouped by DID
-        QuadPassport.Attribute memory attribute = passport.attributes(_account,keccak256("DID"),_issuer);
+        IQuadPassport.Attribute memory attribute = passport.attributes(_account,keccak256("DID"),_issuer);
         require(attribute.value != bytes32(0), "DID_NOT_FOUND");
         return attribute;
     }
@@ -471,7 +464,7 @@ contract QuadPassportReaderStore {
         bytes32 _attribute,
         address _issuer
     ) internal view returns(bool) {
-        QuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
+        IQuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
