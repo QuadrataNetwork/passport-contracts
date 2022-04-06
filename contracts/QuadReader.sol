@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
+import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 
 
@@ -13,7 +14,7 @@ import "./storage/QuadReaderStore.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is UUPSUpgradeable, QuadReaderStore {
+ contract QuadReader is UUPSUpgradeable, QuadReaderStore, IQuadReader {
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -46,7 +47,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] calldata _excludedIssuers
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -69,7 +70,7 @@ import "./storage/QuadReaderStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _excludedIssuers
-    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         (
             bytes32[] memory attributes,
@@ -90,7 +91,7 @@ import "./storage/QuadReaderStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _excludedIssuers
-    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -115,7 +116,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] calldata _onlyIssuers
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
 
         (
             bytes32[] memory attributes,
@@ -139,7 +140,7 @@ import "./storage/QuadReaderStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
 
         (
@@ -162,7 +163,7 @@ import "./storage/QuadReaderStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -435,7 +436,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address _tokenPayment,
         address _account
-    ) public view returns(uint256) {
+    ) public override view returns(uint256) {
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
         uint256 tokenPrice = governance.getPrice(_tokenPayment);
 
@@ -452,7 +453,7 @@ import "./storage/QuadReaderStore.sol";
     function calculatePaymentETH(
         bytes32 _attribute,
         address _account
-    ) public view returns(uint256) {
+    ) public override view returns(uint256) {
         uint256 tokenPrice = governance.getPriceETH();
         uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
