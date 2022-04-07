@@ -30,3 +30,21 @@ export const deployGovernance = async (
   // console.log(`QuadGovernance is deployed: ${governance.address}`);
   return governance;
 };
+
+export const deployReader = async (
+  governance: SignerWithAddress,
+  passport: SignerWithAddress
+): Promise<Contract> => {
+  const QuadReader = await ethers.getContractFactory("QuadReader");
+  const reader = await upgrades.deployProxy(
+    QuadReader,
+    [
+      governance.address,
+      passport.address
+    ],
+    { initializer: "initialize", kind: "uups" }
+  );
+  await reader.deployed();
+  // console.log(`QuadGovernance is deployed: ${governance.address}`);
+  return reader;
+};

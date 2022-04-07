@@ -19,7 +19,7 @@ const {
 } = require("../../utils/constant.ts");
 const { signMint } = require("../utils/signature.ts");
 const {
-  deployPassportAndGovernance,
+  deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 const {
   assertMint,
@@ -58,7 +58,7 @@ describe("QuadPassport", async () => {
 
       [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
         await ethers.getSigners();
-      [governance, passport, usdc, defi] = await deployPassportAndGovernance(
+      [governance, passport, usdc, defi] = await deployPassportEcosystem(
         admin,
         issuer,
         treasury,

@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 const { GOVERNANCE_ROLE } = require("../../utils/constant.ts");
 
 const {
-  deployPassportAndGovernance,
+  deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
 describe("QuadPassport", async () => {
@@ -23,7 +23,7 @@ describe("QuadPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, issuer, treasury, issuerTreasury] =
         await ethers.getSigners();
-      [governance, passport] = await deployPassportAndGovernance(
+      [governance, passport] = await deployPassportEcosystem(
         admin,
         issuer,
         treasury,

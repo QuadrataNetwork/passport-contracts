@@ -19,7 +19,7 @@ const {
 } = require("../../utils/constant.ts");
 
 const {
-  deployPassportAndGovernance,
+  deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
 const { deployGovernance } = require("../../utils/deployment.ts");
@@ -27,23 +27,30 @@ const { deployGovernance } = require("../../utils/deployment.ts");
 describe("QuadGovernance", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let oracle: Contract;
   let usdc: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
-    issuer: SignerWithAddress,
-    issuerTreasury: SignerWithAddress;
+    issuer1: SignerWithAddress,
+    issuer2: SignerWithAddress,
+    issuer3: SignerWithAddress,
+    newIssuer: SignerWithAddress,
+    issuerTreasury1: SignerWithAddress,
+    issuerTreasury2: SignerWithAddress,
+    issuerTreasury3: SignerWithAddress,
+    newIssuerTreasury: SignerWithAddress;
   const baseURI = "https://quadrata.io";
 
   beforeEach(async () => {
-    [deployer, admin, issuer, treasury, issuerTreasury] =
+    [deployer, admin, issuer1, issuer2, issuer3, newIssuer, treasury, issuerTreasury1, issuerTreasury2, issuerTreasury3, newIssuerTreasury] =
       await ethers.getSigners();
-    [governance, passport, usdc, , oracle] = await deployPassportAndGovernance(
+    [governance, passport, reader, usdc, , oracle] = await deployPassportEcosystem(
       admin,
-      issuer,
+      [issuer1, issuer2, issuer3],
       treasury,
-      issuerTreasury,
+      [issuerTreasury1, issuerTreasury2, issuerTreasury3],
       baseURI
     );
 
@@ -310,7 +317,7 @@ describe("QuadGovernance", async () => {
     });
 
     it("succeed (turn false)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -329,11 +336,11 @@ describe("QuadGovernance", async () => {
         false
       );
       expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.getSupportedAttributesLength()).to.equal(1);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
     });
 
     it("succeed (turn false  - first element)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -354,18 +361,18 @@ describe("QuadGovernance", async () => {
         true
       );
       expect(await governance.supportedAttributes(0)).to.equal(
-        ATTRIBUTE_COUNTRY
+        ATTRIBUTE_IS_BUSINESS
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(1);
+      expect(await governance.getSupportedAttributesLength()).to.equal(2);
     });
 
     it("succeed (getSupportedAttributesLength)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getSupportedAttributesLength()).to.equal(3);
       const newAttribute = ethers.utils.id("CREDIT");
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getSupportedAttributesLength()).to.equal(4);
     });
 
     it("fail (not admin)", async () => {
@@ -628,17 +635,26 @@ describe("QuadGovernance", async () => {
 
   describe("addIssuer", async () => {
     it("succeed", async () => {
-      expect(await governance.issuersTreasury(issuer.address)).to.equal(
-        issuerTreasury.address
+      expect(await governance.issuersTreasury(newIssuer.address)).to.equal(
+        ethers.constants.AddressZero
       );
       await expect(
-        governance.connect(admin).addIssuer(issuer.address, admin.address)
+        governance.connect(admin).addIssuer(newIssuer.address, newIssuerTreasury.address)
       )
         .to.emit(governance, "IssuerAdded")
-        .withArgs(issuer.address, admin.address);
-      expect(await governance.issuersTreasury(issuer.address)).to.equal(
-        admin.address
+        .withArgs(newIssuer.address, newIssuerTreasury.address);
+      expect(await governance.issuersTreasury(newIssuer.address)).to.equal(
+        newIssuerTreasury.address
       );
+    });
+
+    it("fail (issuer already added)", async () => {
+      expect(await governance.issuersTreasury(issuer1.address)).to.equal(
+        issuerTreasury1.address
+      );
+      await expect(
+        governance.connect(admin).addIssuer(issuer1.address, admin.address)
+      ).to.be.revertedWith("ISSUER_ALREADY_SET");
     });
 
     it("fail (issuer address (0))", async () => {
@@ -653,13 +669,13 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .addIssuer(issuer.address, ethers.constants.AddressZero)
+          .addIssuer(newIssuer.address, ethers.constants.AddressZero)
       ).to.revertedWith("TREASURY_ISSUER_ADDRESS_ZERO");
     });
 
     it("fail (not admin)", async () => {
       await expect(
-        governance.addIssuer(issuer.address, admin.address)
+        governance.addIssuer(issuer1.address, admin.address)
       ).to.revertedWith("INVALID_ADMIN");
     });
   });

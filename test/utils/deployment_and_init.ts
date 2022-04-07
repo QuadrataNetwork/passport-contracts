@@ -5,24 +5,31 @@ import { ethers } from "hardhat";
 const {
   deployPassport,
   deployGovernance,
+  deployReader
 } = require("../../utils/deployment.ts");
 
-export const deployPassportAndGovernance = async (
+export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
-  issuer: SignerWithAddress,
+  issuers: SignerWithAddress[],
   treasury: SignerWithAddress,
-  issuerTreasury: SignerWithAddress,
+  issuerTreasuries: SignerWithAddress[],
   uri: string
-): Promise<[Promise<Contract>, Promise<Contract>, any, any, any]> => {
+): Promise<[Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, any]> => {
+
   // Deploy Governance
-  const governance = await deployGovernance(admin, issuer);
-  await governance
-    .connect(admin)
-    .addIssuer(issuer.address, issuerTreasury.address);
+  const governance = await deployGovernance(admin);
+  for(var i = 0; i < issuers.length; i++) {
+    await governance
+      .connect(admin)
+      .addIssuer(issuers[i].address, issuerTreasuries[i].address);
+  }
 
   // Deploy Passport
   const passport = await deployPassport(governance, uri);
   await governance.connect(admin).setPassportContractAddress(passport.address);
+
+  // Deploy Reader
+  const reader = await deployReader(governance, passport);
 
   // Deploy Oracle
   const UniswapAnchoredView = await ethers.getContractFactory(
@@ -43,8 +50,8 @@ export const deployPassportAndGovernance = async (
 
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");
-  const defi = await DeFi.deploy(passport.address);
+  const defi = await DeFi.deploy(passport.address, reader.address, [issuers[0].address]);
   await defi.deployed();
 
-  return [governance, passport, usdc, defi, oracle];
+  return [governance, passport, reader, usdc, defi, oracle];
 };
