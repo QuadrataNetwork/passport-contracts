@@ -111,7 +111,7 @@ import "./storage/QuadReaderStore.sol";
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _onlyIssuers The list of issuers to query from
+    /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
     function getAttributesIncludingOnly(
         address _account,
@@ -136,7 +136,7 @@ import "./storage/QuadReaderStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _onlyIssuers The list of issuers to query from
+    /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
     function getAttributesFreeIncludingOnly(
         address _account,
@@ -160,7 +160,7 @@ import "./storage/QuadReaderStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _onlyIssuers The list of issuers to query from
+    /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
     function getAttributesETHIncludingOnly(
         address _account,
