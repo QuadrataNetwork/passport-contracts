@@ -14,7 +14,7 @@ import "./storage/QuadReaderStore.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is UUPSUpgradeable, QuadReaderStore, IQuadReader {
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -48,11 +48,12 @@ import "./storage/QuadReaderStore.sol";
         address _tokenAddr,
         address[] calldata _excludedIssuers
     ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        _verifyAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesFromExclusionFilterInternal(_account, _tokenId, _attribute, _excludedIssuers);
+        ) = _applyFilter(_account, _attribute, _getExcludedIssuers(_excludedIssuers));
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -71,12 +72,13 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address[] calldata _excludedIssuers
     ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        _verifyAttributeQuery(_account, _tokenId, _attribute);
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesFromExclusionFilterInternal(_account, _tokenId, _attribute, _excludedIssuers);
+        ) =  _applyFilter(_account, _attribute, _getExcludedIssuers(_excludedIssuers));
         return (attributes, epochs, issuers);
     }
 
@@ -92,11 +94,12 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address[] calldata _excludedIssuers
     ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        _verifyAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesFromExclusionFilterInternal(_account, _tokenId, _attribute, _excludedIssuers);
+        ) = _applyFilter(_account, _attribute, _getExcludedIssuers(_excludedIssuers));
 
         _doETHPayments(_attribute, issuers, _account);
 
@@ -117,12 +120,12 @@ import "./storage/QuadReaderStore.sol";
         address _tokenAddr,
         address[] calldata _onlyIssuers
     ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-
+        _verifyAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesFromInclusionFilterInternal(_account, _tokenId, _attribute, _onlyIssuers);
+        ) = _applyFilter(_account, _attribute, _onlyIssuers);
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -142,12 +145,13 @@ import "./storage/QuadReaderStore.sol";
         address[] calldata _onlyIssuers
     ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
+        _verifyAttributeQuery(_account, _tokenId, _attribute);
 
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesFromInclusionFilterInternal(_account, _tokenId, _attribute, _onlyIssuers);
+        ) =  _applyFilter(_account, _attribute, _onlyIssuers);
 
         return (attributes, epochs, issuers);
     }
@@ -164,11 +168,12 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address[] calldata _onlyIssuers
     ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        _verifyAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _getAttributesFromInclusionFilterInternal(_account, _tokenId, _attribute, _onlyIssuers);
+        ) = _applyFilter(_account, _attribute, _onlyIssuers);
 
         _doETHPayments(_attribute, issuers, _account);
 
@@ -180,10 +185,10 @@ import "./storage/QuadReaderStore.sol";
     ) internal view returns(address[] memory) {
         address[] memory issuers  = new address[](governance.getIssuersLength());
 
-        uint256 continuations = 0;
+        uint256 gaps = 0;
         for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
             if(_hasIssuer(governance.issuers(i), _issuers)) {
-                continuations++;
+                gaps++;
                 continue;
             }
 
@@ -191,7 +196,7 @@ import "./storage/QuadReaderStore.sol";
         }
 
         // close the gap(s)
-        uint256 newLength = governance.getIssuersLength() - continuations;
+        uint256 newLength = governance.getIssuersLength() - gaps;
 
         address[] memory newIssuers  = new address[](newLength);
         uint256 formattedIndex = 0;
@@ -204,129 +209,59 @@ import "./storage/QuadReaderStore.sol";
         }
         return issuers;
     }
-
-    function _closeGaps(
-        address _account,
-        bytes32[] memory _attributes,
-        uint256[] memory _epochs,
-        address[] memory _issuers
-    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        require(_issuers.length == _attributes.length && _issuers.length == _epochs.length, "ARRAY_LENGTH_MISMATCH");
-        // find number of gaps
-        uint256 gaps;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(!_isDataAvailable(_account, _attributes[i], _issuers[i])) {
-                gaps++;
-            }
-        }
-        bytes32[] memory newAttributes = new bytes32[](_issuers.length - gaps);
-        uint256[] memory newEpochs = new uint256[](_issuers.length - gaps);
-        address[] memory newIssuers  = new address[](_issuers.length - gaps);
-        uint256 counter;
-        // rewrite data into new trimmed arrays
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(_isDataAvailable(_account, _attributes[i], _issuers[i])) {
-                newAttributes[counter] = _attributes[i];
-                newEpochs[counter] = _epochs[i];
-                newIssuers[counter] = _issuers[i];
-                counter++;
-            }
-        }
-
-        return (newAttributes, newEpochs, newIssuers);
-    }
-
-    function _applyInclusionFilter(
-        address _account,
-        bytes32 _attribute,
-        address[] calldata _issuers,
-        bool _groupByDID
-    )internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        bytes32[] memory attributes = new bytes32[](_issuers.length);
-        uint256[] memory epochs = new uint256[](_issuers.length);
-        return _applyFilter(_account, _attribute, attributes, epochs, _issuers, _groupByDID);
-    }
-
-    function _applyExclusionFilter(
-        address _account,
-        bytes32 _attribute,
-        address[] calldata _issuers,
-        bool _groupByDID
-    )internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        (address[] memory issuers)  = _getExcludedIssuers(_issuers);
-        bytes32[] memory attributes = new bytes32[](issuers.length);
-        uint256[] memory epochs = new uint256[](issuers.length);
-        return _applyFilter(_account, _attribute, attributes, epochs, issuers, _groupByDID);
-    }
-
     function _applyFilter(
         address _account,
         bytes32 _attribute,
-        bytes32[] memory _attributes,
-        uint256[] memory _epochs,
-        address[] memory _issuers,
-        bool _groupByDID
+        address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
+
+        // find gap values
+        ApplyFilterVars memory vars;
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
+                vars.gaps++;
+            }
+        }
+
+
+        vars.delta = _issuers.length - vars.gaps;
+
+        bytes32[] memory attributes = new bytes32[](vars.delta);
+        uint256[] memory epochs = new uint256[](vars.delta);
+
         IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(_groupByDID) {
+            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
+                continue;
+            }
+
+
+            if(governance.eligibleAttributes(_attribute)) {
                 IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
                 if(dID.value != bytes32(0)) {
                     continue;
                 }
 
                 attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                _attributes[i] = attribute.value;
-                _epochs[i] = attribute.epoch;
+                attributes[vars.filteredIndex] = attribute.value;
+                epochs[vars.filteredIndex] = attribute.epoch;
                 continue;
             }
 
 
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            _attributes[i] = attribute.value;
-            _epochs[i] = attribute.epoch;
+            attributes[vars.filteredIndex] = attribute.value;
+            epochs[vars.filteredIndex] = attribute.epoch;
         }
 
-        if(_groupByDID) {
-            require(_hasValidAttribute(_attributes), "DIDS_NOT_FOUND");
+        if(governance.eligibleAttributes(_attribute)) {
+            require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 
-        return _closeGaps(_account, _attributes, _epochs, _issuers);
+        return (attributes, epochs, _issuers);
     }
 
-    function _getAttributesFromInclusionFilterInternal(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] calldata _issuers
-    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _getAttributesInternal(_account, _tokenId, _attribute);
-
-        if (governance.eligibleAttributes(_attribute)) {
-            return _applyInclusionFilter(_account, _attribute, _issuers, false);
-        }
-
-        // Attribute grouped by DID
-        return _applyInclusionFilter(_account, _attribute, _issuers, true);
-    }
-
-    function _getAttributesFromExclusionFilterInternal(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] calldata _issuers
-    ) internal view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _getAttributesInternal(_account, _tokenId, _attribute);
-
-        if (governance.eligibleAttributes(_attribute)) {
-            return _applyExclusionFilter(_account, _attribute, _issuers, false);
-        }
-
-        // Attribute grouped by DID
-        return _applyExclusionFilter(_account, _attribute, _issuers, true);
-    }
-
-    function _getAttributesInternal(
+    function _verifyAttributeQuery(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
@@ -339,32 +274,6 @@ import "./storage/QuadReaderStore.sol";
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
     }
-
-    function _getAttributeInternal(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(IQuadPassport.Attribute memory) {
-        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(passport.balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-
-        );
-
-        if (governance.eligibleAttributes(_attribute)) {
-            return passport.attributes(_account,_attribute,_issuer);
-        }
-
-        // Attribute grouped by DID
-        IQuadPassport.Attribute memory attribute = passport.attributes(_account,keccak256("DID"),_issuer);
-        require(attribute.value != bytes32(0), "DID_NOT_FOUND");
-        return attribute;
-    }
-
 
     function _doETHPayment(
         bytes32 _attribute,

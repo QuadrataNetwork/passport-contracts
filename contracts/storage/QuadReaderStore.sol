@@ -11,4 +11,10 @@ contract QuadReaderStore {
     IQuadGovernance public governance;
     IQuadPassport public passport;
 
+    struct ApplyFilterVars {
+        uint256 gaps;
+        uint256 delta;
+        uint256 filteredIndex;
+    }
+
 }

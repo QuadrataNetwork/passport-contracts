@@ -80,14 +80,15 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
-        _validSignatures[_msgSender()][_tokenId] = _sig;
-        _issuedEpoch[_msgSender()][_tokenId] = _issuedAt;
-        _attributes[_msgSender()][keccak256("COUNTRY")][issuer] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
-        _attributes[_msgSender()][keccak256("DID")][issuer] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
+        _validSignatures[_account][_tokenId] = _sig;
+        _issuedEpoch[_account][_tokenId] = _issuedAt;
+        _attributes[_account][keccak256("COUNTRY")][issuer] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
+        _attributes[_account][keccak256("DID")][issuer] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
+        _attributes[_account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _isBusiness, epoch: _issuedAt, issuer: issuer});
         _attributesByDID[_quadDID][keccak256("AML")][issuer] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
 
-        if(balanceOf(_msgSender(), _tokenId) == 0)
-            _mint(_msgSender(), _tokenId, 1, "");
+        if(balanceOf(_account, _tokenId) == 0)
+            _mint(_account, _tokenId, 1, "");
     }
 
     /// @notice Update or set a new attribute for your existing passport
@@ -175,7 +176,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
-            for(uint256 j = 1; j < governance.getIssuersLength(); j++) {
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 bytes32 attributeType = governance.supportedAttributes(i);
                 delete _attributes[_msgSender()][attributeType][governance.issuers(j)];
             }
@@ -204,7 +205,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             bytes32 attributeType = governance.supportedAttributes(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j)];
-                if(attribute.value != bytes32(0) && attribute.epoch != 0) {
+                if(attribute.issuer != address(0) && attribute.epoch != 0) {
                     return;
                 }
 
@@ -331,7 +332,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _issuer
     ) public view override returns (Attribute memory) {
-        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
         return _attributes[_account][_attribute][_issuer];
     }
 
@@ -340,7 +341,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _issuer
     ) public view override returns (Attribute memory) {
-        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 
@@ -348,7 +349,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _amount
     ) public override {
-        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
         _accountBalancesETH[_account] += _amount;
     }
 
@@ -357,7 +358,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _amount
     ) public override {
-        require(governance.hasRole(ACCESSOR_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
         _accountBalances[_token][_account] += _amount;
     }
 

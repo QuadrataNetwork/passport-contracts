@@ -39,10 +39,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         // Add DID, COUNTRY, AML as valid attributes
         eligibleAttributes[keccak256("DID")] = true;
         eligibleAttributes[keccak256("COUNTRY")] = true;
+        eligibleAttributes[keccak256("IS_BUSINESS")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
 
         supportedAttributes.push(keccak256("DID"));
         supportedAttributes.push(keccak256("COUNTRY"));
+        supportedAttributes.push(keccak256("IS_BUSINESS"));
 
         // Set pricing
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
@@ -263,15 +265,16 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function deleteIssuer(address _issuer) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
-        require(issuerIndices[_issuer] < issuers.length, "OUT_OF_BOUNDS");
+        require(issuerIndices[_issuer] < issuers.length + 1, "OUT_OF_BOUNDS");
 
-        revokeRole(ISSUER_ROLE, _issuer);
         // don't need to delete treasury
         issuers[issuerIndices[_issuer]-1] = issuers[issuers.length-1];
         issuerIndices[issuers[issuers.length-1]] = issuerIndices[_issuer];
 
         delete issuerIndices[_issuer];
         issuers.pop();
+
+        revokeRole(ISSUER_ROLE, _issuer);
 
         emit IssuerDeleted(_issuer);
     }

@@ -7,6 +7,7 @@ import "../interfaces/IQuadGovernance.sol";
 contract QuadPassportStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+    bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
 
     IQuadGovernance public governance;
 
@@ -16,10 +17,11 @@ contract QuadPassportStore {
     mapping(address => mapping(uint256 => bytes)) internal _validSignatures;
 
     // Passport attributes
-    // Wallet => (Attribute Name => Attribute)
+    // Wallet => (Attribute Name => (Issuer => Attribute))
     mapping(address => mapping(bytes32 => mapping(address => IQuadPassport.Attribute))) internal _attributes;
-    // DID => (AttributeType => Attribute(value, epoch))
+    // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
     mapping(bytes32 => mapping(bytes32 => mapping(address => IQuadPassport.Attribute))) internal _attributesByDID;
+
     // Wallet => (TokenId => IssuanceEpoch)
     mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
 
@@ -27,7 +29,5 @@ contract QuadPassportStore {
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
-
-    bytes32 public constant ACCESSOR_ROLE = keccak256("ACCESSOR_ROLE");
 
 }

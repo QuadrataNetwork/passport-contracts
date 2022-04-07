@@ -20,6 +20,7 @@ contract QuadGovernanceStore {
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
+    bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
 
     uint256 public revSplitIssuer; // 50 means 50%;
     uint256 public passportVersion;
@@ -32,7 +33,5 @@ contract QuadGovernanceStore {
 
     address[] public issuers;
     mapping(address => uint256) internal issuerIndices;
-
-    bytes32 public constant ACCESSOR_ROLE = keccak256("ACCESSOR_ROLE");
 
 }
