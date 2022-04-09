@@ -28,6 +28,7 @@ const { signMint } = require("../utils/signature.ts");
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let usdc: Contract;
   let defi: Contract; // eslint-disable-line no-unused-vars
   let mockBusiness: Contract;
@@ -57,11 +58,11 @@ describe("QuadPassport", async () => {
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
-    [governance, passport, usdc, defi] = await deployPassportEcosystem(
+    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
-      issuer,
+      [issuer],
       treasury,
-      issuerTreasury,
+      [issuerTreasury],
       baseURI
     );
 
@@ -114,17 +115,17 @@ describe("QuadPassport", async () => {
   describe("calculatePaymentToken", async () => {
     it("success (AML)", async () => {
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, minterA.address)
+        await reader.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, minterA.address)
       ).to.equal(0);
 
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, mockBusiness.address)
+        await reader.calculatePaymentToken(ATTRIBUTE_AML, usdc.address, mockBusiness.address)
       ).to.equal(0);
     });
 
     it("success (COUNTRY)", async () => {
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, minterA.address)
+        await reader.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, minterA.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
@@ -133,7 +134,7 @@ describe("QuadPassport", async () => {
       );
 
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, mockBusiness.address)
+        await reader.calculatePaymentToken(ATTRIBUTE_COUNTRY, usdc.address, mockBusiness.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
@@ -144,7 +145,7 @@ describe("QuadPassport", async () => {
 
     it("success (DID)", async () => {
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address)
+        await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(),
@@ -153,7 +154,7 @@ describe("QuadPassport", async () => {
       );
 
       expect(
-        await passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, mockBusiness.address)
+        await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, mockBusiness.address)
       ).to.equal(
         parseUnits(
           PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(),
@@ -167,40 +168,40 @@ describe("QuadPassport", async () => {
       const wbtc = await ERC20.deploy();
       await wbtc.deployed();
       await expect(
-        passport.calculatePaymentToken(ATTRIBUTE_DID, wbtc.address, minterA.address)
+        reader.calculatePaymentToken(ATTRIBUTE_DID, wbtc.address, minterA.address)
       ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
     });
 
     it("fail - wrong erc20", async () => {
       await expect(
-        passport.calculatePaymentToken(ATTRIBUTE_DID, admin.address, minterA.address)
+        reader.calculatePaymentToken(ATTRIBUTE_DID, admin.address, minterA.address)
       ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
     });
 
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
-      await expect(passport.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address))
+      await expect(reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address))
         .to.reverted;
     });
   });
 
   describe("calculatePaymentETH", async () => {
     it("success (AML)", async () => {
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_AML, minterA.address)).to.equal(0);
+      expect(await reader.calculatePaymentETH(ATTRIBUTE_AML, minterA.address)).to.equal(0);
     });
 
     it("success (COUNTRY)", async () => {
       const priceAttribute = parseEther(
         (PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
       );
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
+      expect(await reader.calculatePaymentETH(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
         priceAttribute
       );
 
       const priceBusinessAttribute = parseEther(
         (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
       );
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_COUNTRY, mockBusiness.address)).to.equal(
+      expect(await reader.calculatePaymentETH(ATTRIBUTE_COUNTRY, mockBusiness.address)).to.equal(
         priceBusinessAttribute
       );
     });
@@ -210,7 +211,7 @@ describe("QuadPassport", async () => {
         (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
       );
 
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.equal(
+      expect(await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.equal(
         priceAttribute
       );
 
@@ -218,14 +219,14 @@ describe("QuadPassport", async () => {
         (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
       );
 
-      expect(await passport.calculatePaymentETH(ATTRIBUTE_DID, mockBusiness.address)).to.equal(
+      expect(await reader.calculatePaymentETH(ATTRIBUTE_DID, mockBusiness.address)).to.equal(
         priceBusniessAttribute
       );
     });
 
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
-      await expect(passport.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
+      await expect(reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
     });
   });
 });
