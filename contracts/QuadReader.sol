@@ -309,6 +309,10 @@ import "hardhat/console.sol";
                  msg.value == amountETH,
                 "INSUFFICIENT_PAYMENT_AMOUNT"
             );
+            require(
+                payable(address(passport)).send(amountETH),
+                "FAILED_TO_SEND_PAYMENT"
+            );
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
