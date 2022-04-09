@@ -332,7 +332,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _issuer
     ) public view override returns (Attribute memory) {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         return _attributes[_account][_attribute][_issuer];
     }
 
@@ -341,7 +341,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _issuer
     ) public view override returns (Attribute memory) {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 
@@ -349,7 +349,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _amount
     ) public override {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         _accountBalancesETH[_account] += _amount;
     }
 
@@ -358,7 +358,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _amount
     ) public override {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_ACCESSOR");
+        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         _accountBalances[_token][_account] += _amount;
     }
 

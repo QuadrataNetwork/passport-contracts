@@ -11,7 +11,8 @@ const {
 
 describe("QuadPassport", async () => {
   let passport: Contract;
-  let governance: Contract; // eslint-disable-line no-unused-vars
+  let governance: Contract;
+  let reader: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -23,11 +24,11 @@ describe("QuadPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, issuer, treasury, issuerTreasury] =
         await ethers.getSigners();
-      [governance, passport] = await deployPassportEcosystem(
+      [governance, passport, reader] = await deployPassportEcosystem(
         admin,
-        issuer,
+        [issuer],
         treasury,
-        issuerTreasury,
+        [issuerTreasury],
         baseURI
       );
     });

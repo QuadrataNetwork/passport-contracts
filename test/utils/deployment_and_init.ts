@@ -1,5 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
+import { id } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const {
@@ -47,6 +48,7 @@ export const deployPassportEcosystem = async (
   await governance.connect(admin).setOracle(oracle.address);
   await governance.connect(admin).allowTokenPayment(usdc.address, true);
   await governance.connect(admin).setTreasury(treasury.address);
+  await governance.connect(admin).grantRole(id("READER_ROLE"), reader.address);
 
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");

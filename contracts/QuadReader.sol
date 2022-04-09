@@ -9,6 +9,9 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 
+//TODO: Delete this
+import "hardhat/console.sol";
+
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
@@ -146,7 +149,6 @@ import "./storage/QuadReaderStore.sol";
     ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         _verifyAttributeQuery(_account, _tokenId, _attribute);
-
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -214,44 +216,65 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-
+        console.log("--------------------");
+        console.log("in apply filter");
         // find gap values
         ApplyFilterVars memory vars;
+        console.log("governance.eligibleAttributes(_attribute)");
+        console.log(governance.eligibleAttributes(_attribute));
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                vars.gaps++;
+            if(governance.eligibleAttributes(_attribute)) {
+                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
+                    vars.gaps++;
+                }
+            } else {
+                IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                require(dID.value != bytes32(0), "USER_MUST_HAVE_DID");
+                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
+                    vars.gaps++;
+                }
             }
         }
 
+        console.log("gaps:");
+        console.log(vars.gaps);
+        console.log("_issuers:");
+        console.log(_issuers.length);
 
         vars.delta = _issuers.length - vars.gaps;
 
         bytes32[] memory attributes = new bytes32[](vars.delta);
         uint256[] memory epochs = new uint256[](vars.delta);
 
+        console.log("attributes length:");
+        console.log(attributes.length);
+
         IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                continue;
-            }
-
-
-            if(governance.eligibleAttributes(_attribute)) {
+            if(!governance.eligibleAttributes(_attribute)) {
                 IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
-                if(dID.value != bytes32(0)) {
+                require(dID.value != bytes32(0), "USER_MUST_HAVE_DID");
+                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
 
                 attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
                 attributes[vars.filteredIndex] = attribute.value;
                 epochs[vars.filteredIndex] = attribute.epoch;
+                vars.filteredIndex++;
                 continue;
             }
 
+            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
+                continue;
+            }
 
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
+            console.log("attribyte value:");
+            console.logBytes32(attribute.value);
             attributes[vars.filteredIndex] = attribute.value;
             epochs[vars.filteredIndex] = attribute.epoch;
+            vars.filteredIndex++;
         }
 
         if(governance.eligibleAttributes(_attribute)) {
@@ -322,6 +345,8 @@ import "./storage/QuadReaderStore.sol";
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account) / _issuers.length;
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
+            console.log("Trying to send");
+            console.log(amountToken);
             require(
                 erc20.transferFrom(msg.sender, address(this), amountToken),
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
@@ -375,6 +400,15 @@ import "./storage/QuadReaderStore.sol";
         address _issuer
     ) internal view returns(bool) {
         IQuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
+        return attrib.value != bytes32(0) && attrib.epoch != 0;
+    }
+
+    function _isDataAvailableByDID(
+        bytes32 _dID,
+        bytes32 _attribute,
+        address _issuer
+    ) internal view returns(bool) {
+        IQuadPassport.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 

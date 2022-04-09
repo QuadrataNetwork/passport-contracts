@@ -27,6 +27,7 @@ const { signMint } = require("../utils/signature.ts");
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let usdc: Contract;
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -53,11 +54,11 @@ describe("QuadPassport", async () => {
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
-    [governance, passport, usdc, defi] = await deployPassportEcosystem(
+    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
-      issuer,
+      [issuer],
       treasury,
-      issuerTreasury,
+      [issuerTreasury],
       baseURI
     );
 
@@ -89,13 +90,16 @@ describe("QuadPassport", async () => {
   describe("burnPassport", async () => {
     it("success - burnPassport, KYB: FALSE", async () => {
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
       );
+      console.log("passed free");
       await assertGetAttribute(
         minterA,
         treasury,
@@ -104,10 +108,12 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
       );
+      console.log("passed get attribute");
       await assertGetAttribute(
         minterA,
         treasury,
@@ -116,6 +122,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt

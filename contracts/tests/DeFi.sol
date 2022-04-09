@@ -26,16 +26,16 @@ contract DeFi {
     ) public returns(bytes32,uint256) {
         uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
-        IERC20(_tokenPayment).approve(address(passport), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding(msg.sender, 1, _attribute, _tokenPayment, issuers);
-        emit GetAttributeEvent(attrValue[0], epoch[1]);
+        IERC20(_tokenPayment).approve(address(reader), paymentAmount);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding(msg.sender, 1, _attribute, _tokenPayment, new address[](0));
+        emit GetAttributeEvent(attrValue[0], epoch[0]);
         return (attrValue[0], epoch[0]);
     }
 
     function doSomethingFree(
         bytes32 _attribute
     ) public returns(bytes32,uint256) {
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeExcluding(msg.sender, 1, _attribute, issuers);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeExcluding(msg.sender, 1, _attribute, new address[](0));
         emit GetAttributeEvent(attrValue[0], epoch[0]);
         return (attrValue[0], epoch[0]);
     }
@@ -45,7 +45,7 @@ contract DeFi {
         console.log("[doSomethingETH] paymentAmount", paymentAmount);
         console.log("[doSomethingETH] msg.value", msg.value);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETHExcluding{value: paymentAmount}(msg.sender, 1, _attribute, issuers);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETHExcluding{value: paymentAmount}(msg.sender, 1, _attribute, new address[](0));
         emit GetAttributeEvent(attrValue[0], epoch[0]);
         return (attrValue[0], epoch[0]);
     }
