@@ -298,24 +298,6 @@ import "hardhat/console.sol";
         );
     }
 
-    function _doETHPayment(
-        bytes32 _attribute,
-        address _issuer,
-        address _account
-    ) internal {
-        uint256 amountETH = calculatePaymentETH(_attribute, _account);
-        if (amountETH > 0) {
-            require(
-                 msg.value == amountETH,
-                "INSUFFICIENT_PAYMENT_AMOUNT"
-            );
-            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
-            uint256 amountProtocol = amountETH - amountIssuer;
-            passport.accountBalancesETH(governance.issuersTreasury(_issuer), amountIssuer);
-            passport.accountBalancesETH(governance.treasury(), amountProtocol);
-        }
-    }
-
     function _doETHPayments(
         bytes32 _attribute,
         address[] memory _issuers,
@@ -348,7 +330,7 @@ import "hardhat/console.sol";
             console.log("Trying to send");
             console.log(amountToken);
             require(
-                erc20.transferFrom(msg.sender, address(this), amountToken),
+                erc20.transferFrom(msg.sender, address(passport), amountToken),
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;

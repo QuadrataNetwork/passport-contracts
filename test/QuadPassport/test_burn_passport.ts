@@ -131,29 +131,32 @@ describe("QuadPassport", async () => {
       await passport.connect(minterA).burnPassport(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
