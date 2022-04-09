@@ -140,9 +140,9 @@ export const assertGetAttribute = async (
 
   // GetAttribute function
   await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
-  expect(await paymentToken.allowance(opts?.signer || account.address, defi.address)).to.equal(priceAttribute);
+  expect(await paymentToken.allowance((opts?.signer || account).address, defi.address)).to.equal(priceAttribute);
   console.log("Allowence")
-  console.log(await paymentToken.allowance(opts?.signer || account.address, defi.address));
+  console.log(await paymentToken.allowance((opts?.signer || account).address, defi.address));
   console.log("approving...");
   console.log(priceAttribute.toString())
 
