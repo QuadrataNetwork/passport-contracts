@@ -29,6 +29,7 @@ const { assertMint, assertSetAttribute } = require("../utils/verify.ts");
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let usdc: Contract;
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -55,11 +56,11 @@ describe("QuadPassport", async () => {
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
-    [governance, passport, usdc, defi] = await deployPassportEcosystem(
+    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
-      issuer,
+      [issuer],
       treasury,
-      issuerTreasury,
+      [issuerTreasury],
       baseURI
     );
     await usdc.transfer(minterA.address, parseUnits("1000", 6));

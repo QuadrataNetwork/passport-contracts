@@ -11,7 +11,7 @@ import "./storage/QuadReaderStore.sol";
 
 //TODO: Delete this
 import "hardhat/console.sol";
-
+//TODO: Delete all debug statements console.logs
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp

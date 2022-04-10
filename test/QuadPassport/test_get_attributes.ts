@@ -375,6 +375,7 @@ describe("QuadPassport", async () => {
     });
 
     // TODO: Add tests for excluding and multi issuer tests with null values
+    // TODO: This will require changing DeFi.sol and current assertGetters
 
     it("fail - getAttributeETHInlcudingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
