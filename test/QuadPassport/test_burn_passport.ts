@@ -99,7 +99,6 @@ describe("QuadPassport", async () => {
         aml,
         issuedAt
       );
-      console.log("passed free");
       await assertGetAttribute(
         minterA,
         treasury,
@@ -113,7 +112,6 @@ describe("QuadPassport", async () => {
         country,
         issuedAt
       );
-      console.log("passed get attribute");
       await assertGetAttribute(
         minterA,
         treasury,

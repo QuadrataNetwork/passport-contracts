@@ -404,7 +404,6 @@ describe("QuadPassport", async () => {
       await passport.withdrawETH(issuerTreasury.address);
 
       // Update AML with Issuer 2
-      console.log("checkpoint 1#")
       const sig = await signMint(
         issuerB,
         minterA,
@@ -421,7 +420,6 @@ describe("QuadPassport", async () => {
       .mintPassport(minterA.address, 1, id("DID_34"), aml, country, isBusiness, issuedAt, sig, {
         value: MINT_PRICE,
       });
-      console.log("checkpoint 2#")
 
       const newAML = id("MEDIUM");
       await assertSetAttribute(
@@ -433,7 +431,6 @@ describe("QuadPassport", async () => {
         newAML,
         newIssuedAt
       );
-      console.log("checkpoint 3#")
 
       await assertGetAttributeFree(
         [issuer.address],
@@ -445,7 +442,6 @@ describe("QuadPassport", async () => {
         aml,
         issuedAt
       );
-      console.log("checkpoint 4#")
 
       await assertGetAttribute(
         minterA,

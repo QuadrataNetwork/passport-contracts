@@ -13,7 +13,6 @@ export const deployPassport = async (
     { initializer: "initialize", kind: "uups" }
   );
   await passport.deployed();
-  // console.log(`QuadPassport is deployed: ${passport.address}`);
   return passport;
 };
 
@@ -27,7 +26,6 @@ export const deployGovernance = async (
     { initializer: "initialize", kind: "uups" }
   );
   await governance.deployed();
-  // console.log(`QuadGovernance is deployed: ${governance.address}`);
   return governance;
 };
 
@@ -45,6 +43,5 @@ export const deployReader = async (
     { initializer: "initialize", kind: "uups" }
   );
   await reader.deployed();
-  // console.log(`QuadGovernance is deployed: ${governance.address}`);
   return reader;
 };

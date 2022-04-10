@@ -9,10 +9,6 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 
-//TODO: Delete this
-import "hardhat/console.sol";
-//TODO: Delete all debug statements console.logs
-
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -218,12 +214,8 @@ import "hardhat/console.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        console.log("--------------------");
-        console.log("in apply filter");
         // find gap values
         ApplyFilterVars memory vars;
-        console.log("governance.eligibleAttributes(_attribute)");
-        console.log(governance.eligibleAttributes(_attribute));
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributes(_attribute)) {
                 if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
@@ -241,19 +233,11 @@ import "hardhat/console.sol";
             }
         }
 
-        console.log("gaps:");
-        console.log(vars.gaps);
-        console.log("_issuers:");
-        console.log(_issuers.length);
-
         vars.delta = _issuers.length - vars.gaps;
 
         bytes32[] memory attributes = new bytes32[](vars.delta);
         uint256[] memory epochs = new uint256[](vars.delta);
         address[] memory issuers = new address[](vars.delta);
-
-        console.log("attributes length:");
-        console.log(attributes.length);
 
         IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
@@ -279,8 +263,6 @@ import "hardhat/console.sol";
             }
 
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            console.log("attribyte value:");
-            console.logBytes32(attribute.value);
             attributes[vars.filteredIndex] = attribute.value;
             epochs[vars.filteredIndex] = attribute.epoch;
             issuers[vars.filteredIndex] = attribute.issuer;
@@ -338,13 +320,9 @@ import "hardhat/console.sol";
         address[] memory _issuers,
         address _account
     ) internal {
-        console.log("In _doTokenPayments");
-        console.log(_issuers.length);
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-            console.log("Trying to send");
-            console.log(amountToken);
             require(
                 erc20.transferFrom(msg.sender, address(passport), amountToken),
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"

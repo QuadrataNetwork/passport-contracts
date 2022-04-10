@@ -144,7 +144,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) internal {
         require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
-        //TODO: Issuers must each have their own DID
         require(_attribute != keccak256("DID"), "MUST_BURN_AND_MINT");
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),

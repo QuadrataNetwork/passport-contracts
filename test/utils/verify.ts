@@ -92,7 +92,6 @@ export const assertGetAttributeFree = async (
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(attributesResponse[0], epochsResponse[0]);
   } else {
-    console.log((opts?.signer || account).address)
     await expect(defi.connect(opts?.signer || account).doSomethingFree(attribute))
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(attributesResponse[0], epochsResponse[0]);
@@ -141,10 +140,6 @@ export const assertGetAttribute = async (
   // GetAttribute function
   await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
   expect(await paymentToken.allowance((opts?.signer || account).address, defi.address)).to.equal(priceAttribute);
-  console.log("Allowence")
-  console.log(await paymentToken.allowance((opts?.signer || account).address, defi.address));
-  console.log("approving...");
-  console.log(priceAttribute.toString())
 
   if (opts?.mockBusiness) {
     await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
@@ -153,7 +148,6 @@ export const assertGetAttribute = async (
       .withArgs(expectedAttributeValue, expectedIssuedAt);
   } else {
 
-    console.log("checkpoint 0");
     await expect(
       defi.connect(opts?.signer || account).doSomething(attribute, paymentToken.address)
     )
@@ -161,33 +155,26 @@ export const assertGetAttribute = async (
     .to.emit(defi, "GetAttributeEvent")
     .withArgs(expectedAttributeValue, expectedIssuedAt);
 
-    console.log("checkpoint 1");
     // Check Balance
     expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
       initialBalance.sub(priceAttribute)
     );
-    console.log("checkpoint 2");
 
     expect(await paymentToken.balanceOf(passport.address)).to.equal(
       priceAttribute.add(initialBalancePassport)
     );
-    console.log("checkpoint 3");
 
     expect(await paymentToken.balanceOf(issuer.address)).to.equal(
       initialBalanceIssuer
     );
-    console.log("checkpoint 4");
 
     expect(await paymentToken.balanceOf(issuerTreasury.address)).to.equal(
       initialBalanceIssuerTreasury
     );
-    console.log("checkpoint 5");
 
     expect(await paymentToken.balanceOf(treasury.address)).to.equal(
       initialBalanceProtocolTreasury
     );
-
-    console.log("checkpoint a");
 
     await expect(
       passport.withdrawToken(issuer.address, paymentToken.address)
@@ -196,16 +183,12 @@ export const assertGetAttribute = async (
       passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
     ).to.revertedWith("NOT_ENOUGH_BALANCE");
 
-    console.log("checkpoint b")
-
     expect(
       await passport.callStatic.withdrawToken(
         issuerTreasury.address,
         paymentToken.address
       )
     ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(opts?.validIssuerCount || 1));
-
-    console.log("checkpoint c")
 
     expect(
       await passport.callStatic.withdrawToken(
