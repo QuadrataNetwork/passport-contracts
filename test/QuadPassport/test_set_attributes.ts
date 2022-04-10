@@ -46,7 +46,9 @@ describe("QuadPassport", async () => {
     minterA: SignerWithAddress,
     minterB: SignerWithAddress,
     issuer: SignerWithAddress,
-    issuerTreasury: SignerWithAddress;
+    issuerTreasury: SignerWithAddress,
+    issuerB: SignerWithAddress,
+    issuerBTreasury: SignerWithAddress;
   let baseURI: string;
   let did: string;
   let aml: string;
@@ -62,13 +64,13 @@ describe("QuadPassport", async () => {
     isBusiness = id("FALSE");
     issuedAt = 1000;
 
-    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
+    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, issuerB, issuerBTreasury] =
       await ethers.getSigners();
     [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
-      [issuer],
+      [issuer, issuerB],
       treasury,
-      [issuerTreasury],
+      [issuerTreasury, issuerBTreasury],
       baseURI
     );
 
@@ -808,10 +810,7 @@ describe("QuadPassport", async () => {
     });
 
     it("success - two issuers (issuers may not overwrite each other)", async () => {
-      const issuerBTreasury = ethers.Wallet.createRandom();
-      await governance
-        .connect(admin)
-        .addIssuer(minterB.address, issuerBTreasury.address);
+
       let newCountry = id("USA");
       let newIssuedAt = Math.floor(new Date().getTime() / 1000);
       await passport
@@ -840,7 +839,7 @@ describe("QuadPassport", async () => {
       const newIssuedAt2 = Math.floor(new Date().getTime() / 1000) + 100;
 
       await passport
-        .connect(minterB)
+        .connect(issuerB)
         .setAttributeIssuer(
           minterA.address,
           TOKEN_ID,
@@ -848,18 +847,33 @@ describe("QuadPassport", async () => {
           id("FRANCE"),
           newIssuedAt2
         );
+
       await assertGetAttribute(
         minterA,
         treasury,
-        minterB,
-        issuerBTreasury,
+        issuer,
+        issuerTreasury,
         usdc,
         defi,
         passport,
         reader,
         ATTRIBUTE_COUNTRY,
-        id("USA"),
+        newCountry,
         newIssuedAt
+      );
+
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuerB,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        id("FRANCE"),
+        newIssuedAt2
       );
     });
 
