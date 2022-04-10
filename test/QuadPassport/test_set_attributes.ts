@@ -463,6 +463,9 @@ describe("QuadPassport", async () => {
         {
           validIssuerCount: 2
         }
+
+        //TODO: assert values from all issuers
+        //TODO: Make verify functions for all getAttributes and the corresponding DeFi doSomethings...
       );
     });
 
@@ -887,6 +890,8 @@ describe("QuadPassport", async () => {
         newIssuedAt,
         1,
         {validIssuerCount: 2}
+
+        //TODO: assert values from all issuers
       );
     });
 
