@@ -8,6 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
+import { assertMint } from "../utils/verify";
 
 const {
   ATTRIBUTE_AML,
@@ -22,6 +23,7 @@ const {
   assertGetAttribute,
   assertGetAttributeFree,
   assertGetAttributeETH,
+  assertGetAttributeFreeExcluding
 } = require("../utils/verify.ts");
 
 const {
@@ -374,8 +376,6 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    // TODO: Add tests for excluding and multi issuer tests with null values
-    // TODO: This will require changing DeFi.sol and current assertGetters
     it("fail - getAttributeETHInlcudingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
@@ -407,4 +407,28 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
   });
+
+  describe("getAttributeFreeExcluding", async() => {
+    // TODO: Add tests for excluding and multi issuer tests with null values
+    it("success - exclude 1 issuer", async  () => {
+      const signers = await ethers.getSigners()
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 0, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 0, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 0, 1, {newIssuerMint: true});
+
+      await assertGetAttributeFreeExcluding(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [id("LOW"), id("MEDIUM"), id("LOW")],
+        [0, 0, 0],
+      );
+    })
+  })
 });

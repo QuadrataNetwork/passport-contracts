@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
 import { parseUnits, parseEther } from "ethers/lib/utils";
+import { ethers } from "hardhat";
 
 const {
   MINT_PRICE,
@@ -24,7 +25,8 @@ export const assertMint = async (
   country: string,
   isBusiness: string,
   issuedAt: number,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
+  opts: any
 ) => {
   const sig = await signMint(
     issuer,
@@ -36,11 +38,15 @@ export const assertMint = async (
     isBusiness,
     issuedAt
   );
-  expect(await passport.balanceOf(account.address, tokenId)).to.equal(0);
-  const initialBalance = await passport.provider.getBalance(passport.address);
-  const initialBalanceIssuer = initialBalance.eq(0)
-    ? initialBalance
-    : await passport.callStatic.withdrawETH(issuerTreasury.address);
+  expect(await passport.balanceOf(account.address, tokenId)).to.equal(opts?.newIssuerMint ? 1 : 0);
+
+  const initalPassportBalance = await ethers.provider.getBalance(passport.address);
+  var initialIssuerBalance = ethers.BigNumber.from(0);
+  // Cannot assume the eth within passport contract belongs to the current issuer
+  try {
+    initialIssuerBalance = await passport.connect(issuer).callStatic.withdrawETH(issuerTreasury.address);
+  } catch {}
+
   await passport
     .connect(account)
     .mintPassport(account.address, tokenId, did, aml, country, isBusiness, issuedAt, sig, {
@@ -48,11 +54,13 @@ export const assertMint = async (
     });
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(1);
   expect(await passport.provider.getBalance(passport.address)).to.equal(
-    initialBalance.add(MINT_PRICE)
+    initalPassportBalance.add(MINT_PRICE)
   );
+
   expect(
-    await passport.callStatic.withdrawETH(issuerTreasury.address)
-  ).to.equal(MINT_PRICE.add(initialBalanceIssuer));
+    await passport.connect(issuer).callStatic.withdrawETH(issuerTreasury.address)
+  ).to.equal(MINT_PRICE.add(initialIssuerBalance));
+
 };
 
 export const assertGetAttributeFree = async (
@@ -201,6 +209,7 @@ export const assertGetAttribute = async (
 
 };
 
+
 export const assertGetAttributeETH = async (
   account: SignerWithAddress,
   defi: Contract,
@@ -268,4 +277,55 @@ export const assertSetAttribute = async (
   expect(
     await passport.callStatic.withdrawETH(issuerTreasury.address)
   ).to.equal(PRICE_SET_ATTRIBUTE[attribute].add(initialBalanceIssuer));
+};
+
+export const assertGetAttributeFreeExcluding = async (
+  excludedIssuers: string[],
+  account: SignerWithAddress,
+  defi: Contract,
+  passport: Contract,
+  reader: Contract,
+  attribute: string,
+  expectedAttributeValues: number[],
+  expectedIssuedAt: number[],
+  tokenId: number = TOKEN_ID,
+  opts: any
+) => {
+  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address)
+
+  expect(priceAttribute).to.equal(parseEther("0"));
+
+  const initialBalancePassport = await passport.provider.getBalance(
+    passport.address
+  );
+  const response = await reader.getAttributesFreeExcluding(
+    account.address,
+    tokenId,
+    attribute,
+    excludedIssuers
+  );
+  const attributesResponse = response[0];
+  const epochsResponse = response[1];
+  const issuersResponse = response[2];
+
+  console.log(response)
+  console.log(attributesResponse)
+
+  expect(attributesResponse).to.equal(expectedAttributeValues);
+  expect(epochsResponse).to.equal(expectedIssuedAt);
+
+  if (opts?.mockBusiness) {
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute))
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(attributesResponse[0], epochsResponse[0]);
+  } else {
+    await expect(defi.connect(opts?.signer || account).doSomethingFreeExcluding(attribute))
+      .to.emit(defi, "GetAttributeEvents")
+      .withArgs(attributesResponse, epochsResponse);
+
+  }
+
+  expect(await passport.provider.getBalance(passport.address)).to.equal(
+    initialBalancePassport
+  );
 };
