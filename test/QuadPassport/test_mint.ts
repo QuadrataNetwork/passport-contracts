@@ -832,7 +832,7 @@ describe("QuadPassport", async () => {
     it("fail - mint passport to contract if not a business", async () => {
 
       const DeFi = await ethers.getContractFactory("DeFi");
-      const defi = await DeFi.deploy(passport.address, reader.address, [issuer.address]);
+      const defi = await DeFi.deploy(passport.address, reader.address);
       await defi.deployed();
 
       const sig = await signMint(
@@ -862,7 +862,7 @@ describe("QuadPassport", async () => {
       const newIsBusiness = id("TRUE")
 
       const DeFi = await ethers.getContractFactory("DeFi");
-      const defi = await DeFi.deploy(passport.address, reader.address, [issuer.address]);
+      const defi = await DeFi.deploy(passport.address, reader.address);
       await defi.deployed();
 
       const sig = await signMint(

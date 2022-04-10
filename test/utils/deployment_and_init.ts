@@ -52,7 +52,7 @@ export const deployPassportEcosystem = async (
 
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");
-  const defi = await DeFi.deploy(passport.address, reader.address, [issuers[0].address]);
+  const defi = await DeFi.deploy(passport.address, reader.address);
   await defi.deployed();
 
   return [governance, passport, reader, usdc, defi, oracle];
