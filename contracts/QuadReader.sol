@@ -311,7 +311,7 @@ import "hardhat/console.sol";
         address[] memory _issuers,
         address _account
     ) internal {
-        uint256 amountETH = calculatePaymentETH(_attribute, _account) / _issuers.length;
+        uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
             require(
                  msg.value == amountETH,
@@ -324,7 +324,7 @@ import "hardhat/console.sol";
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.accountBalancesETH(governance.issuersTreasury(_issuers[i]), amountIssuer);
+                passport.accountBalancesETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
             passport.accountBalancesETH(governance.treasury(), amountProtocol);
         }
@@ -338,7 +338,7 @@ import "hardhat/console.sol";
     ) internal {
         console.log("In _doTokenPayments");
         console.log(_issuers.length);
-        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account) / _issuers.length;
+        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             console.log("Trying to send");
@@ -350,7 +350,7 @@ import "hardhat/console.sol";
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.accountBalances(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer);
+                passport.accountBalances(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
             passport.accountBalances(_tokenPayment,governance.treasury(), amountProtocol);
         }

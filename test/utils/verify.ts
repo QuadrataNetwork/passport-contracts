@@ -203,7 +203,7 @@ export const assertGetAttribute = async (
         issuerTreasury.address,
         paymentToken.address
       )
-    ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+    ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(opts?.validIssuerCount || 1));
 
     console.log("checkpoint c")
 

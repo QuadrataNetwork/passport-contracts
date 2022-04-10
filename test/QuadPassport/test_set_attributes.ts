@@ -859,21 +859,9 @@ describe("QuadPassport", async () => {
         reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
-        newIssuedAt
-      );
-
-      await assertGetAttribute(
-        minterA,
-        treasury,
-        issuerB,
-        issuerTreasury,
-        usdc,
-        defi,
-        passport,
-        reader,
-        ATTRIBUTE_COUNTRY,
-        id("FRANCE"),
-        newIssuedAt2
+        newIssuedAt,
+        1,
+        {validIssuerCount: 2}
       );
     });
 
