@@ -211,6 +211,8 @@ import "hardhat/console.sol";
         }
         return issuers;
     }
+
+    // TODO: Make Doc Strings for Internal functions
     function _applyFilter(
         address _account,
         bytes32 _attribute,
