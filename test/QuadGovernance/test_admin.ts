@@ -650,13 +650,15 @@ describe("QuadGovernance", async () => {
       );
     });
 
-    it("fail (issuer already added)", async () => {
+    it("success (addIssuer maybe called multiple times without creating dupes)", async () => {
       expect(await governance.issuersTreasury(issuer1.address)).to.equal(
         issuerTreasury1.address
       );
-      await expect(
-        governance.connect(admin).addIssuer(issuer1.address, admin.address)
-      ).to.be.revertedWith("ISSUER_ALREADY_SET");
+      await governance.connect(admin).addIssuer(issuer1.address, admin.address);
+
+      expect(await governance.issuersTreasury(issuer1.address)).to.equal(
+        admin.address
+      );
     });
 
     it("fail (issuer address (0))", async () => {
