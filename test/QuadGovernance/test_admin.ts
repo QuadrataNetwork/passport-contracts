@@ -191,7 +191,7 @@ describe("QuadGovernance", async () => {
   });
 
 
-  // TODO: test delete!!!
+  // TODO: test deleteIssuer function !!!
   describe("setPassportVersion", async () => {
     it("succeed", async () => {
       expect(await governance.passportVersion()).to.equal(1);

@@ -37,6 +37,7 @@ const { signMint } = require("../utils/signature.ts");
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let usdc: Contract;
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -63,15 +64,14 @@ describe("QuadPassport", async () => {
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
-    [governance, passport, usdc, defi] = await deployPassportEcosystem(
+    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
-      issuer,
+      [issuer],
       treasury,
-      issuerTreasury,
+      [issuerTreasury],
       baseURI
     );
 
-    await governance.connect(admin).setEligibleAttribute(id("IS_BUSINESS"), true)
     await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
     await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
 
@@ -111,9 +111,11 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
@@ -127,6 +129,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -140,6 +143,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -159,9 +163,11 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_IS_BUSINESS,
         newIsBusiness,
         newIssuedAt
@@ -176,6 +182,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -189,6 +196,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -230,9 +238,11 @@ describe("QuadPassport", async () => {
         {signer: minterA}
       );
       await assertGetAttributeFree(
+        [issuer.address],
         mockBusiness,
         defi,
         passport,
+        reader,
         ATTRIBUTE_IS_BUSINESS,
         newIsBusiness,
         issuedAt,
@@ -251,6 +261,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt,
@@ -266,6 +277,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt,
@@ -296,6 +308,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
         newIssuedAt
@@ -303,9 +316,11 @@ describe("QuadPassport", async () => {
 
       // OK Fetching old value
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -319,6 +334,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -352,9 +368,11 @@ describe("QuadPassport", async () => {
           value: parseEther("0"),
         });
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
@@ -400,9 +418,11 @@ describe("QuadPassport", async () => {
       );
 
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
@@ -416,6 +436,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
         newIssuedAt
@@ -449,6 +470,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
         newIssuedAt
@@ -736,9 +758,11 @@ describe("QuadPassport", async () => {
           newIssuedAt
         );
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
@@ -770,6 +794,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
         newIssuedAt
@@ -782,7 +807,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
-    it("succes - two issuers", async () => {
+    it("success - two issuers (issuers may not overwrite each other)", async () => {
       const issuerBTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
@@ -806,13 +831,13 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
         newIssuedAt
       );
 
-      newCountry = id("FRANCE");
-      newIssuedAt = Math.floor(new Date().getTime() / 1000) + 100;
+      const newIssuedAt2 = Math.floor(new Date().getTime() / 1000) + 100;
 
       await passport
         .connect(minterB)
@@ -820,8 +845,8 @@ describe("QuadPassport", async () => {
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          newCountry,
-          newIssuedAt
+          id("FRANCE"),
+          newIssuedAt2
         );
       await assertGetAttribute(
         minterA,
@@ -831,8 +856,9 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
-        newCountry,
+        id("USA"),
         newIssuedAt
       );
     });
