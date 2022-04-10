@@ -8,6 +8,7 @@ import {
   parseUnits,
   formatBytes32String,
 } from "ethers/lib/utils";
+import { assertMint } from "../utils/verify";
 
 const {
   ATTRIBUTE_AML,
@@ -386,13 +387,8 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
-    it("succes - two issuers", async () => {
-      const issuerB = ethers.Wallet.createRandom();
-      const issuerBTreasury = ethers.Wallet.createRandom();
-      await governance
-        .connect(admin)
-        .addIssuer(issuerB.address, issuerBTreasury.address);
-      // Update Country with Issuer 1
+    it("success - two issuers", async () => {
+
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       await assertSetAttribute(
@@ -408,6 +404,25 @@ describe("QuadPassport", async () => {
       await passport.withdrawETH(issuerTreasury.address);
 
       // Update AML with Issuer 2
+      console.log("checkpoint 1#")
+      const sig = await signMint(
+        issuerB,
+        minterA,
+        1,
+        id("DID_34"),
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      await passport
+      .connect(minterA)
+      .mintPassport(minterA.address, 1, id("DID_34"), aml, country, isBusiness, issuedAt, sig, {
+        value: MINT_PRICE,
+      });
+      console.log("checkpoint 2#")
+
       const newAML = id("MEDIUM");
       await assertSetAttribute(
         minterA,
@@ -418,6 +433,7 @@ describe("QuadPassport", async () => {
         newAML,
         newIssuedAt
       );
+      console.log("checkpoint 3#")
 
       await assertGetAttributeFree(
         [issuer.address],
@@ -426,9 +442,10 @@ describe("QuadPassport", async () => {
         passport,
         reader,
         ATTRIBUTE_AML,
-        newAML,
-        newIssuedAt
+        aml,
+        issuedAt
       );
+      console.log("checkpoint 4#")
 
       await assertGetAttribute(
         minterA,
@@ -441,7 +458,11 @@ describe("QuadPassport", async () => {
         reader,
         ATTRIBUTE_COUNTRY,
         newCountry,
-        newIssuedAt
+        newIssuedAt,
+        1,
+        {
+          validIssuerCount: 2
+        }
       );
     });
 
@@ -813,6 +834,8 @@ describe("QuadPassport", async () => {
 
       let newCountry = id("USA");
       let newIssuedAt = Math.floor(new Date().getTime() / 1000);
+
+      // Update Country with Issuer 1
       await passport
         .connect(issuer)
         .setAttributeIssuer(
@@ -838,6 +861,7 @@ describe("QuadPassport", async () => {
 
       const newIssuedAt2 = Math.floor(new Date().getTime() / 1000) + 100;
 
+      // Update Country with Issuer 2
       await passport
         .connect(issuerB)
         .setAttributeIssuer(
@@ -848,6 +872,7 @@ describe("QuadPassport", async () => {
           newIssuedAt2
         );
 
+      // minterA now has attributes from both issuers
       await assertGetAttribute(
         minterA,
         treasury,
