@@ -178,6 +178,9 @@ import "./storage/QuadReaderStore.sol";
         return (attributes, epochs, issuers);
     }
 
+    /// @notice removes `_issuers` from the full list of supported issuers
+    /// @param _issuers The list of issuers to remove
+    /// @return the subset of `governance.issuers` - `_issuers`
     function _getExcludedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
@@ -208,7 +211,11 @@ import "./storage/QuadReaderStore.sol";
         return issuers;
     }
 
-    // TODO: Make Doc Strings for Internal functions
+    /// @notice creates array attribute values from issuers that have supplied a value
+    /// @param _account address of the passport holder to query
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
+    /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
+    /// @return the filter non-null values
     function _applyFilter(
         address _account,
         bytes32 _attribute,

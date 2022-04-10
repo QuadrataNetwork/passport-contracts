@@ -191,7 +191,82 @@ describe("QuadGovernance", async () => {
   });
 
 
-  // TODO: test deleteIssuer function !!!
+  describe("deleteIssuer", async () => {
+    it("succeed - delete 3rd issuer", async () => {
+      expect(await governance.getIssuersLength()).to.equal(3);
+      expect(await governance.issuers(0)).to.equal(issuer1.address);
+      expect(await governance.issuers(1)).to.equal(issuer2.address);
+      expect(await governance.issuers(2)).to.equal(issuer3.address);
+
+      await governance.connect(admin).deleteIssuer(issuer3.address);
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      expect(await governance.issuers(0)).to.equal(issuer1.address);
+      expect(await governance.issuers(1)).to.equal(issuer2.address);
+
+    });
+
+    it("succeed - delete 2nd issuer", async () => {
+      expect(await governance.getIssuersLength()).to.equal(3);
+      expect(await governance.issuers(0)).to.equal(issuer1.address);
+      expect(await governance.issuers(1)).to.equal(issuer2.address);
+      expect(await governance.issuers(2)).to.equal(issuer3.address);
+
+      await governance.connect(admin).deleteIssuer(issuer2.address);
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      expect(await governance.issuers(0)).to.equal(issuer1.address);
+      expect(await governance.issuers(1)).to.equal(issuer3.address);
+
+    });
+
+    it("succeed - delete 1st issuer", async () => {
+      expect(await governance.getIssuersLength()).to.equal(3);
+      expect(await governance.issuers(0)).to.equal(issuer1.address);
+      expect(await governance.issuers(1)).to.equal(issuer2.address);
+      expect(await governance.issuers(2)).to.equal(issuer3.address);
+
+      await governance.connect(admin).deleteIssuer(issuer1.address);
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      expect(await governance.issuers(1)).to.equal(issuer2.address);
+      expect(await governance.issuers(0)).to.equal(issuer3.address);
+
+    });
+
+    it("succeed - delete all issuers", async () => {
+      expect(await governance.getIssuersLength()).to.equal(3);
+      expect(await governance.issuers(0)).to.equal(issuer1.address);
+      expect(await governance.issuers(1)).to.equal(issuer2.address);
+      expect(await governance.issuers(2)).to.equal(issuer3.address);
+
+      await governance.connect(admin).deleteIssuer(issuer1.address);
+      await governance.connect(admin).deleteIssuer(issuer2.address);
+      await governance.connect(admin).deleteIssuer(issuer3.address);
+
+      expect(await governance.getIssuersLength()).to.equal(0);
+
+      await expect(governance.issuers(0)).to.be.reverted;
+
+    });
+
+    it("fail - not admin", async () => {
+      expect(await governance.getIssuersLength()).to.equal(3);
+      await expect(governance.deleteIssuer(issuer1.address)).to.be.revertedWith("INVALID_ADMIN");
+      expect(await governance.getIssuersLength()).to.equal(3);
+    });
+
+    it("fail - address zero", async () => {
+      expect(await governance.getIssuersLength()).to.equal(3);
+      await expect(governance.connect(admin).deleteIssuer(ethers.constants.AddressZero)).to.be.revertedWith("ISSUER_ADDRESS_ZERO");
+      expect(await governance.getIssuersLength()).to.equal(3);
+    });
+  });
+
+
   describe("setPassportVersion", async () => {
     it("succeed", async () => {
       expect(await governance.passportVersion()).to.equal(1);
