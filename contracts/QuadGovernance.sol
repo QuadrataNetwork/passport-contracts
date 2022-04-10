@@ -241,20 +241,22 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         emit RevenueSplitIssuerUpdated(oldSplit, _split);
     }
 
-    /// @dev Add a new issuer
+    /// @dev Add a new issuer or update treasury
     /// @notice Restricted behind a TimelockController
     /// @param _issuer address generating the signature authorizing minting/setting attributes
     /// @param _treasury address of the issuer treasury to withdraw the fees
     function addIssuer(address _issuer, address _treasury) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(issuerIndices[_issuer] == 0, "ISSUER_ALREADY_SET");
         require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
-        grantRole(ISSUER_ROLE, _issuer);
         issuersTreasury[_issuer] = _treasury;
-        issuers.push(_issuer);
-        issuerIndices[_issuer] = issuers.length;
+
+        if(issuerIndices[_issuer] == 0) {
+            grantRole(ISSUER_ROLE, _issuer);
+            issuers.push(_issuer);
+            issuerIndices[_issuer] = issuers.length;
+        }
 
         emit IssuerAdded(_issuer, _treasury);
     }

@@ -228,8 +228,11 @@ import "hardhat/console.sol";
                     vars.gaps++;
                 }
             } else {
+                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
+                    vars.gaps++;
+                    continue;
+                }
                 IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
-                require(dID.value != bytes32(0), "USER_MUST_HAVE_DID");
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     vars.gaps++;
                 }
@@ -245,6 +248,7 @@ import "hardhat/console.sol";
 
         bytes32[] memory attributes = new bytes32[](vars.delta);
         uint256[] memory epochs = new uint256[](vars.delta);
+        address[] memory issuers = new address[](vars.delta);
 
         console.log("attributes length:");
         console.log(attributes.length);
@@ -252,8 +256,10 @@ import "hardhat/console.sol";
         IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(!governance.eligibleAttributes(_attribute)) {
+                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
+                    continue;
+                }
                 IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
-                require(dID.value != bytes32(0), "USER_MUST_HAVE_DID");
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
@@ -261,6 +267,7 @@ import "hardhat/console.sol";
                 attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
                 attributes[vars.filteredIndex] = attribute.value;
                 epochs[vars.filteredIndex] = attribute.epoch;
+                issuers[vars.filteredIndex] = attribute.issuer;
                 vars.filteredIndex++;
                 continue;
             }
@@ -274,6 +281,7 @@ import "hardhat/console.sol";
             console.logBytes32(attribute.value);
             attributes[vars.filteredIndex] = attribute.value;
             epochs[vars.filteredIndex] = attribute.epoch;
+            issuers[vars.filteredIndex] = attribute.issuer;
             vars.filteredIndex++;
         }
 
@@ -281,7 +289,7 @@ import "hardhat/console.sol";
             require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 
-        return (attributes, epochs, _issuers);
+        return (attributes, epochs, issuers);
     }
 
     function _verifyAttributeQuery(
@@ -328,6 +336,8 @@ import "hardhat/console.sol";
         address[] memory _issuers,
         address _account
     ) internal {
+        console.log("In _doTokenPayments");
+        console.log(_issuers.length);
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account) / _issuers.length;
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
