@@ -73,5 +73,6 @@ interface IQuadGovernance {
 
     function hasRole(bytes32, address) external view returns(bool);
 
+    function getIssuers() external view returns (address[] memory);
 
 }

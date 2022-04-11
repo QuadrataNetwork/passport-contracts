@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { parseUnits, parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
@@ -287,7 +287,7 @@ export const assertGetAttributeFreeExcluding = async (
   reader: Contract,
   attribute: string,
   expectedAttributeValues: number[],
-  expectedIssuedAt: number[],
+  expectedIssuedAt: BigNumber[],
   tokenId: number = TOKEN_ID,
   opts: any
 ) => {
@@ -309,17 +309,16 @@ export const assertGetAttributeFreeExcluding = async (
   const issuersResponse = response[2];
 
   console.log(response)
-  console.log(attributesResponse)
 
-  expect(attributesResponse).to.equal(expectedAttributeValues);
-  expect(epochsResponse).to.equal(expectedIssuedAt);
+  expect(attributesResponse).to.eql(expectedAttributeValues);
+  expect(epochsResponse).to.eql(expectedIssuedAt);
 
   if (opts?.mockBusiness) {
     await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute))
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(attributesResponse[0], epochsResponse[0]);
   } else {
-    await expect(defi.connect(opts?.signer || account).doSomethingFreeExcluding(attribute))
+    await expect(defi.connect(opts?.signer || account).doSomethingFreeExcluding(attribute, excludedIssuers))
       .to.emit(defi, "GetAttributeEvents")
       .withArgs(attributesResponse, epochsResponse);
 

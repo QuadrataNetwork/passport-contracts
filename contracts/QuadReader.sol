@@ -9,6 +9,9 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 
+//TODO: Delete This
+import "hardhat/console.sol";
+
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -184,16 +187,16 @@ import "./storage/QuadReaderStore.sol";
     function _getExcludedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
-        address[] memory issuers  = new address[](governance.getIssuersLength());
-
+        console.log("Begin _getExcludedIssuers:");
+        address[] memory issuers = governance.getIssuers();
         uint256 gaps = 0;
-        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            if(_hasIssuer(governance.issuers(i), _issuers)) {
-                gaps++;
-                continue;
+        for(uint256 i = 0; i < issuers.length; i++) {
+            for(uint256 j = 0; j < _issuers.length; j++) {
+                if(issuers[i] == _issuers[j]) {
+                    issuers[i] = address(0);
+                    gaps++;
+                }
             }
-
-            issuers[i] = governance.issuers(i);
         }
 
         // close the gap(s)
@@ -207,8 +210,9 @@ import "./storage/QuadReaderStore.sol";
             }
 
             newIssuers[formattedIndex++] = issuers[i];
+            console.log("newIssuers: ", newIssuers[formattedIndex-1]);
         }
-        return issuers;
+        return newIssuers;
     }
 
     /// @notice creates array attribute values from issuers that have supplied a value
@@ -221,6 +225,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
+        console.log("Begin _applyFilter:");
         // find gap values
         ApplyFilterVars memory vars;
         for(uint256 i = 0; i < _issuers.length; i++) {
@@ -248,11 +253,18 @@ import "./storage/QuadReaderStore.sol";
 
         IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
+            console.log("applyFilter issuers: ", _issuers[i]);
             if(!governance.eligibleAttributes(_attribute)) {
+                console.log("getting values by DID...");
+                console.log("DID for issuer: ", _issuers[i]);
+                console.logBytes32(passport.attributes(_account,keccak256("DID"),_issuers[i]).value);
+                console.log("------");
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     continue;
                 }
                 IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                console.logBytes32(dID.value);
+                console.log("------");
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
@@ -261,6 +273,9 @@ import "./storage/QuadReaderStore.sol";
                 attributes[vars.filteredIndex] = attribute.value;
                 epochs[vars.filteredIndex] = attribute.epoch;
                 issuers[vars.filteredIndex] = attribute.issuer;
+                console.logBytes32(attributes[vars.filteredIndex]);
+                console.log("epochs ", epochs[vars.filteredIndex]);
+                console.log("issuer ", issuers[vars.filteredIndex]);
                 vars.filteredIndex++;
                 continue;
             }
@@ -269,10 +284,14 @@ import "./storage/QuadReaderStore.sol";
                 continue;
             }
 
+            console.log("getting values by _account...");
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
             attributes[vars.filteredIndex] = attribute.value;
             epochs[vars.filteredIndex] = attribute.epoch;
             issuers[vars.filteredIndex] = attribute.issuer;
+            console.logBytes32(attributes[vars.filteredIndex]);
+            console.log("epochs ", epochs[vars.filteredIndex]);
+            console.log("issuer ", issuers[vars.filteredIndex]);
             vars.filteredIndex++;
         }
 
@@ -280,6 +299,7 @@ import "./storage/QuadReaderStore.sol";
             require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 
+        console.log("---------------end--------------");
         return (attributes, epochs, issuers);
     }
 
@@ -421,17 +441,4 @@ import "./storage/QuadReaderStore.sol";
         }
         return false;
     }
-
-
-    function _hasIssuer(
-        address issuer,
-        address[] memory issuers
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuer == issuers[i])
-                return true;
-        }
-        return false;
-    }
-
  }

@@ -336,5 +336,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function getIssuersLength() public view returns (uint256) {
         return issuers.length;
     }
+
+    /// @dev Get the length of issuers array
+    /// @return length
+    function getIssuers() public view returns (address[] memory) {
+        return issuers;
+    }
 }
 
