@@ -378,15 +378,15 @@ export const assertGetAttributeFreeIncluding = async (
 export const assertGetAttributeExcluding = async (
   account: SignerWithAddress,
   treasury: SignerWithAddress,
-  excludedIssuers: SignerWithAddress[],
+  excludedIssuers: string[],
   paymentToken: Contract,
   defi: Contract,
   governance: Contract,
   passport: Contract,
   reader: Contract,
   attribute: string,
-  expectedAttributeValue: string,
-  expectedIssuedAt: number,
+  expectedAttributeValue: string[],
+  expectedIssuedAt: BigNumber[],
   expectedIssuers: string[],
   tokenId: number = TOKEN_ID,
   opts: any
@@ -397,6 +397,7 @@ export const assertGetAttributeExcluding = async (
   console.log("expected issuer treasuries...");
   const expectedTreasuries = []
   for (const issuer in expectedIssuers) {
+    console.log("issuer ", issuer)
     const treasury = await governance.issuersTreasury(issuer);
     console.log(treasury);
     expectedTreasuries.push(treasury);
@@ -437,10 +438,10 @@ export const assertGetAttributeExcluding = async (
   } else {
 
     await expect(
-      defi.connect(opts?.signer || account).doSomething(attribute, paymentToken.address)
+      defi.connect(opts?.signer || account).doSomethingExcluding(attribute, paymentToken.address, excludedIssuers)
     )
 
-      .to.emit(defi, "GetAttributeEvent")
+      .to.emit(defi, "GetAttributeEvents")
       .withArgs(expectedAttributeValue, expectedIssuedAt);
 
     // Check Balance

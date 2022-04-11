@@ -8,7 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
-import { assertGetAttributeFreeIncluding, assertMint } from "../utils/verify";
+import { assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertMint } from "../utils/verify";
 import exp from "constants";
 
 const {
@@ -92,7 +92,7 @@ describe("QuadPassport", async () => {
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
 
-  describe("getAttribute", async () => {
+  describe.skip("getAttribute", async () => {
     it("success - getAttribute(DID) - Payable", async () => {
       await assertGetAttribute(
         minterA,
@@ -257,7 +257,7 @@ describe("QuadPassport", async () => {
   });
 
   // getAttributeETH tests
-  describe("getAttributeETH", async () => {
+  describe.skip("getAttributeETH", async () => {
     const getDIDPrice = parseEther(
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
@@ -354,7 +354,7 @@ describe("QuadPassport", async () => {
     });
   });
 
-  describe("getAttributeFreeExcluding", async() => {
+  describe.skip("getAttributeFreeExcluding", async() => {
     // TODO: Add tests for excluding and multi issuer tests with null values
     it("success - exclude 1 issuer", async  () => {
       const signers = await ethers.getSigners()
@@ -485,7 +485,7 @@ describe("QuadPassport", async () => {
     });
   })
 
-  describe("getAttributeFreeIncluding", async() => {
+  describe.skip("getAttributeFreeIncluding", async() => {
     it("success - Include 2 issuers (1 supported, 1 not supported)", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
@@ -589,5 +589,32 @@ describe("QuadPassport", async () => {
         reader.getAttributesFreeIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address])
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
     });
-  })
+  });
+
+  describe("getAttributesExcluding", async function() {
+    this.timeout(0)
+
+    it('success - ', async () => {
+
+      expect(await governance.getIssuersLength()).to.equal(1);
+
+      await assertGetAttributeExcluding(
+        minterA,
+        treasury,
+        [issuer.address], // excluded issuer
+        usdc,
+        defi,
+        governance,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        [], // expected returned attributes
+        [], // expected dates of issuance
+        [], // expected issuers to be returned
+        1,
+        {}
+      )
+    })
+
+  });
 });

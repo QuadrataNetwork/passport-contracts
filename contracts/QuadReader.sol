@@ -275,7 +275,7 @@ import "./storage/QuadReaderStore.sol";
             vars.filteredIndex++;
         }
 
-        if(governance.eligibleAttributes(_attribute)) {
+        if(governance.eligibleAttributes(_attribute) && attributes.length != 0) {
             require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 

@@ -58,7 +58,7 @@ contract DeFi {
         bytes32 _attribute,
         address _tokenPayment,
         address[] calldata _excludedIssuers
-    ) public returns(bytes32[] memory attrValue, uint256[] memory epoch) {
+    ) public returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(reader), paymentAmount);
@@ -71,7 +71,7 @@ contract DeFi {
     function doSomethingFreeExcluding(
         bytes32 _attribute,
         address[] calldata _excludedIssuers
-    ) public returns(bytes32[] memory attrValue, uint256[] memory epoch) {
+    ) public returns(bytes32[] memory, uint256[] memory) {
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeExcluding(msg.sender, 1, _attribute, _excludedIssuers);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
@@ -80,7 +80,7 @@ contract DeFi {
     function doSomethingETHExcluding(
         bytes32 _attribute,
         address[] calldata _excludedIssuers
-    ) public payable returns(bytes32[] memory attrValue, uint256[] memory epoch) {
+    ) public payable returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETHExcluding{value: paymentAmount}(msg.sender, 1, _attribute, _excludedIssuers);
@@ -95,7 +95,7 @@ contract DeFi {
         bytes32 _attribute,
         address _tokenPayment,
         address[] calldata _includedIssuers
-    ) public returns(bytes32[] memory attrValue, uint256[] memory epoch) {
+    ) public returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(reader), paymentAmount);
@@ -108,7 +108,7 @@ contract DeFi {
     function doSomethingFreeIncluding(
         bytes32 _attribute,
         address[] calldata _includedIssuers
-    ) public returns(bytes32[] memory attrValue, uint256[] memory epoch) {
+    ) public returns(bytes32[] memory, uint256[] memory) {
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeIncludingOnly(msg.sender, 1, _attribute, _includedIssuers);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
@@ -117,7 +117,7 @@ contract DeFi {
     function doSomethingETHIncluding(
         bytes32 _attribute,
         address[] calldata _includedIssuers
-    ) public payable returns(bytes32[] memory attrValue, uint256[] memory epoch) {
+    ) public payable returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETHIncludingOnly{value: paymentAmount}(msg.sender, 1, _attribute, _includedIssuers);
