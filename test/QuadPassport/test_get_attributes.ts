@@ -594,9 +594,13 @@ describe("QuadPassport", async () => {
   describe("getAttributesExcluding", async function() {
     this.timeout(0)
 
-    it('success - ', async () => {
+    it('success - 1 excluded', async () => {
+      const signers = await ethers.getSigners();
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      expect(await governance.getIssuersLength()).to.equal(2);
+      await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
-      expect(await governance.getIssuersLength()).to.equal(1);
+      expect(await governance.getIssuersLength()).to.equal(2);
 
       await assertGetAttributeExcluding(
         minterA,
@@ -608,11 +612,11 @@ describe("QuadPassport", async () => {
         passport,
         reader,
         ATTRIBUTE_DID,
-        [], // expected returned attributes
-        [], // expected dates of issuance
-        [], // expected issuers to be returned
+        [did], // expected returned attributes
+        [BigNumber.from(15)], // expected dates of issuance
+        [signers[0].address], // expected issuers to be returned
         1,
-        {}
+        {expectedIssuerCount: 1}
       )
     })
 

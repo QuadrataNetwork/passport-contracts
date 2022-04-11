@@ -396,7 +396,8 @@ export const assertGetAttributeExcluding = async (
 
   console.log("expected issuer treasuries...");
   const expectedTreasuries = []
-  for (const issuer in expectedIssuers) {
+  for (var i = 0; i < expectedIssuers.length; i++) {
+    const issuer = expectedIssuers[i];
     console.log("issuer ", issuer)
     const treasury = await governance.issuersTreasury(issuer);
     console.log(treasury);
@@ -413,12 +414,14 @@ export const assertGetAttributeExcluding = async (
   const initialBalancePassport = await paymentToken.balanceOf(passport.address);
 
   const initialBalanceIssuers = [];
-  for(const issuer in expectedIssuers) {
+  for (var i = 0; i < expectedIssuers.length; i++) {
+    const issuer = expectedIssuers[i];
     initialBalanceIssuers.push(await paymentToken.balanceOf(issuer));
   }
 
   const initialBalanceIssuerTreasuries = [];
-  for(const treasury in expectedTreasuries) {
+  for(var i = 0;i < expectedTreasuries.length; i++) {
+    const treasury = expectedTreasuries[i];
     initialBalanceIssuerTreasuries.push(await paymentToken.balanceOf(treasury));
   }
 
@@ -467,7 +470,26 @@ export const assertGetAttributeExcluding = async (
       initialBalanceProtocolTreasury
     );
 
-    for(const issuer in expectedIssuers) {
+    // check balances and ensure issuers recieved correct payment amount
+    for(var i = 0;i < expectedTreasuries.length; i++) {
+      const treasury = expectedTreasuries[i];
+      expect(
+        await passport.callStatic.withdrawToken(
+          treasury,
+          paymentToken.address
+        )
+      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(opts?.expectedIssuerCount || 1));
+    }
+
+    // withdraw payment token
+    for (var i = 0; i < expectedIssuers.length; i++) {
+      const issuer = expectedIssuers[i];
+      await passport.withdrawToken(issuer, paymentToken.address);
+    }
+
+    // should fail now that they are empty
+    for (var i = 0; i < expectedIssuers.length; i++) {
+      const issuer = expectedIssuers[i];
       await expect(
         passport.withdrawToken(issuer, paymentToken.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
@@ -477,14 +499,6 @@ export const assertGetAttributeExcluding = async (
       passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
     ).to.revertedWith("NOT_ENOUGH_BALANCE");
 
-    for(const treasury in expectedTreasuries) {
-      expect(
-        await passport.callStatic.withdrawToken(
-          treasury,
-          paymentToken.address
-        )
-      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(opts?.validIssuerCount || 1));
-    }
 
 
     expect(
