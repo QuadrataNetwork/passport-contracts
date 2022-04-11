@@ -616,7 +616,35 @@ describe("QuadPassport", async () => {
         [BigNumber.from(15)], // expected dates of issuance
         [signers[0].address], // expected issuers to be returned
         1,
-        {expectedIssuerCount: 1}
+        {}
+      )
+    })
+
+    it('success - 2 excluded', async () => {
+      const signers = await ethers.getSigners();
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+
+      expect(await governance.getIssuersLength()).to.equal(3);
+
+      await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, did, id("MEDIUM"), id("UR"), id("FALSE"), 678, 1, {newIssuerMint: true});
+
+      await assertGetAttributeExcluding(
+        minterA,
+        treasury,
+        [issuer.address], // excluded issuer
+        usdc,
+        defi,
+        governance,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        [id("US"), id("UR")], // expected returned attributes
+        [BigNumber.from(15), BigNumber.from(678)], // expected dates of issuance
+        [signers[0].address, signers[1].address], // expected issuers to be returned
+        1,
+        {}
       )
     })
 
