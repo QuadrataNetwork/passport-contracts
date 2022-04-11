@@ -9,9 +9,6 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 
-//TODO: Delete This
-import "hardhat/console.sol";
-
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -187,7 +184,6 @@ import "hardhat/console.sol";
     function _getExcludedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
-        console.log("Begin _getExcludedIssuers:");
         address[] memory issuers = governance.getIssuers();
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
@@ -210,7 +206,6 @@ import "hardhat/console.sol";
             }
 
             newIssuers[formattedIndex++] = issuers[i];
-            console.log("newIssuers: ", newIssuers[formattedIndex-1]);
         }
         return newIssuers;
     }
@@ -225,7 +220,6 @@ import "hardhat/console.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        console.log("Begin _applyFilter:");
         // find gap values
         ApplyFilterVars memory vars;
         for(uint256 i = 0; i < _issuers.length; i++) {
@@ -253,18 +247,11 @@ import "hardhat/console.sol";
 
         IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
-            console.log("applyFilter issuers: ", _issuers[i]);
             if(!governance.eligibleAttributes(_attribute)) {
-                console.log("getting values by DID...");
-                console.log("DID for issuer: ", _issuers[i]);
-                console.logBytes32(passport.attributes(_account,keccak256("DID"),_issuers[i]).value);
-                console.log("------");
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     continue;
                 }
                 IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
-                console.logBytes32(dID.value);
-                console.log("------");
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
@@ -273,9 +260,6 @@ import "hardhat/console.sol";
                 attributes[vars.filteredIndex] = attribute.value;
                 epochs[vars.filteredIndex] = attribute.epoch;
                 issuers[vars.filteredIndex] = attribute.issuer;
-                console.logBytes32(attributes[vars.filteredIndex]);
-                console.log("epochs ", epochs[vars.filteredIndex]);
-                console.log("issuer ", issuers[vars.filteredIndex]);
                 vars.filteredIndex++;
                 continue;
             }
@@ -284,14 +268,10 @@ import "hardhat/console.sol";
                 continue;
             }
 
-            console.log("getting values by _account...");
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
             attributes[vars.filteredIndex] = attribute.value;
             epochs[vars.filteredIndex] = attribute.epoch;
             issuers[vars.filteredIndex] = attribute.issuer;
-            console.logBytes32(attributes[vars.filteredIndex]);
-            console.log("epochs ", epochs[vars.filteredIndex]);
-            console.log("issuer ", issuers[vars.filteredIndex]);
             vars.filteredIndex++;
         }
 
@@ -299,7 +279,6 @@ import "hardhat/console.sol";
             require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
         }
 
-        console.log("---------------end--------------");
         return (attributes, epochs, issuers);
     }
 

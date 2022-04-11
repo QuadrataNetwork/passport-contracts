@@ -308,8 +308,6 @@ export const assertGetAttributeFreeExcluding = async (
   const epochsResponse = response[1];
   const issuersResponse = response[2];
 
-  console.log(response)
-
   expect(attributesResponse).to.eql(expectedAttributeValues);
   expect(epochsResponse).to.eql(expectedIssuedAt);
 
