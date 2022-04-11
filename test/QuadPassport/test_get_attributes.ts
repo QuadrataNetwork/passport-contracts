@@ -417,9 +417,9 @@ describe("QuadPassport", async () => {
       await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
       await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
       expect(await governance.getIssuersLength()).to.equal(4);
-      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 1, 1, {newIssuerMint: true});
-      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 1, 1, {newIssuerMint: true});
-      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 1, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
 
       await assertGetAttributeFreeExcluding(
         [issuer.address],
@@ -429,7 +429,73 @@ describe("QuadPassport", async () => {
         reader,
         ATTRIBUTE_AML,
         [id("LOW"), id("MEDIUM"), id("LOW")],
-        [BigNumber.from(1), BigNumber.from(1), BigNumber.from(1)],
+        [BigNumber.from(15), BigNumber.from(12), BigNumber.from(10)],
+      );
+    })
+
+    it("success - exclude 3 issuers", async  () => {
+      const signers = await ethers.getSigners()
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      expect(await governance.getIssuersLength()).to.equal(4);
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
+
+      await assertGetAttributeFreeExcluding(
+        [issuer.address, signers[0].address, signers[2].address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [id("MEDIUM")],
+        [BigNumber.from(12)],
+      );
+    })
+
+    it("success - exclude 0 issuers", async  () => {
+      const signers = await ethers.getSigners()
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      expect(await governance.getIssuersLength()).to.equal(4);
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
+
+      await assertGetAttributeFreeExcluding(
+        [],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [aml, id("LOW"), id("MEDIUM"), id("LOW")],
+        [BigNumber.from(issuedAt), BigNumber.from(15), BigNumber.from(12), BigNumber.from(10)],
+      );
+    })
+
+    it("success - exclude all 4 issuers", async  () => {
+      const signers = await ethers.getSigners()
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      expect(await governance.getIssuersLength()).to.equal(4);
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
+
+      await assertGetAttributeFreeExcluding(
+        [issuer.address, signers[0].address, signers[1].address, signers[2].address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [],
+        [],
       );
     })
   })
