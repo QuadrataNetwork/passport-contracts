@@ -92,6 +92,7 @@ describe("QuadPassport", async () => {
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
 
+  // TODO: Unskip
   describe.skip("getAttribute", async () => {
     it("success - getAttribute(DID) - Payable", async () => {
       await assertGetAttribute(
@@ -594,7 +595,7 @@ describe("QuadPassport", async () => {
   describe("getAttributesExcluding", async function() {
     this.timeout(0)
 
-    it('success - 1 excluded', async () => {
+    it('success - (1 excluded, 1 included)', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -620,7 +621,7 @@ describe("QuadPassport", async () => {
       )
     })
 
-    it('success - 2 excluded', async () => {
+    it('success - (1 excluded, 2 included)', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
