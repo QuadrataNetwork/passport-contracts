@@ -681,7 +681,7 @@ export const assertGetAttributeIncluding = async (
             treasury,
             paymentToken.address
           )
-        ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(expectedIssuers.length));
+        ).to.equal(((priceAttribute.mul(ISSUER_SPLIT).div(100)).div(expectedIssuers.length)));
       }
     }
     // withdraw payment token

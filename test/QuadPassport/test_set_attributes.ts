@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import { BigNumber, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import {
   id,
@@ -8,7 +8,7 @@ import {
   parseUnits,
   formatBytes32String,
 } from "ethers/lib/utils";
-import { assertMint } from "../utils/verify";
+import { assertGetAttributeIncluding, assertMint } from "../utils/verify";
 
 const {
   ATTRIBUTE_AML,
@@ -238,7 +238,7 @@ describe("QuadPassport", async () => {
         ATTRIBUTE_IS_BUSINESS,
         newIsBusiness,
         issuedAt,
-        {signer: minterA}
+        { signer: minterA }
       );
       await assertGetAttributeFree(
         [issuer.address],
@@ -250,7 +250,8 @@ describe("QuadPassport", async () => {
         newIsBusiness,
         issuedAt,
         1,
-        { signer: minterA,
+        {
+          signer: minterA,
           isContract: true
         }
       );
@@ -269,7 +270,7 @@ describe("QuadPassport", async () => {
         country,
         issuedAt,
         1,
-        {signer: minterA}
+        { signer: minterA }
       );
       // OK Fetching old value
       await assertGetAttribute(
@@ -285,7 +286,7 @@ describe("QuadPassport", async () => {
         did,
         issuedAt,
         1,
-        {signer: minterA}
+        { signer: minterA }
       );
     });
 
@@ -416,10 +417,10 @@ describe("QuadPassport", async () => {
       );
 
       await passport
-      .connect(minterA)
-      .mintPassport(minterA.address, 1, id("DID_34"), aml, country, isBusiness, issuedAt, sig, {
-        value: MINT_PRICE,
-      });
+        .connect(minterA)
+        .mintPassport(minterA.address, 1, id("DID_34"), aml, country, isBusiness, issuedAt, sig, {
+          value: MINT_PRICE,
+        });
 
       const newAML = id("MEDIUM");
       await assertSetAttribute(
@@ -443,25 +444,22 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      await assertGetAttribute(
+      // minterA now has attributes from both issuers
+      await assertGetAttributeIncluding(
         minterA,
         treasury,
-        issuer,
-        issuerTreasury,
+        [issuer.address, issuerB.address],
         usdc,
         defi,
+        governance,
         passport,
         reader,
         ATTRIBUTE_COUNTRY,
-        newCountry,
-        newIssuedAt,
+        [newCountry, country],
+        [BigNumber.from(newIssuedAt), BigNumber.from(issuedAt)],
+        [issuer.address, issuerB.address],
         1,
-        {
-          validIssuerCount: 2
-        }
-
-        //TODO: assert values from all issuers
-        //TODO: Make verify functions for all getAttributes and the corresponding DeFi doSomethings...
+        {}
       );
     });
 
@@ -661,10 +659,10 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
       await passport
-          .connect(minterB)
-          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
-            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
-          })
+        .connect(minterB)
+        .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+          value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+        })
     });
 
     it("fail - not issuer role", async () => {
@@ -871,23 +869,27 @@ describe("QuadPassport", async () => {
           newIssuedAt2
         );
 
+      await passport.withdrawToken(
+        issuerTreasury.address,
+        usdc.address
+      )
+
       // minterA now has attributes from both issuers
-      await assertGetAttribute(
+      await assertGetAttributeIncluding(
         minterA,
         treasury,
-        issuer,
-        issuerTreasury,
+        [issuer.address, issuerB.address],
         usdc,
         defi,
+        governance,
         passport,
         reader,
         ATTRIBUTE_COUNTRY,
-        newCountry,
-        newIssuedAt,
+        [newCountry, id("FRANCE")],
+        [BigNumber.from(newIssuedAt), BigNumber.from(newIssuedAt2)],
+        [issuer.address, issuerB.address],
         1,
-        {validIssuerCount: 2}
-
-        //TODO: assert values from all issuers
+        {}
       );
     });
 
