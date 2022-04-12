@@ -513,7 +513,7 @@ describe("QuadPassport", async () => {
       )
     })
 
-    it.skip('success - (exclude random address)', async () => {
+    it('success - (exclude random address)', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);

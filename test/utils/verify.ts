@@ -490,9 +490,9 @@ export const assertGetAttributeExcluding = async (
     // withdraw payment token
     if(!opts?.assertFree){
       console.log("withdrawing payment...")
-      for (var i = 0; i < expectedIssuers.length; i++) {
-        const issuer = expectedIssuers[i];
-        await passport.withdrawToken(issuer, paymentToken.address);
+      for(var i = 0;i < expectedTreasuries.length; i++) {
+        const treasury = expectedTreasuries[i];
+        await passport.withdrawToken(treasury, paymentToken.address);
       }
     }
 
