@@ -405,25 +405,7 @@ export const assertGetAttributeFreeIncluding = async (
   tokenId: number = TOKEN_ID,
   opts: any
 ) => {
-  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address)
-
-  expect(priceAttribute).to.equal(parseEther("0"));
-
-  const initialBalancePassport = await passport.provider.getBalance(
-    passport.address
-  );
-  const response = await reader.getAttributesFreeIncludingOnly(
-    account.address,
-    tokenId,
-    attribute,
-    issuers
-  );
-  const attributesResponse = response[0];
-  const epochsResponse = response[1];
-  const issuersResponse = response[2];
-
-  expect(attributesResponse).to.eql(expectedAttributeValues);
-  expect(epochsResponse).to.eql(expectedIssuedAt);
+  const { attributesResponse, epochsResponse, initialBalancePassport } = await getAttributeFree(reader, attribute, account, passport, tokenId, issuers, expectedAttributeValues, expectedIssuedAt);
 
   if (opts?.mockBusiness) {
     await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute))
@@ -590,6 +572,28 @@ export const assertGetAttributeIncluding = async (
   }
 
 };
+
+async function getAttributeFree(reader: Contract, attribute: string, account: SignerWithAddress, passport: Contract, tokenId: number, issuers: string[], expectedAttributeValues: any[], expectedIssuedAt: BigNumber[]) {
+  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address);
+
+  expect(priceAttribute).to.equal(parseEther("0"));
+
+  const initialBalancePassport = await passport.provider.getBalance(
+    passport.address
+  );
+  const response = await reader.getAttributesFreeIncludingOnly(
+    account.address,
+    tokenId,
+    attribute,
+    issuers
+  );
+  const attributesResponse = response[0];
+  const epochsResponse = response[1];
+
+  expect(attributesResponse).to.eql(expectedAttributeValues);
+  expect(epochsResponse).to.eql(expectedIssuedAt);
+  return { attributesResponse, epochsResponse, initialBalancePassport };
+}
 
 async function withdrawProtocolTreasury(opts: any, passport: Contract, treasury: SignerWithAddress, paymentToken: Contract, priceAttribute: any) {
   if (!opts?.assertFree) {
