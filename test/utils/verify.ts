@@ -503,78 +503,13 @@ export const assertGetAttributeExcluding = async (
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(expectedAttributeValue, expectedIssuedAt);
   } else {
-
     await expect(
       defi.connect(opts?.signer || account).doSomethingExcluding(attribute, paymentToken.address, excludedIssuers)
-    )
+    ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);
 
-      .to.emit(defi, "GetAttributeEvents")
-      .withArgs(expectedAttributeValue, expectedIssuedAt);
-
-    // Check Balance
-    expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
-      initialBalance.sub(priceAttribute)
-    );
-
-    expect(await paymentToken.balanceOf(passport.address)).to.equal(
-      priceAttribute.add(initialBalancePassport)
-    );
-
-    for(var i = 0; i < expectedIssuers.length; i++) {
-      expect(await paymentToken.balanceOf(expectedIssuers[i])).to.equal(initialBalanceIssuers[i]);
-    }
-
-    for(var i = 0; i < expectedTreasuries.length; i++) {
-      expect(await paymentToken.balanceOf(expectedTreasuries[i])).to.equal(
-        initialBalanceIssuerTreasuries[i]
-      );
-    }
-
-    expect(await paymentToken.balanceOf(treasury.address)).to.equal(
-      initialBalanceProtocolTreasury
-    );
-
-    // check balances and ensure issuers recieved correct payment amount
-    if(!opts?.assertFree){
-      for(var i = 0;i < expectedTreasuries.length; i++) {
-        const treasury = expectedTreasuries[i];
-        expect(
-          await passport.callStatic.withdrawToken(
-            treasury,
-            paymentToken.address
-          )
-        ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(expectedIssuers.length));
-      }
-    }
-    // withdraw payment token
-    if(!opts?.assertFree){
-      for(var i = 0;i < expectedTreasuries.length; i++) {
-        const treasury = expectedTreasuries[i];
-        await passport.withdrawToken(treasury, paymentToken.address);
-      }
-    }
-
-    // should fail now that they are empty
-    for (var i = 0; i < expectedIssuers.length; i++) {
-      const issuer = expectedIssuers[i];
-      await expect(
-        passport.withdrawToken(issuer, paymentToken.address)
-      ).to.revertedWith("NOT_ENOUGH_BALANCE");
-    }
-
-    await expect(
-      passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
-    ).to.revertedWith("NOT_ENOUGH_BALANCE");
-
-
-    if(!opts?.assertFree){
-      expect(
-        await passport.callStatic.withdrawToken(
-          treasury.address,
-          paymentToken.address
-        )
-      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
-    }
+    await checkBalances(paymentToken, opts, account, initialBalance, priceAttribute, passport, initialBalancePassport, i, expectedIssuers, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, treasury, initialBalanceProtocolTreasury);
+    await withdrawIssuerTreasuries(opts, i, expectedTreasuries, passport, paymentToken, expectedIssuers, account);
+    await withdrawProtocolTreasury(opts, passport, treasury, paymentToken, priceAttribute);
   }
 
 };
@@ -649,70 +584,78 @@ export const assertGetAttributeIncluding = async (
       .to.emit(defi, "GetAttributeEvents")
       .withArgs(expectedAttributeValue, expectedIssuedAt);
 
-    // Check Balance
-    expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
-      initialBalance.sub(priceAttribute)
-    );
-
-    expect(await paymentToken.balanceOf(passport.address)).to.equal(
-      priceAttribute.add(initialBalancePassport)
-    );
-
-    for(var i = 0; i < expectedIssuers.length; i++) {
-      expect(await paymentToken.balanceOf(expectedIssuers[i])).to.equal(initialBalanceIssuers[i]);
-    }
-
-    for(var i = 0; i < expectedTreasuries.length; i++) {
-      expect(await paymentToken.balanceOf(expectedTreasuries[i])).to.equal(
-        initialBalanceIssuerTreasuries[i]
-      );
-    }
-
-    expect(await paymentToken.balanceOf(treasury.address)).to.equal(
-      initialBalanceProtocolTreasury
-    );
-
-    // check balances and ensure issuers recieved correct payment amount
-    if(!opts?.assertFree){
-      for(var i = 0;i < expectedTreasuries.length; i++) {
-        const treasury = expectedTreasuries[i];
-        expect(
-          await passport.callStatic.withdrawToken(
-            treasury,
-            paymentToken.address
-          )
-        ).to.equal(((priceAttribute.mul(ISSUER_SPLIT).div(100)).div(expectedIssuers.length)));
-      }
-    }
-    // withdraw payment token
-    if(!opts?.assertFree){
-      for(var i = 0;i < expectedTreasuries.length; i++) {
-        const treasury = expectedTreasuries[i];
-        await passport.withdrawToken(treasury, paymentToken.address);
-      }
-    }
-
-    // should fail now that they are empty
-    for (var i = 0; i < expectedIssuers.length; i++) {
-      const issuer = expectedIssuers[i];
-      await expect(
-        passport.withdrawToken(issuer, paymentToken.address)
-      ).to.revertedWith("NOT_ENOUGH_BALANCE");
-    }
-
-    await expect(
-      passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
-    ).to.revertedWith("NOT_ENOUGH_BALANCE");
-
-
-    if(!opts?.assertFree){
-      expect(
-        await passport.callStatic.withdrawToken(
-          treasury.address,
-          paymentToken.address
-        )
-      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
-    }
+    await checkBalances(paymentToken, opts, account, initialBalance, priceAttribute, passport, initialBalancePassport, i, expectedIssuers, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, treasury, initialBalanceProtocolTreasury);
+    await withdrawIssuerTreasuries(opts, i, expectedTreasuries, passport, paymentToken, expectedIssuers, account);
+    await withdrawProtocolTreasury(opts, passport, treasury, paymentToken, priceAttribute);
   }
 
 };
+
+async function withdrawProtocolTreasury(opts: any, passport: Contract, treasury: SignerWithAddress, paymentToken: Contract, priceAttribute: any) {
+  if (!opts?.assertFree) {
+    expect(
+      await passport.callStatic.withdrawToken(
+        treasury.address,
+        paymentToken.address
+      )
+    ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+  }
+}
+
+async function withdrawIssuerTreasuries(opts: any, i: number, expectedTreasuries: any[], passport: Contract, paymentToken: Contract, expectedIssuers: string[], account: SignerWithAddress) {
+  if (!opts?.assertFree) {
+    for (var i = 0; i < expectedTreasuries.length; i++) {
+      const treasury = expectedTreasuries[i];
+      await passport.withdrawToken(treasury, paymentToken.address);
+    }
+  }
+
+  // should fail now that they are empty
+  for (var i = 0; i < expectedIssuers.length; i++) {
+    const issuer = expectedIssuers[i];
+    await expect(
+      passport.withdrawToken(issuer, paymentToken.address)
+    ).to.revertedWith("NOT_ENOUGH_BALANCE");
+  }
+
+  await expect(
+    passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
+  ).to.revertedWith("NOT_ENOUGH_BALANCE");
+}
+
+async function checkBalances(paymentToken: Contract, opts: any, account: SignerWithAddress, initialBalance: any, priceAttribute: any, passport: Contract, initialBalancePassport: any, i: number, expectedIssuers: string[], initialBalanceIssuers: any[], expectedTreasuries: any[], initialBalanceIssuerTreasuries: any[], treasury: SignerWithAddress, initialBalanceProtocolTreasury: any) {
+  expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
+    initialBalance.sub(priceAttribute)
+  );
+
+  expect(await paymentToken.balanceOf(passport.address)).to.equal(
+    priceAttribute.add(initialBalancePassport)
+  );
+
+  for (var i = 0; i < expectedIssuers.length; i++) {
+    expect(await paymentToken.balanceOf(expectedIssuers[i])).to.equal(initialBalanceIssuers[i]);
+  }
+
+  for (var i = 0; i < expectedTreasuries.length; i++) {
+    expect(await paymentToken.balanceOf(expectedTreasuries[i])).to.equal(
+      initialBalanceIssuerTreasuries[i]
+    );
+  }
+
+  expect(await paymentToken.balanceOf(treasury.address)).to.equal(
+    initialBalanceProtocolTreasury
+  );
+
+  // check balances and ensure issuers recieved correct payment amount
+  if (!opts?.assertFree) {
+    for (var i = 0; i < expectedTreasuries.length; i++) {
+      const treasury = expectedTreasuries[i];
+      expect(
+        await passport.callStatic.withdrawToken(
+          treasury,
+          paymentToken.address
+        )
+      ).to.equal(((priceAttribute.mul(ISSUER_SPLIT).div(100)).div(expectedIssuers.length)));
+    }
+  }
+}
