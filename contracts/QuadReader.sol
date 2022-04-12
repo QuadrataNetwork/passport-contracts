@@ -282,6 +282,10 @@ import "./storage/QuadReaderStore.sol";
         return (attributes, epochs, issuers);
     }
 
+    /// @notice safty checks for all getAttribute functions
+    /// @param _account address of the passport holder to query
+    /// @param _tokenId token id of erc1155
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     function _verifyAttributeQuery(
         address _account,
         uint256 _tokenId,
@@ -376,6 +380,11 @@ import "./storage/QuadReaderStore.sol";
         return amountETH;
     }
 
+    /// @dev Used to determine if issuer has returned something useful
+    /// @param _account the value to check existsance on
+    /// @param _attribute the value to check existsance on
+    /// @param _issuer the issuer in question
+    /// @return whether or not we found a value
     function _isDataAvailable(
         address _account,
         bytes32 _attribute,
@@ -385,6 +394,11 @@ import "./storage/QuadReaderStore.sol";
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
+    /// @dev Used to determine if issuer has returned something useful
+    /// @param _dID the value to check existsance on
+    /// @param _attribute the value to check existsance on
+    /// @param _issuer the issuer in question
+    /// @return whether or not we found a value
     function _isDataAvailableByDID(
         bytes32 _dID,
         bytes32 _attribute,
@@ -411,6 +425,9 @@ import "./storage/QuadReaderStore.sol";
         return bytes32(0);
     }
 
+    /// @dev Used to determine if any of the attributes is valid
+    /// @param attributes the value to check existsance on
+    /// @return whether or not we found a value
     function _hasValidAttribute(
         bytes32[] memory attributes
     ) internal pure returns(bool) {
