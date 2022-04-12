@@ -394,13 +394,10 @@ export const assertGetAttributeExcluding = async (
 
   try { await passport.withdrawToken(treasury.address, paymentToken.address) } catch { }
 
-  console.log("expected issuer treasuries...");
   const expectedTreasuries = []
   for (var i = 0; i < expectedIssuers.length; i++) {
     const issuer = expectedIssuers[i];
-    console.log("issuer ", issuer)
     const treasury = await governance.issuersTreasury(issuer);
-    console.log(treasury);
     expectedTreasuries.push(treasury);
     try { await passport.connect(issuer).withdrawToken(treasury, paymentToken.address) } catch {};
   }
@@ -472,13 +469,9 @@ export const assertGetAttributeExcluding = async (
     );
 
     // check balances and ensure issuers recieved correct payment amount
-    console.log("Checking balances...")
-    console.log("ATTR PRICE: ", priceAttribute.toString())
-
     if(!opts?.assertFree){
       for(var i = 0;i < expectedTreasuries.length; i++) {
         const treasury = expectedTreasuries[i];
-        console.log("Treasuries, ", treasury)
         expect(
           await passport.callStatic.withdrawToken(
             treasury,
@@ -489,7 +482,144 @@ export const assertGetAttributeExcluding = async (
     }
     // withdraw payment token
     if(!opts?.assertFree){
-      console.log("withdrawing payment...")
+      for(var i = 0;i < expectedTreasuries.length; i++) {
+        const treasury = expectedTreasuries[i];
+        await passport.withdrawToken(treasury, paymentToken.address);
+      }
+    }
+
+    // should fail now that they are empty
+    for (var i = 0; i < expectedIssuers.length; i++) {
+      const issuer = expectedIssuers[i];
+      await expect(
+        passport.withdrawToken(issuer, paymentToken.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
+    }
+
+    await expect(
+      passport.withdrawToken(opts?.signer?.address || account.address, paymentToken.address)
+    ).to.revertedWith("NOT_ENOUGH_BALANCE");
+
+
+    if(!opts?.assertFree){
+      expect(
+        await passport.callStatic.withdrawToken(
+          treasury.address,
+          paymentToken.address
+        )
+      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+    }
+  }
+
+};
+
+export const assertGetAttributeIncluding = async (
+  account: SignerWithAddress,
+  treasury: SignerWithAddress,
+  includedIssuers: string[],
+  paymentToken: Contract,
+  defi: Contract,
+  governance: Contract,
+  passport: Contract,
+  reader: Contract,
+  attribute: string,
+  expectedAttributeValue: string[],
+  expectedIssuedAt: BigNumber[],
+  expectedIssuers: string[],
+  tokenId: number = TOKEN_ID,
+  opts: any
+) => {
+
+  try { await passport.withdrawToken(treasury.address, paymentToken.address) } catch { }
+
+  const expectedTreasuries = []
+  for (var i = 0; i < expectedIssuers.length; i++) {
+    const issuer = expectedIssuers[i];
+    const treasury = await governance.issuersTreasury(issuer);
+    expectedTreasuries.push(treasury);
+    try { await passport.connect(issuer).withdrawToken(treasury, paymentToken.address) } catch {};
+  }
+
+  const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
+  const priceAttributeETH = await reader.calculatePaymentETH(attribute, account.address)
+  if(!opts?.assertFree)
+    expect(priceAttribute).to.not.equal(parseEther("0"));
+
+  // Retrieve initialBalances
+  const initialBalance = await paymentToken.balanceOf(opts?.signer?.address || account.address);
+  const initialBalancePassport = await paymentToken.balanceOf(passport.address);
+
+  const initialBalanceIssuers = [];
+  for (var i = 0; i < expectedIssuers.length; i++) {
+    const issuer = expectedIssuers[i];
+    initialBalanceIssuers.push(await paymentToken.balanceOf(issuer));
+  }
+
+  const initialBalanceIssuerTreasuries = [];
+  for(var i = 0;i < expectedTreasuries.length; i++) {
+    const treasury = expectedTreasuries[i];
+    initialBalanceIssuerTreasuries.push(await paymentToken.balanceOf(treasury));
+  }
+
+  const initialBalanceProtocolTreasury = await paymentToken.balanceOf(
+    treasury.address
+  );
+
+  // GetAttribute function
+  await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
+  expect(await paymentToken.allowance((opts?.signer || account).address, defi.address)).to.equal(priceAttribute);
+
+  if (opts?.mockBusiness) {
+    await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeETH }))
+      .to.emit(defi, "GetAttributeEvent")
+      .withArgs(expectedAttributeValue, expectedIssuedAt);
+  } else {
+
+    await expect(
+      defi.connect(opts?.signer || account).doSomethingIncluding(attribute, paymentToken.address, includedIssuers)
+    )
+
+      .to.emit(defi, "GetAttributeEvents")
+      .withArgs(expectedAttributeValue, expectedIssuedAt);
+
+    // Check Balance
+    expect(await paymentToken.balanceOf(opts?.signer?.address || account.address)).to.equal(
+      initialBalance.sub(priceAttribute)
+    );
+
+    expect(await paymentToken.balanceOf(passport.address)).to.equal(
+      priceAttribute.add(initialBalancePassport)
+    );
+
+    for(var i = 0; i < expectedIssuers.length; i++) {
+      expect(await paymentToken.balanceOf(expectedIssuers[i])).to.equal(initialBalanceIssuers[i]);
+    }
+
+    for(var i = 0; i < expectedTreasuries.length; i++) {
+      expect(await paymentToken.balanceOf(expectedTreasuries[i])).to.equal(
+        initialBalanceIssuerTreasuries[i]
+      );
+    }
+
+    expect(await paymentToken.balanceOf(treasury.address)).to.equal(
+      initialBalanceProtocolTreasury
+    );
+
+    // check balances and ensure issuers recieved correct payment amount
+    if(!opts?.assertFree){
+      for(var i = 0;i < expectedTreasuries.length; i++) {
+        const treasury = expectedTreasuries[i];
+        expect(
+          await passport.callStatic.withdrawToken(
+            treasury,
+            paymentToken.address
+          )
+        ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(expectedIssuers.length));
+      }
+    }
+    // withdraw payment token
+    if(!opts?.assertFree){
       for(var i = 0;i < expectedTreasuries.length; i++) {
         const treasury = expectedTreasuries[i];
         await passport.withdrawToken(treasury, paymentToken.address);

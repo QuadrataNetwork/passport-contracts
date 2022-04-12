@@ -8,7 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
-import { assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertMint } from "../utils/verify";
+import { assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeIncluding, assertMint } from "../utils/verify";
 import exp from "constants";
 
 const {
@@ -428,8 +428,6 @@ describe("QuadPassport", async () => {
   });
 
   describe("getAttributesExcluding", async function() {
-    this.timeout(0)
-
     it('success - (1 excluded, 1 included) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
@@ -578,6 +576,126 @@ describe("QuadPassport", async () => {
     it("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
+      ).to.revertedWith("ERC20: insufficient allowance");
+    });
+  });
+
+  describe("getAttributesIncluding", async() => {
+    it('success - (1 included) - DID', async () => {
+      const signers = await ethers.getSigners();
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      expect(await governance.getIssuersLength()).to.equal(2);
+      await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      await assertGetAttributeIncluding(
+        minterA,
+        treasury,
+        [issuer.address], // included issuer(s)
+        usdc,
+        defi,
+        governance,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        [did], // expected returned attributes
+        [BigNumber.from(issuedAt)], // expected dates of issuance
+        [issuer.address], // expected issuers to be returned
+        1,
+        {}
+      )
+    })
+
+    it('success - (include random address) - DID', async () => {
+      const signers = await ethers.getSigners();
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      expect(await governance.getIssuersLength()).to.equal(2);
+      await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      await assertGetAttributeIncluding(
+        minterA,
+        treasury,
+        [signers[19].address], // included issuer(s)
+        usdc,
+        defi,
+        governance,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        [], // expected returned attributes
+        [], // expected dates of issuance
+        [], // expected issuers to be returned
+        1,
+        {}
+      )
+    })
+
+    it('success - (2 included) - AML', async () => {
+      const signers = await ethers.getSigners();
+      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      expect(await governance.getIssuersLength()).to.equal(2);
+      await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      await assertGetAttributeIncluding(
+        minterA,
+        treasury,
+        [issuer.address, signers[0].address], // included issuer(s)
+        usdc,
+        defi,
+        governance,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [aml, id("LOW")], // expected returned attributes
+        [BigNumber.from(issuedAt), BigNumber.from(15)], // expected dates of issuance
+        [issuer.address, signers[0].address], // expected issuers to be returned
+        1,
+        {assertFree: true}
+      )
+    })
+    it("fail - getAttributesIncludingOnly(AML) - wallet not found", async () => {
+      const wallet = ethers.Wallet.createRandom();
+      await expect(
+        reader.getAttributesIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
+      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("fail - getAttributesIncludingOnly from address(0)", async () => {
+      await expect(
+        reader.getAttributesIncludingOnly(
+          ethers.constants.AddressZero,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          usdc.address,
+          [issuer.address]
+        )
+      ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
+    });
+
+    it("fail - getAttributesIncludingOnly ineligible Token Id", async () => {
+      const wrongTokenId = 2;
+      await expect(
+        reader.getAttributesIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
+
+    it("fail - getAttributesIncludingOnly ineligible attribute (AML)", async () => {
+      await governance
+        .connect(admin)
+        .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
+      await expect(
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
+
+    it("fail - attribute not free", async () => {
+      await expect(
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
       ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
