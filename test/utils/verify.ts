@@ -407,7 +407,8 @@ export const assertGetAttributeExcluding = async (
 
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
   const priceAttributeETH = await reader.calculatePaymentETH(attribute, account.address)
-  expect(priceAttribute).to.not.equal(parseEther("0"));
+  if(!opts?.assertFree)
+    expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Retrieve initialBalances
   const initialBalance = await paymentToken.balanceOf(opts?.signer?.address || account.address);
@@ -471,20 +472,28 @@ export const assertGetAttributeExcluding = async (
     );
 
     // check balances and ensure issuers recieved correct payment amount
-    for(var i = 0;i < expectedTreasuries.length; i++) {
-      const treasury = expectedTreasuries[i];
-      expect(
-        await passport.callStatic.withdrawToken(
-          treasury,
-          paymentToken.address
-        )
-      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(expectedIssuers.length));
-    }
+    console.log("Checking balances...")
+    console.log("ATTR PRICE: ", priceAttribute.toString())
 
+    if(!opts?.assertFree){
+      for(var i = 0;i < expectedTreasuries.length; i++) {
+        const treasury = expectedTreasuries[i];
+        console.log("Treasuries, ", treasury)
+        expect(
+          await passport.callStatic.withdrawToken(
+            treasury,
+            paymentToken.address
+          )
+        ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100).div(expectedIssuers.length));
+      }
+    }
     // withdraw payment token
-    for (var i = 0; i < expectedIssuers.length; i++) {
-      const issuer = expectedIssuers[i];
-      await passport.withdrawToken(issuer, paymentToken.address);
+    if(!opts?.assertFree){
+      console.log("withdrawing payment...")
+      for (var i = 0; i < expectedIssuers.length; i++) {
+        const issuer = expectedIssuers[i];
+        await passport.withdrawToken(issuer, paymentToken.address);
+      }
     }
 
     // should fail now that they are empty
@@ -500,14 +509,14 @@ export const assertGetAttributeExcluding = async (
     ).to.revertedWith("NOT_ENOUGH_BALANCE");
 
 
-
-    expect(
-      await passport.callStatic.withdrawToken(
-        treasury.address,
-        paymentToken.address
-      )
-    ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+    if(!opts?.assertFree){
+      expect(
+        await passport.callStatic.withdrawToken(
+          treasury.address,
+          paymentToken.address
+        )
+      ).to.equal(priceAttribute.mul(ISSUER_SPLIT).div(100));
+    }
   }
-
 
 };
