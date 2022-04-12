@@ -241,6 +241,72 @@ export const assertGetAttributeETH = async (
   );
 };
 
+export const assertGetAttributeETHExcluding = async (
+  account: SignerWithAddress,
+  excludedIssuers: string[],
+  defi: Contract,
+  passport: Contract,
+  attribute: string,
+  expectedAttributeValue: any[],
+  expectedIssuedAt: BigNumber[],
+  tokenId: number = TOKEN_ID
+) => {
+
+  const provider = defi.provider;
+  const priceAttribute = parseEther(
+    (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
+  );
+  expect(priceAttribute).to.not.equal(parseEther("0"));
+
+  // Test with potential actual transfer of Token
+  const initialBalance = await provider.getBalance(account.address);
+  const initialBalancePassport = await provider.getBalance(passport.address);
+  await expect(
+    defi.connect(account).doSomethingETHExcluding(attribute, excludedIssuers, { value: priceAttribute })
+  )
+    .to.emit(defi, "GetAttributeEvents")
+    .withArgs(expectedAttributeValue, expectedIssuedAt);
+  expect(await provider.getBalance(account.address)).to.be.below(
+    initialBalance.sub(priceAttribute)
+  );
+  expect(await provider.getBalance(passport.address)).to.equal(
+    priceAttribute.add(initialBalancePassport)
+  );
+};
+
+export const assertGetAttributeETHIncluding = async (
+  account: SignerWithAddress,
+  includedIssuers: string[],
+  defi: Contract,
+  passport: Contract,
+  attribute: string,
+  expectedAttributeValue: any[],
+  expectedIssuedAt: BigNumber[],
+  tokenId: number = TOKEN_ID
+) => {
+
+  const provider = defi.provider;
+  const priceAttribute = parseEther(
+    (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
+  );
+  expect(priceAttribute).to.not.equal(parseEther("0"));
+
+  // Test with potential actual transfer of Token
+  const initialBalance = await provider.getBalance(account.address);
+  const initialBalancePassport = await provider.getBalance(passport.address);
+  await expect(
+    defi.connect(account).doSomethingETHIncluding(attribute, includedIssuers, { value: priceAttribute })
+  )
+    .to.emit(defi, "GetAttributeEvents")
+    .withArgs(expectedAttributeValue, expectedIssuedAt);
+  expect(await provider.getBalance(account.address)).to.be.below(
+    initialBalance.sub(priceAttribute)
+  );
+  expect(await provider.getBalance(passport.address)).to.equal(
+    priceAttribute.add(initialBalancePassport)
+  );
+};
+
 export const assertSetAttribute = async (
   account: SignerWithAddress,
   issuer: SignerWithAddress,

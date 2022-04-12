@@ -194,9 +194,7 @@ describe("QuadPassport", async () => {
       }
     });
 
-    // TODO: Ask Fab + Travis if this is even possible. It seems impossible for this to be true so test should fail
-    // TODO: Originally test was 'success - mint multiple passports with same DID from two issuers'
-    it("fail - two issuers cannot mint multiple passports with same DID", async () => {
+    it("success - two issuers may mint multiple passports with same DID", async () => {
 
       await assertMint(
         minterA,
