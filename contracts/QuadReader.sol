@@ -381,7 +381,7 @@ import "./storage/QuadReaderStore.sol";
     }
 
     /// @dev Used to determine if issuer has returned something useful
-    /// @param _account the value to check existsance on
+    /// @param _account the value to check existence on
     /// @param _attribute the value to check existsance on
     /// @param _issuer the issuer in question
     /// @return whether or not we found a value
