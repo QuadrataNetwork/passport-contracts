@@ -4,6 +4,27 @@ pragma solidity 0.8.4;
 import "../interfaces/IQuadPassport.sol";
 
 contract QuadGovernanceStore {
+
+    struct GovernanceData {
+        uint256  revSplitIssuer; // 50 means 50%;
+        uint256  passportVersion;
+        uint256  mintPrice; // Price in $ETH
+        IQuadPassport  passport;
+        address  oracle;
+        address  treasury;
+    }
+
+    enum IssuerStatus {
+        ACTIVE,
+        DEACTIVATED
+    }
+
+    struct Issuer {
+        address issuer;
+        IssuerStatus status;
+        // TODO: should we add `bytes data;` in the struct
+    }
+
     // Admin Functions
     bytes32[] public supportedAttributes;
     mapping(uint256 => bool) public eligibleTokenId;
@@ -22,16 +43,11 @@ contract QuadGovernanceStore {
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
 
-    uint256 public revSplitIssuer; // 50 means 50%;
-    uint256 public passportVersion;
-    uint256 public mintPrice; // Price in $ETH
-    IQuadPassport public passport;
-    address public oracle;
-    address public treasury;
+    GovernanceData public governanceData;
 
     mapping(bytes32 => uint256) public pricePerBusinessAttribute;
 
-    address[] public issuers;
+    Issuer[] public issuers;
     mapping(address => uint256) internal issuerIndices;
 
 }

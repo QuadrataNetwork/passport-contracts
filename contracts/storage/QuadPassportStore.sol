@@ -5,6 +5,14 @@ import "../interfaces/IQuadPassport.sol";
 import "../interfaces/IQuadGovernance.sol";
 
 contract QuadPassportStore {
+
+    struct Attribute {
+        bytes32 value;
+        uint256 epoch;
+        address issuer;
+    }
+
+
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
@@ -18,9 +26,9 @@ contract QuadPassportStore {
 
     // Passport attributes
     // Wallet => (Attribute Name => (Issuer => Attribute))
-    mapping(address => mapping(bytes32 => mapping(address => IQuadPassport.Attribute))) internal _attributes;
+    mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
     // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
-    mapping(bytes32 => mapping(bytes32 => mapping(address => IQuadPassport.Attribute))) internal _attributesByDID;
+    mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
 
     // Wallet => (TokenId => IssuanceEpoch)
     mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;

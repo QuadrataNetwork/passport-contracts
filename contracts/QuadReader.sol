@@ -8,6 +8,8 @@ import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
+import "./storage/QuadPassportStore.sol";
+import "./storage/QuadGovernanceStore.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
@@ -124,7 +126,7 @@ import "./storage/QuadReaderStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _onlyIssuers);
+        ) = _applyFilter(_account, _attribute, _getIncludedIssuers(_onlyIssuers));
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -149,7 +151,7 @@ import "./storage/QuadReaderStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _onlyIssuers);
+        ) =  _applyFilter(_account, _attribute, _getIncludedIssuers(_onlyIssuers));
 
         return (attributes, epochs, issuers);
     }
@@ -171,11 +173,38 @@ import "./storage/QuadReaderStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _onlyIssuers);
+        ) = _applyFilter(_account, _attribute, _getIncludedIssuers(_onlyIssuers));
 
         _doETHPayments(_attribute, issuers, _account);
 
         return (attributes, epochs, issuers);
+    }
+
+    function _getIncludedIssuers(
+        address[] calldata _issuers
+    ) internal view returns(address[] memory) {
+        address[] memory issuers = _issuers;
+
+        uint256 gaps = 0;
+        for(uint256 i = 0; i < issuers.length; i++) {
+            if(governance.getIssuerStatus(_issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+                issuers[i] = address(0);
+                gaps++;
+            }
+        }
+
+
+        address[] memory newIssuers = new address[](issuers.length - gaps);
+        uint256 formattedIndex = 0;
+        for(uint256 i = 0; i < issuers.length; i++) {
+            if(issuers[i] == address(0)){
+                continue;
+            }
+
+            newIssuers[formattedIndex++] = issuers[i];
+        }
+
+        return newIssuers;
     }
 
     /// @notice removes `_issuers` from the full list of supported issuers
@@ -184,9 +213,12 @@ import "./storage/QuadReaderStore.sol";
     function _getExcludedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
-        address[] memory issuers = governance.getIssuers();
+        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
+        address[] memory issuers = new address[](governance.getIssuersLength());
+
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
+            issuers[i] = issuerData[i].status == QuadGovernanceStore.IssuerStatus.ACTIVE ? issuerData[i].issuer : address(0);
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);
@@ -232,7 +264,7 @@ import "./storage/QuadReaderStore.sol";
                     vars.gaps++;
                     continue;
                 }
-                IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     vars.gaps++;
                 }
@@ -245,13 +277,13 @@ import "./storage/QuadReaderStore.sol";
         uint256[] memory epochs = new uint256[](vars.delta);
         address[] memory issuers = new address[](vars.delta);
 
-        IQuadPassport.Attribute memory attribute;
+        QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(!governance.eligibleAttributes(_attribute)) {
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     continue;
                 }
-                IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
@@ -390,7 +422,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address _issuer
     ) internal view returns(bool) {
-        IQuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
+        QuadPassportStore.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
@@ -404,7 +436,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute,
         address _issuer
     ) internal view returns(bool) {
-        IQuadPassport.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
+        QuadPassportStore.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
@@ -417,7 +449,7 @@ import "./storage/QuadReaderStore.sol";
         bytes32 _attribute
     ) internal view returns(bytes32) {
         for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i)).value;
+            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i).issuer).value;
             if(value != bytes32(0)) {
                 return value;
             }

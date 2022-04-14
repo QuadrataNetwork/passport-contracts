@@ -266,7 +266,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("success - Include 2 issuers (1 not supported, 1 previously supported)", async  () => {
+    it("success - Include 2 issuers (2 previously supported)", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).deleteIssuer(signers[0].address)
@@ -280,8 +280,8 @@ describe("QuadPassport", async () => {
         passport,
         reader,
         ATTRIBUTE_AML,
-        [aml],
-        [BigNumber.from(issuedAt)],
+        [],
+        [],
         1,
         {}
       );

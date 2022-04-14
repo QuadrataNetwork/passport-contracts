@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "./ERC1155/ERC1155Upgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
+import "./storage/QuadGovernanceStore.sol";
 import "./storage/QuadPassportStore.sol";
 
 /// @title Quadrata Web3 Identity Passport
@@ -50,7 +51,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) internal override {}
 
     fallback() external payable {}
-
 
     /// @notice Claim and mint a wallet account Quadrata Passport
     /// @dev Only when authorized by an eligible issuer
@@ -180,7 +180,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 bytes32 attributeType = governance.supportedAttributes(i);
-                delete _attributes[_msgSender()][attributeType][governance.issuers(j)];
+                delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
             }
         }
     }
@@ -206,11 +206,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
             bytes32 attributeType = governance.supportedAttributes(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j)];
+                Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];
                 if(attribute.issuer != address(0) && attribute.epoch != 0) {
                     return;
                 }
-
             }
         }
 

@@ -194,54 +194,54 @@ describe("QuadGovernance", async () => {
   describe("deleteIssuer", async () => {
     it("succeed - delete 3rd issuer", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
-      expect(await governance.issuers(0)).to.equal(issuer1.address);
-      expect(await governance.issuers(1)).to.equal(issuer2.address);
-      expect(await governance.issuers(2)).to.equal(issuer3.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer2.address);
+      expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer3.address);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      expect(await governance.issuers(0)).to.equal(issuer1.address);
-      expect(await governance.issuers(1)).to.equal(issuer2.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer2.address);
 
     });
 
     it("succeed - delete 2nd issuer", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
-      expect(await governance.issuers(0)).to.equal(issuer1.address);
-      expect(await governance.issuers(1)).to.equal(issuer2.address);
-      expect(await governance.issuers(2)).to.equal(issuer3.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer2.address);
+      expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer2.address);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      expect(await governance.issuers(0)).to.equal(issuer1.address);
-      expect(await governance.issuers(1)).to.equal(issuer3.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer3.address);
 
     });
 
     it("succeed - delete 1st issuer", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
-      expect(await governance.issuers(0)).to.equal(issuer1.address);
-      expect(await governance.issuers(1)).to.equal(issuer2.address);
-      expect(await governance.issuers(2)).to.equal(issuer3.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer2.address);
+      expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer1.address);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      expect(await governance.issuers(1)).to.equal(issuer2.address);
-      expect(await governance.issuers(0)).to.equal(issuer3.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer2.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer3.address);
 
     });
 
     it("succeed - delete all issuers", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
-      expect(await governance.issuers(0)).to.equal(issuer1.address);
-      expect(await governance.issuers(1)).to.equal(issuer2.address);
-      expect(await governance.issuers(2)).to.equal(issuer3.address);
+      expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
+      expect((await governance.issuers(1))[0]).to.equal(issuer2.address);
+      expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer1.address);
       await governance.connect(admin).deleteIssuer(issuer2.address);

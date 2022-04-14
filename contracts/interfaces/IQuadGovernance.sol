@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "../storage/QuadGovernanceStore.sol";
+
 interface IQuadGovernance {
     function setTreasury(address _treasury) external;
 
@@ -43,8 +45,6 @@ interface IQuadGovernance {
 
     function getPriceETH() external view returns (uint);
 
-    function getIssuersLength() external view returns (uint256);
-
     function mintPrice() external view returns (uint256);
 
     function eligibleTokenId(uint256) external view returns(bool);
@@ -59,20 +59,21 @@ interface IQuadGovernance {
 
     function supportedAttributes(uint256) external view returns(bytes32);
 
-    function issuers(uint256) external view returns(address);
-
     function pricePerAttribute(bytes32) external view returns(uint256);
 
     function pricePerBusinessAttribute(bytes32) external view returns(uint256);
 
-
     function revSplitIssuer() external view returns (uint256);
-
 
     function treasury() external view returns (address);
 
     function hasRole(bytes32, address) external view returns(bool);
 
-    function getIssuers() external view returns (address[] memory);
+    function getIssuersLength() external view returns (uint256);
 
+    function getIssuers() external view returns (QuadGovernanceStore.Issuer[] memory);
+
+    function issuers(uint256) external view returns(QuadGovernanceStore.Issuer memory);
+
+    function getIssuerStatus(address _issuer) external view returns(QuadGovernanceStore.IssuerStatus);
 }
