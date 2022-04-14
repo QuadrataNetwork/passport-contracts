@@ -210,7 +210,7 @@ import "./storage/QuadReaderStore.sol";
         return newIssuers;
     }
 
-    /// @notice creates array attribute values from issuers that have supplied a value
+    /// @notice creates a list of attribute values from filtered issuers that have attested to the data
     /// @param _account address of the passport holder to query
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
