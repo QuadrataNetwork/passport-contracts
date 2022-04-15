@@ -40,21 +40,21 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
+    /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of the attribute from all issuers ignoring the excluded list
     function getAttributesExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr,
-        address[] calldata _excludedIssuers
+        address[] calldata _excluded
     ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _getExcludedIssuers(_excludedIssuers));
+        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -65,13 +65,13 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
+    /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of the attribute from all issuers ignoring the excluded list
     function getAttributesFreeExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _excludedIssuers
+        address[] calldata _excluded
     ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
@@ -79,7 +79,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _getExcludedIssuers(_excludedIssuers));
+        ) =  _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
         return (attributes, epochs, issuers);
     }
 
@@ -87,20 +87,20 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _excludedIssuers The list of issuers to ignore. Keep empty for full list
+    /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of an attribute from all issuers ignoring the excluded list
     function getAttributesETHExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _excludedIssuers
+        address[] calldata _excluded
     ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _getExcludedIssuers(_excludedIssuers));
+        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
 
         _doETHPayments(_attribute, issuers, _account);
 
@@ -126,7 +126,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _getIncludedIssuers(_onlyIssuers));
+        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -151,7 +151,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _getIncludedIssuers(_onlyIssuers));
+        ) =  _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
 
         return (attributes, epochs, issuers);
     }
@@ -173,14 +173,14 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _getIncludedIssuers(_onlyIssuers));
+        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
 
         _doETHPayments(_attribute, issuers, _account);
 
         return (attributes, epochs, issuers);
     }
 
-    function _getIncludedIssuers(
+    function _includedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
         address[] memory issuers = _issuers;
@@ -210,7 +210,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @notice removes `_issuers` from the full list of supported issuers
     /// @param _issuers The list of issuers to remove
     /// @return the subset of `governance.issuers` - `_issuers`
-    function _getExcludedIssuers(
+    function _excludedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
