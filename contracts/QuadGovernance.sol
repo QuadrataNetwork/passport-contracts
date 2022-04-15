@@ -367,7 +367,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
     /// @dev Get the status of an issuer
-    /// @return length
+    /// @return status
     function getIssuerStatus(address _issuer) public view returns(IssuerStatus) {
         if(issuerIndices[_issuer] == 0) {
             // if the issuer isn't in the mapping, just say it's not active
