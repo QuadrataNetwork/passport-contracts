@@ -287,7 +287,7 @@ import "./storage/QuadGovernanceStore.sol";
 
         QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(!governance.eligibleAttributes(_attribute)) {
+            if(governance.eligibleAttributesByDID(_attribute)) {
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     continue;
                 }
@@ -349,6 +349,9 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal {
+        if(_issuers.length == 0) {
+            return;
+        }
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
             require(
@@ -379,6 +382,9 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal {
+        if(_issuers.length == 0) {
+            return;
+        }
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
