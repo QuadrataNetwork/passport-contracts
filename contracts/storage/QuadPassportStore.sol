@@ -30,9 +30,6 @@ contract QuadPassportStore {
     // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
     mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
 
-    // Wallet => (TokenId => IssuanceEpoch)
-    mapping(address => mapping(uint256 => uint256)) internal _issuedEpoch;
-
     // Accounting
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;

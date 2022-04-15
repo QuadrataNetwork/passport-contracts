@@ -83,7 +83,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _validSignatures[_account][_tokenId] = _sig;
-        _issuedEpoch[_account][_tokenId] = _issuedAt;
         _attributes[_account][keccak256("COUNTRY")][issuer] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
         _attributes[_account][keccak256("DID")][issuer] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
         _attributes[_account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _isBusiness, epoch: _issuedAt, issuer: issuer});
