@@ -222,6 +222,10 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
             issuers[i] = issuerData[i].status == QuadGovernanceStore.IssuerStatus.ACTIVE ? issuerData[i].issuer : address(0);
+            if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+                gaps++;
+                continue;
+            }
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);

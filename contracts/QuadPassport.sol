@@ -338,6 +338,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _issuer
     ) public view override returns (Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        if (!governance.hasRole(ISSUER_ROLE, _issuer))
+           return Attribute({value: bytes32(0), epoch: 0, issuer: address(0)});
         return _attributes[_account][_attribute][_issuer];
     }
 
@@ -352,6 +354,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _issuer
     ) public view override returns (Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        if (!governance.hasRole(ISSUER_ROLE, _issuer))
+           return Attribute({value: bytes32(0), epoch: 0, issuer: address(0)});
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 
