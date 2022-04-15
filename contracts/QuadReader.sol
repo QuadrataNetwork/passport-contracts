@@ -49,7 +49,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _tokenAddr,
         address[] calldata _excludedIssuers
     ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _verifyAttributeQuery(_account, _tokenId, _attribute);
+        _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -73,7 +73,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] calldata _excludedIssuers
     ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _verifyAttributeQuery(_account, _tokenId, _attribute);
+        _validateAttributeQuery(_account, _tokenId, _attribute);
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         (
             bytes32[] memory attributes,
@@ -95,7 +95,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] calldata _excludedIssuers
     ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _verifyAttributeQuery(_account, _tokenId, _attribute);
+        _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -121,7 +121,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _tokenAddr,
         address[] calldata _onlyIssuers
     ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _verifyAttributeQuery(_account, _tokenId, _attribute);
+        _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -146,7 +146,7 @@ import "./storage/QuadGovernanceStore.sol";
         address[] calldata _onlyIssuers
     ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        _verifyAttributeQuery(_account, _tokenId, _attribute);
+        _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -168,7 +168,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] calldata _onlyIssuers
     ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _verifyAttributeQuery(_account, _tokenId, _attribute);
+        _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
@@ -318,7 +318,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _tokenId token id of erc1155
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    function _verifyAttributeQuery(
+    function _validateAttributeQuery(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
