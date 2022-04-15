@@ -5,7 +5,7 @@ import "../interfaces/IQuadPassport.sol";
 
 contract QuadGovernanceStore {
 
-    struct GovernanceData {
+    struct Config {
         uint256  revSplitIssuer; // 50 means 50%;
         uint256  passportVersion;
         uint256  mintPrice; // Price in $ETH
@@ -43,7 +43,7 @@ contract QuadGovernanceStore {
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
     bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
 
-    GovernanceData public governanceData;
+    Config public config;
 
     mapping(bytes32 => uint256) public pricePerBusinessAttribute;
 

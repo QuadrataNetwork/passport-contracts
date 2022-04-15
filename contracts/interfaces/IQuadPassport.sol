@@ -56,9 +56,9 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function attributesByDID(bytes32, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
 
-    function accountBalancesETH(address, uint256) external;
+    function increaseAccountBalanceETH(address, uint256) external;
 
-    function accountBalances(address, address, uint256) external;
+    function increaseAccountBalance(address, address, uint256) external;
 
 
 

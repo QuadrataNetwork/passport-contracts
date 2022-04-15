@@ -351,9 +351,9 @@ import "./storage/QuadGovernanceStore.sol";
             uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.accountBalancesETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
+                passport.increaseAccountBalanceETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
-            passport.accountBalancesETH(governance.treasury(), amountProtocol);
+            passport.increaseAccountBalanceETH(governance.treasury(), amountProtocol);
         }
     }
 
@@ -373,9 +373,9 @@ import "./storage/QuadGovernanceStore.sol";
             uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.accountBalances(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
+                passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
-            passport.accountBalances(_tokenPayment,governance.treasury(), amountProtocol);
+            passport.increaseAccountBalance(_tokenPayment,governance.treasury(), amountProtocol);
         }
     }
 

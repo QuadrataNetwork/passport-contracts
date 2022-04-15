@@ -328,6 +328,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
+    /// @dev Allow an autherized readers to get attribute information for free
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @param _issuer the entity that gave the attribute value
+    /// @return value of attribute from issuer
     function attributes(
         address _account,
         bytes32 _attribute,
@@ -337,6 +342,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _attributes[_account][_attribute][_issuer];
     }
 
+    /// @dev Allow an autherized readers to get did information for free
+    /// @param _dID did of user
+    /// @param _attribute attribute to get respective value from
+    /// @param _issuer the entity that gave the attribute value
+    /// @return did value by issuer
     function attributesByDID(
         bytes32 _dID,
         bytes32 _attribute,
@@ -346,7 +356,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 
-    function accountBalancesETH(
+    /// @dev Increase balance of account
+    /// @param _account address of user
+    /// @param _amount the entity that gave the attribute value
+    function increaseAccountBalanceETH(
         address _account,
         uint256 _amount
     ) public override {
@@ -354,7 +367,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _accountBalancesETH[_account] += _amount;
     }
 
-    function accountBalances(
+    function increaseAccountBalance(
         address _token,
         address _account,
         uint256 _amount

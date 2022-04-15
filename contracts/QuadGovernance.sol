@@ -36,7 +36,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
 
         eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
-        governanceData.passportVersion = 1;  // Passport Version
+        config.passportVersion = 1;  // Passport Version
 
         // Add DID, COUNTRY, AML as valid attributes
         eligibleAttributes[keccak256("DID")] = true;
@@ -54,10 +54,10 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
         mintPricePerAttribute[keccak256("AML")] = 0.01 ether;
         mintPricePerAttribute[keccak256("COUNTRY")] = 0.01 ether;
-        governanceData.mintPrice = 0.01 ether;
+        config.mintPrice = 0.01 ether;
 
         // Revenue split with issuers
-        governanceData.revSplitIssuer = 50;  // 50%
+        config.revSplitIssuer = 50;  // 50%
 
         // Set Roles
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
@@ -72,9 +72,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function setTreasury(address _treasury)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ADDRESS_ZERO");
-        require(_treasury != governanceData.treasury, "TREASURY_ADDRESS_ALREADY_SET");
-        address oldTreasury = governanceData.treasury;
-        governanceData.treasury = _treasury;
+        require(_treasury != config.treasury, "TREASURY_ADDRESS_ALREADY_SET");
+        address oldTreasury = config.treasury;
+        config.treasury = _treasury;
         emit TreasuryUpdated(oldTreasury, _treasury);
     }
 
@@ -84,11 +84,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function setPassportContractAddress(address _passportAddr)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_passportAddr != address(0), "PASSPORT_ADDRESS_ZERO");
-        require(address(governanceData.passport) != _passportAddr, "PASSPORT_ADDRESS_ALREADY_SET");
-        address _oldPassport = address(governanceData.passport);
-        governanceData.passport = IQuadPassport(_passportAddr);
+        require(address(config.passport) != _passportAddr, "PASSPORT_ADDRESS_ALREADY_SET");
+        address _oldPassport = address(config.passport);
+        config.passport = IQuadPassport(_passportAddr);
 
-        emit PassportAddressUpdated(_oldPassport, address(governanceData.passport));
+        emit PassportAddressUpdated(_oldPassport, address(config.passport));
     }
 
     /// @dev Set the QuadGovernance address in the QuadPassport contract
@@ -97,9 +97,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function updateGovernanceInPassport(address _newGovernance)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_newGovernance != address(0), "GOVERNANCE_ADDRESS_ZERO");
-        require(address(governanceData.passport) != address(0), "PASSPORT_NOT_SET");
+        require(address(config.passport) != address(0), "PASSPORT_NOT_SET");
 
-        governanceData.passport.setGovernance(_newGovernance);
+        config.passport.setGovernance(_newGovernance);
     }
 
     /// @dev Set the QuadPassport deployed version
@@ -107,11 +107,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @param _version current version of the QuadPassport
     function setPassportVersion(uint256 _version)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_version > governanceData.passportVersion, "PASSPORT_VERSION_INCREMENTAL");
+        require(_version > config.passportVersion, "PASSPORT_VERSION_INCREMENTAL");
 
-        uint256 oldVersion = governanceData.passportVersion;
-        governanceData.passportVersion = _version;
-        emit PassportVersionUpdated(oldVersion, governanceData.passportVersion);
+        uint256 oldVersion = config.passportVersion;
+        config.passportVersion = _version;
+        emit PassportVersionUpdated(oldVersion, config.passportVersion);
     }
 
     /// @dev Set the price for minting the QuadPassport
@@ -119,11 +119,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @param _mintPrice price in wei for minting a passport
     function setMintPrice(uint256 _mintPrice)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(governanceData.mintPrice != _mintPrice, "MINT_PRICE_ALREADY_SET");
+        require(config.mintPrice != _mintPrice, "MINT_PRICE_ALREADY_SET");
 
-        uint256 oldMintPrice = governanceData.mintPrice;
-        governanceData.mintPrice = _mintPrice;
-        emit PassportMintPriceUpdated(oldMintPrice, governanceData.mintPrice);
+        uint256 oldMintPrice = config.mintPrice;
+        config.mintPrice = _mintPrice;
+        emit PassportMintPriceUpdated(oldMintPrice, config.mintPrice);
     }
 
     /// @dev Set the eligibility status for a tokenId passport
@@ -220,11 +220,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function setOracle(address _oracleAddr)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_oracleAddr != address(0), "ORACLE_ADDRESS_ZERO");
-        require(governanceData.oracle != _oracleAddr, "ORACLE_ADDRESS_ALREADY_SET");
+        require(config.oracle != _oracleAddr, "ORACLE_ADDRESS_ALREADY_SET");
         // Safety check to ensure that address is a valid Oracle
         IUniswapAnchoredView(_oracleAddr).price("ETH");
-        address oldAddress = governanceData.oracle;
-        governanceData.oracle = _oracleAddr;
+        address oldAddress = config.oracle;
+        config.oracle = _oracleAddr;
         emit OracleUpdated(oldAddress, _oracleAddr);
     }
 
@@ -234,11 +234,11 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @param _split percentage split (`50` equals 50%)
     function setRevSplitIssuer(uint256 _split)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(governanceData.revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
+        require(config.revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
         require(_split <= 100, "SPLIT_MUST_BE_LESS_THAN_100");
 
-        uint256 oldSplit = governanceData.revSplitIssuer;
-        governanceData.revSplitIssuer = _split;
+        uint256 oldSplit = config.revSplitIssuer;
+        config.revSplitIssuer = _split;
 
         emit RevenueSplitIssuerUpdated(oldSplit, _split);
     }
@@ -341,17 +341,17 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @param _tokenAddr address of the ERC20 token
     /// @return price in USD
     function getPrice(address _tokenAddr)  external view returns (uint) {
-        require(governanceData.oracle != address(0), "ORACLE_ADDRESS_ZERO");
+        require(config.oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
-        return IUniswapAnchoredView(governanceData.oracle).price(erc20.symbol());
+        return IUniswapAnchoredView(config.oracle).price(erc20.symbol());
     }
 
     /// @dev Get the price in USD for $ETH using UniswapAnchorView
     /// @return price in USD for $ETH
     function getPriceETH()  external view returns (uint) {
-        require(governanceData.oracle != address(0), "ORACLE_ADDRESS_ZERO");
-        return IUniswapAnchoredView(governanceData.oracle).price("ETH");
+        require(config.oracle != address(0), "ORACLE_ADDRESS_ZERO");
+        return IUniswapAnchoredView(config.oracle).price("ETH");
     }
 
     /// @dev Get the length of issuers array
@@ -377,27 +377,27 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     }
 
     function passportVersion() public view returns(uint256) {
-        return governanceData.passportVersion;
+        return config.passportVersion;
     }
 
     function revSplitIssuer() public view returns(uint256) {
-        return governanceData.revSplitIssuer;
+        return config.revSplitIssuer;
     }
 
     function mintPrice() public view returns(uint256) {
-        return governanceData.mintPrice;
+        return config.mintPrice;
     }
 
     function treasury() public view returns(address) {
-        return governanceData.treasury;
+        return config.treasury;
     }
 
     function oracle() public view returns(address) {
-        return governanceData.oracle;
+        return config.oracle;
     }
 
     function passport() public view returns(IQuadPassport) {
-        return governanceData.passport;
+        return config.passport;
     }
 }
 
