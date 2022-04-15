@@ -30,7 +30,7 @@ interface IQuadGovernance {
 
      function setRevSplitIssuer(uint256 _split) external;
 
-     function addIssuer(address _issuer, address _treasury) external;
+     function setIssuer(address _issuer, address _treasury) external;
 
      function deleteIssuer(address _issuer) external;
 
@@ -39,7 +39,7 @@ interface IQuadGovernance {
         bool _isAllowed
     ) external;
 
-    function getSupportedAttributesLength() external view returns(uint256);
+    function getEligibleAttributesLength() external view returns(uint256);
 
     function getPrice(address _tokenAddr) external view returns (uint);
 

@@ -176,7 +176,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(balanceOf(_msgSender(), _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
         _burn(_msgSender(), _tokenId, 1);
 
-        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
+        for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 bytes32 attributeType = governance.eligibleAttributesArray(i);
                 delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
@@ -196,13 +196,13 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
         // only delete attributes from sender
-        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
+        for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             delete _attributes[_account][attributeType][_msgSender()];
         }
 
         // if another attribute is found, keep the passport, otherwise burn if all values are null
-        for (uint256 i = 0; i < governance.getSupportedAttributesLength(); i++) {
+        for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];

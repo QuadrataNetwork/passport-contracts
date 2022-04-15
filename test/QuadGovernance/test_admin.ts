@@ -394,7 +394,7 @@ describe("QuadGovernance", async () => {
     });
 
     it("succeed (turn false)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getEligibleAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -413,11 +413,11 @@ describe("QuadGovernance", async () => {
         false
       );
       expect(await governance.eligibleAttributesArray(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getEligibleAttributesLength()).to.equal(2);
     });
 
     it("succeed (turn false  - first element)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+      expect(await governance.getEligibleAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -440,16 +440,16 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributesArray(0)).to.equal(
         ATTRIBUTE_IS_BUSINESS
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(2);
+      expect(await governance.getEligibleAttributesLength()).to.equal(2);
     });
 
-    it("succeed (getSupportedAttributesLength)", async () => {
-      expect(await governance.getSupportedAttributesLength()).to.equal(3);
+    it("succeed (getEligibleAttributesLength)", async () => {
+      expect(await governance.getEligibleAttributesLength()).to.equal(3);
       const newAttribute = ethers.utils.id("CREDIT");
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)
       );
-      expect(await governance.getSupportedAttributesLength()).to.equal(4);
+      expect(await governance.getEligibleAttributesLength()).to.equal(4);
     });
 
     it("fail (not admin)", async () => {
@@ -710,13 +710,13 @@ describe("QuadGovernance", async () => {
     });
   });
 
-  describe("addIssuer", async () => {
+  describe("setIssuer", async () => {
     it("succeed", async () => {
       expect(await governance.issuersTreasury(newIssuer.address)).to.equal(
         ethers.constants.AddressZero
       );
       await expect(
-        governance.connect(admin).addIssuer(newIssuer.address, newIssuerTreasury.address)
+        governance.connect(admin).setIssuer(newIssuer.address, newIssuerTreasury.address)
       )
         .to.emit(governance, "IssuerAdded")
         .withArgs(newIssuer.address, newIssuerTreasury.address);
@@ -725,11 +725,11 @@ describe("QuadGovernance", async () => {
       );
     });
 
-    it("success (addIssuer maybe called multiple times without creating dupes)", async () => {
+    it("success (setIssuer maybe called multiple times without creating dupes)", async () => {
       expect(await governance.issuersTreasury(issuer1.address)).to.equal(
         issuerTreasury1.address
       );
-      await governance.connect(admin).addIssuer(issuer1.address, admin.address);
+      await governance.connect(admin).setIssuer(issuer1.address, admin.address);
 
       expect(await governance.issuersTreasury(issuer1.address)).to.equal(
         admin.address
@@ -740,7 +740,7 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .addIssuer(ethers.constants.AddressZero, admin.address)
+          .setIssuer(ethers.constants.AddressZero, admin.address)
       ).to.revertedWith("ISSUER_ADDRESS_ZERO");
     });
 
@@ -748,13 +748,13 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .addIssuer(newIssuer.address, ethers.constants.AddressZero)
+          .setIssuer(newIssuer.address, ethers.constants.AddressZero)
       ).to.revertedWith("TREASURY_ISSUER_ADDRESS_ZERO");
     });
 
     it("fail (not admin)", async () => {
       await expect(
-        governance.addIssuer(issuer1.address, admin.address)
+        governance.setIssuer(issuer1.address, admin.address)
       ).to.revertedWith("INVALID_ADMIN");
     });
   });

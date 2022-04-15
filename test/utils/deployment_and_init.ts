@@ -22,7 +22,7 @@ export const deployPassportEcosystem = async (
   for(var i = 0; i < issuers.length; i++) {
     await governance
       .connect(admin)
-      .addIssuer(issuers[i].address, issuerTreasuries[i].address);
+      .setIssuer(issuers[i].address, issuerTreasuries[i].address);
   }
 
   // Deploy Passport

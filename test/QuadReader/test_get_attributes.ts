@@ -96,9 +96,9 @@ describe("QuadPassport", async () => {
   describe("getAttributeFreeExcluding", async() => {
     it("success - exclude 1 issuer", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
-      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[2].address, signers[2].address);
       expect(await governance.getIssuersLength()).to.equal(4);
       await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
@@ -118,9 +118,9 @@ describe("QuadPassport", async () => {
 
     it("success - exclude 3 issuers", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
-      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[2].address, signers[2].address);
       expect(await governance.getIssuersLength()).to.equal(4);
       await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
@@ -140,9 +140,9 @@ describe("QuadPassport", async () => {
 
     it("success - exclude 0 issuers", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
-      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[2].address, signers[2].address);
       expect(await governance.getIssuersLength()).to.equal(4);
       await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
@@ -162,9 +162,9 @@ describe("QuadPassport", async () => {
 
     it("success - exclude all 4 issuers", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
-      await governance.connect(admin).addIssuer(signers[2].address, signers[2].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[2].address, signers[2].address);
       expect(await governance.getIssuersLength()).to.equal(4);
       await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
@@ -226,7 +226,7 @@ describe("QuadPassport", async () => {
   describe("getAttributeFreeIncluding", async() => {
     it("success - Include 2 issuers (1 supported, 1 not supported)", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).deleteIssuer(signers[0].address)
       expect(await governance.getIssuersLength()).to.equal(1);
 
@@ -246,8 +246,8 @@ describe("QuadPassport", async () => {
 
     it("success - Include 2 issuers (2 not supported)", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
       await governance.connect(admin).deleteIssuer(signers[0].address)
       await governance.connect(admin).deleteIssuer(signers[1].address)
       expect(await governance.getIssuersLength()).to.equal(1);
@@ -268,7 +268,7 @@ describe("QuadPassport", async () => {
 
     it("success - Include 2 issuers (2 previously supported)", async  () => {
       const signers = await ethers.getSigners()
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).deleteIssuer(signers[0].address)
       await governance.connect(admin).deleteIssuer(issuer.address)
       expect(await governance.getIssuersLength()).to.equal(0);
@@ -332,7 +332,7 @@ describe("QuadPassport", async () => {
   describe("getAttributesExcluding", async function() {
     it('success - (1 excluded, 1 included) - DID', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -358,8 +358,8 @@ describe("QuadPassport", async () => {
 
     it('success - (1 excluded, 2 included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
 
       expect(await governance.getIssuersLength()).to.equal(3);
 
@@ -387,8 +387,8 @@ describe("QuadPassport", async () => {
 
     it('success - (0 excluded, 3 included) - AML', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
 
       expect(await governance.getIssuersLength()).to.equal(3);
 
@@ -415,8 +415,8 @@ describe("QuadPassport", async () => {
 
     it('success - (exclude random address)', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
-      await governance.connect(admin).addIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
 
       expect(await governance.getIssuersLength()).to.equal(3);
 
@@ -485,7 +485,7 @@ describe("QuadPassport", async () => {
   describe("getAttributesIncluding", async() => {
     it('success - (1 included) - DID', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -511,7 +511,7 @@ describe("QuadPassport", async () => {
 
     it('success - (include random address) - DID', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -537,7 +537,7 @@ describe("QuadPassport", async () => {
 
     it('success - (2 included) - AML', async () => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -609,7 +609,7 @@ describe("QuadPassport", async () => {
 
     it("success - (1 excluded, 1 included)", async() => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -628,7 +628,7 @@ describe("QuadPassport", async () => {
 
     it("success - (0 excluded, 2 included)", async() => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -733,7 +733,7 @@ describe("QuadPassport", async () => {
 
     it("success - (1 excluded, 1 included)", async() => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, id("SIGNER_0"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
@@ -752,7 +752,7 @@ describe("QuadPassport", async () => {
 
     it("success - (0 excluded, 2 included)", async() => {
       const signers = await ethers.getSigners();
-      await governance.connect(admin).addIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
       await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 

@@ -468,7 +468,7 @@ describe("QuadPassport", async () => {
       const newIssuerTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
-        .addIssuer(issuer.address, newIssuerTreasury.address);
+        .setIssuer(issuer.address, newIssuerTreasury.address);
 
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);

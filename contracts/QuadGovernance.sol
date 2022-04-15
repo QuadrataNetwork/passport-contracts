@@ -247,7 +247,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _issuer address generating the signature authorizing minting/setting attributes
     /// @param _treasury address of the issuer treasury to withdraw the fees
-    function addIssuer(address _issuer, address _treasury)  external {
+    function setIssuer(address _issuer, address _treasury)  external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
@@ -329,7 +329,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Get number of eligible attributes currently supported
     /// @notice Restricted behind a TimelockController
     /// @return length of eligible attributes
-    function getSupportedAttributesLength() external view returns(uint256) {
+    function getEligibleAttributesLength() external view returns(uint256) {
         return eligibleAttributesArray.length;
     }
 

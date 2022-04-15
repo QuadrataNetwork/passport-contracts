@@ -500,7 +500,7 @@ describe("QuadPassport", async () => {
       const newIssuerTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
-        .addIssuer(issuer.address, newIssuerTreasury.address);
+        .setIssuer(issuer.address, newIssuerTreasury.address);
 
       await assertMint(
         minterA,
@@ -635,7 +635,7 @@ describe("QuadPassport", async () => {
       const issuerBTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
-        .addIssuer(issuerB.address, issuerBTreasury.address);
+        .setIssuer(issuerB.address, issuerBTreasury.address);
 
       await assertMint(
         minterA,
