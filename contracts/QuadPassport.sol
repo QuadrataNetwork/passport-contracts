@@ -367,6 +367,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _accountBalancesETH[_account] += _amount;
     }
 
+    /// @dev Increase balance of account
+    /// @param _account address of user
+    /// @param _amount the entity that gave the attribute value
     function increaseAccountBalance(
         address _token,
         address _account,

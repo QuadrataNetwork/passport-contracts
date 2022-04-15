@@ -180,6 +180,9 @@ import "./storage/QuadGovernanceStore.sol";
         return (attributes, epochs, issuers);
     }
 
+    /// @notice removes `_issuers` if they are deactivated
+    /// @param _issuers The list of issuers to include
+    /// @return `_issuers` - deactivated issuers
     function _includedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
@@ -333,6 +336,10 @@ import "./storage/QuadGovernanceStore.sol";
         );
     }
 
+    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
+    /// @param _issuers tokenId of the Passport (1 for now)
+    /// @param _account The account used for figuring how much it will cost to query
     function _doETHPayments(
         bytes32 _attribute,
         address[] memory _issuers,
@@ -357,6 +364,11 @@ import "./storage/QuadGovernanceStore.sol";
         }
     }
 
+    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
+    /// @param _tokenPayment address of erc20 payment method
+    /// @param _issuers tokenId of the Passport (1 for now)
+    /// @param _account The account used for figuring how much it will cost to query
     function _doTokenPayments(
         bytes32 _attribute,
         address _tokenPayment,

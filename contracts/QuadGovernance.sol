@@ -376,26 +376,38 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         return issuers[issuerIndices[_issuer]-1].status;
     }
 
+    /// @dev Get the version of deployment
+    /// @return version
     function passportVersion() public view returns(uint256) {
         return config.passportVersion;
     }
 
+    /// @dev Get the revenue split between protocol and issuers
+    /// @return ratio of revenue distribution
     function revSplitIssuer() public view returns(uint256) {
         return config.revSplitIssuer;
     }
 
+    /// @dev Get the cost for minting a passport
+    /// @return passport mint price
     function mintPrice() public view returns(uint256) {
         return config.mintPrice;
     }
 
+    /// @dev Get the address of protocol treasury
+    /// @return treasury address
     function treasury() public view returns(address) {
         return config.treasury;
     }
 
+    /// @dev Get the address of price oracle
+    /// @return oracle address
     function oracle() public view returns(address) {
         return config.oracle;
     }
 
+    /// @dev Get the address of passport
+    /// @return passport address
     function passport() public view returns(IQuadPassport) {
         return config.passport;
     }
