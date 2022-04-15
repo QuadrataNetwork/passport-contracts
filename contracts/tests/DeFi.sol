@@ -94,9 +94,9 @@ contract DeFi {
     function doSomethingIncluding(
         bytes32 _attribute,
         address _tokenPayment,
-        address[] calldata _includedIssuers
+        address[] calldata _includedIssuers,
+        uint256 paymentAmount
     ) public returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(reader), paymentAmount);
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesIncludingOnly(msg.sender, 1, _attribute, _tokenPayment, _includedIssuers);

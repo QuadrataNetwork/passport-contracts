@@ -315,9 +315,7 @@ import "./storage/QuadGovernanceStore.sol";
             vars.filteredIndex++;
         }
 
-        if(governance.eligibleAttributes(_attribute) && attributes.length != 0) {
-            require(_hasValidAttribute(attributes), "DIDS_NOT_FOUND");
-        }
+        require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
 
         return (attributes, epochs, issuers);
     }
@@ -342,7 +340,7 @@ import "./storage/QuadGovernanceStore.sol";
 
     /// @notice Distrubte the fee to query an attribute to issuers and protocol
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers tokenId of the Passport (1 for now)
+    /// @param _issuers The providers of the attributes
     /// @param _account The account used for figuring how much it will cost to query
     function _doETHPayments(
         bytes32 _attribute,
@@ -374,7 +372,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @notice Distrubte the fee to query an attribute to issuers and protocol
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenPayment address of erc20 payment method
-    /// @param _issuers tokenId of the Passport (1 for now)
+    /// @param _issuers The providers of the attributes
     /// @param _account The account used for figuring how much it will cost to query
     function _doTokenPayments(
         bytes32 _attribute,
@@ -481,15 +479,15 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @dev Used to determine if any of the attributes is valid
-    /// @param attributes the value to check existsance on
+    /// @param _issuers the value to check existsance on
     /// @return whether or not we found a value
-    function _hasValidAttribute(
-        bytes32[] memory attributes
+    function _safetyCheckIssuers(
+        address[] memory _issuers
     ) internal pure returns(bool) {
-        for(uint256 i = 0; i < attributes.length; i++) {
-            if(attributes[i] != bytes32(0))
-                return true;
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            if(_issuers[i] == address(0))
+                return false;
         }
-        return false;
+        return true;
     }
  }

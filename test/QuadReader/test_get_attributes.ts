@@ -528,7 +528,7 @@ describe("QuadPassport", async () => {
 
     it("fail - attribute not free", async () => {
       await expect(
-        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
+        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
       ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
@@ -582,7 +582,7 @@ describe("QuadPassport", async () => {
         [], // expected dates of issuance
         [], // expected issuers to be returned
         1,
-        {}
+        {assertFree: true}
       )
     })
 
@@ -716,11 +716,13 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - insufficient eth amount", async () => {
-      await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+      try {
+        await reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: getDIDPrice.sub(1),
         })
-      ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
+      } catch (error) {
+        expect((error as Object).toString().includes("INSUFFICIENT_PAYMENT_AMOUNT")).to.equals(true);
+      }
       await expect(
         reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice.add(1),
