@@ -265,7 +265,7 @@ import "./storage/QuadGovernanceStore.sol";
                     vars.gaps++;
                     continue;
                 }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     vars.gaps++;
                 }
@@ -284,7 +284,7 @@ import "./storage/QuadGovernanceStore.sol";
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     continue;
                 }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"),_issuers[i]);
+                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
