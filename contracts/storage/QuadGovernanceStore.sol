@@ -26,7 +26,7 @@ contract QuadGovernanceStore {
     }
 
     // Admin Functions
-    bytes32[] public supportedAttributes;
+    bytes32[] public eligibleAttributesArray;
     mapping(uint256 => bool) public eligibleTokenId;
     mapping(bytes32 => bool) public eligibleAttributes;
     mapping(bytes32 => bool) public eligibleAttributesByDID;

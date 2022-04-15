@@ -399,8 +399,8 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
-      expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.supportedAttributes(1)).to.equal(
+      expect(await governance.eligibleAttributesArray(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.eligibleAttributesArray(1)).to.equal(
         ATTRIBUTE_COUNTRY
       );
       await expect(
@@ -412,7 +412,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         false
       );
-      expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.eligibleAttributesArray(0)).to.equal(ATTRIBUTE_DID);
       expect(await governance.getSupportedAttributesLength()).to.equal(2);
     });
 
@@ -422,8 +422,8 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
-      expect(await governance.supportedAttributes(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.supportedAttributes(1)).to.equal(
+      expect(await governance.eligibleAttributesArray(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.eligibleAttributesArray(1)).to.equal(
         ATTRIBUTE_COUNTRY
       );
       await expect(
@@ -437,7 +437,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
-      expect(await governance.supportedAttributes(0)).to.equal(
+      expect(await governance.eligibleAttributesArray(0)).to.equal(
         ATTRIBUTE_IS_BUSINESS
       );
       expect(await governance.getSupportedAttributesLength()).to.equal(2);

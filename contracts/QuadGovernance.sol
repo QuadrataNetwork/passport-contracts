@@ -44,9 +44,9 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         eligibleAttributes[keccak256("IS_BUSINESS")] = true;
         eligibleAttributesByDID[keccak256("AML")] = true;
 
-        supportedAttributes.push(keccak256("DID"));
-        supportedAttributes.push(keccak256("COUNTRY"));
-        supportedAttributes.push(keccak256("IS_BUSINESS"));
+        eligibleAttributesArray.push(keccak256("DID"));
+        eligibleAttributesArray.push(keccak256("COUNTRY"));
+        eligibleAttributesArray.push(keccak256("IS_BUSINESS"));
 
         // Set pricing
         pricePerAttribute[keccak256("DID")] = 2 * 1e6; // $2
@@ -148,12 +148,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
         eligibleAttributes[_attribute] = _eligibleStatus;
         if (_eligibleStatus) {
-            supportedAttributes.push(_attribute);
+            eligibleAttributesArray.push(_attribute);
         } else {
-            for (uint256 i = 0; i < supportedAttributes.length; i++) {
-                if (supportedAttributes[i] == _attribute) {
-                    supportedAttributes[i] = supportedAttributes[supportedAttributes.length - 1];
-                    supportedAttributes.pop();
+            for (uint256 i = 0; i < eligibleAttributesArray.length; i++) {
+                if (eligibleAttributesArray[i] == _attribute) {
+                    eligibleAttributesArray[i] = eligibleAttributesArray[eligibleAttributesArray.length - 1];
+                    eligibleAttributesArray.pop();
                     break;
                 }
             }
@@ -330,7 +330,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @return length of eligible attributes
     function getSupportedAttributesLength() external view returns(uint256) {
-        return supportedAttributes.length;
+        return eligibleAttributesArray.length;
     }
 
     function _authorizeUpgrade(address) override internal view {

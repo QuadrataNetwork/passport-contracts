@@ -57,7 +57,7 @@ interface IQuadGovernance {
 
     function eligibleAttributesByDID(bytes32) external view returns(bool);
 
-    function supportedAttributes(uint256) external view returns(bytes32);
+    function eligibleAttributesArray(uint256) external view returns(bytes32);
 
     function pricePerAttribute(bytes32) external view returns(uint256);
 
