@@ -716,20 +716,20 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - insufficient eth amount", async () => {
-      try {
-        await reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
+      await expect(
+        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: getDIDPrice.sub(1),
         })
-      } catch (error) {
-        expect((error as Object).toString().includes("INSUFFICIENT_PAYMENT_AMOUNT")).to.equals(true);
-      }
+      ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
+
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: getDIDPrice.add(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
+
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: parseEther("0"),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
