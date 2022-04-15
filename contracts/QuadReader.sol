@@ -260,7 +260,7 @@ import "./storage/QuadGovernanceStore.sol";
                 if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
                     vars.gaps++;
                 }
-            } else {
+            } else if(governance.eligibleAttributesByDID(_attribute)) {
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     vars.gaps++;
                     continue;
