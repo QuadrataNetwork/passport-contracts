@@ -223,6 +223,7 @@ import "./storage/QuadGovernanceStore.sol";
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);
                     gaps++;
+                    break;
                 }
             }
         }
