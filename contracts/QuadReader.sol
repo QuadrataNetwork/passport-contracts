@@ -221,11 +221,11 @@ import "./storage/QuadGovernanceStore.sol";
 
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
-            issuers[i] = issuerData[i].status == QuadGovernanceStore.IssuerStatus.ACTIVE ? issuerData[i].issuer : address(0);
             if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
                 gaps++;
                 continue;
             }
+            issuers[i] = issuerData[i].issuer;
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);
@@ -339,6 +339,7 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The providers of the attributes
     /// @param _account The account used for figuring how much it will cost to query
@@ -347,9 +348,6 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal {
-        if(_issuers.length == 0) {
-            return;
-        }
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
             require(
@@ -360,7 +358,7 @@ import "./storage/QuadGovernanceStore.sol";
                 payable(address(passport)).send(amountETH),
                 "FAILED_TO_SEND_PAYMENT"
             );
-            uint256 amountIssuer = amountETH * governance.revSplitIssuer() / 1e2;
+            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
                 passport.increaseAccountBalanceETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
@@ -370,6 +368,7 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenPayment address of erc20 payment method
     /// @param _issuers The providers of the attributes
@@ -380,9 +379,6 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal {
-        if(_issuers.length == 0) {
-            return;
-        }
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
@@ -390,12 +386,12 @@ import "./storage/QuadGovernanceStore.sol";
                 erc20.transferFrom(msg.sender, address(passport), amountToken),
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
-            uint256 amountIssuer = amountToken * governance.revSplitIssuer() / 10 ** 2;
+            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
                 passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
-            passport.increaseAccountBalance(_tokenPayment,governance.treasury(), amountProtocol);
+            passport.increaseAccountBalance(_tokenPayment, governance.treasury(), amountProtocol);
         }
     }
 

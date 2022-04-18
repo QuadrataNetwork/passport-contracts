@@ -523,8 +523,8 @@ export const assertGetAttributeIncluding = async (
     try { await passport.connect(issuer).withdrawToken(treasury, paymentToken.address) } catch {};
   }
 
-  const priceAttribute = expectedIssuers.length == 0 ? 0 : await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
-  const priceAttributeETH = expectedIssuers.length == 0 ? 0 : await reader.calculatePaymentETH(attribute, account.address)
+  const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
+  const priceAttributeETH = await reader.calculatePaymentETH(attribute, account.address)
   if(!opts?.assertFree)
     expect(priceAttribute).to.not.equal(parseEther("0"));
 
