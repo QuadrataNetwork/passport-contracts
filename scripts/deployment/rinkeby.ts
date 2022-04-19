@@ -14,8 +14,7 @@ const deployGovernance = async (
     );
     await governance.deployed();
     console.log(`QuadGovernance is deployed: ${governance.address}`);
-
-    return governance;
+     return governance;
 };
 
 

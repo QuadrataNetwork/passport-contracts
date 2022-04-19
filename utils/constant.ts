@@ -12,6 +12,9 @@ export const ATTRIBUTE_DID = ethers.utils.id("DID");
 export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
 export const TOKEN_ID = 1;
 
+export const ACTIVE = 0;
+export const DEACTIVATED = 1;
+
 export const PRICE_PER_ATTRIBUTES = {
   [ATTRIBUTE_AML]: 0,
   [ATTRIBUTE_COUNTRY]: 1,

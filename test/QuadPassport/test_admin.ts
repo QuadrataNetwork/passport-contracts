@@ -6,12 +6,13 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 const { GOVERNANCE_ROLE } = require("../../utils/constant.ts");
 
 const {
-  deployPassportAndGovernance,
+  deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
-  let governance: Contract; // eslint-disable-line no-unused-vars
+  let governance: Contract;
+  let reader: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -23,11 +24,11 @@ describe("QuadPassport", async () => {
     beforeEach(async () => {
       [deployer, admin, issuer, treasury, issuerTreasury] =
         await ethers.getSigners();
-      [governance, passport] = await deployPassportAndGovernance(
+      [governance, passport, reader] = await deployPassportEcosystem(
         admin,
-        issuer,
+        [issuer],
         treasury,
-        issuerTreasury,
+        [issuerTreasury],
         baseURI
       );
     });

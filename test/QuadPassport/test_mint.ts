@@ -8,6 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
+import { read } from "fs";
 
 const {
   ATTRIBUTE_AML,
@@ -19,7 +20,7 @@ const {
 } = require("../../utils/constant.ts");
 const { signMint } = require("../utils/signature.ts");
 const {
-  deployPassportAndGovernance,
+  deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 const {
   assertMint,
@@ -30,6 +31,7 @@ const {
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let usdc: Contract;
   let defi: Contract;
   let mockBusiness: Contract;
@@ -39,7 +41,9 @@ describe("QuadPassport", async () => {
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
-    issuerTreasury: SignerWithAddress;
+    issuerB: SignerWithAddress,
+    issuerTreasury: SignerWithAddress,
+    issuerBTreasury: SignerWithAddress;
   let baseURI: string;
   let did: string;
   let aml: string;
@@ -56,13 +60,13 @@ describe("QuadPassport", async () => {
       isBusiness = id("FALSE");
       issuedAt = Math.floor(new Date().getTime() / 1000);
 
-      [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
+      [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, issuerB, issuerBTreasury] =
         await ethers.getSigners();
-      [governance, passport, usdc, defi] = await deployPassportAndGovernance(
+      [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
         admin,
-        issuer,
+        [issuer, issuerB],
         treasury,
-        issuerTreasury,
+        [issuerTreasury, issuerBTreasury],
         baseURI
       );
 
@@ -90,9 +94,11 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -105,6 +111,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -117,6 +124,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -148,9 +156,11 @@ describe("QuadPassport", async () => {
       );
       for (const wallet of [minterA, minterB]) {
         await assertGetAttributeFree(
+          [issuer.address],
           wallet,
           defi,
           passport,
+          reader,
           ATTRIBUTE_AML,
           aml,
           issuedAt
@@ -163,6 +173,7 @@ describe("QuadPassport", async () => {
           usdc,
           defi,
           passport,
+          reader,
           ATTRIBUTE_COUNTRY,
           country,
           issuedAt
@@ -175,6 +186,7 @@ describe("QuadPassport", async () => {
           usdc,
           defi,
           passport,
+          reader,
           ATTRIBUTE_DID,
           did,
           issuedAt
@@ -182,12 +194,8 @@ describe("QuadPassport", async () => {
       }
     });
 
-    it("success - mint multiple passports with same DID from two issuers", async () => {
-      const issuerB = ethers.Wallet.createRandom();
-      const issuerBTreasury = ethers.Wallet.createRandom();
-      await governance
-        .connect(admin)
-        .addIssuer(issuerB.address, issuerBTreasury.address);
+    it("success - two issuers may mint multiple passports with same DID", async () => {
+
       await assertMint(
         minterA,
         issuer,
@@ -200,6 +208,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await passport.connect(issuer).withdrawETH(issuerTreasury.address);
+
       await assertMint(
         minterB,
         issuerB,
@@ -211,16 +220,29 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      for (const wallet of [minterA, minterB]) {
-        await assertGetAttributeFree(
-          wallet,
-          defi,
-          passport,
-          ATTRIBUTE_AML,
-          aml,
-          issuedAt
-        );
-      }
+      await passport.connect(issuerB).withdrawETH(issuerBTreasury.address);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+
+      await assertGetAttributeFree(
+        [issuerB.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
 
       await assertGetAttribute(
         minterA,
@@ -230,10 +252,12 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
       );
+
       await assertGetAttribute(
         minterB,
         treasury,
@@ -242,6 +266,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -254,6 +279,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -266,6 +292,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -285,9 +312,11 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await assertGetAttributeFree(
+        [issuer.address],
         minterB,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -300,6 +329,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -312,6 +342,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -356,9 +387,11 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -371,6 +404,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -383,6 +417,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -419,9 +454,11 @@ describe("QuadPassport", async () => {
       );
       for (const tokenId of [TOKEN_ID, newTokenId]) {
         await assertGetAttributeFree(
+          [issuer.address],
           minterA,
           defi,
           passport,
+          reader,
           ATTRIBUTE_AML,
           aml,
           issuedAt,
@@ -435,6 +472,7 @@ describe("QuadPassport", async () => {
           usdc,
           defi,
           passport,
+          reader,
           ATTRIBUTE_COUNTRY,
           country,
           issuedAt,
@@ -449,6 +487,7 @@ describe("QuadPassport", async () => {
           usdc,
           defi,
           passport,
+          reader,
           ATTRIBUTE_DID,
           did,
           issuedAt,
@@ -461,7 +500,7 @@ describe("QuadPassport", async () => {
       const newIssuerTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
-        .addIssuer(issuer.address, newIssuerTreasury.address);
+        .setIssuer(issuer.address, newIssuerTreasury.address);
 
       await assertMint(
         minterA,
@@ -476,9 +515,11 @@ describe("QuadPassport", async () => {
       );
 
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -491,6 +532,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -503,6 +545,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -584,7 +627,7 @@ describe("QuadPassport", async () => {
           .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
-      ).to.be.revertedWith("PASSPORT_ALREADY_EXISTS");
+      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
     it("fail - passport already exists - two diff issuers", async () => {
@@ -592,7 +635,7 @@ describe("QuadPassport", async () => {
       const issuerBTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
-        .addIssuer(issuerB.address, issuerBTreasury.address);
+        .setIssuer(issuerB.address, issuerBTreasury.address);
 
       await assertMint(
         minterA,
@@ -622,7 +665,7 @@ describe("QuadPassport", async () => {
           .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
-      ).to.be.revertedWith("PASSPORT_ALREADY_EXISTS");
+      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
     it("fail - invalid hash (wrong aml)", async () => {
@@ -787,7 +830,7 @@ describe("QuadPassport", async () => {
     it("fail - mint passport to contract if not a business", async () => {
 
       const DeFi = await ethers.getContractFactory("DeFi");
-      const defi = await DeFi.deploy(passport.address);
+      const defi = await DeFi.deploy(passport.address, reader.address);
       await defi.deployed();
 
       const sig = await signMint(
@@ -817,7 +860,7 @@ describe("QuadPassport", async () => {
       const newIsBusiness = id("TRUE")
 
       const DeFi = await ethers.getContractFactory("DeFi");
-      const defi = await DeFi.deploy(passport.address);
+      const defi = await DeFi.deploy(passport.address, reader.address);
       await defi.deployed();
 
       const sig = await signMint(

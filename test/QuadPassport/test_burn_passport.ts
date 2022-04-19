@@ -14,7 +14,7 @@ const {
 } = require("../../utils/constant.ts");
 
 const {
-  deployPassportAndGovernance,
+  deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
 const {
@@ -27,6 +27,7 @@ const { signMint } = require("../utils/signature.ts");
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract;
   let usdc: Contract;
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -53,11 +54,11 @@ describe("QuadPassport", async () => {
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
-    [governance, passport, usdc, defi] = await deployPassportAndGovernance(
+    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
-      issuer,
+      [issuer],
       treasury,
-      issuerTreasury,
+      [issuerTreasury],
       baseURI
     );
 
@@ -89,9 +90,11 @@ describe("QuadPassport", async () => {
   describe("burnPassport", async () => {
     it("success - burnPassport, KYB: FALSE", async () => {
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -104,6 +107,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -116,6 +120,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -124,29 +129,32 @@ describe("QuadPassport", async () => {
       await passport.connect(minterA).burnPassport(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
@@ -176,9 +184,11 @@ describe("QuadPassport", async () => {
         });
 
       await assertGetAttributeFree(
+        [issuer.address],
         mockBusiness,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt,
@@ -196,6 +206,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt,
@@ -214,6 +225,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt,
@@ -229,29 +241,32 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
@@ -277,9 +292,11 @@ describe("QuadPassport", async () => {
         });
 
       await assertGetAttributeFree(
+        [issuer.address],
         minterB,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -292,6 +309,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt,
@@ -306,6 +324,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt,
@@ -316,29 +335,32 @@ describe("QuadPassport", async () => {
       await passport.connect(minterB).burnPassport(TOKEN_ID);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterB.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterB.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterB.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
@@ -367,9 +389,11 @@ describe("QuadPassport", async () => {
         });
 
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
@@ -382,6 +406,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         newIssuedAt
@@ -394,6 +419,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         newIssuedAt
@@ -410,9 +436,11 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -425,6 +453,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -437,6 +466,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -479,9 +509,11 @@ describe("QuadPassport", async () => {
 
 
       await assertGetAttributeFree(
+        [issuer.address],
         mockBusiness,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt,
@@ -499,6 +531,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt,
@@ -517,6 +550,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt,
@@ -533,38 +567,43 @@ describe("QuadPassport", async () => {
         .burnPassportIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
     it("success - burnPassportIssuer", async () => {
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -577,6 +616,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -589,6 +629,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
@@ -599,29 +640,32 @@ describe("QuadPassport", async () => {
         .burnPassportIssuer(minterA.address, TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        passport.getAttribute(
+        reader.getAttributesIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          usdc.address
+          usdc.address,
+          [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
@@ -653,9 +697,11 @@ describe("QuadPassport", async () => {
         });
 
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         newAML,
         newIssuedAt
@@ -668,6 +714,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         newIssuedAt
@@ -680,6 +727,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         newIssuedAt
@@ -697,9 +745,11 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await assertGetAttributeFree(
+        [issuer.address],
         minterA,
         defi,
         passport,
+        reader,
         ATTRIBUTE_AML,
         aml,
         issuedAt
@@ -712,6 +762,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_COUNTRY,
         country,
         issuedAt
@@ -724,6 +775,7 @@ describe("QuadPassport", async () => {
         usdc,
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         did,
         issuedAt
