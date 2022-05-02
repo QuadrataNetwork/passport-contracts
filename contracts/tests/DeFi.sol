@@ -104,7 +104,7 @@ contract DeFi {
 
     function doSomethingFreeWrapper(
         bytes32 _attribute
-    ) public returns(bytes32[] memory, uint256[] memory) {
+    ) public returns(bytes32[] memory, uint256[] memory)  {
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFree(msg.sender, 1, _attribute);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);

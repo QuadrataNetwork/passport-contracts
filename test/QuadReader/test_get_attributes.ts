@@ -8,7 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
-import { assertGetAttributeETHExcluding, assertGetAttributeETHIncluding, assertGetAttributeETHWrapper, assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeIncluding, assertGetAttributeWrapper, assertMint } from "../utils/verify";
+import { assertGetAttributeETHExcluding, assertGetAttributeETHIncluding, assertGetAttributeETHWrapper, assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeFreeWrapper, assertGetAttributeIncluding, assertGetAttributeWrapper, assertMint } from "../utils/verify";
 import exp from "constants";
 
 const {
@@ -1024,6 +1024,69 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
+  describe("getAttributeFree", async() => {
+    it("success - (all issuers)", async  () => {
+      const signers = await ethers.getSigners()
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
+      await governance.connect(admin).setIssuer(signers[2].address, signers[2].address);
+      expect(await governance.getIssuersLength()).to.equal(4);
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
+
+      await assertGetAttributeFreeWrapper(
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [aml, id("LOW"), id("MEDIUM"), id("LOW")],
+        [BigNumber.from(issuedAt), BigNumber.from(15), BigNumber.from(12), BigNumber.from(10)],
+        1,
+        {}
+      );
+    })
+
+    it("fail - getAttributesFree(AML) - wallet not found", async () => {
+      const wallet = ethers.Wallet.createRandom();
+      await expect(
+        reader.getAttributesFree(wallet.address, TOKEN_ID, ATTRIBUTE_AML)
+      ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("fail - getAttributesFree from address(0)", async () => {
+      await expect(
+        reader.getAttributesFree(
+          ethers.constants.AddressZero,
+          TOKEN_ID,
+          ATTRIBUTE_AML
+        )
+      ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
+    });
+
+    it("fail - getAttributesFree ineligible Token Id", async () => {
+      const wrongTokenId = 2;
+      await expect(
+        reader.getAttributesFree(minterA.address, wrongTokenId, ATTRIBUTE_AML)
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
+
+    it("fail - getAttributesFree ineligible attribute (AML)", async () => {
+      await governance
+        .connect(admin)
+        .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
+      await expect(
+        reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_AML)
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
+
+    it("fail - attribute not free", async () => {
+      await expect(
+        reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_DID)
+      ).to.revertedWith("ATTRIBUTE_NOT_FREE");
+    });
+  })
 
   describe("getAttributeETH", async () => {
     const getDIDPrice = parseEther(

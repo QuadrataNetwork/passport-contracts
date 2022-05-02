@@ -355,13 +355,13 @@ export const assertGetAttributeFreeWrapper = async (
   passport: Contract,
   reader: Contract,
   attribute: string,
-  expectedAttributeValues: number[],
+  expectedAttributeValues: string[],
   expectedIssuedAt: BigNumber[],
   tokenId: number = TOKEN_ID,
   opts: any
 ) => {
   const initialBalancePassport = await getInitialValuesFree(reader, attribute, account, passport);
-  const response = await reader.getAttributesFree(
+  const response = await reader.callStatic.getAttributesFree(
     account.address,
     tokenId,
     attribute,
@@ -381,7 +381,7 @@ export const assertGetAttributeFreeExcluding = async (
   passport: Contract,
   reader: Contract,
   attribute: string,
-  expectedAttributeValues: number[],
+  expectedAttributeValues: string[],
   expectedIssuedAt: BigNumber[],
   tokenId: number = TOKEN_ID,
   opts: any
@@ -626,7 +626,7 @@ async function checkFinalValuesFree(passport: Contract, initialBalancePassport: 
   );
 }
 
-function assertReturnValuesFree(response: any, expectedAttributeValues: number[], expectedIssuedAt: BigNumber[]) {
+function assertReturnValuesFree(response: any, expectedAttributeValues: string[], expectedIssuedAt: BigNumber[]) {
   const attributesResponse = response[0];
   const epochsResponse = response[1];
   const issuersResponse = response[2];
