@@ -250,7 +250,7 @@ export const assertGetAttributeETHWrapper = async (
   expectedIssuedAt: BigNumber[],
   tokenId: number = TOKEN_ID
 ) => {
-  const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getIntitalValuesETH(defi, attribute, account, passport);
+  const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getInitialValuesETH(defi, attribute, account, passport);
 
   await expect(
     defi.connect(account).doSomethingETHWrapper(attribute, { value: priceAttribute })
@@ -271,7 +271,7 @@ export const assertGetAttributeETHExcluding = async (
   tokenId: number = TOKEN_ID
 ) => {
 
-  const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getIntitalValuesETH(defi, attribute, account, passport);
+  const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getInitialValuesETH(defi, attribute, account, passport);
   await expect(
     defi.connect(account).doSomethingETHExcluding(attribute, excludedIssuers, { value: priceAttribute })
   ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);
@@ -656,7 +656,7 @@ async function checkFinalValuesETH(provider: any, account: SignerWithAddress, in
   );
 }
 
-async function getIntitalValuesETH(defi: Contract, attribute: string, account: SignerWithAddress, passport: Contract) {
+async function getInitialValuesETH(defi: Contract, attribute: string, account: SignerWithAddress, passport: Contract) {
   const provider = defi.provider;
   const priceAttribute = parseEther(
     (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
