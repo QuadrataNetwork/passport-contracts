@@ -87,6 +87,38 @@ contract DeFi {
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
     }
+    /**
+        Do Something (Excluding-Wrappers)
+    */
+    function doSomethingWrapper(
+        bytes32 _attribute,
+        address _tokenPayment
+    ) public returns(bytes32[] memory, uint256[] memory) {
+        uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
+        IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
+        IERC20(_tokenPayment).approve(address(reader), paymentAmount);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributes(msg.sender, 1, _attribute, _tokenPayment);
+        emit GetAttributeEvents(attrValue, epoch);
+        return (attrValue, epoch);
+    }
+
+    function doSomethingFreeWrapper(
+        bytes32 _attribute
+    ) public returns(bytes32[] memory, uint256[] memory)  {
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFree(msg.sender, 1, _attribute);
+        emit GetAttributeEvents(attrValue, epoch);
+        return (attrValue, epoch);
+    }
+
+    function doSomethingETHWrapper(
+        bytes32 _attribute
+    ) public payable returns(bytes32[] memory, uint256[] memory) {
+        uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
+        require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETH{value: paymentAmount}(msg.sender, 1, _attribute);
+        emit GetAttributeEvents(attrValue, epoch);
+        return (attrValue, epoch);
+    }
 
     /**
         Do Something (Including)

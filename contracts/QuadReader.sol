@@ -47,8 +47,8 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr,
-        address[] calldata _excluded
-    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        address[] memory _excluded
+    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -71,8 +71,8 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _excluded
-    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        address[] memory _excluded
+    ) public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         (
@@ -93,8 +93,8 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _excluded
-    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        address[] memory _excluded
+    ) public override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -105,6 +105,47 @@ import "./storage/QuadGovernanceStore.sol";
         _doETHPayments(_attribute, issuers, _account);
 
         return (attributes, epochs, issuers);
+    }
+
+    /// @notice Get all values of an attribute for a passport holder (payable ETH)
+    /// @param _account address of the passport holder to query
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
+    /// @return all values from all issuers
+    function getAttributesETH(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute
+    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        return getAttributesETHExcluding(_account, _tokenId, _attribute, new address[](0));
+    }
+
+    /// @notice Get all values of an attribute for a passport holder (free)
+    /// @param _account address of the passport holder to query
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
+    /// @return all values of the the attribute from all issuers
+    function getAttributesFree(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute
+    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        return getAttributesFreeExcluding(_account, _tokenId, _attribute, new address[](0));
+    }
+
+    /// @notice Get all values of an attribute for a passport holder (payable with ERC20)
+    /// @param _account address of the passport holder to query
+    /// @param _tokenId tokenId of the Passport (1 for now)
+    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
+    /// @param _tokenAddr address of the ERC20 token to use as a payment
+    /// @return all values of the attribute from all issuers
+    function getAttributes(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute,
+        address _tokenAddr
+    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
@@ -214,7 +255,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _issuers The list of issuers to remove
     /// @return the subset of `governance.issuers` - `_issuers`
     function _excludedIssuers(
-        address[] calldata _issuers
+        address[] memory _issuers
     ) internal view returns(address[] memory) {
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
         address[] memory issuers = new address[](governance.getIssuersLength());
