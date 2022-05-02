@@ -243,7 +243,6 @@ export const assertGetAttributeETH = async (
 
 export const assertGetAttributeETHWrapper = async (
   account: SignerWithAddress,
-  excludedIssuers: string[],
   defi: Contract,
   passport: Contract,
   attribute: string,
@@ -254,7 +253,7 @@ export const assertGetAttributeETHWrapper = async (
   const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getIntitalValuesETH(defi, attribute, account, passport);
 
   await expect(
-    defi.connect(account).doSomethingETHExcluding(attribute, excludedIssuers, { value: priceAttribute })
+    defi.connect(account).doSomethingETHWrapper(attribute, { value: priceAttribute })
   ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);
 
   await checkFinalValuesETH(provider, account, initialBalance, priceAttribute, passport, initialBalancePassport);
@@ -444,7 +443,6 @@ export const assertGetAttributeFreeIncluding = async (
 export const assertGetAttributeWrapper  = async (
   account: SignerWithAddress,
   treasury: SignerWithAddress,
-  excludedIssuers: string[],
   paymentToken: Contract,
   defi: Contract,
   governance: Contract,
@@ -457,6 +455,14 @@ export const assertGetAttributeWrapper  = async (
   tokenId: number = TOKEN_ID,
   opts: any
 ) => {
+  var { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts, defi);
+  await expect(
+    defi.connect(opts?.signer || account).doSomethingWrapper(attribute, paymentToken.address)
+  ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);
+
+  await checkBalances(paymentToken, opts, account, initialBalance, priceAttribute, passport, initialBalancePassport, i, expectedIssuers, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, treasury, initialBalanceProtocolTreasury);
+  await withdrawIssuerTreasuries(opts, i, expectedTreasuries, passport, paymentToken, expectedIssuers, account);
+  await withdrawProtocolTreasury(opts, passport, treasury, paymentToken, priceAttribute);
 }
 
 export const assertGetAttributeExcluding = async (
@@ -476,11 +482,7 @@ export const assertGetAttributeExcluding = async (
   opts: any
 ) => {
 
-  var { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts);
-
-  // GetAttribute function
-  await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
-  expect(await paymentToken.allowance((opts?.signer || account).address, defi.address)).to.equal(priceAttribute);
+  var { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts, defi);
 
   if (opts?.mockBusiness) {
     await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
@@ -576,7 +578,7 @@ export const assertGetAttributeIncluding = async (
 
 };
 
-async function getInitialValuesToken(passport: Contract, treasury: SignerWithAddress, paymentToken: Contract, expectedIssuers: string[], governance: Contract, reader: Contract, attribute: string, account: SignerWithAddress, opts: any) {
+async function getInitialValuesToken(passport: Contract, treasury: SignerWithAddress, paymentToken: Contract, expectedIssuers: string[], governance: Contract, reader: Contract, attribute: string, account: SignerWithAddress, opts: any, defi: Contract) {
   try { await passport.withdrawToken(treasury.address, paymentToken.address); } catch { }
 
   const expectedTreasuries = [];
@@ -611,6 +613,10 @@ async function getInitialValuesToken(passport: Contract, treasury: SignerWithAdd
   const initialBalanceProtocolTreasury = await paymentToken.balanceOf(
     treasury.address
   );
+
+  // GetAttribute function
+  await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
+  expect(await paymentToken.allowance((opts?.signer || account).address, defi.address)).to.equal(priceAttribute);
   return { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury };
 }
 
