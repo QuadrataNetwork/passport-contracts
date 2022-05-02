@@ -8,7 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
-import { assertGetAttributeETHExcluding, assertGetAttributeETHIncluding, assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeIncluding, assertMint } from "../utils/verify";
+import { assertGetAttributeETHExcluding, assertGetAttributeETHIncluding, assertGetAttributeETHWrapper, assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeIncluding, assertMint } from "../utils/verify";
 import exp from "constants";
 
 const {
@@ -903,7 +903,8 @@ describe("QuadReader", async () => {
     });
   });
 
-  describe("Get Attribute Wrappers", async () => {
+
+  describe("getAttributeETH", async () => {
     const getDIDPrice = parseEther(
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
@@ -916,9 +917,8 @@ describe("QuadReader", async () => {
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      await assertGetAttributeETHIncluding(
+      await assertGetAttributeETHWrapper(
         minterA,
-        [issuer.address, signers[0].address],
         defi,
         passport,
         ATTRIBUTE_DID,
@@ -927,20 +927,21 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("fail - getAttributesETHIncludingOnly(AML) - wallet not found", async () => {
+
+    it("fail - getAttributesETH(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
-        reader.getAttributesETHIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
+        reader.getAttributesETH(wallet.address, TOKEN_ID, ATTRIBUTE_AML, {
           value: parseEther("0"),
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETHIncludingOnly(DID) - wallet not found", async () => {
+    it("fail - getAttributesETH(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesETHIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETH(wallet.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
@@ -948,63 +949,65 @@ describe("QuadReader", async () => {
 
     it("fail - insufficient eth amount", async () => {
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice.sub(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
+
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice.add(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
+
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: parseEther("0"),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
     });
 
-    it("fail - getAttributesETHIncludingOnly from address(0)", async () => {
+    it("fail - getAttributesETH from address(0)", async () => {
       await expect(
-        reader.getAttributesETHIncludingOnly(
+        reader.getAttributesETH(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_DID,
-          [issuer.address],
           { value: getDIDPrice }
         )
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesETHIncludingOnly ineligible Token Id", async () => {
+    it("fail - getAttributesETH ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesETH(minterA.address, wrongTokenId, ATTRIBUTE_DID, {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesETHIncludingOnly ineligible attribute (AML)", async () => {
+    it("fail - getAttributesETH ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
+        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_AML, {
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - getAttributesETHIncludingOnly ineligible attribute (Country)", async () => {
+    it("fail - getAttributesETH ineligible attribute (Country)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, [issuer.address], {
+        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY,{
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
   });
+
 });
