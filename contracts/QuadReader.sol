@@ -129,7 +129,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    )external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         return getAttributesFreeExcluding(_account, _tokenId, _attribute, new address[](0));
     }
 
@@ -144,7 +144,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
-    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
     }
 
