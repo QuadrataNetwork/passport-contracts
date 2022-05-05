@@ -9,6 +9,7 @@ import {
   id,
 } from "ethers/lib/utils";
 import { read } from "fs";
+import exp from "constants";
 
 const {
   ATTRIBUTE_AML,
@@ -668,8 +669,8 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
-    it("fail - invalid hash (wrong aml)", async () => {
-      const wrongAML = id("HIGH");
+    it("fail - invalid hash (wrong DID)", async () => {
+      const wrongDID = id("Ceaser");
       const sig = await signMint(
         issuer,
         minterA,
@@ -680,13 +681,22 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt, sig, {
+          .mintPassport(minterA.address, TOKEN_ID, wrongDID, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
+
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
     it("fail - invalid hash (wrong aml)", async () => {
@@ -701,6 +711,12 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
       await expect(
         passport
           .connect(minterA)
@@ -708,10 +724,14 @@ describe("QuadPassport", async () => {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
+
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
     it("fail - invalid hash (wrong country)", async () => {
-      const wrongCountry = id("USA");
+      const wrongCountry = id("RU");
       const sig = await signMint(
         issuer,
         minterA,
@@ -722,6 +742,12 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
       await expect(
         passport
           .connect(minterA)
@@ -729,6 +755,10 @@ describe("QuadPassport", async () => {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
+
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
     it("fail - invalid hash (issuedAt)", async () => {
@@ -764,6 +794,12 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
       await expect(
         passport
           .connect(minterA)
@@ -771,6 +807,11 @@ describe("QuadPassport", async () => {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
+
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
     });
 
     it("fail - using someone else signature", async () => {
@@ -816,6 +857,12 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
       await expect(
         passport
           .connect(minterA)
@@ -823,6 +870,40 @@ describe("QuadPassport", async () => {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
+
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+    });
+
+    it("fail - invalid account", async () => {
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+
+      await expect(
+        passport
+          .connect(minterA)
+          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+            value: MINT_PRICE,
+          })
+      ).to.be.revertedWith("INVALID_ISSUER");
+
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
   });
 
