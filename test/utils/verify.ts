@@ -10,6 +10,7 @@ const {
   TOKEN_ID,
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
+  ATTRIBUTE_DID,
 } = require("../../utils/constant.ts");
 const { signMint } = require("./signature.ts");
 
@@ -251,7 +252,9 @@ export const assertGetAttributeETHWrapper = async (
   tokenId: number = TOKEN_ID
 ) => {
   const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getInitialValuesETH(defi, attribute, account, passport);
-
+  console.log(priceAttribute.toString())
+  console.log(attribute.toString());
+  console.log(ATTRIBUTE_DID);
   await expect(
     defi.connect(account).doSomethingETHWrapper(attribute, { value: priceAttribute })
   ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);

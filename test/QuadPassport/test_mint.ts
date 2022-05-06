@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract, Wallet } from "ethers";
+import { BigNumber, Contract, Wallet } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import {
   parseEther,
@@ -10,14 +10,17 @@ import {
 } from "ethers/lib/utils";
 import { read } from "fs";
 import exp from "constants";
+import { assertGetAttributeETHWrapper, assertGetAttributeFreeWrapper } from "../utils/verify";
 
 const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_DID,
+  ATTRIBUTE_IS_BUSINESS,
   TOKEN_ID,
   MINT_PRICE,
   PRICE_PER_BUSINESS_ATTRIBUTES,
+  PRICE_PER_ATTRIBUTES,
 } = require("../../utils/constant.ts");
 const { signMint } = require("../utils/signature.ts");
 const {
@@ -297,6 +300,149 @@ describe("QuadPassport", async () => {
         ATTRIBUTE_DID,
         did,
         issuedAt
+      );
+    });
+
+    it('success mint -- two issuers mint same args for account', async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+      await assertMint(
+        minterA,
+        issuerB,
+        issuerBTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt,
+        1,
+        {newIssuerMint: true}
+      );
+
+      const expectedDIDs = [did, did];
+      const expectedAMLs = [aml, aml];
+      const expectedCOUNTRYs = [country, country];
+      const expectedIssuedAts = [BigNumber.from(issuedAt), BigNumber.from(issuedAt)];
+      const expectedIsBusinesses = [isBusiness, isBusiness];
+
+      await assertGetAttributeETHWrapper(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        expectedDIDs,
+        expectedIssuedAts,
+      );
+
+      await assertGetAttributeFreeWrapper(
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        expectedAMLs,
+        expectedIssuedAts,
+        1,
+        {}
+      )
+      await assertGetAttributeETHWrapper(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        expectedCOUNTRYs,
+        expectedIssuedAts,
+      );
+      await assertGetAttributeETHWrapper(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        expectedIsBusinesses,
+        expectedIssuedAts,
+      );
+    });
+
+    it('success mint -- two issuers mint different args for account', async () => {
+
+      const expectedDIDs = [id("Mr. T"), id("Prof. Aaron")];
+      const expectedAMLs = [aml, aml];
+      const expectedCOUNTRYs = [id("KR"), id("SR")];
+      const expectedIssuedAts = [BigNumber.from(1999), BigNumber.from(1890)];
+      const expectedIsBusinesses = [id("TRUE"), isBusiness];
+
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        expectedDIDs[0],
+        expectedAMLs[0],
+        expectedCOUNTRYs[0],
+        expectedIsBusinesses[0],
+        expectedIssuedAts[0]
+      );
+      await assertMint(
+        minterA,
+        issuerB,
+        issuerBTreasury,
+        passport,
+        expectedDIDs[1],
+        expectedAMLs[1],
+        expectedCOUNTRYs[1],
+        expectedIsBusinesses[1],
+        expectedIssuedAts[1],
+        1,
+        {newIssuerMint: true}
+      );
+
+      await assertGetAttributeETHWrapper(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_DID,
+        expectedDIDs,
+        expectedIssuedAts,
+      );
+
+      await assertGetAttributeFreeWrapper(
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        expectedAMLs,
+        expectedIssuedAts,
+        1,
+        {}
+      )
+
+      await assertGetAttributeETHWrapper(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_COUNTRY,
+        expectedCOUNTRYs,
+        expectedIssuedAts,
+      );
+
+      await assertGetAttributeETHWrapper(
+        minterA,
+        defi,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        expectedIsBusinesses,
+        expectedIssuedAts,
       );
     });
 
