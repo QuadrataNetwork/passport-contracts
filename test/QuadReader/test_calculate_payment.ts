@@ -85,7 +85,7 @@ describe("QuadPassport", async () => {
     );
 
     await passport
-      .connect(issuer)
+      .connect(minterA)
       .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
         value: MINT_PRICE,
       });

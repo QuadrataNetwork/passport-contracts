@@ -691,7 +691,7 @@ describe("QuadPassport", async () => {
       );
 
       await passport
-        .connect(admin)
+        .connect(minterA)
         .mintPassport(minterA.address, TOKEN_ID, did, newAML, country, isBusiness, newIssuedAt, sig, {
           value: MINT_PRICE,
         });
