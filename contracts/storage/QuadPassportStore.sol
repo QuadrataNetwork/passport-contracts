@@ -35,4 +35,7 @@ contract QuadPassportStore {
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
 
+
+    string public symbol;
+    string public name;
 }

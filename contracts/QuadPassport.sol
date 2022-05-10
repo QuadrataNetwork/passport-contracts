@@ -28,6 +28,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
         __ERC1155_init(_uri);
         governance = IQuadGovernance(_governanceContract);
+        name = "Quadrata Passport";
+        symbol = "QP";
     }
 
     /// @dev Overwitten to prevent reverts when a contract is missing `onERC1155BatchReceived` and receiving a passport
@@ -237,16 +239,17 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _isBusiness,
         uint256 _issuedAt,
         bytes calldata _sig
-    ) internal view returns(bytes32,address){
-        bytes32 hash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country, _isBusiness, _issuedAt));
+    ) internal view returns(bytes32, address){
 
-        require(!_usedHashes[hash], "SIGNATURE_ALREADY_USED");
-
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
+        bytes32 extractionHash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country, _isBusiness, _issuedAt));
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
+        bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
+
+        require(!_usedHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
         require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
 
-        return (hash, issuer);
+        return (issuerMintHash, issuer);
     }
 
     function _verifyIssuerSetAttr(

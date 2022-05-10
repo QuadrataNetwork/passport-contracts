@@ -84,5 +84,5 @@ const springLabsLEDeployment = async (governanceAddr:string) => {
     const passport = await deployPassport(governance.address, "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu");
     const reader = await deployReader(governance, passport);
 
-    //await springLabsLEDeployment('0x91B1fFB304Bf11c8112FAacaD4021325c1e7af27')
+    await springLabsLEDeployment('0x91B1fFB304Bf11c8112FAacaD4021325c1e7af27')
 })()
