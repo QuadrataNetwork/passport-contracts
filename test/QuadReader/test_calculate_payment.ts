@@ -8,6 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
+import exp from "constants";
 
 const {
   ATTRIBUTE_AML,
@@ -17,6 +18,7 @@ const {
   MINT_PRICE,
   PRICE_PER_ATTRIBUTES,
   PRICE_PER_BUSINESS_ATTRIBUTES,
+  READER_ROLE
 } = require("../../utils/constant.ts");
 
 const {
@@ -110,6 +112,8 @@ describe("QuadPassport", async () => {
 
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
+
+   expect(await governance.hasRole(READER_ROLE, deployer.address)).equals(false);
   });
 
   describe("calculatePaymentToken", async () => {
