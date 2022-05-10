@@ -17,8 +17,8 @@ export const DEACTIVATED = 1;
 
 export const PRICE_PER_ATTRIBUTES = {
   [ATTRIBUTE_AML]: 0,
-  [ATTRIBUTE_COUNTRY]: 1,
-  [ATTRIBUTE_DID]: 2,
+  [ATTRIBUTE_COUNTRY]: 5,
+  [ATTRIBUTE_DID]: 10,
   [ATTRIBUTE_IS_BUSINESS]: 0
 };
 
@@ -35,5 +35,5 @@ export const PRICE_SET_ATTRIBUTE = {
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0.00"),
 };
 
-export const MINT_PRICE = parseEther("0.01");
+export const MINT_PRICE = parseEther("0.03");
 export const ISSUER_SPLIT = 50;

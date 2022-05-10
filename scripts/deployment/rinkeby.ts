@@ -75,6 +75,12 @@ const springLabsLEDeployment = async (governanceAddr:string) => {
 
 }
 
+const huysIssuer = async (governanceAddr:string) => {
+  const governance = await ethers.getContractAt('QuadGovernance', governanceAddr)
+
+  await governance.setIssuer('0x19c6525E6927554e311Cd83491d34623fF04605a', '0x19c6525E6927554e311Cd83491d34623fF04605a');
+  console.log('added issuer: ', '0x19c6525E6927554e311Cd83491d34623fF04605a')
+}
 
 (async () => {
 
@@ -84,5 +90,7 @@ const springLabsLEDeployment = async (governanceAddr:string) => {
     const passport = await deployPassport(governance.address, "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu");
     const reader = await deployReader(governance, passport);
 
-    await springLabsLEDeployment('0x91B1fFB304Bf11c8112FAacaD4021325c1e7af27')
+
+    await huysIssuer(governance.address)
+    await springLabsLEDeployment(governance.address)
 })()
