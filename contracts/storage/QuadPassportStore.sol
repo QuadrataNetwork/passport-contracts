@@ -12,6 +12,16 @@ contract QuadPassportStore {
         address issuer;
     }
 
+    struct MintConfig {
+        address account;
+        uint256 tokenId;
+        bytes32 quadDID;
+        bytes32 aml;
+        bytes32 country;
+        bytes32 isBusiness;
+        uint256 issuedAt;
+    }
+
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");

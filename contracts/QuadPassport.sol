@@ -56,45 +56,32 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @notice Claim and mint a wallet account Quadrata Passport
     /// @dev Only when authorized by an eligible issuer
-    /// @param _account EOA/Contract to mint the passport
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _quadDID Quadrata Decentralized Identity (raw value)
-    /// @param _aml keccak256 of the AML status value
-    /// @param _country keccak256 of the country value
-    /// @param _isBusiness flag identifying if a wallet is a business or individual
-    /// @param _issuedAt epoch when the passport has been issued by the Issuer
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
     function mintPassport(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _quadDID,
-        bytes32 _aml,
-        bytes32 _country,
-        bytes32 _isBusiness,
-        uint256 _issuedAt,
+        MintConfig calldata _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
+        require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
 
-        if(_isBusiness == keccak256("FALSE")) {
-            _verifyAccountMint(_account, _tokenId, _quadDID, _aml, _country,_isBusiness, _issuedAt, _sigAccount);
+        if(_config.isBusiness == keccak256("FALSE")) {
+            _verifyAccountMint(_config, _sigAccount);
         }
 
-        (bytes32 hash, address issuer) = _verifyIssuerMint(_account, _tokenId, _quadDID, _aml, _country,_isBusiness, _issuedAt, _sigIssuer);
+        (bytes32 hash, address issuer) = _verifyIssuerMint(_config, _sigIssuer);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
-        _validSignatures[_account][_tokenId] = _sigIssuer;
-        _attributes[_account][keccak256("COUNTRY")][issuer] = Attribute({value: _country, epoch: _issuedAt, issuer: issuer});
-        _attributes[_account][keccak256("DID")][issuer] = Attribute({value: _quadDID, epoch: _issuedAt, issuer: issuer});
-        _attributes[_account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _isBusiness, epoch: _issuedAt, issuer: issuer});
-        _attributesByDID[_quadDID][keccak256("AML")][issuer] = Attribute({value: _aml, epoch: _issuedAt, issuer: issuer});
+        _validSignatures[_config.account][_config.tokenId] = _sigIssuer;
+        _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt, issuer: issuer});
+        _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt, issuer: issuer});
+        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt, issuer: issuer});
+        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt, issuer: issuer});
 
-        if(balanceOf(_account, _tokenId) == 0)
-            _mint(_account, _tokenId, 1, "");
+        if(balanceOf(_config.account, _config.tokenId) == 0)
+            _mint(_config.account, _config.tokenId, 1, "");
     }
 
     /// @notice Update or set a new attribute for your existing passport
@@ -234,35 +221,23 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
       function _verifyAccountMint(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _quadDID,
-        bytes32 _aml,
-        bytes32 _country,
-        bytes32 _isBusiness,
-        uint256 _issuedAt,
+        MintConfig calldata _config,
         bytes calldata _sig
     ) internal view returns(bytes32, address){
 
-        bytes32 extractionHash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country, _isBusiness, _issuedAt));
+        bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address extractedAddress = ECDSAUpgradeable.recover(signedMsg, _sig);
 
-         require(extractedAddress == _account, "ACCOUNT_MUST_SIGN_ARGS");
+        require(extractedAddress == _config.account, "ACCOUNT_MUST_SIGN_ARGS");
     }
 
     function _verifyIssuerMint(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _quadDID,
-        bytes32 _aml,
-        bytes32 _country,
-        bytes32 _isBusiness,
-        uint256 _issuedAt,
+        MintConfig calldata _config,
         bytes calldata _sig
     ) internal view returns(bytes32, address){
 
-        bytes32 extractionHash = keccak256(abi.encode(_account, _tokenId, _quadDID, _aml, _country, _isBusiness, _issuedAt));
+        bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
         bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
