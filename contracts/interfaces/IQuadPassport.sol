@@ -14,7 +14,8 @@ interface IQuadPassport is IERC1155Upgradeable {
         bytes32 _country,
         bytes32 _kyb,
         uint256 _issuedAt,
-        bytes calldata _sig
+        bytes calldata _sigIssuer,
+        bytes calldata _sigAccount
     ) external payable;
 
     function setAttribute(
