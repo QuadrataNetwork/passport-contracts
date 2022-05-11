@@ -619,7 +619,7 @@ describe("QuadPassport", async () => {
         aml,
         country,
         isBusiness,
-        issuedAt + 1
+        issuedAt
       );
       await expect(
         passport
@@ -630,7 +630,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
-    it("fail - passport already exists - two diff issuers", async () => {
+    it("success - passport already exists - two diff issuers", async () => {
       const issuerB = ethers.Wallet.createRandom();
       const issuerBTreasury = ethers.Wallet.createRandom();
       await governance
@@ -657,7 +657,7 @@ describe("QuadPassport", async () => {
         aml,
         country,
         isBusiness,
-        issuedAt + 1
+        issuedAt
       );
       await expect(
         passport
@@ -665,7 +665,7 @@ describe("QuadPassport", async () => {
           .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
             value: MINT_PRICE,
           })
-      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.not.be.reverted;
     });
 
     it("fail - invalid hash (wrong aml)", async () => {
