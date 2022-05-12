@@ -66,11 +66,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
 
+        (bytes32 hash, address issuer) = _verifyIssuerMint(_config, _sigIssuer);
+
         if(_config.isBusiness == keccak256("FALSE")) {
             _verifyAccountMint(_config, _sigAccount);
         }
-
-        (bytes32 hash, address issuer) = _verifyIssuerMint(_config, _sigIssuer);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
@@ -229,7 +229,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address extractedAddress = ECDSAUpgradeable.recover(signedMsg, _sig);
 
-        require(extractedAddress == _config.account, "ACCOUNT_MUST_SIGN_ARGS");
+        require(extractedAddress == _config.account, "INVALID_ACCOUNT");
     }
 
     function _verifyIssuerMint(

@@ -873,7 +873,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, sigAccount, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -955,7 +955,7 @@ describe("QuadPassport", async () => {
   });
 
   describe("KYB", async () => {
-    it("fail - mint passport to contract if not a business", async () => {
+    it("fail - mint passport to contract while not a business", async () => {
 
       const DeFi = await ethers.getContractFactory("DeFi");
       const defi = await DeFi.deploy(passport.address, reader.address);
@@ -980,11 +980,48 @@ describe("QuadPassport", async () => {
           value: MINT_PRICE,
         });
 
-      await expect(promise).to.be.revertedWith("NON-BUSINESS_MUST_BE_EOA")
+      await expect(promise).to.be.reverted;
 
 
     });
+    it("fail - mint passport to contract with account forging contract sig while not a business", async () => {
 
+      const DeFi = await ethers.getContractFactory("DeFi");
+      const defi = await DeFi.deploy(passport.address, reader.address);
+      await defi.deployed();
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = await signMint(
+        minterA,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const promise = passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      await expect(promise).to.be.revertedWith("INVALID_ACCOUNT");
+
+
+    });
     it("success - mint passport to contract", async () => {
 
       const newIsBusiness = id("TRUE")
