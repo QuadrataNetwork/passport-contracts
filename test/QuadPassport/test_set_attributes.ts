@@ -90,9 +90,20 @@ describe("QuadPassport", async () => {
       issuedAt
     );
 
+    const sigAccount = await signMint(
+      minterA,
+      minterA,
+      TOKEN_ID,
+      did,
+      aml,
+      country,
+      isBusiness,
+      issuedAt
+    );
+
     await passport
       .connect(minterA)
-      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+      .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
         value: MINT_PRICE,
       });
 
@@ -226,7 +237,7 @@ describe("QuadPassport", async () => {
 
       await passport
         .connect(minterA)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sigBusiness, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
           value: MINT_PRICE,
         });
 
@@ -416,9 +427,20 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        1,
+        id("DID_34"),
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
       await passport
         .connect(minterA)
-        .mintPassport(minterA.address, 1, id("DID_34"), aml, country, isBusiness, issuedAt, sig, {
+        .mintPassport([minterA.address, 1, id("DID_34"), aml, country, isBusiness, issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 

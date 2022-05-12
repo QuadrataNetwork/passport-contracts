@@ -82,10 +82,19 @@ describe("QuadReader", async () => {
       isBusiness,
       issuedAt
     );
-
+    const sigAccount = await signMint(
+      minterA,
+      minterA,
+      TOKEN_ID,
+      did,
+      aml,
+      country,
+      isBusiness,
+      issuedAt
+    );
     await passport
       .connect(minterA)
-      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+      .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
         value: MINT_PRICE,
       });
 
