@@ -592,7 +592,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, sigAccount, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: wrongMintPrice,
           })
       ).to.be.revertedWith("INVALID_MINT_PRICE");
@@ -610,10 +610,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        badTokenId,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt], sig, sigAccount,{
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
@@ -724,10 +734,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        wrongAML,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -745,10 +765,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt], sig,sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -766,10 +796,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        wrongCountry,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt], sig ,sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -787,10 +827,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, wrongIssuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, wrongIssuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -922,9 +972,11 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
+      const sigAccount = '0x00';
+
       const promise = passport
         .connect(minterA)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
@@ -954,7 +1006,7 @@ describe("QuadPassport", async () => {
 
       const promise = passport
         .connect(minterA)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt, sig, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt], sig, '0x00', {
           value: MINT_PRICE,
         });
 
