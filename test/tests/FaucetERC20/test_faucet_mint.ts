@@ -31,9 +31,9 @@ describe("FaucetErc20", async() => {
       await erc20.connect(minterB).faucetMint();
 
       // Check that minting worked
-      expect(await erc20.balanceOf(deployer.address)).to.equal(10*(10**6))
-      expect(await erc20.balanceOf(minterA.address)).to.equal(10*(10**6))
-      expect(await erc20.balanceOf(minterB.address)).to.equal(10*(10**6))
+      expect(await erc20.balanceOf(deployer.address)).to.equal(10*1e6)
+      expect(await erc20.balanceOf(minterA.address)).to.equal(10*1e6)
+      expect(await erc20.balanceOf(minterB.address)).to.equal(10*1e6)
 
       // Check tom ake sure we didnt mint to random addresses that never call function
       expect(await erc20.balanceOf(admin.address)).to.equal(0)
