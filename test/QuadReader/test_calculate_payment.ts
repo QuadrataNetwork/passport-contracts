@@ -72,9 +72,6 @@ describe("QuadPassport", async () => {
     mockBusiness = await MockBusiness.deploy(defi.address)
     await mockBusiness.deployed()
 
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
-
     const sig = await signMint(
       issuer,
       minterA,

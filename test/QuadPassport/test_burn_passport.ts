@@ -90,9 +90,6 @@ describe("QuadPassport", async () => {
         value: MINT_PRICE,
       });
 
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
-
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
