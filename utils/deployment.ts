@@ -45,3 +45,12 @@ export const deployReader = async (
   await reader.deployed();
   return reader;
 };
+
+
+export const deployFaucetERC20 = async(
+): Promise<Contract> => {
+  const contractFactory = await ethers.getContractFactory("FaucetERC20");
+  const erc20 = await contractFactory.deploy()
+  await erc20.deployed();
+  return erc20;
+};
