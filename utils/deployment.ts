@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { Contract } from "ethers";
 const { ethers, upgrades } = require("hardhat");
+import { BigNumber, Contract } from "ethers";
 
 export const deployPassport = async (
   governance: SignerWithAddress,
@@ -44,4 +44,16 @@ export const deployReader = async (
   );
   await reader.deployed();
   return reader;
+};
+
+
+export const deployFaucetERC20 = async(
+  name: string,
+  symbol: string,
+  decimal: BigNumber
+): Promise<Contract> => {
+  const contractFactory = await ethers.getContractFactory("FaucetERC20");
+  const erc20 = await contractFactory.deploy(name, symbol, decimal)
+  await erc20.deployed();
+  return erc20;
 };
