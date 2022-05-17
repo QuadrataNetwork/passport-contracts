@@ -38,6 +38,17 @@ export const assertMint = async (
     isBusiness,
     issuedAt
   );
+
+  const sigAccount = await signMint(
+    account,
+    account,
+    tokenId,
+    did,
+    aml,
+    country,
+    isBusiness,
+    issuedAt
+  );
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(opts?.newIssuerMint ? 1 : 0);
 
   const initalPassportBalance = await ethers.provider.getBalance(passport.address);
@@ -49,7 +60,7 @@ export const assertMint = async (
 
   await passport
     .connect(account)
-    .mintPassport(account.address, tokenId, did, aml, country, isBusiness, issuedAt, sig, {
+    .mintPassport([account.address, tokenId, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
       value: MINT_PRICE,
     });
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(1);

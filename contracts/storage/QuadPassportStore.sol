@@ -12,6 +12,25 @@ contract QuadPassportStore {
         address issuer;
     }
 
+    /// @dev MintConfig is defined to prevent 'stack frame too deep' during compilation
+    /// @notice This struct is used to abstract mintPassport function parameters
+    /// `account` EOA/Contract to mint the passport
+    /// `tokenId` tokenId of the Passport (1 for now)
+    /// `quadDID` Quadrata Decentralized Identity (raw value)
+    /// `aml` keccak256 of the AML status value
+    /// `country` keccak256 of the country value
+    /// `isBusiness` flag identifying if a wallet is a business or individual
+    /// `issuedAt` epoch when the passport has been issued by the Issuer
+    struct MintConfig {
+        address account;
+        uint256 tokenId;
+        bytes32 quadDID;
+        bytes32 aml;
+        bytes32 country;
+        bytes32 isBusiness;
+        uint256 issuedAt;
+    }
+
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
@@ -35,4 +54,7 @@ contract QuadPassportStore {
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
 
+
+    string public symbol;
+    string public name;
 }
