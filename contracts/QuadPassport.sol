@@ -68,7 +68,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
 
-
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _validSignatures[_config.account][_config.tokenId] = _sigIssuer;
@@ -217,6 +216,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _validSignatures[_msgSender()][_tokenId];
     }
 
+    /// @dev Verify sigs and ensure account is an EOA or Smart Contract depending on IS_BUSINESS status
+    /// @param _config all the mint function parameters
+    /// @param _sigIssuer sig of issuer EOA
+    /// @param _sigAccount sig of EOA authorizing claim of passport NFT
+    /// @return unique hash of mintPassport invocation and extracted issuer of passport
     function _verifySignersMint(
         MintConfig calldata _config,
         bytes calldata _sigIssuer,
