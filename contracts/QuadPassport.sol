@@ -66,11 +66,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
 
-        (bytes32 hash, address issuer) = _verifyIssuerMint(_config, _sigIssuer);
+        (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
 
-        if(_config.isBusiness == keccak256("FALSE")) {
-            _verifyAccountMint(_config, _sigAccount);
-        }
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
@@ -220,30 +217,28 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _validSignatures[_msgSender()][_tokenId];
     }
 
-      function _verifyAccountMint(
+    function _verifySignersMint(
         MintConfig calldata _config,
-        bytes calldata _sig
+        bytes calldata _sigIssuer,
+        bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
 
         bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        address extractedAddress = ECDSAUpgradeable.recover(signedMsg, _sig);
+        address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
 
-        require(extractedAddress == _config.account, "INVALID_ACCOUNT");
-    }
-
-    function _verifyIssuerMint(
-        MintConfig calldata _config,
-        bytes calldata _sig
-    ) internal view returns(bytes32, address){
-
-        bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
         bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
 
         require(!_usedHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
         require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+
+        // if the account isn't a Business, then ensure account is EOA
+        // Businesses can be Smart Contracts or EOAs
+        // Individuals can only be EOAs
+        if(_config.isBusiness == keccak256("FALSE")) {
+            address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
+            require(account == _config.account, "INVALID_ACCOUNT");
+        }
 
         return (issuerMintHash, issuer);
     }
