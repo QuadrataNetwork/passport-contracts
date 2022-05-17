@@ -56,6 +56,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @notice Claim and mint a wallet account Quadrata Passport
     /// @dev Only when authorized by an eligible issuer
+    /// @param _config Input paramters required to mint
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
     function mintPassport(
