@@ -18,7 +18,7 @@ describe("FaucetErc20", async() => {
     issuerTreasury: SignerWithAddress;
 
   beforeEach(async() =>{
-    erc20 = await deployFaucetERC20();
+    erc20 = await deployFaucetERC20('FaucetDollar', 'FUSD', 6);
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
   })
