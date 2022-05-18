@@ -52,6 +52,7 @@ const config: HardhatUserConfig = {
 
     mumbai: {
       url: process.env.MUMBAI_URI || "",
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
 
     rinkeby: {
