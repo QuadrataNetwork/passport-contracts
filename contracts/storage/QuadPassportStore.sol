@@ -9,7 +9,6 @@ contract QuadPassportStore {
     struct Attribute {
         bytes32 value;
         uint256 epoch;
-        address issuer;
     }
 
     /// @dev MintConfig is defined to prevent 'stack frame too deep' during compilation

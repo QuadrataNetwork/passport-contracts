@@ -72,10 +72,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _validSignatures[_config.account][_config.tokenId] = _sigIssuer;
-        _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt, issuer: issuer});
-        _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt, issuer: issuer});
-        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt, issuer: issuer});
-        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt, issuer: issuer});
+        _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
+        _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
+        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
+        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
 
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
@@ -141,8 +141,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         if (governance.eligibleAttributes(_attribute)) {
             _attributes[_account][_attribute][_issuer] = Attribute({
                 value: _value,
-                epoch: _issuedAt,
-                issuer: _issuer
+                epoch: _issuedAt
             });
         } else {
             // Attribute grouped by DID
@@ -150,8 +149,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             require(dID != bytes32(0), "DID_NOT_FOUND");
             _attributesByDID[dID][_attribute][_issuer] = Attribute({
                 value: _value,
-                epoch: _issuedAt,
-                issuer: _issuer
+                epoch: _issuedAt
             });
         }
     }
@@ -195,7 +193,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];
-                if(attribute.issuer != address(0) && attribute.epoch != 0) {
+                if(attribute.epoch != 0) {
                     return;
                 }
             }
@@ -338,7 +336,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) public view override returns (Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
-           return Attribute({value: bytes32(0), epoch: 0, issuer: address(0)});
+           return Attribute({value: bytes32(0), epoch: 0});
         return _attributes[_account][_attribute][_issuer];
     }
 
@@ -354,7 +352,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) public view override returns (Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
-           return Attribute({value: bytes32(0), epoch: 0, issuer: address(0)});
+           return Attribute({value: bytes32(0), epoch: 0});
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 
