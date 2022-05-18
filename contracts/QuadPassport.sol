@@ -71,7 +71,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
-        _validSignatures[_config.account][_config.tokenId] = _sigIssuer;
         _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
         _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
         _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
@@ -200,19 +199,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         }
 
         _burn(_account, _tokenId, 1);
-    }
-
-
-
-
-    /// @dev Retrieve a signature for an existing passport minted (to be used across chain)
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @return the signaure allowing the mint of the passport
-    function getPassportSignature(
-        uint256 _tokenId
-    ) external view override returns(bytes memory) {
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        return _validSignatures[_msgSender()][_tokenId];
     }
 
     /// @dev Verify sigs and ensure account is an EOA or Smart Contract depending on IS_BUSINESS status
