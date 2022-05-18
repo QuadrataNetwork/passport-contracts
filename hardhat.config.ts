@@ -49,6 +49,11 @@ const config: HardhatUserConfig = {
     ]
   },
   networks: {
+
+    mumbai: {
+      url: process.env.MUMBAI_URI || "",
+    },
+
     rinkeby: {
       url: process.env.RINKEBY_URI || "",
       accounts:
@@ -59,7 +64,7 @@ const config: HardhatUserConfig = {
     enabled: true,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: process.env.POLYGONSCAN_API_KEY,
   },
   typechain: {
     outDir: "types",
