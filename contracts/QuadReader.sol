@@ -304,19 +304,21 @@ import "./storage/QuadGovernanceStore.sol";
         // find gap values
         ApplyFilterVars memory vars;
         for(uint256 i = 0; i < _issuers.length; i++) {
+
             if(governance.eligibleAttributes(_attribute)) {
                 if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
                     vars.gaps++;
                 }
-            } else if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    vars.gaps++;
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
+                continue;
+            }
+
+            if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
+                vars.gaps++;
+                continue;
+            }
+            QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
+            if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
+                vars.gaps++;
             }
         }
 
