@@ -47,7 +47,6 @@ contract QuadPassportStore {
     // DID => (AttributeType => (Attribute[]))
     mapping(bytes32 => mapping(bytes32 => Attribute[])) internal _attributesByDIDBundle;
 
-
     // Accounting
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;

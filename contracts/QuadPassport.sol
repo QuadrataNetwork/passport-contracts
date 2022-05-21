@@ -76,7 +76,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributesBundle[_config.account][keccak256("DID")].push(Attribute({value: _config.quadDID, epoch: _config.issuedAt, issuer: issuer}));
         _attributesBundle[_config.account][keccak256("IS_BUSINESS")].push(Attribute({value: _config.isBusiness, epoch: _config.issuedAt, issuer: issuer}));
         _attributesByDIDBundle[_config.quadDID][keccak256("AML")].push(Attribute({value: _config.aml, epoch: _config.issuedAt, issuer: issuer}));
-
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
     }
@@ -166,10 +165,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attributeType = governance.eligibleAttributesArray(i);
-                delete _attributesBundle[_msgSender()][attributeType];
-            }
+            bytes32 attributeType = governance.eligibleAttributesArray(i);
+            delete _attributesBundle[_msgSender()][attributeType];
         }
     }
 
