@@ -116,8 +116,11 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesETHExcluding(_account, _tokenId, _attribute, new address[](0));
+    )external override payable returns(QuadPassportStore.Attribute[] memory) {
+        _validateAttributeQuery(_account, _tokenId, _attribute);
+        QuadPassportStore.Attribute[] memory bundle = passport.getBundle(_account, _attribute);
+        _doETHPayments(_attribute, bundle, _account);
+        return bundle;
     }
 
     /// @notice Get all values of an attribute for a passport holder (free)
@@ -129,8 +132,11 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    )external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesFreeExcluding(_account, _tokenId, _attribute, new address[](0));
+    )external override view returns(QuadPassportStore.Attribute[] memory) {
+        _validateAttributeQuery(_account, _tokenId, _attribute);
+        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
+        QuadPassportStore.Attribute[] memory bundle = passport.getBundle(_account, _attribute);
+        return bundle;
     }
 
     /// @notice Get all values of an attribute for a passport holder (payable with ERC20)
@@ -144,8 +150,11 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
-    )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
+    )external override returns(QuadPassportStore.Attribute[] memory) {
+        _validateAttributeQuery(_account, _tokenId, _attribute);
+        QuadPassportStore.Attribute[] memory bundle = passport.getBundle(_account, _attribute);
+        _doTokenPayments(_attribute, _tokenAddr, bundle, _account);
+        return bundle;
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
@@ -295,70 +304,12 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
-    /// @return the filter non-null values
     function _applyFilter(
         address _account,
         bytes32 _attribute,
         address[] memory _issuers
-    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        // find gap values
-        ApplyFilterVars memory vars;
-        for(uint256 i = 0; i < _issuers.length; i++) {
+    ) internal view returns (bytes32[] memory attributes, uint256[] memory epochs, address[] memory issuers) {
 
-            if(governance.eligibleAttributes(_attribute)) {
-                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-                continue;
-            }
-
-            if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                vars.gaps++;
-                continue;
-            }
-            QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-            if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                vars.gaps++;
-            }
-        }
-
-        vars.delta = _issuers.length - vars.gaps;
-
-        bytes32[] memory attributes = new bytes32[](vars.delta);
-        uint256[] memory epochs = new uint256[](vars.delta);
-        address[] memory issuers = new address[](vars.delta);
-
-        QuadPassportStore.Attribute memory attribute;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
-                }
-
-                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                attributes[vars.filteredIndex] = attribute.value;
-                epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = _issuers[i];
-                vars.filteredIndex++;
-                continue;
-            }
-
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                continue;
-            }
-
-            attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            attributes[vars.filteredIndex] = attribute.value;
-            epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = _issuers[i];
-            vars.filteredIndex++;
-        }
-
-        require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
 
         return (attributes, epochs, issuers);
     }
@@ -384,11 +335,11 @@ import "./storage/QuadGovernanceStore.sol";
     /// @notice Distrubte the fee to query an attribute to issuers and protocol
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The providers of the attributes
+    /// @param _bundle Used to access the providers of the attributes
     /// @param _account The account used for figuring how much it will cost to query
     function _doETHPayments(
         bytes32 _attribute,
-        address[] memory _issuers,
+        QuadPassportStore.Attribute[] memory _bundle,
         address _account
     ) internal {
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
@@ -401,10 +352,10 @@ import "./storage/QuadGovernanceStore.sol";
                 payable(address(passport)).send(amountETH),
                 "FAILED_TO_SEND_PAYMENT"
             );
-            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
+            uint256 amountIssuer = _bundle.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
-            for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.increaseAccountBalanceETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
+            for(uint256 i = 0; i < _bundle.length; i++) {
+                passport.increaseAccountBalanceETH(governance.issuersTreasury(_bundle[i].issuer), amountIssuer / _bundle.length);
             }
             passport.increaseAccountBalanceETH(governance.treasury(), amountProtocol);
         }
@@ -414,12 +365,12 @@ import "./storage/QuadGovernanceStore.sol";
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenPayment address of erc20 payment method
-    /// @param _issuers The providers of the attributes
+    /// @param _bundle Used to access the providers of the attributes
     /// @param _account The account used for figuring how much it will cost to query
     function _doTokenPayments(
         bytes32 _attribute,
         address _tokenPayment,
-        address[] memory _issuers,
+        QuadPassportStore.Attribute[] memory _bundle,
         address _account
     ) internal {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
@@ -429,10 +380,10 @@ import "./storage/QuadGovernanceStore.sol";
                 erc20.transferFrom(msg.sender, address(passport), amountToken),
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
-            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
+            uint256 amountIssuer = _bundle.length == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
-            for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
+            for(uint256 i = 0; i < _bundle.length; i++) {
+                passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_bundle[i].issuer), amountIssuer / _bundle.length);
             }
             passport.increaseAccountBalance(_tokenPayment, governance.treasury(), amountProtocol);
         }
@@ -472,34 +423,6 @@ import "./storage/QuadGovernanceStore.sol";
         return amountETH;
     }
 
-    /// @dev Used to determine if issuer has returned something useful
-    /// @param _account the value to check existence on
-    /// @param _attribute the value to check existence on
-    /// @param _issuer the issuer in question
-    /// @return whether or not we found a value
-    function _isDataAvailable(
-        address _account,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
-        return attrib.value != bytes32(0) && attrib.epoch != 0;
-    }
-
-    /// @dev Used to determine if issuer has returned something useful
-    /// @param _dID the value to check existsance on
-    /// @param _attribute the value to check existsance on
-    /// @param _issuer the issuer in question
-    /// @return whether or not we found a value
-    function _isDataAvailableByDID(
-        bytes32 _dID,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
-        return attrib.value != bytes32(0) && attrib.epoch != 0;
-    }
-
     /// @dev Used to determine if issuers have an attribute
     /// @param _attribute the value to check existsance on
     /// @param _account account getting requested for attributes
@@ -508,13 +431,8 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         bytes32 _attribute
     ) internal view returns(bytes32) {
-        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i).issuer).value;
-            if(value != bytes32(0)) {
-                return value;
-            }
-        }
-        return bytes32(0);
+        QuadPassportStore.Attribute[] memory bundle = passport.getBundle(_account, _attribute);
+        return bundle.length == 0 ? bytes32(0) : bundle[0].value;
     }
 
     /// @dev Used to determine if any of the attributes is valid

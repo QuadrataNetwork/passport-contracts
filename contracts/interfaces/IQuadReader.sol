@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "../storage/QuadPassportStore.sol";
 
 interface IQuadReader {
 
@@ -31,20 +32,20 @@ interface IQuadReader {
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external payable returns(QuadPassportStore.Attribute[] memory);
 
     function getAttributesFree(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external view returns(QuadPassportStore.Attribute[] memory);
 
     function getAttributes(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external returns(QuadPassportStore.Attribute[] memory);
 
     function getAttributesIncludingOnly(
         address _account,
