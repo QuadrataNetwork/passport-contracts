@@ -48,17 +48,11 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] memory _excluded
-    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override returns(QuadPassportStore.Attribute[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
-
-        _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
-
-        return (attributes, epochs, issuers);
+        QuadPassportStore.Attribute[] memory bundle = _getExcludedBundle(_excluded, passport.getBundle(_account, _attribute));
+        _doTokenPayments(_attribute, _tokenAddr, bundle, _account);
+        return bundle;
     }
 
     /// @notice Query the values of an attribute for a passport holder (free)
@@ -72,15 +66,11 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] memory _excluded
-    ) public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override view returns(QuadPassportStore.Attribute[] memory ) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
-        return (attributes, epochs, issuers);
+        QuadPassportStore.Attribute[] memory bundle = _getExcludedBundle(_excluded, passport.getBundle(_account, _attribute));
+        return bundle;
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
@@ -94,17 +84,11 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] memory _excluded
-    ) public override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override payable returns(QuadPassportStore.Attribute[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
-
-        _doETHPayments(_attribute, issuers, _account);
-
-        return (attributes, epochs, issuers);
+        QuadPassportStore.Attribute[] memory bundle = _getExcludedBundle(_excluded, passport.getBundle(_account, _attribute));
+        _doETHPayments(_attribute, bundle, _account);
+        return bundle;
     }
 
     /// @notice Get all values of an attribute for a passport holder (payable ETH)
@@ -261,57 +245,41 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice removes `_issuers` from the full list of supported issuers
-    /// @param _issuers The list of issuers to remove
+    /// @param _excludedIssuers The list of issuers to remove
     /// @return the subset of `governance.issuers` - `_issuers`
-    function _excludedIssuers(
-        address[] memory _issuers
-    ) internal view returns(address[] memory) {
-        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
-        address[] memory issuers = new address[](governance.getIssuersLength());
+    function _getExcludedBundle(
+        address[] memory _excludedIssuers,
+        QuadPassportStore.Attribute[] memory _rawBundle
+    ) internal view returns(QuadPassportStore.Attribute[] memory _bundle) {
 
         uint256 gaps = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+        for(uint256 i = 0; i < _rawBundle.length; i++) {
+            if(governance.getIssuerStatus(_rawBundle[i].issuer) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
                 gaps++;
+                delete _rawBundle[i];
                 continue;
             }
-            issuers[i] = issuerData[i].issuer;
-            for(uint256 j = 0; j < _issuers.length; j++) {
-                if(issuers[i] == _issuers[j]) {
-                    issuers[i] = address(0);
+            for(uint256 j = 0; j < _excludedIssuers.length; j++) {
+                if(_rawBundle[i].issuer == _excludedIssuers[j]) {
                     gaps++;
+                    delete _rawBundle[i];
                     break;
                 }
             }
         }
 
         // close the gap(s)
-        uint256 newLength = governance.getIssuersLength() - gaps;
+        uint256 newLength = _rawBundle.length - gaps;
+        QuadPassportStore.Attribute[] memory newBundle = new QuadPassportStore.Attribute[](newLength);
 
-        address[] memory newIssuers  = new address[](newLength);
         uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
+        for(uint256 i = 0; i < _rawBundle.length; i++) {
+            if(_rawBundle[i] == 0) {
                 continue;
             }
-
-            newIssuers[formattedIndex++] = issuers[i];
+            newBundle[formattedIndex++] = _rawBundle[i];
         }
-        return newIssuers;
-    }
-
-    /// @notice creates a list of attribute values from filtered issuers that have attested to the data
-    /// @param _account address of the passport holder to query
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
-    function _applyFilter(
-        address _account,
-        bytes32 _attribute,
-        address[] memory _issuers
-    ) internal view returns (bytes32[] memory attributes, uint256[] memory epochs, address[] memory issuers) {
-
-
-        return (attributes, epochs, issuers);
+        return newBundle;
     }
 
     /// @notice safty checks for all getAttribute functions

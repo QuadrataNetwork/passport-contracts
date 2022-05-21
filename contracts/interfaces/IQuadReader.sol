@@ -10,7 +10,7 @@ interface IQuadReader {
             bytes32 _attribute,
             address _tokenAddr,
             address[] calldata _excludedIssuers
-        ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
+        ) external returns(QuadPassportStore.Attribute[] memory);
 
 
     function getAttributesFreeExcluding(
@@ -18,7 +18,7 @@ interface IQuadReader {
             uint256 _tokenId,
             bytes32 _attribute,
             address[] calldata _excludedIssuers
-        ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
+        ) external view returns(QuadPassportStore.Attribute[] memory);
 
 
     function getAttributesETHExcluding(
@@ -26,7 +26,7 @@ interface IQuadReader {
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _excludedIssuers
-    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external payable returns(QuadPassportStore.Attribute[] memory);
 
     function getAttributesETH(
         address _account,
@@ -53,21 +53,21 @@ interface IQuadReader {
         bytes32 _attribute,
         address _tokenAddr,
         address[] calldata _onlyIssuers
-    ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external returns(QuadPassportStore.Attribute[] memory);
 
     function getAttributesFreeIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external view returns(QuadPassportStore.Attribute[] memory);
 
     function getAttributesETHIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external payable returns(QuadPassportStore.Attribute[] memory);
 
     function calculatePaymentToken(
         bytes32 _attribute,
