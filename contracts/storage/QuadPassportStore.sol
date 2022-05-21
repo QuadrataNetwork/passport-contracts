@@ -9,6 +9,7 @@ contract QuadPassportStore {
     struct Attribute {
         bytes32 value;
         uint256 epoch;
+        address issuer;
     }
 
     /// @dev MintConfig is defined to prevent 'stack frame too deep' during compilation
@@ -41,10 +42,11 @@ contract QuadPassportStore {
     mapping(bytes32 => bool) internal _usedHashes;
 
     // Passport attributes
-    // Wallet => (Attribute Name => (Issuer => Attribute))
-    mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
-    // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
-    mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
+    // Wallet => (Attribute Name => (Attribute[]))
+    mapping(address => mapping(bytes32 => Attribute[])) internal _attributesBundle;
+    // DID => (AttributeType => (Attribute[]))
+    mapping(bytes32 => mapping(bytes32 => Attribute[])) internal _attributesByDIDBundle;
+
 
     // Accounting
     // ERC20 => Account => balance

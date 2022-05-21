@@ -71,10 +71,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
-        _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
-        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
+
+        _attributesBundle[_config.account][keccak256("COUNTRY")].push(Attribute({value: _config.country, epoch: _config.issuedAt, issuer: issuer}));
+        _attributesBundle[_config.account][keccak256("DID")].push(Attribute({value: _config.quadDID, epoch: _config.issuedAt, issuer: issuer}));
+        _attributesBundle[_config.account][keccak256("IS_BUSINESS")].push(Attribute({value: _config.isBusiness, epoch: _config.issuedAt, issuer: issuer}));
+        _attributesByDIDBundle[_config.quadDID][keccak256("AML")].push(Attribute({value: _config.aml, epoch: _config.issuedAt, issuer: issuer}));
 
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
@@ -138,18 +139,20 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         );
 
         if (governance.eligibleAttributes(_attribute)) {
-            _attributes[_account][_attribute][_issuer] = Attribute({
+            _attributesBundle[_account][_attribute].push(Attribute({
                 value: _value,
-                epoch: _issuedAt
-            });
+                epoch: _issuedAt,
+                issuer: _issuer
+            }));
         } else {
             // Attribute grouped by DID
-            bytes32 dID = _attributes[_account][keccak256("DID")][_issuer].value;
+            bytes32 dID = _attributesBundle[_account][keccak256("DID")][0].value;
             require(dID != bytes32(0), "DID_NOT_FOUND");
-            _attributesByDID[dID][_attribute][_issuer] = Attribute({
+            _attributesByDIDBundle[dID][_attribute].push(Attribute({
                 value: _value,
-                epoch: _issuedAt
-            });
+                epoch: _issuedAt,
+                issuer: _issuer
+            }));
         }
     }
 
@@ -165,7 +168,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 bytes32 attributeType = governance.eligibleAttributesArray(i);
-                delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
+                delete _attributesBundle[_msgSender()][attributeType];
             }
         }
     }
@@ -182,22 +185,28 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
         // only delete attributes from sender
+
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            delete _attributes[_account][attributeType][_msgSender()];
+
+            // clean bundles
+            Attribute[] storage bundle = _attributesBundle[_account][attributeType];
+            for(uint256 j = 0; j < bundle.length; j++) {
+                if(bundle[j].issuer == _msgSender()) {
+                    bundle[j] = bundle[bundle.length - 1];
+                    bundle.pop();
+                }
+            }
         }
 
         // if another attribute is found, keep the passport, otherwise burn if all values are null
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];
-                if(attribute.epoch != 0) {
-                    return;
-                }
+            Attribute[] storage bundle = _attributesBundle[_account][attributeType];
+            if(bundle.length != 0) {
+                return;
             }
         }
-
         _burn(_account, _tokenId, 1);
     }
 
@@ -313,33 +322,25 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
-    /// @param _issuer the entity that gave the attribute value
     /// @return value of attribute from issuer
-    function attributes(
+    function getBundle(
         address _account,
-        bytes32 _attribute,
-        address _issuer
-    ) public view override returns (Attribute memory) {
+        bytes32 _attribute
+    ) public view override returns (Attribute[] memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        if (!governance.hasRole(ISSUER_ROLE, _issuer))
-           return Attribute({value: bytes32(0), epoch: 0});
-        return _attributes[_account][_attribute][_issuer];
+        return _attributesBundle[_account][_attribute];
     }
 
     /// @dev Allow an authorized readers to get information about a QuadDID for a specific issuer
     /// @param _dID did of user
     /// @param _attribute attribute to get respective value from
-    /// @param _issuer the entity that gave the attribute value
     /// @return did value by issuer
-    function attributesByDID(
+    function getBundleByDID(
         bytes32 _dID,
-        bytes32 _attribute,
-        address _issuer
-    ) public view override returns (Attribute memory) {
+        bytes32 _attribute
+    ) public view override returns (Attribute[] memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        if (!governance.hasRole(ISSUER_ROLE, _issuer))
-           return Attribute({value: bytes32(0), epoch: 0});
-        return _attributesByDID[_dID][_attribute][_issuer];
+        return _attributesByDIDBundle[_dID][_attribute];
     }
 
     /// @dev Increase balance of account
