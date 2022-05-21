@@ -154,17 +154,11 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] calldata _onlyIssuers
-    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override returns(QuadPassportStore.Attribute[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
-
-        _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
-
-        return (attributes, epochs, issuers);
+        QuadPassportStore.Attribute[] memory bundle = _getIncludedBundle(_onlyIssuers, passport.getBundle(_account, _attribute));
+        _doTokenPayments(_attribute, _tokenAddr, bundle, _account);
+        return bundle;
     }
 
     /// @notice Query the values of an attribute for a passport holder (Free)
@@ -178,16 +172,11 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override view returns(QuadPassportStore.Attribute[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
-
-        return (attributes, epochs, issuers);
+        QuadPassportStore.Attribute[] memory bundle = _getIncludedBundle(_onlyIssuers, passport.getBundle(_account, _attribute));
+        return bundle;
     }
 
     /// @notice Query the values of an attribute for a passport holder (Payable ETH)
@@ -201,52 +190,54 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override payable returns(QuadPassportStore.Attribute[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
-
-        _doETHPayments(_attribute, issuers, _account);
-
-        return (attributes, epochs, issuers);
+        QuadPassportStore.Attribute[] memory bundle = _getIncludedBundle(_onlyIssuers, passport.getBundle(_account, _attribute));
+        _doETHPayments(_attribute, bundle, _account);
+        return bundle;
     }
 
     /// @notice removes `_issuers` if they are deactivated
-    /// @param _issuers The list of issuers to include
+    /// @param _includedIssuers The list of issuers to include
     /// @return `_issuers` - deactivated issuers
-    function _includedIssuers(
-        address[] calldata _issuers
-    ) internal view returns(address[] memory) {
-        address[] memory issuers = _issuers;
+    function _getIncludedBundle(
+        address[] calldata _includedIssuers,
+        QuadPassportStore.Attribute[] memory _rawBundle
+    ) internal view returns(QuadPassportStore.Attribute[] memory) {
 
         uint256 gaps = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(governance.getIssuerStatus(_issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                issuers[i] = address(0);
+        for(uint256 i = 0; i < _rawBundle.length; i++) {
+            if(governance.getIssuerStatus(_rawBundle[i].issuer) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
                 gaps++;
-            }
-        }
-
-
-        address[] memory newIssuers = new address[](issuers.length - gaps);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
+                delete _rawBundle[i];
                 continue;
             }
 
-            newIssuers[formattedIndex++] = issuers[i];
+            for(uint256 j = 0; j < _includedIssuers.length; j++) {
+                if(_rawBundle[i].issuer == _includedIssuers[j]) {
+                    gaps++;
+                    delete _rawBundle[i];
+                    break;
+                }
+            }
         }
 
-        return newIssuers;
+
+        QuadPassportStore.Attribute[] memory newBundle = new QuadPassportStore.Attribute[](_rawBundle.length - gaps);
+        uint256 formattedIndex = 0;
+        for(uint256 i = 0; i < _rawBundle.length; i++) {
+            if(_rawBundle[i].epoch == 0){
+                continue;
+            }
+
+            newBundle[formattedIndex++] = _rawBundle[i];
+        }
+
+        return newBundle;
     }
 
     /// @notice removes `_issuers` from the full list of supported issuers
     /// @param _excludedIssuers The list of issuers to remove
-    /// @return the subset of `governance.issuers` - `_issuers`
     function _getExcludedBundle(
         address[] memory _excludedIssuers,
         QuadPassportStore.Attribute[] memory _rawBundle
@@ -274,7 +265,7 @@ import "./storage/QuadGovernanceStore.sol";
 
         uint256 formattedIndex = 0;
         for(uint256 i = 0; i < _rawBundle.length; i++) {
-            if(_rawBundle[i] == 0) {
+            if(_rawBundle[i].epoch == 0) {
                 continue;
             }
             newBundle[formattedIndex++] = _rawBundle[i];
