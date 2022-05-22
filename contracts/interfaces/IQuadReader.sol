@@ -80,4 +80,7 @@ interface IQuadReader {
         address _account
     ) external view returns(uint256);
 
+    function attributeStructToTuple(
+        QuadPassportStore.Attribute[] memory _bundle
+    ) external pure returns(bytes32[] memory, uint256[] memory, address[] memory);
 }
