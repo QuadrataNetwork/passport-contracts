@@ -11,6 +11,8 @@ import "./storage/QuadReaderStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./storage/QuadGovernanceStore.sol";
 
+import "hardhat/console.sol";
+
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -222,34 +224,34 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice removes `_issuers` if they are deactivated
-    /// @param _includedIssuers The list of issuers to include
+    /// @param _included The list of issuers to include
     /// @return `_issuers` - deactivated issuers
     function _includedIssuers(
         address _account,
         bytes32 _attributeType,
-        address[] calldata _includedIssuers
+        address[] calldata _included
     ) internal view returns(address[] memory) {
         address[] memory issuers = passport.getIssuerCache(_account, _attributeType);
 
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
             if(governance.getIssuerStatus(issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                issuers[i] = address(0);
+                delete issuers[i];
                 gaps++;
                 continue;
             }
 
             bool hasElement = false;
             // truncate included issuers until it is a subset of cached issuers
-            for (uint256 j = 0; j < _includedIssuers.length; j++) {
-                if(issuers[i] == _includedIssuers[j]) {
+            for (uint256 j = 0; j < _included.length; j++) {
+                if(issuers[i] == _included[j]) {
                     hasElement = true;
                     break;
                 }
             }
             // if the included issuer is not found, remove it
             if(!hasElement) {
-                issuers[i] = address(0);
+                delete issuers[i];
                 gaps++;
             }
         }
@@ -258,31 +260,32 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice removes `_issuers` from the full list of supported issuers
-    /// @param _issuers The list of issuers to remove
+    /// @param _excluded The list of issuers to remove
     /// @return the subset of `governance.issuers` - `_issuers`
     function _excludedIssuers(
         address _account,
         bytes32 _attributeType,
-        address[] memory _issuers
+        address[] memory _excluded
     ) internal view returns(address[] memory) {
         address[] memory nonNullIssuers = passport.getIssuerCache(_account, _attributeType);
 
         uint256 gaps = 0;
         for(uint256 i = 0; i < nonNullIssuers.length; i++) {
             if(governance.getIssuerStatus(nonNullIssuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                nonNullIssuers[i] == address(0);
+                delete nonNullIssuers[i];
                 gaps++;
                 continue;
             }
-            for(uint256 j = 0; j < _issuers.length; j++) {
-                if(nonNullIssuers[i] == _issuers[j]) {
-                    nonNullIssuers[i] = address(0);
+
+            // exclude valid issuers when they are found
+            for(uint256 j = 0; j < _excluded.length; j++) {
+                if(nonNullIssuers[i] == _excluded[j]) {
+                    delete nonNullIssuers[i];
                     gaps++;
                     break;
                 }
             }
         }
-
 
         return _closeGaps(gaps, nonNullIssuers);
     }
@@ -291,7 +294,11 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _gaps,
         address[] memory _oldIssuers
     ) internal pure returns(address[] memory) {
-        address[] memory newIssuers  = new address[](_oldIssuers.length - _gaps);
+        uint256 newLength = _oldIssuers.length - _gaps;
+        if(newLength == 0) {
+            return new address[](0);
+        }
+        address[] memory newIssuers  = new address[](newLength);
         uint256 formattedIndex = 0;
         for(uint256 i = 0; i < _oldIssuers.length; i++) {
             if(_oldIssuers[i] == address(0)){
