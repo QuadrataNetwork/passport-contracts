@@ -239,15 +239,17 @@ import "./storage/QuadGovernanceStore.sol";
                 continue;
             }
 
-            uint256 hasElement = _includedIssuers.length;
+            bool hasElement = false;
+            // truncate included issuers until it is a subset of cached issuers
             for (uint256 j = 0; j < _includedIssuers.length; j++) {
                 if(issuers[i] == _includedIssuers[j]) {
-                    hasElement = j;
+                    hasElement = true;
                     break;
                 }
             }
-            if(hasElement != _includedIssuers.length) {
-                issuers[hasElement] = address(0);
+            // if the included issuer is not found, remove it
+            if(!hasElement) {
+                issuers[i] = address(0);
                 gaps++;
             }
         }
