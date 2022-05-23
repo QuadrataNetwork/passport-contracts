@@ -54,7 +54,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
+        ) = _applyFilter(_account, _attribute, _excludedIssuers(_account, _attribute, _excluded));
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -79,7 +79,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
+        ) =  _applyFilter(_account, _attribute, _excludedIssuers(_account, _attribute, _excluded));
         return (attributes, epochs, issuers);
     }
 
@@ -100,7 +100,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
+        ) = _applyFilter(_account, _attribute, _excludedIssuers(_account, _attribute, _excluded));
 
         _doETHPayments(_attribute, issuers, _account);
 
@@ -167,7 +167,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
+        ) = _applyFilter(_account, _attribute, _includedIssuers(_account, _attribute, _onlyIssuers));
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -192,7 +192,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
+        ) =  _applyFilter(_account, _attribute, _includedIssuers(_account, _attribute, _onlyIssuers));
 
         return (attributes, epochs, issuers);
     }
@@ -214,7 +214,7 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
+        ) = _applyFilter(_account, _attribute, _includedIssuers(_account, _attribute, _onlyIssuers));
 
         _doETHPayments(_attribute, issuers, _account);
 
@@ -222,23 +222,38 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice removes `_issuers` if they are deactivated
-    /// @param _issuers The list of issuers to include
+    /// @param _includedIssuers The list of issuers to include
     /// @return `_issuers` - deactivated issuers
     function _includedIssuers(
-        address[] calldata _issuers
+        address _account,
+        bytes32 _attributeType,
+        address[] calldata _includedIssuers
     ) internal view returns(address[] memory) {
-        address[] memory issuers = _issuers;
+        address[] memory issuers = passport.getIssuerCache(_account, _attributeType);
 
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
-            if(governance.getIssuerStatus(_issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+            if(governance.getIssuerStatus(issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
                 issuers[i] = address(0);
+                gaps++;
+                continue;
+            }
+
+            uint256 hasElement = _includedIssuers.length;
+            for (uint256 j = 0; j < _includedIssuers.length; j++) {
+                if(issuers[i] == _includedIssuers[j]) {
+                    hasElement = j;
+                    break;
+                }
+            }
+            if(hasElement != _includedIssuers.length) {
+                issuers[hasElement] = address(0);
                 gaps++;
             }
         }
 
 
-        address[] memory newIssuers = new address[](issuers.length - gaps);
+        address[] memory newIssuers = new address[](_includedIssuers.length - gaps);
         uint256 formattedIndex = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
             if(issuers[i] == address(0)){
@@ -255,21 +270,22 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _issuers The list of issuers to remove
     /// @return the subset of `governance.issuers` - `_issuers`
     function _excludedIssuers(
+        address _account,
+        bytes32 _attributeType,
         address[] memory _issuers
     ) internal view returns(address[] memory) {
-        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
-        address[] memory issuers = new address[](governance.getIssuersLength());
+        address[] memory nonNullIssuers = passport.getIssuerCache(_account, _attributeType);
 
         uint256 gaps = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+        for(uint256 i = 0; i < nonNullIssuers.length; i++) {
+            if(governance.getIssuerStatus(nonNullIssuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+                nonNullIssuers[i] == address(0);
                 gaps++;
                 continue;
             }
-            issuers[i] = issuerData[i].issuer;
             for(uint256 j = 0; j < _issuers.length; j++) {
-                if(issuers[i] == _issuers[j]) {
-                    issuers[i] = address(0);
+                if(nonNullIssuers[i] == _issuers[j]) {
+                    nonNullIssuers[i] = address(0);
                     gaps++;
                     break;
                 }
@@ -281,12 +297,12 @@ import "./storage/QuadGovernanceStore.sol";
 
         address[] memory newIssuers  = new address[](newLength);
         uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
+        for(uint256 i = 0; i < nonNullIssuers.length; i++) {
+            if(nonNullIssuers[i] == address(0)){
                 continue;
             }
 
-            newIssuers[formattedIndex++] = issuers[i];
+            newIssuers[formattedIndex++] = nonNullIssuers[i];
         }
         return newIssuers;
     }
@@ -301,64 +317,25 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        // find gap values
-        ApplyFilterVars memory vars;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributes(_attribute)) {
-                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            } else if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    vars.gaps++;
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            }
-        }
 
-        vars.delta = _issuers.length - vars.gaps;
-
-        bytes32[] memory attributes = new bytes32[](vars.delta);
-        uint256[] memory epochs = new uint256[](vars.delta);
-        address[] memory issuers = new address[](vars.delta);
+        bytes32[] memory attributes = new bytes32[](_issuers.length);
+        uint256[] memory epochs = new uint256[](_issuers.length);
 
         QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
                 QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
-                }
-
                 attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                attributes[vars.filteredIndex] = attribute.value;
-                epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = _issuers[i];
-                vars.filteredIndex++;
-                continue;
-            }
-
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
+                attributes[i] = attribute.value;
+                epochs[i] = attribute.epoch;
                 continue;
             }
 
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            attributes[vars.filteredIndex] = attribute.value;
-            epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = _issuers[i];
-            vars.filteredIndex++;
+            attributes[i] = attribute.value;
+            epochs[i] = attribute.epoch;
         }
-
-        require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
-
-        return (attributes, epochs, issuers);
+        return (attributes, epochs, _issuers);
     }
 
     /// @notice safty checks for all getAttribute functions
