@@ -76,4 +76,12 @@ interface IQuadGovernance {
     function issuers(uint256) external view returns(QuadGovernanceStore.Issuer memory);
 
     function getIssuerStatus(address _issuer) external view returns(QuadGovernanceStore.IssuerStatus);
+
+    function ISSUER_ROLE() external view returns (bytes32);
+
+    function PAUSER_ROLE() external view returns (bytes32);
+
+    function GOVERNANCE_ROLE() external view returns (bytes32);
+
+    function READER_ROLE() external view returns (bytes32);
 }

@@ -30,21 +30,21 @@ contract QuadPassportStore {
         uint256 issuedAt;
     }
 
-
-    bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-    bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
-
     IQuadGovernance public governance;
 
     // Hash => bool
     mapping(bytes32 => bool) internal _usedHashes;
 
     // Passport attributes
-    // Wallet => (Attribute Name => (Issuer => Attribute))
+    // Account => (Attribute Type => (Issuer => Attribute))
     mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
     // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
     mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
+
+    // Account => (Attribute Type => Issuers[]))
+    mapping(address => mapping (bytes32 => address[])) public issuerCache;
+    // DID => (Attribute Type => Issuers[]))
+    mapping(bytes32 => mapping (bytes32 => address[])) public issuerCacheByDID;
 
     // Accounting
     // ERC20 => Account => balance
