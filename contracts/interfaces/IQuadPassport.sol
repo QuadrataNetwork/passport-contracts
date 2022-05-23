@@ -52,7 +52,4 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function getIssuerCache(address, bytes32) external view returns (address[] memory);
 
-    function getIssuerCacheByDID(bytes32, bytes32) external view returns (address[] memory);
-
-
 }

@@ -252,18 +252,7 @@ import "./storage/QuadGovernanceStore.sol";
             }
         }
 
-
-        address[] memory newIssuers = new address[](_includedIssuers.length - gaps);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
-                continue;
-            }
-
-            newIssuers[formattedIndex++] = issuers[i];
-        }
-
-        return newIssuers;
+        return _closeGaps(gaps, issuers);
     }
 
     /// @notice removes `_issuers` from the full list of supported issuers
@@ -292,17 +281,22 @@ import "./storage/QuadGovernanceStore.sol";
             }
         }
 
-        // close the gap(s)
-        uint256 newLength = governance.getIssuersLength() - gaps;
 
-        address[] memory newIssuers  = new address[](newLength);
+        return _closeGaps(gaps, nonNullIssuers);
+    }
+
+    function _closeGaps(
+        uint256 _gaps,
+        address[] memory _oldIssuers
+    ) internal pure returns(address[] memory) {
+        address[] memory newIssuers  = new address[](_oldIssuers.length - _gaps);
         uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < nonNullIssuers.length; i++) {
-            if(nonNullIssuers[i] == address(0)){
+        for(uint256 i = 0; i < _oldIssuers.length; i++) {
+            if(_oldIssuers[i] == address(0)){
                 continue;
             }
 
-            newIssuers[formattedIndex++] = nonNullIssuers[i];
+            newIssuers[formattedIndex++] = _oldIssuers[i];
         }
         return newIssuers;
     }

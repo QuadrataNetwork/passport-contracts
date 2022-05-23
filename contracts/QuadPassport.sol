@@ -78,7 +78,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
         issuerCache[_config.account][keccak256("IS_BUSINESS")].push(issuer);
         _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
-        issuerCacheByDID[_config.quadDID][keccak256("AML")].push(issuer);
+        issuerCache[_config.account][keccak256("AML")].push(issuer);
 
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
@@ -156,7 +156,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
                 value: _value,
                 epoch: _issuedAt
             });
-            issuerCacheByDID[dID][_attribute].push(_issuer);
+            issuerCache[_account][_attribute].push(_issuer);
         }
     }
 
@@ -380,10 +380,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     function getIssuerCache(address _account, bytes32 _attributeType) public view override returns (address[] memory) {
         return issuerCache[_account][_attributeType];
-    }
-
-    function getIssuerCacheByDID(bytes32 _dID, bytes32 _attributeType) public view override returns (address[] memory) {
-        return issuerCacheByDID[_dID][_attributeType];
     }
 }
 

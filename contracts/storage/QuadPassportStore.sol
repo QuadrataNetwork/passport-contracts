@@ -43,8 +43,6 @@ contract QuadPassportStore {
 
     // Account => (Attribute Type => Issuers[]))
     mapping(address => mapping (bytes32 => address[])) public issuerCache;
-    // DID => (Attribute Type => Issuers[]))
-    mapping(bytes32 => mapping (bytes32 => address[])) public issuerCacheByDID;
 
     // Accounting
     // ERC20 => Account => balance
