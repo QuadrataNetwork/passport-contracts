@@ -129,8 +129,14 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    )external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesFreeExcluding(_account, _tokenId, _attribute, new address[](0));
+    )public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
+        address[] memory issuerAddresses = new address[](issuerData.length);
+        for(uint256 i = 0; i < issuerData.length; i++) {
+            issuerAddresses[i] = issuerData[i].issuer;
+        }
+
+        return getAttributesFreeIncludingOnly(_account, _tokenId, _attribute, issuerAddresses);
     }
 
     /// @notice Get all values of an attribute for a passport holder (payable with ERC20)
@@ -144,8 +150,15 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
-    )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
+        // public for testing
+    )public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
+        address[] memory issuerAddresses = new address[](issuerData.length);
+        for(uint256 i = 0; i < issuerData.length; i++) {
+            issuerAddresses[i] = issuerData[i].issuer;
+        }
+
+        return getAttributesIncludingOnly(_account, _tokenId, _attribute, _tokenAddr, issuerAddresses);
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
@@ -160,14 +173,14 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr,
-        address[] calldata _onlyIssuers
-    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        address[] memory _onlyIssuers
+    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
+        ) = _applyFilter(_account, _attribute, _onlyIssuers);
 
         _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
 
@@ -184,15 +197,15 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
-        address[] calldata _onlyIssuers
-    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        address[] memory _onlyIssuers
+    ) public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
+        ) =  _applyFilter(_account, _attribute, _onlyIssuers);
 
         return (attributes, epochs, issuers);
     }
@@ -214,42 +227,13 @@ import "./storage/QuadGovernanceStore.sol";
             bytes32[] memory attributes,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
+        ) = _applyFilter(_account, _attribute, _onlyIssuers);
 
         _doETHPayments(_attribute, issuers, _account);
 
         return (attributes, epochs, issuers);
     }
 
-    /// @notice removes `_issuers` if they are deactivated
-    /// @param _issuers The list of issuers to include
-    /// @return `newIssuers` - filtered active issuers
-    function _includedIssuers(
-        address[] calldata _issuers
-    ) internal view returns(address[] memory) {
-        address[] memory issuers = _issuers;
-
-        uint256 gaps = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(governance.getIssuerStatus(_issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                issuers[i] = address(0);
-                gaps++;
-            }
-        }
-
-
-        address[] memory newIssuers = new address[](issuers.length - gaps);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
-                continue;
-            }
-
-            newIssuers[formattedIndex++] = issuers[i];
-        }
-
-        return newIssuers;
-    }
 
     /// @notice removes `_issuers` from the full list of supported issuers
     /// @param _issuers The list of issuers to remove
@@ -273,7 +257,6 @@ import "./storage/QuadGovernanceStore.sol";
             }
         }
 
-        // close the gap(s)
         uint256 newLength = governance.getIssuersLength();
 
         address[] memory newIssuers  = new address[](newLength);
