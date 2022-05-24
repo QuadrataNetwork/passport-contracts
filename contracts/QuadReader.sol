@@ -223,7 +223,7 @@ import "./storage/QuadGovernanceStore.sol";
 
     /// @notice removes `_issuers` if they are deactivated
     /// @param _issuers The list of issuers to include
-    /// @return `_issuers` - deactivated issuers
+    /// @return `newIssuers` - filtered active issuers
     function _includedIssuers(
         address[] calldata _issuers
     ) internal view returns(address[] memory) {
@@ -306,9 +306,10 @@ import "./storage/QuadGovernanceStore.sol";
         QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
+                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
                 attribute = passport.attributesByDID(dID.value, _attribute, _issuers[i]);
             } else {
-                attribute = passport.attributes(_account,_attribute, _issuers[i]);
+                attribute = passport.attributes(_account, _attribute, _issuers[i]);
             }
 
             attributes[i] = attribute.value;
@@ -318,8 +319,6 @@ import "./storage/QuadGovernanceStore.sol";
                 issuers[i] = _issuers[i];
             }
         }
-
-        require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
 
         return (attributes, epochs, issuers);
     }
@@ -384,8 +383,8 @@ import "./storage/QuadGovernanceStore.sol";
         address _account
     ) internal {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
+        uint256 issuersToPayLength = 0;
 
-        uint8 issuersToPayLength;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(_issuers[i] != address(0)){
                 issuersToPayLength++;
@@ -458,18 +457,5 @@ import "./storage/QuadGovernanceStore.sol";
             }
         }
         return bytes32(0);
-    }
-
-    /// @dev Used to determine if any of the attributes is valid
-    /// @param _issuers the value to check existsance on
-    /// @return whether or not we found a value
-    function _safetyCheckIssuers(
-        address[] memory _issuers
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(_issuers[i] == address(0))
-                return false;
-        }
-        return true;
     }
  }
