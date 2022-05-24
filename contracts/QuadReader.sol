@@ -260,8 +260,11 @@ import "./storage/QuadGovernanceStore.sol";
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
         address[] memory issuers = new address[](governance.getIssuersLength());
 
+        // Loop through all issuers
         for(uint256 i = 0; i < issuers.length; i++) {
             issuers[i] = issuerData[i].issuer;
+            // Compare current issuer against blocklisted issuers
+            // If duplicate, assign empty address to current issuers (i.e. exclude issuer)
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);
