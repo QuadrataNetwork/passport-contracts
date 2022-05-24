@@ -129,7 +129,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    )public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
         address[] memory issuerAddresses = new address[](issuerData.length);
         for(uint256 i = 0; i < issuerData.length; i++) {
@@ -150,14 +150,12 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
-        // public for testing
-    )public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
         address[] memory issuerAddresses = new address[](issuerData.length);
         for(uint256 i = 0; i < issuerData.length; i++) {
             issuerAddresses[i] = issuerData[i].issuer;
         }
-
         return getAttributesIncludingOnly(_account, _tokenId, _attribute, _tokenAddr, issuerAddresses);
     }
 
