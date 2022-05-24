@@ -307,16 +307,16 @@ import "./storage/QuadGovernanceStore.sol";
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
                 attribute = passport.attributesByDID(dID.value, _attribute, _issuers[i]);
-                attributes[i] = attribute.value;
-                epochs[i] = attribute.epoch;
-                issuers[i] = _issuers[i];
-                continue;
+            } else {
+                attribute = passport.attributes(_account,_attribute, _issuers[i]);
             }
 
-            attribute = passport.attributes(_account,_attribute, _issuers[i]);
             attributes[i] = attribute.value;
             epochs[i] = attribute.epoch;
-            issuers[i] = _issuers[i];
+
+            if(attribute.value != bytes32(0)) {
+                issuers[i] = _issuers[i];
+            }
         }
 
         require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
@@ -371,7 +371,7 @@ import "./storage/QuadGovernanceStore.sol";
         }
     }
 
-    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @notice Distribute the fee to query an attribute to issuers and protocol
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenPayment address of erc20 payment method
@@ -384,16 +384,26 @@ import "./storage/QuadGovernanceStore.sol";
         address _account
     ) internal {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
+
+        uint8 issuersToPayLength;
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            if(_issuers[i] != address(0)){
+                issuersToPayLength++;
+            }
+        }
+
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             require(
                 erc20.transferFrom(msg.sender, address(passport), amountToken),
                 "INSUFFICIENT_PAYMENT_ALLOWANCE"
             );
-            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
+            uint256 amountIssuer = issuersToPayLength == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
-            for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
+            for(uint256 i = 0; i < issuersToPayLength; i++) {
+                if(_issuers[i] != address(0)){
+                    passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / issuersToPayLength);
+                }
             }
             passport.increaseAccountBalance(_tokenPayment, governance.treasury(), amountProtocol);
         }
