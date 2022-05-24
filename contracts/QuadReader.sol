@@ -260,24 +260,18 @@ import "./storage/QuadGovernanceStore.sol";
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
         address[] memory issuers = new address[](governance.getIssuersLength());
 
-        uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                gaps++;
-                continue;
-            }
             issuers[i] = issuerData[i].issuer;
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);
-                    gaps++;
                     break;
                 }
             }
         }
 
         // close the gap(s)
-        uint256 newLength = governance.getIssuersLength() - gaps;
+        uint256 newLength = governance.getIssuersLength();
 
         address[] memory newIssuers  = new address[](newLength);
         uint256 formattedIndex = 0;
