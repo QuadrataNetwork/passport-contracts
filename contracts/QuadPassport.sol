@@ -310,6 +310,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
+    //  HUY!!!!
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
@@ -321,8 +322,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _issuer
     ) public view override returns (Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
+        if (!governance.eligibleAttributes(_attribute))
+            return Attribute({value: bytes32(0), epoch: 0});
+
         return _attributes[_account][_attribute][_issuer];
     }
 
@@ -337,8 +342,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _issuer
     ) public view override returns (Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
+        if (!governance.eligibleAttributes(_attribute))
+            return Attribute({value: bytes32(0), epoch: 0});
+
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 

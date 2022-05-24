@@ -301,59 +301,25 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        // find gap values
-        ApplyFilterVars memory vars;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributes(_attribute)) {
-                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            } else if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    vars.gaps++;
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            }
-        }
-
-        vars.delta = _issuers.length - vars.gaps;
-
-        bytes32[] memory attributes = new bytes32[](vars.delta);
-        uint256[] memory epochs = new uint256[](vars.delta);
-        address[] memory issuers = new address[](vars.delta);
+        // Instantiate arrays assuming full set (i.e. we do no filtering)
+        bytes32[] memory attributes = new bytes32[](governance.getIssuersLength());
+        uint256[] memory epochs = new uint256[](governance.getIssuersLength());
+        address[] memory issuers = new address[](governance.getIssuersLength());
 
         QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
-                }
-
-                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                attributes[vars.filteredIndex] = attribute.value;
-                epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = _issuers[i];
-                vars.filteredIndex++;
-                continue;
-            }
-
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
+                attribute = passport.attributesByDID(dID.value, _attribute, _issuers[i]);
+                attributes[i] = attribute.value;
+                epochs[i] = attribute.epoch;
+                issuers[i] = _issuers[i];
                 continue;
             }
 
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            attributes[vars.filteredIndex] = attribute.value;
-            epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = _issuers[i];
-            vars.filteredIndex++;
+            attributes[i] = attribute.value;
+            epochs[i] = attribute.epoch;
+            issuers[i] = _issuers[i];
         }
 
         require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
@@ -468,34 +434,6 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
         uint256 amountETH = (price * 1e18 / tokenPrice) ;
         return amountETH;
-    }
-
-    /// @dev Used to determine if issuer has returned something useful
-    /// @param _account the value to check existence on
-    /// @param _attribute the value to check existence on
-    /// @param _issuer the issuer in question
-    /// @return whether or not we found a value
-    function _isDataAvailable(
-        address _account,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
-        return attrib.value != bytes32(0) && attrib.epoch != 0;
-    }
-
-    /// @dev Used to determine if issuer has returned something useful
-    /// @param _dID the value to check existsance on
-    /// @param _attribute the value to check existsance on
-    /// @param _issuer the issuer in question
-    /// @return whether or not we found a value
-    function _isDataAvailableByDID(
-        bytes32 _dID,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
-        return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
     /// @dev Used to determine if issuers have an attribute
