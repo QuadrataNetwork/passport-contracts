@@ -325,8 +325,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
-        if (!governance.eligibleAttributes(_attribute))
-            return Attribute({value: bytes32(0), epoch: 0});
         if (governance.getIssuerStatus(_issuer) == QuadGovernanceStore.IssuerStatus.DEACTIVATED)
             return Attribute({value: bytes32(0), epoch: 0});
 
@@ -347,8 +345,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
-        if (!governance.eligibleAttributes(_attribute))
-            return Attribute({value: bytes32(0), epoch: 0});
         if (governance.getIssuerStatus(_issuer) == QuadGovernanceStore.IssuerStatus.DEACTIVATED)
             return Attribute({value: bytes32(0), epoch: 0});
 
