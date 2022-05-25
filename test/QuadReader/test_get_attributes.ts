@@ -114,5 +114,9 @@ describe("QuadReader", async () => {
     })
   });
 
-
+  describe("getAttributesExcluding", async function() {
+    it('success', async () => {
+      await reader.connect(minterA).getAttributesExcluding(minterA.address, 1, ATTRIBUTE_DID, usdc.address, []);
+    })
+  });
 });

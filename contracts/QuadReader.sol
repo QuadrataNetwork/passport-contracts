@@ -240,12 +240,13 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers
     ) internal view returns(address[] memory) {
         QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
-        address[] memory issuers = new address[](governance.getIssuersLength());
-
+        address[] memory issuers = new address[](issuerData.length);
+        uint256 validIssuerCount = 0;
         // Loop through all issuers
         for(uint256 i = 0; i < issuers.length; i++) {
             issuers[i] = issuerData[i].issuer;
-            // Compare current issuer against blocklisted issuers
+
+            // Compare current issuer against blocked issuers
             // If duplicate, assign empty address to current issuers (i.e. exclude issuer)
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
@@ -253,20 +254,22 @@ import "./storage/QuadGovernanceStore.sol";
                     break;
                 }
             }
+            if (issuers[i] != address(0))
+                validIssuerCount++;
         }
 
-        uint256 newLength = governance.getIssuersLength();
+        address[] memory validIssuers  = new address[](validIssuerCount);
+        uint256 validIssuerIndex = 0;
 
-        address[] memory newIssuers  = new address[](newLength);
-        uint256 formattedIndex = 0;
+        // Loop through all issuers to handpick the valid ones
         for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
-                continue;
+            if(issuers[i] != address(0)){
+                validIssuers[validIssuerIndex] = issuers[i];
+                validIssuerIndex++;
             }
 
-            newIssuers[formattedIndex++] = issuers[i];
         }
-        return newIssuers;
+        return validIssuers;
     }
 
     /// @notice creates a list of attribute values from filtered issuers that have attested to the data
