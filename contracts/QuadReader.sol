@@ -247,7 +247,7 @@ import "./storage/QuadGovernanceStore.sol";
             issuers[i] = issuerData[i].issuer;
 
             // Compare current issuer against blocked issuers
-            // If duplicate, assign empty address to current issuers (i.e. exclude issuer)
+            // If duplicate, assign burn address to current issuers (i.e. exclude issuer)
             for(uint256 j = 0; j < _issuers.length; j++) {
                 if(issuers[i] == _issuers[j]) {
                     issuers[i] = address(0);
@@ -263,6 +263,7 @@ import "./storage/QuadGovernanceStore.sol";
 
         // Loop through all issuers to handpick the valid ones
         for(uint256 i = 0; i < issuers.length; i++) {
+            // Valid if not burn address
             if(issuers[i] != address(0)){
                 validIssuers[validIssuerIndex] = issuers[i];
                 validIssuerIndex++;
