@@ -11,7 +11,7 @@ const {
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
 } = require("../../utils/constant.ts");
-const { signMint } = require("./signature.ts");
+const { signMint, signMessage } = require("./signature.ts");
 
 const { signSetAttribute } = require("./signature.ts");
 
@@ -38,16 +38,9 @@ export const assertMint = async (
     isBusiness,
     issuedAt
   );
-
-  const sigAccount = await signMint(
+  const sigAccount = await signMessage(
     account,
-    account,
-    tokenId,
-    did,
-    aml,
-    country,
-    isBusiness,
-    issuedAt
+    account.address
   );
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(opts?.newIssuerMint ? 1 : 0);
 

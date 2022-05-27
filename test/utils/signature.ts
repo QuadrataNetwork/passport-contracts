@@ -1,6 +1,20 @@
 const { ethers } = require("hardhat");
 const { Signer, DataHexString } = require("ethers");
 
+export const signMessage = async (
+  signer: typeof Signer,
+  message: typeof DataHexString,
+): Promise<typeof DataHexString> => {
+  const hash = ethers.utils.keccak256(
+    ethers.utils.defaultAbiCoder.encode(
+      ["address"],
+      [message]
+    )
+  );
+  const sig = await signer.signMessage(ethers.utils.arrayify(hash));
+  return sig;
+};
+
 export const signMint = async (
   issuer: typeof Signer,
   minter: typeof Signer,
