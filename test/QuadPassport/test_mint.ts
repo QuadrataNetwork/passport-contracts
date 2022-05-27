@@ -78,9 +78,6 @@ describe("QuadPassport", async () => {
       mockBusiness = await MockBusiness.deploy(defi.address)
       await mockBusiness.deployed()
 
-      await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
-      await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
-
       await usdc.transfer(minterA.address, parseUnits("1000", 6));
       await usdc.transfer(minterB.address, parseUnits("1000", 6));
     });
@@ -508,9 +505,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
       await passport
         .connect(minterA)
-        .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+        .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
           value: parseEther("0"),
         });
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
@@ -719,12 +727,22 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       const wrongMintPrice = parseEther("1");
 
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: wrongMintPrice,
           })
       ).to.be.revertedWith("INVALID_MINT_PRICE");
@@ -775,10 +793,20 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        badTokenId,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt], sig, sigAccount,{
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
@@ -805,18 +833,29 @@ describe("QuadPassport", async () => {
         aml,
         country,
         isBusiness,
-        issuedAt + 1
+        issuedAt
       );
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
-    it("fail - passport already exists - two diff issuers", async () => {
+    it("success - passport already exists - two diff issuers", async () => {
       const issuerB = ethers.Wallet.createRandom();
       const issuerBTreasury = ethers.Wallet.createRandom();
       await governance
@@ -843,15 +882,27 @@ describe("QuadPassport", async () => {
         aml,
         country,
         isBusiness,
-        issuedAt + 1
+        issuedAt
       );
+
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
-      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.not.be.reverted;
     });
 
     it("fail - invalid hash (wrong DID)", async () => {
@@ -866,15 +917,26 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
+
       const protocolTreasury = (await governance.config()).treasury;
       await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        wrongDID,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, wrongDID, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, wrongDID, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -902,10 +964,20 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
+      const sigAccount = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt], sig,sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -933,10 +1005,20 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        wrongCountry,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt], sig ,sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -995,10 +1077,20 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, wrongIssuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, wrongIssuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -1025,11 +1117,21 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+      const sigAccount = await signMint(
+        issuer,
+        minterA,
+        wrongTokenId,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
 
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -1067,11 +1169,21 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterB.address, 1)).equals(0);
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
 
       await expect(
         passport
           .connect(minterB)
-          .mintPassport(minterB.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterB.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -1133,11 +1245,21 @@ describe("QuadPassport", async () => {
       await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       await expect(passport.withdrawETH(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+      const sigAccount = await signMint(
+        invalidSigner,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
 
       await expect(
         passport
           .connect(minterA)
-          .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -1179,7 +1301,7 @@ describe("QuadPassport", async () => {
   });
 
   describe("KYB", async () => {
-    it("fail - mint passport to contract if not a business", async () => {
+    it("fail - mint passport to contract while not a business", async () => {
 
       const DeFi = await ethers.getContractFactory("DeFi");
       const defi = await DeFi.deploy(passport.address, reader.address);
@@ -1196,17 +1318,56 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
+      const sigAccount = '0x00';
+
       const promise = passport
         .connect(minterA)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
-      await expect(promise).to.be.revertedWith("NON-BUSINESS_MUST_BE_EOA")
+      await expect(promise).to.be.reverted;
 
 
     });
+    it("fail - mint passport to contract with account forging contract sig while not a business", async () => {
 
+      const DeFi = await ethers.getContractFactory("DeFi");
+      const defi = await DeFi.deploy(passport.address, reader.address);
+      await defi.deployed();
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = await signMint(
+        minterA,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const promise = passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      await expect(promise).to.be.revertedWith("INVALID_ACCOUNT");
+
+
+    });
     it("success - mint passport to contract", async () => {
 
       const newIsBusiness = id("TRUE")
@@ -1228,7 +1389,7 @@ describe("QuadPassport", async () => {
 
       const promise = passport
         .connect(minterA)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt, sig, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, newIsBusiness, issuedAt], sig, '0x00', {
           value: MINT_PRICE,
         });
 

@@ -7,14 +7,9 @@ import "../storage/QuadPassportStore.sol";
 interface IQuadPassport is IERC1155Upgradeable {
 
     function mintPassport(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _quadDID,
-        bytes32 _aml,
-        bytes32 _country,
-        bytes32 _kyb,
-        uint256 _issuedAt,
-        bytes calldata _sig
+        QuadPassportStore.MintConfig calldata config,
+        bytes calldata _sigIssuer,
+        bytes calldata _sigAccount
     ) external payable;
 
     function setAttribute(
@@ -37,11 +32,6 @@ interface IQuadPassport is IERC1155Upgradeable {
     function burnPassport(uint256 _tokenId) external;
 
     function burnPassportIssuer(address _account, uint256 _tokenId) external;
-
-    function getPassportSignature(uint256 _tokenId)
-        external
-        view
-        returns (bytes memory);
 
     function setGovernance(address _governanceContract) external;
 

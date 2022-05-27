@@ -62,7 +62,7 @@ describe("QuadPassport", async () => {
       baseURI
     );
 
-    const sig = await signMint(
+    const sigIssuer = await signMint(
       issuer,
       minterA,
       TOKEN_ID,
@@ -73,15 +73,22 @@ describe("QuadPassport", async () => {
       issuedAt
     );
 
+    const sigMinter = await signMint(
+      minterA,
+      minterA,
+      TOKEN_ID,
+      did,
+      aml,
+      country,
+      isBusiness,
+      issuedAt
+    );
 
     await passport
       .connect(minterA)
-      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+      .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigIssuer, sigMinter, {
         value: MINT_PRICE,
       });
-
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
 
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
@@ -176,10 +183,12 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
+      const sigAccount = '0x00';
+
 
       await passport
         .connect(minterB)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sig, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
@@ -284,10 +293,21 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
+      const sigAccount = await signMint(
+        minterB,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
 
       await passport
         .connect(minterB)
-        .mintPassport(minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sig, {
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
@@ -382,9 +402,20 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        newAML,
+        country,
+        isBusiness,
+        newIssuedAt
+      );
+
       await passport
         .connect(minterA)
-        .mintPassport(minterA.address, TOKEN_ID, did, newAML, country, isBusiness, newIssuedAt, sig, {
+        .mintPassport([minterA.address, TOKEN_ID, did, newAML, country, isBusiness, newIssuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
@@ -500,10 +531,12 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
+      const sigAccount = '0x00'
+
 
       await passport
         .connect(minterB)
-        .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sig, {
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
@@ -690,9 +723,20 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
+      const sigAccount = await signMint(
+        minterA,
+        minterA,
+        TOKEN_ID,
+        did,
+        newAML,
+        country,
+        isBusiness,
+        newIssuedAt
+      );
+
       await passport
         .connect(admin)
-        .mintPassport(minterA.address, TOKEN_ID, did, newAML, country, isBusiness, newIssuedAt, sig, {
+        .mintPassport([minterA.address, TOKEN_ID, did, newAML, country, isBusiness, newIssuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 

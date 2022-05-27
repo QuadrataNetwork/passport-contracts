@@ -340,7 +340,7 @@ import "./storage/QuadGovernanceStore.sol";
                 attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
                 attributes[vars.filteredIndex] = attribute.value;
                 epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = attribute.issuer;
+                issuers[vars.filteredIndex] = _issuers[i];
                 vars.filteredIndex++;
                 continue;
             }
@@ -352,7 +352,7 @@ import "./storage/QuadGovernanceStore.sol";
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
             attributes[vars.filteredIndex] = attribute.value;
             epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = attribute.issuer;
+            issuers[vars.filteredIndex] = _issuers[i];
             vars.filteredIndex++;
         }
 

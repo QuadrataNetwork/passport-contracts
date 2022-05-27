@@ -8,6 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
+import exp from "constants";
 
 const {
   ATTRIBUTE_AML,
@@ -17,6 +18,7 @@ const {
   MINT_PRICE,
   PRICE_PER_ATTRIBUTES,
   PRICE_PER_BUSINESS_ATTRIBUTES,
+  READER_ROLE
 } = require("../../utils/constant.ts");
 
 const {
@@ -70,9 +72,6 @@ describe("QuadPassport", async () => {
     mockBusiness = await MockBusiness.deploy(defi.address)
     await mockBusiness.deployed()
 
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
-
     const sig = await signMint(
       issuer,
       minterA,
@@ -84,9 +83,19 @@ describe("QuadPassport", async () => {
       issuedAt
     );
 
+    const sigAccount = await signMint(
+      minterA,
+      minterA,
+      TOKEN_ID,
+      did,
+      aml,
+      country,
+      isBusiness,
+      issuedAt
+    );
+
     await passport
-      .connect(issuer)
-      .mintPassport(minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt, sig, {
+      .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
         value: MINT_PRICE,
       });
 
@@ -103,13 +112,15 @@ describe("QuadPassport", async () => {
 
     await passport
       .connect(minterA)
-      .mintPassport(mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt, sigBusiness, {
+      .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
         value: MINT_PRICE,
       });
 
 
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
+
+   expect(await governance.hasRole(READER_ROLE, deployer.address)).equals(false);
   });
 
   describe("calculatePaymentToken", async () => {

@@ -53,10 +53,6 @@ describe("QuadGovernance", async () => {
       [issuerTreasury1, issuerTreasury2, issuerTreasury3],
       baseURI
     );
-
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_COUNTRY, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(), 6))
-    await governance.connect(admin).setBusinessAttributePrice(ATTRIBUTE_DID, parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6))
-
   });
 
   describe("initialize", async () => {
