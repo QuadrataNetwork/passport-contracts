@@ -22,7 +22,7 @@ const {
   assertGetAttributeFree,
 } = require("../utils/verify.ts");
 
-const { signMint } = require("../utils/signature.ts");
+const { signMint, signMessage } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
@@ -73,15 +73,9 @@ describe("QuadPassport", async () => {
       issuedAt
     );
 
-    const sigMinter = await signMint(
+    const sigMinter = await signMessage(
       minterA,
-      minterA,
-      TOKEN_ID,
-      did,
-      aml,
-      country,
-      isBusiness,
-      issuedAt
+      minterA.address,
     );
 
     await passport
@@ -293,15 +287,9 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const sigAccount = await signMint(
+      const sigAccount = await signMessage(
         minterB,
-        minterB,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        id("TRUE"),
-        issuedAt
+        minterB.address,
       );
 
 
@@ -402,15 +390,9 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      const sigAccount = await signMint(
+      const sigAccount = await signMessage(
         minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        newAML,
-        country,
-        isBusiness,
-        newIssuedAt
+        minterA.address,
       );
 
       await passport
@@ -723,15 +705,9 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      const sigAccount = await signMint(
+      const sigAccount = await signMessage(
         minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        newAML,
-        country,
-        isBusiness,
-        newIssuedAt
+        minterA.address,
       );
 
       await passport
