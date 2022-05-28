@@ -5,12 +5,7 @@ export const signMessage = async (
   signer: typeof Signer,
   message: typeof DataHexString,
 ): Promise<typeof DataHexString> => {
-  const hash = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ["address"],
-      [message]
-    )
-  );
+  const hash = ethers.utils.keccak256(message);
   const sig = await signer.signMessage(ethers.utils.arrayify(hash));
   return sig;
 };
