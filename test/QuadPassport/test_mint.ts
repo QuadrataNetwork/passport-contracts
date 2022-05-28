@@ -18,7 +18,7 @@ const {
   MINT_PRICE,
   PRICE_PER_BUSINESS_ATTRIBUTES,
 } = require("../../utils/constant.ts");
-const { signMint } = require("../utils/signature.ts");
+const { signMint, signMessage } = require("../utils/signature.ts");
 const {
   deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
@@ -358,15 +358,9 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
+      const sigAccount = await signMessage(
         minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
+        minterA.address,
       );
 
       await passport
@@ -574,16 +568,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
       const wrongMintPrice = parseEther("1");
 
       await expect(
@@ -607,16 +592,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        badTokenId,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
       await expect(
         passport
           .connect(minterA)
@@ -649,16 +625,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
 
       await expect(
         passport
@@ -699,16 +666,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
 
       await expect(
         passport
@@ -719,7 +677,7 @@ describe("QuadPassport", async () => {
       ).to.not.be.reverted;
     });
 
-    it("fail - invalid hash (wrong aml)", async () => {
+    it("fail - invalid hash (wrong aml), valid sigAccount", async () => {
       const wrongAML = id("HIGH");
       const sig = await signMint(
         issuer,
@@ -731,16 +689,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        wrongAML,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
       await expect(
         passport
           .connect(minterA)
@@ -750,7 +699,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - invalid hash (wrong aml)", async () => {
+    it("fail - invalid hash (wrong aml), invalid sigAccount", async () => {
       const wrongAML = id("HIGH");
       const sig = await signMint(
         issuer,
@@ -762,20 +711,11 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        issuer,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(issuer, minterA.address);
       await expect(
         passport
           .connect(minterA)
-          .mintPassport([minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt], sig,sigAccount, {
+          .mintPassport([minterA.address, TOKEN_ID, did, wrongAML, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -793,16 +733,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        wrongCountry,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
       await expect(
         passport
           .connect(minterA)
@@ -824,16 +755,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
       await expect(
         passport
           .connect(minterA)
@@ -856,16 +778,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const sigAccount = await signMint(
-        issuer,
-        minterA,
-        wrongTokenId,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(issuer, minterA.address);
 
       await expect(
         passport
@@ -898,16 +811,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        minterA,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
 
       await expect(
         passport
@@ -930,16 +834,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const sigAccount = await signMint(
-        invalidSigner,
-        minterA,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(invalidSigner, minterA.address);
 
       await expect(
         passport
@@ -998,16 +893,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const sigAccount = await signMint(
-        minterA,
-        mockBusiness,
-        TOKEN_ID,
-        did,
-        aml,
-        country,
-        isBusiness,
-        issuedAt
-      );
+      const sigAccount = await signMessage(minterA, minterA.address);
 
       const promise = passport
         .connect(minterA)

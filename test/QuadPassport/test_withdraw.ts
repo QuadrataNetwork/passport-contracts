@@ -68,7 +68,7 @@ describe("QuadPassport", async () => {
   });
 
   describe("withdrawETH", async () => {
-    it("sucess - after mint", async () => {
+    it("success - after mint", async () => {
       const initialBalanceTreasury = await ethers.provider.getBalance(
         treasury.address
       );
@@ -99,7 +99,7 @@ describe("QuadPassport", async () => {
       expect(await ethers.provider.getBalance(passport.address)).to.equal(0);
     });
 
-    it("sucess - after setAttribute", async () => {
+    it("success - after setAttribute", async () => {
       await assertMint(
         minterA,
         issuer,
@@ -142,7 +142,7 @@ describe("QuadPassport", async () => {
       expect(await ethers.provider.getBalance(passport.address)).to.equal(0);
     });
 
-    it("sucess - after getAttribute(Free)", async () => {
+    it("success - after getAttribute(Free)", async () => {
       await assertMint(
         minterA,
         issuer,
@@ -164,7 +164,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
-    it("sucess - after getAttribute(Payable)", async () => {
+    it("success - after getAttribute(Payable)", async () => {
       await assertMint(
         minterA,
         issuer,
@@ -268,7 +268,7 @@ describe("QuadPassport", async () => {
   });
 
   describe("withdrawToken", async () => {
-    it("sucess - after getAttribute(Free)", async () => {
+    it("success - after getAttribute(Free)", async () => {
       await assertMint(
         minterA,
         issuer,
@@ -289,7 +289,7 @@ describe("QuadPassport", async () => {
         passport.withdrawToken(issuerTreasury.address, usdc.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
-    it("sucess - after getAttribute(Payable)", async () => {
+    it("success - after getAttribute(Payable)", async () => {
       await assertMint(
         minterA,
         issuer,
