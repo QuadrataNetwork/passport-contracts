@@ -6,8 +6,7 @@ const { parseEther } = require("ethers/lib/utils");
 
 // Only rinkeby for now.
 // TODO: Turn into object/mapping and handle Mumbai/Prod/Moonbeam as well
-const QUADPASSPORT_PROXY_CONTRACT = '0x485582Af3CA30F937b22f2b6d48340a8769e54A4'
-
+const QUADPASSPORT_PROXY_CONTRACT = '0x69Ec3DD088e971bC24ef49aB8e57325c28cf30Dd';
 
 (async () => {
   const QuadPassport = await ethers.getContractFactory('QuadPassport');
