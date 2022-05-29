@@ -225,7 +225,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         // Businesses can be Smart Contracts or EOAs
         // Individuals can only be EOAs
         if(_config.isBusiness == keccak256("FALSE")) {
-            extractionHash = keccak256(abi.encode(_config.account));
+            extractionHash = keccak256(abi.encodePacked(_config.account));
             signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
             require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _config.account, "INVALID_ACCOUNT");
         }
