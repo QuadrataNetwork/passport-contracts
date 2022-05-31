@@ -1212,16 +1212,22 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const sigAccount = '0x00';
+      const sigAccount = await signMessage(minterA, mockBusiness.address);
 
+      expect(await passport.balanceOf(mockBusiness.address, 1)).equals(0);
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       const promise = passport
         .connect(minterA)
         .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
           value: MINT_PRICE,
         });
 
-      await expect(promise).to.be.reverted;
-
+      await expect(promise).to.be.revertedWith("INVALID_ACCOUNT");
+      expect(await passport.balanceOf(mockBusiness.address, 1)).equals(0);
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
 
     });
     it("fail - mint passport to contract with account forging contract sig while not a business", async () => {
@@ -1271,6 +1277,10 @@ describe("QuadPassport", async () => {
         newIsBusiness,
         issuedAt
       );
+      expect(await passport.balanceOf(mockBusiness.address, 1)).equals(0);
+      const protocolTreasury = (await governance.config()).treasury;
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdrawETH(issuerTreasury.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
 
       const promise = passport
         .connect(minterA)
@@ -1279,8 +1289,10 @@ describe("QuadPassport", async () => {
         });
 
       await promise;
-
-
+      expect(await passport.balanceOf(mockBusiness.address, 1)).equals(1);
+      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      const response = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      expect(response).to.equals(MINT_PRICE);
     });
   })
 });
