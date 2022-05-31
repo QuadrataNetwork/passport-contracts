@@ -675,7 +675,6 @@ async function getInitialValuesETH(defi: Contract, attribute: string, account: S
   const priceAttribute = parseEther(
     (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
   );
-  expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Test with potential actual transfer of Token
   const initialBalance = await provider.getBalance(account.address);
