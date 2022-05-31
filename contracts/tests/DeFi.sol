@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "../interfaces/IQuadPassport.sol";
 import "../QuadReader.sol";
-import "hardhat/console.sol";
 
 contract DeFi {
     event GetAttributeEvent(bytes32 _value, uint256 _epoch);
@@ -114,8 +113,6 @@ contract DeFi {
         bytes32 _attribute
     ) public payable returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
-        console.log("CA: payment ", paymentAmount);
-        console.logBytes32(_attribute);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETH{value: paymentAmount}(msg.sender, 1, _attribute);
         emit GetAttributeEvents(attrValue, epoch);
