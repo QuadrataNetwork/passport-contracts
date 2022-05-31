@@ -25,7 +25,7 @@ const {
   deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
-const { signMint } = require("../utils/signature.ts");
+const { signMint, signMessage } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
@@ -83,15 +83,9 @@ describe("QuadPassport", async () => {
       issuedAt
     );
 
-    const sigAccount = await signMint(
+    const sigAccount = await signMessage(
       minterA,
-      minterA,
-      TOKEN_ID,
-      did,
-      aml,
-      country,
-      isBusiness,
-      issuedAt
+      minterA.address,
     );
 
     await passport
