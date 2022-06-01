@@ -778,6 +778,60 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
+    it("fail - mint then transfer", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+      expect(await passport.balanceOf(minterA.address, 1)).equals(1);
+      const txPromise = passport.connect(minterA).safeTransferFrom(minterA.address, minterB.address, 1, 1, '0x00');
+      await expect(txPromise).to.be.revertedWith("ONLY_MINT_OR_BURN_ALLOWED");
+      expect(await passport.balanceOf(minterA.address, 1)).equals(1);
+    });
+
     it("fail - invalid mint Price", async () => {
       const sig = await signMint(
         issuer,
