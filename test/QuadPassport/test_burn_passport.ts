@@ -609,7 +609,7 @@ describe("QuadPassport", async () => {
     });
 
 
-    it.skip("success - burnPassport(IS_BUSINESS: TRUE, EOA)", async () => {
+    it("success - burnPassport(IS_BUSINESS: TRUE, EOA)", async () => {
 
       const sig = await signMint(
         issuer,
@@ -708,7 +708,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it.skip("success - can remint after burn", async () => {
+    it("success - can remint after burn", async () => {
       await passport.connect(minterA).burnPassport(TOKEN_ID);
 
       const newIssuedAt = issuedAt + 1;
@@ -775,7 +775,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
     });
 
-    it.skip("fail - invalid tokenId", async () => {
+    it("fail - invalid tokenId", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       const wrongTokenId = 2;
       await expect(
@@ -1042,7 +1042,7 @@ describe("QuadPassport", async () => {
   })
 
   describe("burnPassportIssuer", async () => {
-    it.skip("success - burnPassportIssuer - business contract", async () => {
+    it("success - burnPassportIssuer - business contract", async () => {
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -1158,7 +1158,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it.skip("success - burnPassportIssuer", async () => {
+    it("success - burnPassportIssuer", async () => {
       await assertGetAttributeFree(
         [issuer.address],
         minterA,
@@ -1231,7 +1231,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it.skip("success - can remint after burn", async () => {
+    it("success - can remint after burn", async () => {
       await passport
         .connect(issuer)
         .burnPassportIssuer(minterA.address, TOKEN_ID);
@@ -1301,7 +1301,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
     });
 
-    it.skip("fail - invalid tokenId", async () => {
+    it("fail - invalid tokenId", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       const wrongTokenId = 2;
       await expect(
@@ -1348,7 +1348,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it.skip("fail - passport non-existent", async () => {
+    it("fail - passport non-existent", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.connect(issuer).burnPassportIssuer(minterB.address, TOKEN_ID)
@@ -1356,7 +1356,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
 
-    it.skip("fail - not issuer role", async () => {
+    it("fail - not issuer role", async () => {
       await expect(
         passport.connect(admin).burnPassportIssuer(minterB.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
