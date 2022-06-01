@@ -129,6 +129,7 @@ describe("QuadPassport", async () => {
         did,
         issuedAt
       );
+      const responseAMLBeforeBurn = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterA).burnPassport(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
@@ -162,8 +163,8 @@ describe("QuadPassport", async () => {
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
-      const response = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
-      console.log(response)
+      const responseAML = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      expect(responseAML.value).equals(responseAMLBeforeBurn.value);
     });
 
     it.skip("success - burnPassport(KYB: TRUE, Smart Contract)", async () => {
