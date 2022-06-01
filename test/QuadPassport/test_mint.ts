@@ -1271,7 +1271,10 @@ describe("QuadPassport", async () => {
   describe("KYB", async () => {
 
     it("fail - contracts cannot pose and mint as individuals even when their code length is 0", async () => {
-      const nextAddress = utils.getContractAddress({from: attacker.address, nonce: 0});
+
+      const nonce = await ethers.provider.getTransactionCount(attacker.address);
+
+      const nextAddress = utils.getContractAddress({from: attacker.address, nonce: nonce});
 
       const sig = await signMint(
         issuer,
