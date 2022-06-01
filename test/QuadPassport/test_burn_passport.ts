@@ -192,8 +192,6 @@ describe("QuadPassport", async () => {
           [issuer.address]
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
-
-
     });
 
     it("success - burnPassport, IS_BUSINESS: FALSE", async () => {
@@ -233,10 +231,35 @@ describe("QuadPassport", async () => {
         did,
         issuedAt
       );
-      const responseAMLBeforeBurn = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      // did level
+      const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+
+      expect(didPreBurnA.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterA).burnPassport(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+
+      // did level
+      const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      // account level
+      const didPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+
+      // expect did level attributes to not change
+      expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+
+      expect(didPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
+
       await expect(
         reader.getAttributesIncludingOnly(
           minterA.address,
@@ -267,8 +290,6 @@ describe("QuadPassport", async () => {
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
-      const responseAML = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
-      expect(responseAML.value).equals(responseAMLBeforeBurn.value);
     });
 
     it.skip("success - burnPassport(IS_BUSINESS: TRUE, Smart Contract)", async () => {
@@ -433,7 +454,7 @@ describe("QuadPassport", async () => {
         country,
         issuedAt,
         1,
-        {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY]}
+        { ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] }
       );
       await assertGetAttribute(
         minterB,
@@ -448,7 +469,7 @@ describe("QuadPassport", async () => {
         did,
         issuedAt,
         1,
-        {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID]}
+        { ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] }
       );
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterB).burnPassport(TOKEN_ID);
