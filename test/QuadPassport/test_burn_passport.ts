@@ -821,12 +821,55 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it.skip("fail - passport non-existent", async () => {
+    it("fail - passport non-existent", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.connect(minterB).burnPassport(TOKEN_ID)
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+    });
+
+    it("fail - EOA passport non-existent under token id=2", async () => {
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+      await expect(
+        passport.connect(minterA).burnPassport(2)
+      ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+    });
+
+    it("fail - IS_BUSINESS=true passport non-existent under token id=2", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      const sigAccount = '0x00';
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
+      await expect(
+        mockBusiness.burnPassport(2)
+      ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
+
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+      await mockBusiness.burnPassport(TOKEN_ID);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
     });
   });
 
