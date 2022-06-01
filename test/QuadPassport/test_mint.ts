@@ -323,7 +323,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt,
         1,
-        {newIssuerMint: true}
+        { newIssuerMint: true }
       );
 
       const expectedDIDs = [did, did];
@@ -400,7 +400,7 @@ describe("QuadPassport", async () => {
         expectedIsBusinesses[1],
         expectedIssuedAts[1],
         1,
-        {newIssuerMint: true}
+        { newIssuerMint: true }
       );
 
       await assertGetAttributeETHWrapper(
@@ -645,6 +645,81 @@ describe("QuadPassport", async () => {
       }
     });
 
+    it("fail - mint the same passport using the exact same arguments", async () => {
+
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sig = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      await expect(
+        passport
+          .connect(minterA)
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, '0x00', {
+            value: MINT_PRICE,
+          })
+      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt,
+        1
+      );
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1
+      );
+
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1
+      );
+    });
+
     it("success - change of issuer treasury", async () => {
       const newIssuerTreasury = ethers.Wallet.createRandom();
       await governance
@@ -783,7 +858,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .mintPassport([minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt], sig, sigAccount,{
+          .mintPassport([minterA.address, badTokenId, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
@@ -949,7 +1024,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .mintPassport([minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt], sig ,sigAccount, {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, wrongCountry, isBusiness, issuedAt], sig, sigAccount, {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
@@ -980,7 +1055,7 @@ describe("QuadPassport", async () => {
       await expect(
         passport
           .connect(minterA)
-          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, wrongIsBusiness, issuedAt], sig, '0x00',  {
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, wrongIsBusiness, issuedAt], sig, '0x00', {
             value: MINT_PRICE,
           })
       ).to.be.revertedWith("INVALID_ISSUER");
