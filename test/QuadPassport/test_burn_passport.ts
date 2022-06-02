@@ -1872,10 +1872,48 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
 
-    it.skip("fail - not issuer role", async () => {
+    it("fail - not issuer role", async () => {
       await expect(
         passport.connect(admin).burnPassportIssuer(minterB.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
+
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
     });
   });
 });
