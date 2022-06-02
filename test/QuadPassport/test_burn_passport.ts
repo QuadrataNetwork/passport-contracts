@@ -1019,8 +1019,8 @@ describe("QuadPassport", async () => {
 
       // enable issuer to query data
       await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
-      .to.emit(governance, 'IssuerStatusChanged')
-      .withArgs(issuer.address, 1, 0);
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 1, 0);
 
       // POST BURN
       // did level
@@ -1038,6 +1038,108 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
 
     });
+
+    it("mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted from issuerB", async () => {
+      isBusiness = id("TRUE");
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigA = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = '0x00';
+
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigA, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      const sigB = await signMint(
+        issuerB,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigB, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      // PRE BURN
+      // did level
+      const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPreBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuer.address);
+      const didPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuerB.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuer.address);
+      const countryPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuer.address);
+      const isBusinessPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuerB.address);
+
+      expect(didPreBurnA.value).equals(did);
+      expect(didPreBurnB.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(countryPreBurnB.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+      expect(isBusinessPreBurnB.value).equals(isBusiness);
+
+      // delete issuer pre burn
+      await expect(governance.connect(admin).deleteIssuer(issuer.address))
+        .to.emit(governance, 'IssuerDeleted')
+        .withArgs(issuer.address);
+
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+      await mockBusiness.burn();
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
+
+      // add issuer post burn (in order to access data)
+      await expect(governance.connect(admin).setIssuer(issuer.address, issuerTreasury.address))
+        .to.emit(governance, 'IssuerAdded')
+        .withArgs(issuer.address, issuerTreasury.address);
+
+      // POST BURN
+      // did level
+      const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPostBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuer.address);
+      const didPostBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuerB.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuer.address);
+      const countryPostBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuer.address);
+      const isBusinessPostBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuerB.address);
+
+      // expect did level attributes to not change
+      expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+      expect(amlPreBurnB.value).equals(amlPostBurnB.value);
+
+      expect(didPostBurnA.value).equals(didPreBurnA.value);
+      expect(didPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnA.value).equals(countryPreBurnA.value);
+      expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
+      expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
+
+    });
+
     it("mint for individual, disable issuer, burn, assert only account level items were deleted", async () => {
 
       // PRE BURN
@@ -1062,8 +1164,8 @@ describe("QuadPassport", async () => {
 
       // enable issuer to query data
       await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
-      .to.emit(governance, 'IssuerStatusChanged')
-      .withArgs(issuer.address, 1, 0);
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 1, 0);
 
       // POST BURN
       // did level
@@ -1081,6 +1183,8 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
 
     });
+
+
 
     it("mint 2 passports for individual, delete issuerA, burn, assert only account level items were deleted from issuerB", async () => {
 
