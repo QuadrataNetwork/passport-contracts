@@ -1864,12 +1864,58 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it.skip("fail - passport non-existent", async () => {
+    it.skip("fail - passport non-existent (account never had attested data)", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.connect(issuer).burnPassportIssuer(minterB.address, TOKEN_ID)
       ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+    });
+
+    it("fail - passport non-existent (indiviual account currently has attested data)", async () => {
+      expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+      await expect(
+        passport.connect(issuer).burnPassportIssuer(minterA.address, 2)
+      ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
+      expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+    });
+
+    it("fail - passport non-existent (business account currently has attested data)", async () => {
+      isBusiness = id("TRUE");
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigA = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = '0x00'
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigA, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
+      await expect(
+        passport.connect(issuer).burnPassportIssuer(minterA.address, 2)
+      ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
+      expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
     });
 
     it("fail - trying to burn indiviual account as a non issuer role", async () => {
