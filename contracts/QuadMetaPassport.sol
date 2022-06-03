@@ -16,6 +16,14 @@ contract QuadMetaPassport is UUPSUpgradeable, ERC2771Context {
         governance = IQuadGovernance(_governance);
     }
 
+    function metaMintPassport(
+        IQuadPassport.MintConfig calldata config,
+        bytes calldata _sigIssuer,
+        bytes calldata _sigAccount
+    ) external payable {
+        passport.mintPassport(config, _sigIssuer, _sigAccount);
+    }
+
 
     function _authorizeUpgrade(address) internal view override {
         require(governance.hasRole(keccak256("GOVERNANCE_ROLE"), _msgSender()), "INVALID_ADMIN");
