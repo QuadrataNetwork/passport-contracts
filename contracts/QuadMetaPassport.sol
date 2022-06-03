@@ -12,8 +12,9 @@ contract QuadMetaPassport is UUPSUpgradeable, ERC2771Context {
     IQuadGovernance public governance;
     IQuadPassport public passport;
 
-    constructor(address _trustedForwarder, address _governance) ERC2771Context(_trustedForwarder) {
+    constructor(address _trustedForwarder, address _governance, address _passport) ERC2771Context(_trustedForwarder) {
         governance = IQuadGovernance(_governance);
+        passport = IQuadPassport(_passport);
     }
 
     function metaMintPassport(
