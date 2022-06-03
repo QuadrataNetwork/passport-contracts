@@ -231,7 +231,7 @@ import "./storage/QuadGovernanceStore.sol";
 
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
-            if(governance.getIssuerStatus(_issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+            if(governance.getIssuerStatus(_issuers[i]) == IQuadGovernance.IssuerStatus.DEACTIVATED) {
                 issuers[i] = address(0);
                 gaps++;
             }
@@ -257,12 +257,12 @@ import "./storage/QuadGovernanceStore.sol";
     function _excludedIssuers(
         address[] memory _issuers
     ) internal view returns(address[] memory) {
-        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
+        IQuadGovernance.Issuer[] memory issuerData = governance.getIssuers();
         address[] memory issuers = new address[](governance.getIssuersLength());
 
         uint256 gaps = 0;
         for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
+            if(issuerData[i].status == IQuadGovernance.IssuerStatus.DEACTIVATED) {
                 gaps++;
                 continue;
             }

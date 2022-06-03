@@ -1,8 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../storage/QuadGovernanceStore.sol";
-
 interface IQuadGovernance {
     function setTreasury(address _treasury) external;
 
@@ -71,9 +69,20 @@ interface IQuadGovernance {
 
     function getIssuersLength() external view returns (uint256);
 
-    function getIssuers() external view returns (QuadGovernanceStore.Issuer[] memory);
+    enum IssuerStatus {
+        ACTIVE,
+        DEACTIVATED
+    }
 
-    function issuers(uint256) external view returns(QuadGovernanceStore.Issuer memory);
+    struct Issuer {
+        address issuer;
+        IssuerStatus status;
+        // TODO: should we add `bytes data;` in the struct
+    }
 
-    function getIssuerStatus(address _issuer) external view returns(QuadGovernanceStore.IssuerStatus);
+    function getIssuers() external view returns (Issuer[] memory);
+
+    function issuers(uint256) external view returns(Issuer memory);
+
+    function getIssuerStatus(address _issuer) external view returns(IssuerStatus);
 }
