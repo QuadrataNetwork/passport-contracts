@@ -60,7 +60,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
     function mintPassport(
-        MintConfig calldata _config,
+        IQuadPassport.MintConfig calldata _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override {
@@ -71,10 +71,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
-        _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
-        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
+        _attributes[_config.account][keccak256("COUNTRY")][issuer] = IQuadPassport.Attribute({value: _config.country, epoch: _config.issuedAt});
+        _attributes[_config.account][keccak256("DID")][issuer] = IQuadPassport.Attribute({value: _config.quadDID, epoch: _config.issuedAt});
+        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = IQuadPassport.Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
+        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = IQuadPassport.Attribute({value: _config.aml, epoch: _config.issuedAt});
 
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
@@ -138,15 +138,15 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         );
 
         if (governance.eligibleAttributes(_attribute)) {
-            _attributes[_account][_attribute][_issuer] = Attribute({
+            _attributes[_account][_attribute][_issuer] = IQuadPassport.Attribute({
                 value: _value,
                 epoch: _issuedAt
             });
         } else {
-            // Attribute grouped by DID
+            // IQuadPassport.Attribute grouped by DID
             bytes32 dID = _attributes[_account][keccak256("DID")][_issuer].value;
             require(dID != bytes32(0), "DID_NOT_FOUND");
-            _attributesByDID[dID][_attribute][_issuer] = Attribute({
+            _attributesByDID[dID][_attribute][_issuer] = IQuadPassport.Attribute({
                 value: _value,
                 epoch: _issuedAt
             });
@@ -191,7 +191,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];
+                IQuadPassport.Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];
                 if(attribute.epoch != 0) {
                     return;
                 }
@@ -207,7 +207,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _sigAccount sig of EOA authorizing claim of passport NFT
     /// @return unique hash of mintPassport invocation and extracted issuer of passport
     function _verifySignersMint(
-        MintConfig calldata _config,
+        IQuadPassport.MintConfig calldata _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
@@ -320,10 +320,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         bytes32 _attribute,
         address _issuer
-    ) public view override returns (Attribute memory) {
+    ) public view override returns (IQuadPassport.Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
-           return Attribute({value: bytes32(0), epoch: 0});
+           return IQuadPassport.Attribute({value: bytes32(0), epoch: 0});
         return _attributes[_account][_attribute][_issuer];
     }
 
@@ -336,10 +336,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _dID,
         bytes32 _attribute,
         address _issuer
-    ) public view override returns (Attribute memory) {
+    ) public view override returns (IQuadPassport.Attribute memory) {
         require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         if (!governance.hasRole(ISSUER_ROLE, _issuer))
-           return Attribute({value: bytes32(0), epoch: 0});
+           return IQuadPassport.Attribute({value: bytes32(0), epoch: 0});
         return _attributesByDID[_dID][_attribute][_issuer];
     }
 

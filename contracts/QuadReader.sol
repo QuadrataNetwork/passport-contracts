@@ -313,7 +313,7 @@ import "./storage/QuadGovernanceStore.sol";
                     vars.gaps++;
                     continue;
                 }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
+                IQuadPassport.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     vars.gaps++;
                 }
@@ -326,13 +326,13 @@ import "./storage/QuadGovernanceStore.sol";
         uint256[] memory epochs = new uint256[](vars.delta);
         address[] memory issuers = new address[](vars.delta);
 
-        QuadPassportStore.Attribute memory attribute;
+        IQuadPassport.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
                     continue;
                 }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
+                IQuadPassport.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
                 if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
                     continue;
                 }
@@ -480,7 +480,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _issuer
     ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
+        IQuadPassport.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 
@@ -494,7 +494,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _issuer
     ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
+        IQuadPassport.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
         return attrib.value != bytes32(0) && attrib.epoch != 0;
     }
 

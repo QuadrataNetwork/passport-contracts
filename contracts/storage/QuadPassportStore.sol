@@ -6,29 +6,6 @@ import "../interfaces/IQuadGovernance.sol";
 
 contract QuadPassportStore {
 
-    struct Attribute {
-        bytes32 value;
-        uint256 epoch;
-    }
-
-    /// @dev MintConfig is defined to prevent 'stack frame too deep' during compilation
-    /// @notice This struct is used to abstract mintPassport function parameters
-    /// `account` EOA/Contract to mint the passport
-    /// `tokenId` tokenId of the Passport (1 for now)
-    /// `quadDID` Quadrata Decentralized Identity (raw value)
-    /// `aml` keccak256 of the AML status value
-    /// `country` keccak256 of the country value
-    /// `isBusiness` flag identifying if a wallet is a business or individual
-    /// `issuedAt` epoch when the passport has been issued by the Issuer
-    struct MintConfig {
-        address account;
-        uint256 tokenId;
-        bytes32 quadDID;
-        bytes32 aml;
-        bytes32 country;
-        bytes32 isBusiness;
-        uint256 issuedAt;
-    }
 
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
@@ -42,9 +19,9 @@ contract QuadPassportStore {
 
     // Passport attributes
     // Wallet => (Attribute Name => (Issuer => Attribute))
-    mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
+    mapping(address => mapping(bytes32 => mapping(address => IQuadPassport.Attribute))) internal _attributes;
     // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
-    mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
+    mapping(bytes32 => mapping(bytes32 => mapping(address => IQuadPassport.Attribute))) internal _attributesByDID;
 
     // Accounting
     // ERC20 => Account => balance

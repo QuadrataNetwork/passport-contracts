@@ -2,12 +2,30 @@
 pragma solidity ^0.8.0;
 
 import "../ERC1155/IERC1155Upgradeable.sol";
-import "../storage/QuadPassportStore.sol";
 
 interface IQuadPassport is IERC1155Upgradeable {
 
+    /// @dev MintConfig is defined to prevent 'stack frame too deep' during compilation
+    /// @notice This struct is used to abstract mintPassport function parameters
+    /// `account` EOA/Contract to mint the passport
+    /// `tokenId` tokenId of the Passport (1 for now)
+    /// `quadDID` Quadrata Decentralized Identity (raw value)
+    /// `aml` keccak256 of the AML status value
+    /// `country` keccak256 of the country value
+    /// `isBusiness` flag identifying if a wallet is a business or individual
+    /// `issuedAt` epoch when the passport has been issued by the Issuer
+    struct MintConfig {
+        address account;
+        uint256 tokenId;
+        bytes32 quadDID;
+        bytes32 aml;
+        bytes32 country;
+        bytes32 isBusiness;
+        uint256 issuedAt;
+    }
+
     function mintPassport(
-        QuadPassportStore.MintConfig calldata config,
+        MintConfig calldata config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable;
@@ -42,9 +60,14 @@ interface IQuadPassport is IERC1155Upgradeable {
         returns (uint256);
 
 
-    function attributes(address, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
+    struct Attribute {
+        bytes32 value;
+        uint256 epoch;
+    }
 
-    function attributesByDID(bytes32, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
+    function attributes(address, bytes32, address) external view returns (Attribute memory);
+
+    function attributesByDID(bytes32, bytes32, address) external view returns (Attribute memory);
 
     function increaseAccountBalanceETH(address, uint256) external;
 
