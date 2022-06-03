@@ -218,22 +218,38 @@ describe("READER_ROLE Privileges", async () => {
 
     describe("increaseAccountBalanceETH", async () => {
 
-        it("success - ", async() => {
+        it("success - READER_ROLE can increase eth withdrawal allowences", async() => {
+            expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(true);
             expect(await ethers.provider.getBalance(passport.address)).equals(parseEther("1"));
+            await expect(passport.withdrawETH(minterA.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+            await passport.connect(dataChecker).increaseAccountBalanceETH(minterA.address, parseEther("0.75"));
+            const response = await passport.callStatic.withdrawETH(minterA.address);
+            expect(response).equals(parseEther("0.75"));
+
+            await passport.withdrawETH(minterA.address)
+            expect(await ethers.provider.getBalance(passport.address)).equals(parseEther("0.25"));
         });
 
-        it("fail - ", async() => {
+        it("fail - accounts without READER_ROLE cannot increase eth withdrawal allowences", async() => {
+            expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(true);
             expect(await ethers.provider.getBalance(passport.address)).equals(parseEther("1"));
+            await governance.connect(admin).revokeRole(id("READER_ROLE"), dataChecker.address);
+            expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(false);
 
+            await expect(passport.withdrawETH(minterA.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+            await expect(passport.connect(dataChecker).increaseAccountBalanceETH(minterA.address, parseEther("0.75"))).to.be.revertedWith("INVALID_READER");
+            await expect(passport.withdrawETH(minterA.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+
+            expect(await ethers.provider.getBalance(passport.address)).equals(parseEther("1"));
         });
     });
 
     describe("increaseAccountBalance", async () => {
-        it("success - ", async() => {
+        it("success - READER_ROLE can increase token withdrawal allowences", async() => {
             expect(await usdc.balanceOf(passport.address)).equals(parseUnits("1000", 6));
         });
 
-        it("fail - ", async() => {
+        it("fail - accounts without READER_ROLE cannot increase token withdrawal allowences", async() => {
             expect(await usdc.balanceOf(passport.address)).equals(parseUnits("1000", 6));
 
         });
