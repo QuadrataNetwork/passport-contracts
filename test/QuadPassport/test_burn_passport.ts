@@ -97,7 +97,7 @@ describe("QuadPassport", async () => {
 
 
   describe("burnPassport", async () => {
-    it("success - burnPassport, KYB: FALSE", async () => {
+    it.skip("success - burnPassport, KYB: FALSE", async () => {
       await assertGetAttributeFree(
         [issuer.address],
         minterA,
@@ -168,7 +168,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - burnPassport(KYB: TRUE, Smart Contract)", async () => {
+    it.skip("success - burnPassport(KYB: TRUE, Smart Contract)", async () => {
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -282,7 +282,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - burnPassport(KYB: TRUE, EOA)", async () => {
+    it.skip("success - burnPassport(KYB: TRUE, EOA)", async () => {
 
       const sig = await signMint(
         issuer,
@@ -330,7 +330,7 @@ describe("QuadPassport", async () => {
         country,
         issuedAt,
         1,
-        {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY]}
+        { ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] }
       );
       await assertGetAttribute(
         minterB,
@@ -345,7 +345,7 @@ describe("QuadPassport", async () => {
         did,
         issuedAt,
         1,
-        {ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID]}
+        { ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] }
       );
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterB).burnPassport(TOKEN_ID);
@@ -381,7 +381,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - can remint after burn", async () => {
+    it.skip("success - can remint after burn", async () => {
       await passport.connect(minterA).burnPassport(TOKEN_ID);
 
       const newIssuedAt = issuedAt + 1;
@@ -448,7 +448,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
     });
 
-    it("fail - invalid tokenId", async () => {
+    it.skip("fail - invalid tokenId", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       const wrongTokenId = 2;
       await expect(
@@ -494,7 +494,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("fail - passport non-existent", async () => {
+    it.skip("fail - passport non-existent", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.connect(minterB).burnPassport(TOKEN_ID)
@@ -504,7 +504,7 @@ describe("QuadPassport", async () => {
   });
 
   describe("burnPassportIssuer", async () => {
-    it("success - burnPassportIssuer - business contract", async () => {
+    it.skip("success - burnPassportIssuer - business contract", async () => {
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -620,7 +620,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - burnPassportIssuer", async () => {
+    it.skip("success - burnPassportIssuer", async () => {
       await assertGetAttributeFree(
         [issuer.address],
         minterA,
@@ -693,7 +693,86 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - can remint after burn", async () => {
+    it("success - mint 2 individual passports, deactivate issuerA, burnIssuerA, then assert only account level attributes remain on issuerB", async () => {
+
+      const sigB = await signMint(
+        issuerB,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = await signMessage(minterA, minterA.address);
+
+      await passport
+        .connect(minterB)
+        .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigB, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      // PRE BURN
+      // did level
+      const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPreBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
+      const didPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuerB.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
+      const countryPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+      const isBusinessPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuerB.address);
+      expect(didPreBurnA.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+
+      expect(didPreBurnB.value).equals(did);
+      expect(countryPreBurnB.value).equals(country);
+      expect(isBusinessPreBurnB.value).equals(isBusiness);
+
+      // disable issuer for burn
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 0, 1);
+
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(issuerB).burnPassportIssuer(minterA.address, TOKEN_ID);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+
+      // enable issuer to see what the storage values are
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 1, 0);
+
+      // POST BURN
+      // did level
+      const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPostBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+      const didPostBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuerB.address);
+      const countryPostBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPostBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuerB.address);
+
+      // expect did level attributes to not change
+      expect(amlPostBurnB.value).equals(amlPreBurnB.value);
+      expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+
+      expect(didPostBurnA.value).equals(didPreBurnA.value);
+      expect(countryPostBurnA.value).equals(countryPreBurnA.value);
+      expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
+
+      expect(didPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
+    });
+
+    it.skip("success - can remint after burn", async () => {
       await passport
         .connect(issuer)
         .burnPassportIssuer(minterA.address, TOKEN_ID);
@@ -763,7 +842,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
     });
 
-    it("fail - invalid tokenId", async () => {
+    it.skip("fail - invalid tokenId", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       const wrongTokenId = 2;
       await expect(
@@ -810,7 +889,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("fail - passport non-existent", async () => {
+    it.skip("fail - passport non-existent", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
         passport.connect(issuer).burnPassportIssuer(minterB.address, TOKEN_ID)
@@ -818,7 +897,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
 
-    it("fail - not issuer role", async () => {
+    it.skip("fail - not issuer role", async () => {
       await expect(
         passport.connect(admin).burnPassportIssuer(minterB.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
