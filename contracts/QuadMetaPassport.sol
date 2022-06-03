@@ -3,18 +3,15 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
-import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassport.sol";
 
 contract QuadMetaPassport is ERC2771Context {
 
-    IQuadGovernance public governance;
     IQuadPassport public passport;
 
     // Biconomy's Trusted Forwarder: 0x84a0856b038eaAd1cC7E297cF34A7e72685A8693
     // Full list for each network found here: https://docs.biconomy.io/misc/contract-addresses
-    constructor(address _trustedForwarder, address _governance, address _passport) ERC2771Context(_trustedForwarder) {
-        governance = IQuadGovernance(_governance);
+    constructor(address _trustedForwarder, address _passport) ERC2771Context(_trustedForwarder) {
         passport = IQuadPassport(_passport);
     }
 

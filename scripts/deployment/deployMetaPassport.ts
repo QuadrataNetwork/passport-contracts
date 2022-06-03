@@ -4,16 +4,13 @@ import { ethers, upgrades } from "hardhat";
 
 const deployQuadMetaPassport = async (
     forwarder: string,
-    governance: string,
     passport: string
 ) => {
     console.log("forwarder: ", forwarder);
-    console.log("governance: ", governance);
     console.log("passport: ", passport);
     const QuadMetaPassport = await ethers.getContractFactory("QuadMetaPassport");
     const metaPassport = await QuadMetaPassport.deploy(
         forwarder,
-        governance,
         passport
     );
     await metaPassport.deployed();
@@ -24,7 +21,6 @@ const deployQuadMetaPassport = async (
 (async () => {
     await deployQuadMetaPassport(
         '0xFD4973FeB2031D4409fB57afEE5dF2051b171104',
-        '0x485582Af3CA30F937b22f2b6d48340a8769e54A4',
         '0x69Ec3DD088e971bC24ef49aB8e57325c28cf30Dd'
     );
 
