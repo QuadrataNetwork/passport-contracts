@@ -1,13 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.9;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassport.sol";
 
-contract QuadMetaPassport is UUPSUpgradeable, ERC2771Context {
+contract QuadMetaPassport is ERC2771Context {
 
     IQuadGovernance public governance;
     IQuadPassport public passport;
@@ -28,9 +27,5 @@ contract QuadMetaPassport is UUPSUpgradeable, ERC2771Context {
         bytes calldata _sigAccount
     ) external payable {
         passport.mintPassport(config, _sigIssuer, _sigAccount);
-    }
-
-    function _authorizeUpgrade(address) internal view override {
-        require(governance.hasRole(keccak256("GOVERNANCE_ROLE"), _msgSender()), "INVALID_ADMIN");
     }
 }
