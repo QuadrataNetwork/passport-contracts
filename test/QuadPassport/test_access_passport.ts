@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { id, parseUnits, formatBytes32String, zeroPad, hexZeroPad } from "ethers/lib/utils";
+import { id, parseUnits, formatBytes32String, zeroPad, hexZeroPad, parseEther } from "ethers/lib/utils";
 
 const {
     TOKEN_ID,
@@ -83,6 +83,13 @@ describe("READER_ROLE Privileges", async () => {
 
         await usdc.transfer(minterA.address, parseUnits("1000", 6));
         await usdc.transfer(minterB.address, parseUnits("1000", 6));
+
+        // top off passport with token and eth
+        await admin.sendTransaction({
+            to: passport.address,
+            value: parseEther("1").sub(await ethers.provider.getBalance(passport.address))
+        });
+        await usdc.transfer(passport.address, parseUnits("1000", 6));
     });
 
     describe("attributes", async () => {
@@ -97,7 +104,7 @@ describe("READER_ROLE Privileges", async () => {
             expect(countryResponse.value).equals(country);
             expect(isBusinessResponse.value).equals(isBusiness);
 
-        })
+        });
 
         it("fail - a READER_ROLE may gets null attributes if an issuer is deleted", async () => {
             expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(true);
@@ -159,7 +166,7 @@ describe("READER_ROLE Privileges", async () => {
 
             expect(amlResponse.value).equals(aml);
 
-        })
+        });
 
         it("fail - a READER_ROLE may gets null attributes if an issuer is deleted", async () => {
             expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(true);
@@ -212,21 +219,23 @@ describe("READER_ROLE Privileges", async () => {
     describe("increaseAccountBalanceETH", async () => {
 
         it("success - ", async() => {
-
-        })
+            expect(await ethers.provider.getBalance(passport.address)).equals(parseEther("1"));
+        });
 
         it("fail - ", async() => {
+            expect(await ethers.provider.getBalance(passport.address)).equals(parseEther("1"));
 
-        })
+        });
     });
 
     describe("increaseAccountBalance", async () => {
         it("success - ", async() => {
-
-        })
+            expect(await usdc.balanceOf(passport.address)).equals(parseUnits("1000", 6));
+        });
 
         it("fail - ", async() => {
+            expect(await usdc.balanceOf(passport.address)).equals(parseUnits("1000", 6));
 
-        })
+        });
     });
 });
