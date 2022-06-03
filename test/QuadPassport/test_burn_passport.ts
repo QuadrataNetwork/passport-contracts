@@ -2,7 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { id, parseUnits, formatBytes32String } from "ethers/lib/utils";
+import { id, parseUnits, formatBytes32String, zeroPad, hexZeroPad } from "ethers/lib/utils";
+import { assertMint } from "../utils/verify";
 
 const {
   ATTRIBUTE_AML,
@@ -36,7 +37,10 @@ describe("QuadPassport", async () => {
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
-    issuerTreasury: SignerWithAddress;
+    issuerB: SignerWithAddress,
+    issuerTreasury: SignerWithAddress,
+    issuerBTreasury: SignerWithAddress,
+    dataChecker: SignerWithAddress; // used as READER_ROLE to check AML and DID after burn
   let baseURI: string;
   let did: string;
   let aml: string;
@@ -52,7 +56,7 @@ describe("QuadPassport", async () => {
     isBusiness = id("FALSE");
     issuedAt = Math.floor(new Date().getTime() / 1000);
 
-    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
+    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, dataChecker, issuerB, issuerBTreasury] =
       await ethers.getSigners();
     [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
@@ -84,9 +88,13 @@ describe("QuadPassport", async () => {
         value: MINT_PRICE,
       });
 
+    await governance.connect(admin).grantRole(id("READER_ROLE"), dataChecker.address);
+    await governance.connect(admin).setIssuer(issuerB.address, issuerBTreasury.address)
+
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
+
 
   describe("burnPassport", async () => {
     it("success - burnPassport, KYB: FALSE", async () => {
