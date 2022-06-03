@@ -975,6 +975,85 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
     });
 
+    it("success - mint 2 individual passports, delete issuerA, burnIssuerA, then assert only account level attributes remain on issuerB", async () => {
+
+      const sigB = await signMint(
+        issuerB,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = await signMessage(minterA, minterA.address);
+
+      await passport
+        .connect(minterB)
+        .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigB, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      // PRE BURN
+      // did level
+      const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPreBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
+      const didPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuerB.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
+      const countryPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+      const isBusinessPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuerB.address);
+      expect(didPreBurnA.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+
+      expect(didPreBurnB.value).equals(did);
+      expect(countryPreBurnB.value).equals(country);
+      expect(isBusinessPreBurnB.value).equals(isBusiness);
+
+      // delete issuer for burn
+      await expect(governance.connect(admin).deleteIssuer(issuer.address))
+        .to.emit(governance, 'IssuerDeleted')
+        .withArgs(issuer.address);
+
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(issuerB).burnPassportIssuer(minterA.address, TOKEN_ID);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+
+      // enable issuer to see what the storage values are
+      await expect(governance.connect(admin).setIssuer(issuer.address, issuerTreasury.address))
+        .to.emit(governance, 'IssuerAdded')
+        .withArgs(issuer.address, issuerTreasury.address);
+
+      // POST BURN
+      // did level
+      const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPostBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+      const didPostBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuerB.address);
+      const countryPostBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPostBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuerB.address);
+
+      // expect did level attributes to not change
+      expect(amlPostBurnB.value).equals(amlPreBurnB.value);
+      expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+
+      expect(didPostBurnA.value).equals(didPreBurnA.value);
+      expect(countryPostBurnA.value).equals(countryPreBurnA.value);
+      expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
+
+      expect(didPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
+    });
+
     it.skip("success - can remint after burn", async () => {
       await passport
         .connect(issuer)
