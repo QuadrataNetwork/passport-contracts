@@ -208,4 +208,25 @@ describe("READER_ROLE Privileges", async () => {
 
         });
     });
+
+    describe("increaseAccountBalanceETH", async () => {
+
+        it("success - ", async() => {
+
+        })
+
+        it("fail - ", async() => {
+
+        })
+    });
+
+    describe("increaseAccountBalance", async () => {
+        it("success - ", async() => {
+
+        })
+
+        it("fail - ", async() => {
+
+        })
+    });
 });
