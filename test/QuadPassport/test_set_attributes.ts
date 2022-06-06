@@ -293,7 +293,7 @@ describe("QuadPassport", async () => {
 
 
     it("success - setAttribute(COUNTRY)", async () => {
-      const newCountry = id("USA");
+      const newCountry = id("DE");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const initialBalance = await ethers.provider.getBalance(passport.address);
       await assertSetAttribute(
