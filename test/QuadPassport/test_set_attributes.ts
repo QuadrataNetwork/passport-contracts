@@ -480,7 +480,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("success - setAttribute(AML)", async () => {
+    it("success - Individual setAttribute(AML)", async () => {
       const newAML = hexZeroPad('0x05', 32);
       const newIssuedAt = 1000;
       const initialBalance = await ethers.provider.getBalance(passport.address);
@@ -521,6 +521,81 @@ describe("QuadPassport", async () => {
       // OK Fetching old value
       await assertGetAttribute(
         minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+      const expectedPayment = PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY];
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(
+        initialBalance.add(expectedPayment)
+      );
+    });
+
+    it("success - Business setAttribute(AML)", async () => {
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+        );
+
+        await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newAML = hexZeroPad('0x05', 32);
+      const newIssuedAt = 1000;
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await assertSetAttribute(
+        minterB,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_AML,
+        newAML,
+        newIssuedAt
+      );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        newAML,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterB,
         treasury,
         issuer,
         issuerTreasury,
