@@ -934,7 +934,7 @@ describe("QuadPassport", async () => {
         })
     });
 
-    it("fail - not issuer role", async () => {
+    it("fail - not issuer role (Individual)", async () => {
       const newIssuer = ethers.Wallet.createRandom();
       const newAML = id("HIGH");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
@@ -950,6 +950,45 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - not issuer role (Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+        );
+
+        await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+
+      const newIssuer = ethers.Wallet.createRandom();
+      const newAML = id("HIGH");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const sig = await signSetAttribute(
+        newIssuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        newAML,
+        newIssuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
