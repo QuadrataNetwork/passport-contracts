@@ -260,7 +260,6 @@ describe("QuadPassport", async () => {
     });
 
     it("success - setAttribute(IS_BUSINESS) Smart Contract", async () => {
-      const newIsBusiness = id("FALSE");
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -275,14 +274,16 @@ describe("QuadPassport", async () => {
         country,
         id("TRUE"),
         issuedAt
-      );
+        );
 
-      await passport
+        await passport
         .connect(minterA)
         .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
           value: MINT_PRICE,
         });
 
+
+      const newIsBusiness = id("FALSE");
       await assertSetAttribute(
         mockBusiness,
         issuer,
