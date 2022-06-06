@@ -156,8 +156,59 @@ describe("QuadPassport", async () => {
     });
 
     it("success - setAttribute(IS_BUSINESS) EOA", async () => {
-      const newIsBusiness = id("TRUE");
-      const newIssuedAt = 1010;
+      var newIsBusiness = id("TRUE");
+      var newIssuedAt = 1010;
+      await assertSetAttribute(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+
+      newIsBusiness = id("FALSE");
+      newIssuedAt = 1011;
       await assertSetAttribute(
         minterA,
         issuer,
@@ -353,7 +404,7 @@ describe("QuadPassport", async () => {
 
     it("success - setAttribute(AML)", async () => {
       const newAML = hexZeroPad('0x05', 32);
-      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const newIssuedAt = 1000;
       const initialBalance = await ethers.provider.getBalance(passport.address);
       await assertSetAttribute(
         minterA,
