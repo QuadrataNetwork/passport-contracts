@@ -7,6 +7,7 @@ import {
   parseEther,
   parseUnits,
   formatBytes32String,
+  hexZeroPad,
 } from "ethers/lib/utils";
 import { assertGetAttributeIncluding, assertMint } from "../utils/verify";
 
@@ -328,6 +329,64 @@ describe("QuadPassport", async () => {
         reader,
         ATTRIBUTE_AML,
         aml,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+      const expectedPayment = PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY];
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(
+        initialBalance.add(expectedPayment)
+      );
+    });
+
+    it("success - setAttribute(AML)", async () => {
+      const newAML = hexZeroPad('0x05', 32);
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await assertSetAttribute(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_AML,
+        newAML,
+        newIssuedAt
+      );
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        newAML,
         issuedAt
       );
       // OK Fetching old value
