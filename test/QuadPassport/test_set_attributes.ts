@@ -905,7 +905,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - invalid mint price per attribute", async () => {
+    it("fail - invalid mint price too high per attribute (Individual)", async () => {
       const sig = await signSetAttribute(
         issuer,
         minterA,
@@ -919,6 +919,94 @@ describe("QuadPassport", async () => {
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
             value: parseEther("1"),
+          })
+      ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
+    });
+
+    it("fail - invalid mint too high price per attribute (Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
+            value: parseEther("1"),
+          })
+      ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
+    });
+
+    it("fail - invalid mint price too low per attribute (Individual)", async () => {
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
+            value: parseEther("0.0000001"),
+          })
+      ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
+    });
+
+    it("fail - invalid mint too low price per attribute (Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_COUNTRY, country, issuedAt, sig, {
+            value: parseEther("0.0000001"),
           })
       ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
     });
