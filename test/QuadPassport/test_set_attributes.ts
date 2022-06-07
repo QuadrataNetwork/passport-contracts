@@ -1068,7 +1068,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - invalid sig (attribute value)", async () => {
+    it("fail - invalid sig (attribute value for AML)", async () => {
       const wrongAML = id("HIGH");
       const sig = await signSetAttribute(
         issuer,
@@ -1083,6 +1083,64 @@ describe("QuadPassport", async () => {
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, wrongAML, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - invalid sig (attribute value for COUNTRY, Inidividual)", async () => {
+      const wrongAML = id("FR");
+      aml = id("DE");
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_COUNTRY,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, wrongAML, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - invalid sig (attribute value for COUNTRY, Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const wrongAML = id("FR");
+      aml = id("DE");
+
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_COUNTRY,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_COUNTRY, wrongAML, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY],
           })
       ).to.revertedWith("INVALID_ISSUER");
     });
