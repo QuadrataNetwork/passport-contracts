@@ -825,7 +825,51 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("MUST_BURN_AND_MINT");
     });
 
-    it("fail - passport tokenId invalid", async () => {
+    it("fail - passport tokenId invalid (Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const invalidTokenId = 2;
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        invalidTokenId,
+        ATTRIBUTE_COUNTRY,
+        newCountry,
+        newIssuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(
+            minterB.address,
+            invalidTokenId,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt,
+            sig,
+            { value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_COUNTRY] }
+          )
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
+
+    it("fail - passport tokenId invalid (Individual)", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const invalidTokenId = 2;
