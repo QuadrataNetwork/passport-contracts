@@ -274,9 +274,9 @@ describe("QuadPassport", async () => {
         country,
         id("TRUE"),
         issuedAt
-        );
+      );
 
-        await passport
+      await passport
         .connect(minterA)
         .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
           value: MINT_PRICE,
@@ -414,9 +414,9 @@ describe("QuadPassport", async () => {
         country,
         id("TRUE"),
         issuedAt
-        );
+      );
 
-        await passport
+      await passport
         .connect(minterA)
         .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, '0x00', {
           value: MINT_PRICE,
@@ -548,9 +548,9 @@ describe("QuadPassport", async () => {
         country,
         id("TRUE"),
         issuedAt
-        );
+      );
 
-        await passport
+      await passport
         .connect(minterA)
         .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, '0x00', {
           value: MINT_PRICE,
@@ -965,9 +965,9 @@ describe("QuadPassport", async () => {
         country,
         id("TRUE"),
         issuedAt
-        );
+      );
 
-        await passport
+      await passport
         .connect(minterA)
         .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
           value: MINT_PRICE,
@@ -1013,7 +1013,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - invalid sig (attribute type)", async () => {
+    it("fail - invalid sig (attribute type, Individual)", async () => {
       const wrongAttribute = ATTRIBUTE_COUNTRY;
       const sig = await signSetAttribute(
         issuer,
@@ -1027,6 +1027,42 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, wrongAttribute, aml, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - invalid sig (attribute type, Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const wrongAttribute = ATTRIBUTE_COUNTRY;
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, wrongAttribute, aml, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
@@ -1051,7 +1087,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - invalid sig (issuedAt)", async () => {
+    it("fail - invalid sig (issuedAt, Individual)", async () => {
       const wrongIssuedAt = issuedAt + 1;
       const sig = await signSetAttribute(
         issuer,
@@ -1065,6 +1101,42 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, aml, wrongIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - invalid sig (issuedAt, Business)", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const wrongIssuedAt = issuedAt + 1;
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_AML, aml, wrongIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
           })
       ).to.revertedWith("INVALID_ISSUER");
