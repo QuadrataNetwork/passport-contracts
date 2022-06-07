@@ -770,7 +770,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
-    it("fail - setAttribute(DID)", async () => {
+    it("fail - setAttribute(DID) as Individual", async () => {
       const newDid = formatBytes32String("did:1:newdid");
       const sig = await signSetAttribute(
         issuer,
@@ -784,6 +784,42 @@ describe("QuadPassport", async () => {
         passport
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_DID, newDid, issuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_DID],
+          })
+      ).to.revertedWith("MUST_BURN_AND_MINT");
+    });
+
+    it("fail - setAttribute(DID) as Business", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newDid = formatBytes32String("did:1:newdid");
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_DID,
+        newDid,
+        issuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_DID, newDid, issuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_DID],
           })
       ).to.revertedWith("MUST_BURN_AND_MINT");
