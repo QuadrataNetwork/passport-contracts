@@ -480,6 +480,169 @@ describe("QuadPassport", async () => {
       );
     });
 
+    it("success - Individuals may be assiged new eligible attributes", async () => {
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(false);
+      await governance.connect(admin).setEligibleAttribute(id("GENDER"), true);
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(true);
+
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        id("GENDER"),
+        id("M"),
+        issuedAt
+      );
+
+      await passport
+      .connect(minterA)
+      .setAttribute(minterA.address, TOKEN_ID, id("GENDER"), id("M"), issuedAt, sig, {
+        value: 0,
+      });
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        id("GENDER"),
+        id("M"),
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    })
+
+    it("success - Businesses may be assiged new eligible attributes", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(false);
+      await governance.connect(admin).setEligibleAttribute(id("GENDER"), true);
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(true);
+
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        id("GENDER"),
+        id("M"),
+        issuedAt
+      );
+
+      await passport
+      .connect(minterB)
+      .setAttribute(minterB.address, TOKEN_ID, id("GENDER"), id("M"), issuedAt, sig, {
+        value: 0,
+      });
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        id("GENDER"),
+        id("M"),
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    })
+
     it("success - Individual setAttribute(AML)", async () => {
       const newAML = hexZeroPad('0x05', 32);
       const newIssuedAt = 1000;
