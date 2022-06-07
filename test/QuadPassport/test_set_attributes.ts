@@ -1262,7 +1262,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ATTR_MINT_PRICE");
     });
 
-    it("fail - signature already used", async () => {
+    it("fail - signature already used for AML", async () => {
       const newAML = id("HIGH");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       await assertSetAttribute(
@@ -1287,6 +1287,81 @@ describe("QuadPassport", async () => {
           .connect(minterA)
           .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_AML, newAML, newIssuedAt, sig, {
             value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_AML],
+          })
+      ).to.revertedWith("SIGNATURE_ALREADY_USED");
+    });
+
+    it("fail - signature already used for IS_BUSINESS as Individual", async () => {
+      const newIsBusiness = id("TRUE");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      await assertSetAttribute(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      const sig = await signSetAttribute(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttribute(minterA.address, TOKEN_ID, ATTRIBUTE_IS_BUSINESS, newIsBusiness, newIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_IS_BUSINESS],
+          })
+      ).to.revertedWith("SIGNATURE_ALREADY_USED");
+    });
+
+    it("fail - signature already used for IS_BUSINESS as Business", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newIsBusiness = id("TRUE");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      await assertSetAttribute(
+        minterB,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      const sig = await signSetAttribute(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      await expect(
+        passport
+          .connect(minterB)
+          .setAttribute(minterB.address, TOKEN_ID, ATTRIBUTE_IS_BUSINESS, newIsBusiness, newIssuedAt, sig, {
+            value: PRICE_SET_ATTRIBUTE[ATTRIBUTE_IS_BUSINESS],
           })
       ).to.revertedWith("SIGNATURE_ALREADY_USED");
     });
