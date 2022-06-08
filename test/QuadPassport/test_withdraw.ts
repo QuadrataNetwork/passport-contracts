@@ -72,6 +72,7 @@ describe("QuadPassport", async () => {
       const initialBalanceTreasury = await ethers.provider.getBalance(
         treasury.address
       );
+
       const initialBalanceTreasuryIssuer = await ethers.provider.getBalance(
         issuerTreasury.address
       );
