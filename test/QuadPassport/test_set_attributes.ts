@@ -1434,13 +1434,49 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - setAttribute(DID)", async () => {
+    it("fail - setAttribute(DID) as Individual", async () => {
       const newDid = formatBytes32String("did:1:newdid");
       await expect(
         passport
           .connect(issuer)
           .setAttributeIssuer(
             minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_DID,
+            newDid,
+            issuedAt
+          )
+      ).to.revertedWith("MUST_BURN_AND_MINT");
+    });
+
+    it("fail - setAttribute(DID) as Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newDid = formatBytes32String("did:1:newdid");
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            mockBusiness.address,
             TOKEN_ID,
             ATTRIBUTE_DID,
             newDid,
