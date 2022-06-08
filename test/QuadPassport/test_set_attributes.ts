@@ -1357,7 +1357,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("fail - passport tokenId invalid", async () => {
+    it("fail - passport tokenId invalid as Individual", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const wrongTokenId = 2;
@@ -1367,6 +1367,45 @@ describe("QuadPassport", async () => {
           .connect(issuer)
           .setAttributeIssuer(
             minterA.address,
+            wrongTokenId,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
+
+    it("fail - passport tokenId invalid as Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const wrongTokenId = 2;
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            mockBusiness.address,
             wrongTokenId,
             ATTRIBUTE_COUNTRY,
             newCountry,
@@ -1392,7 +1431,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - attribute not eligible", async () => {
+    it("fail - attribute not eligible as Individual", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
@@ -1410,6 +1449,53 @@ describe("QuadPassport", async () => {
           .connect(issuer)
           .setAttributeIssuer(
             minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
+
+    it("fail - attribute not eligible as Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        true
+      );
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        false
+      );
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            mockBusiness.address,
             TOKEN_ID,
             ATTRIBUTE_COUNTRY,
             newCountry,
