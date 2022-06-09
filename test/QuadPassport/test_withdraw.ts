@@ -353,7 +353,9 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("WITHDRAW_ADDRESS_ZERO");
     });
 
-    it("fail - withdraw to non valid issuer or treasury", async () => {
+    it("fail - withdraw to non valid issuer or treasury (a random user)", async () => {
+      const randoUser = ethers.Wallet.createRandom();
+
       await assertMint(
         minterA,
         issuer,
@@ -366,8 +368,32 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await expect(
-        passport.withdrawToken(admin.address, usdc.address)
+        passport.withdrawToken(randoUser.address, usdc.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
+    });
+
+    it("fail - withdraw to non valid issuer or treasury as issuerTreasury after COUNTRY query", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
+
+      await expect(passport.connect(issuerTreasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
+
+      await expect(passport.connect(treasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
     });
 
     it("fail - withdraw balance 0", async () => {
