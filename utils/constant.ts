@@ -36,5 +36,10 @@ export const PRICE_SET_ATTRIBUTE = {
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0.00"),
 };
 
+export const ISSUER_STATUS = {
+  ACTIVE: 0,
+  DEACTIVATED: 1
+}
+
 export const MINT_PRICE = parseEther("0.003");
 export const ISSUER_SPLIT = 50;
