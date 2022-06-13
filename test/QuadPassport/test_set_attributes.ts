@@ -1680,9 +1680,146 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("success - setAttribute(COUNTRY)", async () => {
+    it("success - Individual setAttribute(AML=5)", async () => {
       await passport.withdrawETH(issuerTreasury.address);
-      const newCountry = id("USA");
+
+      const newAML = hexZeroPad('0x05', 32);
+      const newIssuedAt = 1000;
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          newAML,
+          newIssuedAt
+        );
+
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        newAML,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(initialBalance);
+      await expect(passport.withdrawETH(issuerTreasury.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+    });
+
+    it("success - Business setAttribute(AML=5)", async () => {
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      await passport.withdrawETH(issuerTreasury.address);
+
+      const newAML = hexZeroPad('0x05', 32);
+      const newIssuedAt = 1000;
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterB.address,
+          TOKEN_ID,
+          ATTRIBUTE_AML,
+          newAML,
+          newIssuedAt
+        );
+
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        newAML,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(initialBalance);
+      await expect(passport.withdrawETH(issuerTreasury.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+    });
+
+    it("success - Individual setAttribute(COUNTRY)", async () => {
+      await passport.withdrawETH(issuerTreasury.address);
+      const newCountry = id("DE");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const initialBalance = await ethers.provider.getBalance(passport.address);
       await passport
@@ -1713,6 +1850,631 @@ describe("QuadPassport", async () => {
       await expect(
         passport.withdrawETH(issuerTreasury.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
+    });
+
+    it("success - Business setAttribute(COUNTRY)", async () => {
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      await passport.withdrawETH(issuerTreasury.address);
+      const newCountry = id("DE");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterB.address,
+          TOKEN_ID,
+          ATTRIBUTE_COUNTRY,
+          newCountry,
+          newIssuedAt
+        );
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        newCountry,
+        newIssuedAt
+      );
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(
+        initialBalance
+      );
+      await expect(
+        passport.withdrawETH(issuerTreasury.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
+    });
+    it("success - setAttribute(IS_BUSINESS) Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+
+      var newIsBusiness = id("FALSE");
+
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          mockBusiness.address,
+          TOKEN_ID,
+          ATTRIBUTE_IS_BUSINESS,
+          newIsBusiness,
+          issuedAt
+        );
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(initialBalance);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        mockBusiness,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        issuedAt,
+        1,
+        {
+          signer: minterA,
+          mockBusiness: mockBusiness
+        }
+
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1,
+        {
+          signer: minterA,
+          mockBusiness: mockBusiness
+        }
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1,
+        {
+          signer: minterA,
+          mockBusiness: mockBusiness
+        }
+      );
+
+      newIsBusiness = id("TRUE");
+      const newIssuedAt = 1011;
+
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          mockBusiness.address,
+          TOKEN_ID,
+          ATTRIBUTE_IS_BUSINESS,
+          newIsBusiness,
+          newIssuedAt
+        );
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        mockBusiness,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt,
+        1,
+        {
+          signer: minterA,
+          mockBusiness: mockBusiness
+        }
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1,
+        {
+          signer: minterA,
+          mockBusiness: mockBusiness
+        }
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1,
+        {
+          signer: minterA,
+          mockBusiness: mockBusiness
+        }
+      );
+    });
+
+    it("success - setAttribute(IS_BUSINESS) Individual", async () => {
+      var newIsBusiness = id("TRUE");
+      var newIssuedAt = 1010;
+      const initialBalance = await ethers.provider.getBalance(passport.address);
+      await passport
+        .connect(issuer)
+        .setAttributeIssuer(
+          minterA.address,
+          TOKEN_ID,
+          ATTRIBUTE_IS_BUSINESS,
+          newIsBusiness,
+          newIssuedAt
+        );
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(initialBalance);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+
+      newIsBusiness = id("FALSE");
+      newIssuedAt = 1011;
+      await assertSetAttribute(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    });
+
+    it("success - Individuals may be assiged new eligible attributes", async () => {
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(false);
+      await governance.connect(admin).setEligibleAttribute(id("GENDER"), true);
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(true);
+
+      await passport.connect(issuer).setAttributeIssuer(minterA.address, TOKEN_ID, id("GENDER"), id("F"), issuedAt);
+
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        id("GENDER"),
+        id("F"),
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    })
+
+    it("success - Businesses may be assiged new eligible attributes", async () => {
+      const sigMint = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigMint, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(false);
+      await governance.connect(admin).setEligibleAttribute(id("GENDER"), true);
+      expect(await governance.eligibleAttributes(id("GENDER"))).to.equal(true);
+
+      await passport.connect(issuer).setAttributeIssuer(minterB.address, TOKEN_ID, id("GENDER"), id("F"), issuedAt);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        id("GENDER"),
+        id("F"),
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterB,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        aml,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterB,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    });
+
+    it("success - setAttribute(IS_BUSINESS) Individual", async () => {
+      var newIsBusiness = id("TRUE");
+      var newIssuedAt = 1010;
+      await passport.connect(issuer).setAttributeIssuer(minterA.address, TOKEN_ID, ATTRIBUTE_IS_BUSINESS, newIsBusiness, newIssuedAt);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+
+      newIsBusiness = id("FALSE");
+      newIssuedAt = 1011;
+      await passport.connect(issuer).setAttributeIssuer(minterA.address, TOKEN_ID, ATTRIBUTE_IS_BUSINESS, newIsBusiness, newIssuedAt);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        newIssuedAt
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        minterA,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt
+      );
+    });
+
+    it("success - setAttribute(IS_BUSINESS) Smart Contract", async () => {
+
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+
+      const newIsBusiness = id("FALSE");
+      await passport.connect(issuer).setAttributeIssuer(mockBusiness.address, TOKEN_ID, ATTRIBUTE_IS_BUSINESS, newIsBusiness, issuedAt);
+
+      await assertGetAttributeFree(
+        [issuer.address],
+        mockBusiness,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_IS_BUSINESS,
+        newIsBusiness,
+        issuedAt,
+        1,
+        {
+          signer: minterA,
+          isContract: true
+        }
+      );
+
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        country,
+        issuedAt,
+        1,
+        { signer: minterA }
+      );
+      // OK Fetching old value
+      await assertGetAttribute(
+        mockBusiness,
+        treasury,
+        issuer,
+        issuerTreasury,
+        usdc,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_DID,
+        did,
+        issuedAt,
+        1,
+        { signer: minterA }
+      );
     });
 
     it("success - two issuers (issuers may not overwrite each other)", async () => {
@@ -1781,7 +2543,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it("fail - passport tokenId invalid", async () => {
+    it("fail - passport tokenId invalid as Individual", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const wrongTokenId = 2;
@@ -1791,6 +2553,45 @@ describe("QuadPassport", async () => {
           .connect(issuer)
           .setAttributeIssuer(
             minterA.address,
+            wrongTokenId,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
+
+    it("fail - passport tokenId invalid as Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+      const wrongTokenId = 2;
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            mockBusiness.address,
             wrongTokenId,
             ATTRIBUTE_COUNTRY,
             newCountry,
@@ -1816,7 +2617,7 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - attribute not eligible", async () => {
+    it("fail - attribute not eligible as Individual", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
@@ -1842,6 +2643,53 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
+    it("fail - attribute not eligible as Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        true
+      );
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        false
+      );
+      const newCountry = id("USA");
+      const newIssuedAt = Math.floor(new Date().getTime() / 1000);
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            mockBusiness.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            newIssuedAt
+          )
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
+
     it("fail - invalid issuer role", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
@@ -1858,13 +2706,49 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - setAttribute(DID)", async () => {
+    it("fail - setAttribute(DID) as Individual", async () => {
       const newDid = formatBytes32String("did:1:newdid");
       await expect(
         passport
           .connect(issuer)
           .setAttributeIssuer(
             minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_DID,
+            newDid,
+            issuedAt
+          )
+      ).to.revertedWith("MUST_BURN_AND_MINT");
+    });
+
+    it("fail - setAttribute(DID) as Business", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sigBusiness = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      await passport
+        .connect(minterA)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sigBusiness, '0x00', {
+          value: MINT_PRICE,
+        });
+
+      const newDid = formatBytes32String("did:1:newdid");
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            mockBusiness.address,
             TOKEN_ID,
             ATTRIBUTE_DID,
             newDid,
