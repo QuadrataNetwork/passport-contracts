@@ -10,6 +10,7 @@ const {
   TOKEN_ID,
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
+  ATTRIBUTE_DID,
 } = require("../../utils/constant.ts");
 const { signMint, signMessage } = require("./signature.ts");
 
@@ -255,7 +256,6 @@ export const assertGetAttributeETHWrapper = async (
   tokenId: number = TOKEN_ID
 ) => {
   const { priceAttribute, provider, initialBalance, initialBalancePassport } = await getInitialValuesETH(defi, attribute, account, passport);
-
   await expect(
     defi.connect(account).doSomethingETHWrapper(attribute, { value: priceAttribute })
   ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);
@@ -662,10 +662,9 @@ async function checkFinalValuesETH(provider: any, account: SignerWithAddress, in
 
 async function getInitialValuesETH(defi: Contract, attribute: string, account: SignerWithAddress, passport: Contract) {
   const provider = defi.provider;
-  const priceAttribute = parseEther(
-    (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
-  );
-  expect(priceAttribute).to.not.equal(parseEther("0"));
+
+  const reader = await ethers.getContractAt('QuadReader', defi.reader());
+  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address);
 
   // Test with potential actual transfer of Token
   const initialBalance = await provider.getBalance(account.address);

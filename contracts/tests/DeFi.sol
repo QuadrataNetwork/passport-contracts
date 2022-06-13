@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "../interfaces/IQuadPassport.sol";
 import "../QuadReader.sol";
-import "hardhat/console.sol";
 
 contract DeFi {
     event GetAttributeEvent(bytes32 _value, uint256 _epoch);
