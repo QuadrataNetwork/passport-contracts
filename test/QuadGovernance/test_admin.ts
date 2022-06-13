@@ -1,7 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
-import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { constants, Contract } from "ethers";
+import { id, parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, upgrades } from "hardhat";
 const {
   ATTRIBUTE_AML,
@@ -15,7 +15,8 @@ const {
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
   ATTRIBUTE_IS_BUSINESS,
-  PRICE_PER_BUSINESS_ATTRIBUTES
+  PRICE_PER_BUSINESS_ATTRIBUTES,
+  ISSUER_STATUS
 } = require("../../utils/constant.ts");
 
 const {
@@ -704,6 +705,89 @@ describe("QuadGovernance", async () => {
         governance.connect(admin).setOracle(ethers.constants.AddressZero)
       ).to.be.revertedWith("ORACLE_ADDRESS_ZERO");
     });
+  });
+
+  describe("setIssuerStatus", async () => {
+
+    it("succeed - turns an active issuer into a decativated issuer", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.DEACTIVATED))
+        .to.emit(governance, "IssuerStatusChanged")
+        .withArgs(issuer1.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
+
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+    })
+
+    it("succeed - turns a decativated issuer into an active issuer", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.DEACTIVATED))
+        .to.emit(governance, "IssuerStatusChanged")
+        .withArgs(issuer1.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
+
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.ACTIVE))
+        .to.emit(governance, "IssuerStatusChanged")
+        .withArgs(issuer1.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+    })
+
+    it("fail - cannot set active issuer to random status", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
+        .to.be.revertedWith("function was called with incorrect parameters");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+    })
+
+    it("fail - cannot set deactivated issuer to random status", async () => {
+      await governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.DEACTIVATED);
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
+        .to.be.revertedWith("function was called with incorrect parameters");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+    })
+
+    it("fail - must be admin", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(issuer1).setIssuerStatus(issuer1.address, 2))
+        .to.be.revertedWith("INVALID_ADMIN");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+    })
+
+    it("fail - must be valid value", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(constants.AddressZero, 2))
+        .to.be.revertedWith("ISSUER_ADDRESS_ZERO");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+    })
   });
 
   describe("setIssuer", async () => {
