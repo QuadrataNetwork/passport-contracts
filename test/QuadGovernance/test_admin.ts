@@ -771,7 +771,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
 
-      await expect(governance.connect(issuer1).setIssuerStatus(issuer1.address, 2))
+      await expect(governance.connect(issuer1).setIssuerStatus(issuer1.address, 0))
         .to.be.revertedWith("INVALID_ADMIN");
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
@@ -782,7 +782,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
 
-      await expect(governance.connect(admin).setIssuerStatus(constants.AddressZero, 2))
+      await expect(governance.connect(admin).setIssuerStatus(constants.AddressZero, 0))
         .to.be.revertedWith("ISSUER_ADDRESS_ZERO");
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
