@@ -8,6 +8,7 @@ import {
   formatBytes32String,
   id,
 } from "ethers/lib/utils";
+import { ucs2 } from "punycode";
 
 const {
   ATTRIBUTE_AML,
@@ -594,6 +595,181 @@ describe("QuadPassport", async () => {
       expect(await usdc.balanceOf(passport.address)).to.equal(0);
     });
 
+    it("success - after deactivated issuer withdrawToken", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const initialBalanceTreasury = await usdc.balanceOf(
+        treasury.address
+      );
+      const initialBalanceTreasuryIssuer = await usdc.balanceOf(
+        issuerTreasury.address
+      );
+
+      const priceAttribute = await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address);
+
+      await usdc.connect(minterA).approve(defi.address, priceAttribute);
+      await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
+
+      // deactivate the issuer
+      await governance.connect(admin).setIssuerStatus(issuer.address, 1);
+
+      const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
+      // Withdraw for Protocol Treasury
+      await passport.withdrawToken(treasury.address, usdc.address);
+      expect(await usdc.balanceOf(treasury.address)).to.equal(
+        initialBalanceTreasury.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
+        initialBalanceTreasuryIssuer
+      );
+      expect(await usdc.balanceOf(passport.address)).to.equal(
+        priceAttribute.sub(expectedWithdrawAmount)
+      );
+
+      // Withdraw for Issuer Treasury
+      await passport.withdrawToken(issuerTreasury.address, usdc.address);
+      expect(await usdc.balanceOf(treasury.address)).to.equal(
+        initialBalanceTreasury.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
+        initialBalanceTreasuryIssuer.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(passport.address)).to.equal(0);
+    });
+
+    it("success - after updated issuerTreasury withdrawToken", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const initialBalanceTreasury = await usdc.balanceOf(
+        treasury.address
+      );
+      const initialBalanceTreasuryIssuer = await usdc.balanceOf(
+        issuerTreasury.address
+      );
+
+      const priceAttribute = await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address);
+
+      await usdc.connect(minterA).approve(defi.address, priceAttribute);
+      await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
+
+      // update the issuer treaz
+      const newIssuerTreasury = ethers.Wallet.createRandom();
+      await governance.connect(admin).setIssuer(issuer.address, newIssuerTreasury.address);
+
+      const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
+      // Withdraw for Protocol Treasury
+      await passport.withdrawToken(treasury.address, usdc.address);
+      expect(await usdc.balanceOf(treasury.address)).to.equal(
+        initialBalanceTreasury.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
+        initialBalanceTreasuryIssuer
+      );
+      expect(await usdc.balanceOf(passport.address)).to.equal(
+        priceAttribute.sub(expectedWithdrawAmount)
+      );
+
+      // Withdraw for Issuer Treasury
+      await passport.withdrawToken(issuerTreasury.address, usdc.address);
+      expect(await usdc.balanceOf(treasury.address)).to.equal(
+        initialBalanceTreasury.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
+        initialBalanceTreasuryIssuer.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(passport.address)).to.equal(0);
+      expect(await usdc.balanceOf(newIssuerTreasury.address)).to.equal(0);
+    });
+
+    it("success - after multi-issuer getAttribute(Payable)", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+      await assertMint(
+        minterA,
+        issuerB,
+        issuerBTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt,
+        TOKEN_ID,
+        {newIssuerMint: true}
+      );
+
+      const initialBalanceTreasury = await usdc.balanceOf(
+        treasury.address
+      );
+      const initialBalanceTreasuryIssuer = await usdc.balanceOf(
+        issuerTreasury.address
+      );
+
+      const initialBalancePassport = await usdc.balanceOf(
+        passport.address
+      );
+
+      const priceAttribute = await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address);
+      await usdc.connect(minterA).approve(defi.address, priceAttribute);
+      await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
+      const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
+      const expectedAmountPerIssuer = expectedWithdrawAmount.div(2);
+
+
+      // Withdraw for Protocol Treasury
+      await passport.withdrawToken(treasury.address, usdc.address);
+      expect(await usdc.balanceOf(treasury.address)).to.equal(
+        initialBalanceTreasury.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
+        initialBalanceTreasuryIssuer
+      );
+      expect(await usdc.balanceOf(passport.address)).to.equal(
+        initialBalancePassport.add(priceAttribute.sub(expectedWithdrawAmount))
+      );
+
+      // Withdraw for Issuer Treasury
+      await passport.withdrawToken(issuerTreasury.address, usdc.address);
+      expect(await usdc.balanceOf(treasury.address)).to.equal(
+        initialBalanceTreasury.add(expectedWithdrawAmount)
+      );
+      expect(await usdc.balanceOf(issuerTreasury.address)).to.equal(
+        initialBalanceTreasuryIssuer.add(expectedAmountPerIssuer)
+      );
+
+      // we expect to have enough eth left in the passport to account for issuerB as they did not withdraw
+      expect(await usdc.balanceOf(passport.address)).to.equal(expectedAmountPerIssuer);
+    });
+
     it("fail - withdraw to address(0)", async () => {
       await assertMint(
         minterA,
@@ -611,7 +787,9 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("WITHDRAW_ADDRESS_ZERO");
     });
 
-    it("fail - withdraw to non valid issuer or treasury", async () => {
+    it("fail - withdraw to non valid issuer or treasury (a random user)", async () => {
+      const randoUser = ethers.Wallet.createRandom();
+
       await assertMint(
         minterA,
         issuer,
@@ -624,8 +802,32 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await expect(
-        passport.withdrawToken(admin.address, usdc.address)
+        passport.withdrawToken(randoUser.address, usdc.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
+    });
+
+    it("fail - withdraw to non valid issuer or treasury as issuerTreasury after COUNTRY query", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
+
+      await expect(passport.connect(issuerTreasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
+
+      await expect(passport.connect(treasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
     });
 
     it("fail - withdraw balance 0", async () => {
