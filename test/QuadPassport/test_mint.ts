@@ -7,7 +7,10 @@ import {
   parseUnits,
   formatBytes32String,
   id,
+  hexZeroPad,
 } from "ethers/lib/utils";
+import { read } from "fs";
+import { assertGetAttributeExcluding, assertGetAttributeFreeExcluding } from "../utils/verify";
 import { assertGetAttributeETHWrapper, assertGetAttributeFreeWrapper } from "../utils/verify";
 
 const {
@@ -81,7 +84,7 @@ describe("QuadPassport", async () => {
       await usdc.transfer(minterB.address, parseUnits("1000", 6));
     });
 
-    it("success mint", async () => {
+    it("success - mint", async () => {
       await assertMint(
         minterA,
         issuer,
@@ -128,6 +131,33 @@ describe("QuadPassport", async () => {
         ATTRIBUTE_DID,
         did,
         issuedAt
+      );
+    });
+
+    it("success - mint with default values 0x00....000 ie bytes32(0) for aml", async () => {
+      await assertMint(
+        minterA,
+        issuer,
+        issuerTreasury,
+        passport,
+        hexZeroPad("0x00", 32),
+        hexZeroPad("0x00", 32),
+        hexZeroPad("0x00", 32),
+        hexZeroPad("0x00", 32),
+        issuedAt
+      );
+
+      await assertGetAttributeFreeExcluding(
+        [],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [],
+        [],
+        1,
+        {}
       );
     });
 

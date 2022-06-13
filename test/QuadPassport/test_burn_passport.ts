@@ -95,6 +95,7 @@ describe("QuadPassport", async () => {
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
 
+
   describe("burnPassport", async () => {
     it("success - mint from issuerA and issuer B, burnPassport, check that all account level values are gone", async () => {
 
@@ -1475,6 +1476,131 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
+    it("success - mint individual, update AML to 10, deactivate, reactivate, assert AML is still 10", async () => {
+      aml = hexZeroPad('0x0a', 32); // this is AML 10 as a bytes32 encoded hex
+
+
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = await signMessage(minterB, minterB.address);
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      // PRE BURN
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("DID"), issuer.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("COUNTRY"), issuer.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("IS_BUSINESS"), issuer.address);
+      expect(didPreBurnA.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+
+      // disable issuer for burn
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 0, 1);
+
+      // enable issuer
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 1, 0);
+
+      // POST BURN
+      // did level
+      const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      // account level
+      const didPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("DID"), issuer.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("COUNTRY"), issuer.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("IS_BUSINESS"), issuer.address);
+
+      // expect did level attributes to not change
+      expect(amlPostBurnA.value).equals(hexZeroPad('0x0a', 32)); // check aml is still 10
+
+      expect(didPostBurnA.value).equals(didPreBurnA.value);
+      expect(countryPostBurnA.value).equals(countryPreBurnA.value);
+      expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
+    })
+
+    it("success - mint individual, update AML to 10, deactivate, reactivate, burn, assert AML is still 10", async () => {
+      aml = hexZeroPad('0x0a', 32); // this is AML 10 as a bytes32 encoded hex
+
+
+      const sig = await signMint(
+        issuer,
+        minterB,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      const sigAccount = await signMessage(minterB, minterB.address);
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport([minterB.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      // PRE BURN
+      // did level
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("DID"), issuer.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("COUNTRY"), issuer.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("IS_BUSINESS"), issuer.address);
+      expect(didPreBurnA.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+
+      // disable issuer for burn
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 0, 1);
+
+      // enable issuer
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 1, 0);
+
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(issuer).burnPassportIssuer(minterB.address, TOKEN_ID);
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+
+      // POST BURN
+      // did level
+      const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      // account level
+      const didPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("DID"), issuer.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("COUNTRY"), issuer.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, id("IS_BUSINESS"), issuer.address);
+
+      // expect did level attributes to not change
+      expect(amlPostBurnA.value).equals(hexZeroPad('0x0a', 32)); // check aml is still 10
+
+      expect(didPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
+    })
+
+    it("success - mint business, update AML to 10, deactivate, reactivate, assert AML is still 10", async () => {
+      aml = hexZeroPad('0x0a', 32); // this is AML 10 as a bytes32 encoded hex
     it("success - burnPassportIssuer for business contract given 2 issuers", async () => {
 
       isBusiness = id("TRUE");
@@ -1746,7 +1872,61 @@ describe("QuadPassport", async () => {
         )
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
+    it("success - mint 2 business passports, deactivate issuerA, burnIssuerA, then assert only account level attributes remain on issuerB", async () => {
+      isBusiness = id("TRUE");
 
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
+
+      const sig = await signMint(
+        issuer,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        id("TRUE"),
+        issuedAt
+      );
+
+      const sigAccount = '0x00';
+
+
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      const sigB = await signMint(
+        issuerB,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigB, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      // PRE BURN
+      // did level
+      const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPreBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
+      // account level
+      const didPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuer.address);
+      const didPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuerB.address);
+      const countryPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuer.address);
+      const countryPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuer.address);
+      const isBusinessPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuerB.address);
     it("success - mint for individual, make country not eligible, burnPassportIssuer, assert country isn't deleted", async () => {
       // PRE BURN
       // did level
@@ -1759,6 +1939,23 @@ describe("QuadPassport", async () => {
       expect(countryPreBurnA.value).equals(country);
       expect(isBusinessPreBurnA.value).equals(isBusiness);
 
+      expect(didPreBurnB.value).equals(did);
+      expect(countryPreBurnB.value).equals(country);
+      expect(isBusinessPreBurnB.value).equals(isBusiness);
+
+      // disable issuer for burn
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 0, 1);
+
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(issuerB).burnPassportIssuer(mockBusiness.address, TOKEN_ID);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+
+      // enable issuer to see what the storage values are
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, 1, 0);
       await expect(governance.connect(admin).setEligibleAttribute(id("COUNTRY"), false))
         .to.emit(governance, 'EligibleAttributeUpdated')
         .withArgs(id("COUNTRY"), false);
@@ -1772,22 +1969,29 @@ describe("QuadPassport", async () => {
       // POST BURN
       // did level
       const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPostBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
       // account level
-      const didPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
-      const countryPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
-      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
+      const didPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuer.address);
+      const countryPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuer.address);
+      const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuer.address);
+      const didPostBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuerB.address);
+      const countryPostBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuerB.address);
+      const isBusinessPostBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuerB.address);
 
       // expect did level attributes to not change
+      expect(amlPostBurnB.value).equals(amlPreBurnB.value);
       expect(amlPostBurnA.value).equals(amlPreBurnA.value);
 
-      expect(didPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(didPostBurnA.value).equals(didPreBurnA.value);
       expect(countryPostBurnA.value).equals(countryPreBurnA.value);
-      expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
 
-
+      expect(didPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
     });
 
-    it("success - mint for business, make country not eligible, burnPassportIssuer, assert country isn't deleted", async () => {
+    it("success - mint 2 business passports, delete issuerA, burnIssuerA, then assert only account level attributes remain on issuerB", async () => {
       isBusiness = id("TRUE");
 
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
@@ -1801,13 +2005,29 @@ describe("QuadPassport", async () => {
         did,
         aml,
         country,
-        isBusiness,
+        id("TRUE"),
         issuedAt
       );
 
-      const sigAccount = '0x00'
+      const sigAccount = '0x00';
 
 
+      await passport
+        .connect(minterB)
+        .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
+          value: MINT_PRICE,
+        });
+
+      const sigB = await signMint(
+        issuerB,
+        mockBusiness,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
       await passport
         .connect(minterB)
         .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigA, sigAccount, {
@@ -1817,10 +2037,14 @@ describe("QuadPassport", async () => {
       // PRE BURN
       // did level
       const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
+      const amlPreBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
       // account level
       const didPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuer.address);
+      const didPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("DID"), issuerB.address);
       const countryPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuer.address);
+      const countryPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("COUNTRY"), issuerB.address);
       const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuer.address);
+      const isBusinessPreBurnB = await passport.connect(dataChecker).attributes(mockBusiness.address, id("IS_BUSINESS"), issuerB.address);
       expect(didPreBurnA.value).equals(did);
       expect(countryPreBurnA.value).equals(country);
       expect(isBusinessPreBurnA.value).equals(isBusiness);
@@ -2135,8 +2359,9 @@ describe("QuadPassport", async () => {
         ATTRIBUTE_DID,
         did,
         issuedAt
-      );
+    );
     });
-
+  })
+  });
   });
 });
