@@ -1130,7 +1130,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
+    it("success - mint individual passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
       await governance.connect(admin).deleteIssuer(issuer.address);
 
       const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
@@ -1154,7 +1154,31 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
+    it("success - mint business passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      await governance.connect(admin).deleteIssuer(issuer.address);
+
+      const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
+
+      expect(response[0].length).equals(0);
+      expect(response[1].length).equals(0);
+      expect(response[2].length).equals(0);
+
+    });
+
+    it("fail - mint individual passport for wallet A (AML = 1), burn, assert error", async  () => {
+      await passport.connect(minterA).burnPassport(1);
+      await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("fail - mint Business passport for wallet A (AML = 1), burn, assert error", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await passport.connect(minterA).burnPassport(1);
+      await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("success - mint business passport for wallet A (AML = 1), burn, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).deleteIssuer(issuer.address);
