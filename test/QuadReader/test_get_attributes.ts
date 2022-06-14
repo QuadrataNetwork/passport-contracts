@@ -48,7 +48,11 @@ describe("QuadReader", async () => {
     minterA: SignerWithAddress,
     minterB: SignerWithAddress,
     issuer: SignerWithAddress,
-    issuerTreasury: SignerWithAddress;
+    issuerB: SignerWithAddress,
+    issuerC: SignerWithAddress,
+    issuerTreasury: SignerWithAddress,
+    issuerBTreasury: SignerWithAddress,
+    issuerCTreasury: SignerWithAddress;
 
   let baseURI: string;
   let did: string;
@@ -65,7 +69,7 @@ describe("QuadReader", async () => {
     isBusiness = id("FALSE");
     issuedAt = Math.floor(new Date().getTime() / 1000);
 
-    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
+    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, issuerB, issuerBTreasury, issuerC, issuerCTreasury] =
       await ethers.getSigners();
     [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
@@ -74,6 +78,10 @@ describe("QuadReader", async () => {
       [issuerTreasury],
       baseURI
     );
+
+    await governance.connect(admin).setIssuer(issuerB.address, issuerBTreasury.address);
+    await governance.connect(admin).setIssuer(issuerC.address, issuerCTreasury.address);
+
     const sig = await signMint(
       issuer,
       minterA,
@@ -1189,6 +1197,20 @@ describe("QuadReader", async () => {
       expect(response[1].length).equals(0);
       expect(response[2].length).equals(0);
 
+    });
+
+    it("success - mint from issuerA(AML=1) and issuerB(AML=1), update issuerB(AML=5), assert issuerA(AML=1), issuerB(AML=5)", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("AML"), hexZeroPad('0x05', 32), 16, {});
+
+      const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
+      const expectation = [
+        [hexZeroPad('0x01', 32), hexZeroPad('0x05', 32)],
+        [BigNumber.from('15'), BigNumber.from('16')],
+        [issuer.address, issuerB.address]
+      ];
+      expect(response).to.eqls(expectation);
     });
 
     it.skip("fail - getAttributesFree(AML) - wallet not found", async () => {
