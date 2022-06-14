@@ -1271,6 +1271,32 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
+    it("fail - mint from issuerA, issuerB, issuerC), burnPassport, revert PASSPORT_DOES_NOT_EXIST", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      await passport.connect(minterA).burnPassport(1);
+
+      await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+    });
+
+    it("success - mint from issuerA, issuerB, issuerC), burnPassport issuerB, assert values from issuerA and issuerB", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      await passport.connect(issuerB).burnPassportIssuer(minterA.address, 1);
+
+      const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
+      const expectation = [
+        [hexZeroPad('0x01', 32), hexZeroPad('0x01', 32)],
+        [BigNumber.from('13'), BigNumber.from('15')],
+        [issuer.address, issuerC.address]
+      ];
+      expect(response).to.eqls(expectation);
+    });
+
     it.skip("fail - getAttributesFree(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
