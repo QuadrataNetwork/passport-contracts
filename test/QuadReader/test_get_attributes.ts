@@ -1065,9 +1065,24 @@ describe("QuadReader", async () => {
 
       expect(response[0][0]).equals(hexZeroPad('0x01', 32));
       expect(initialBalanceInquisitor.sub(finalBalanceInquisitor)).equals('0')
-      expect(finalBalancePassport.sub(finalBalancePassport)).equals('0')
+      expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
+    });
 
-    })
+    it("success - mint business passport for wallet A (AML = 1), assert AML is 1", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(admin.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(admin.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response[0][0]).equals(hexZeroPad('0x01', 32));
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor)).equals('0')
+      expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
+    });
 
 
     it.skip("fail - getAttributesFree(AML) - wallet not found", async () => {
