@@ -1229,6 +1229,32 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
+    it("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB, activate again, assert all values", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      await governance.connect(admin).setIssuerStatus(issuerB.address, ISSUER_STATUS.DEACTIVATED);
+
+      const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
+      const expectation = [
+        [hexZeroPad('0x01', 32), hexZeroPad('0x01', 32)],
+        [BigNumber.from('13'), BigNumber.from('15')],
+        [issuer.address, issuerC.address]
+      ];
+      expect(response).to.eqls(expectation);
+
+      await governance.connect(admin).setIssuerStatus(issuerB.address, ISSUER_STATUS.ACTIVE);
+
+      const response2 = await reader.getAttributesFree(minterA.address, 1, id("AML"));
+      const expectation2 = [
+        [hexZeroPad('0x01', 32), hexZeroPad('0x01', 32), hexZeroPad('0x01', 32)],
+        [BigNumber.from('13'), BigNumber.from('14'), BigNumber.from('15')],
+        [issuer.address, issuerB.address, issuerC.address]
+      ];
+      expect(response2).to.eqls(expectation2);
+    });
+
     it.skip("fail - getAttributesFree(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
