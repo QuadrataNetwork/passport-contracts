@@ -1156,7 +1156,40 @@ describe("QuadReader", async () => {
       const protocolWithdrawAmount2 = await passport.callStatic.withdrawToken(treasury.address, usdc.address);
 
       expect(issuerWithdrawAmount2).equals(calcPaymentToken.div(2));
-      expect(protocolWithdrawAmount2).equals(calcPaymentToken.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentToken.div(2).add(calcPaymentToken));
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
+      const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const initialBalancePassport = await usdc.balanceOf(passport.address);
+
+      const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
+      usdc.approve(reader.address, calcPaymentToken.mul(2))
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+
+      const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const finalBalancePassport = await usdc.balanceOf(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentToken)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentToken)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawToken(treasury.address, usdc.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentToken.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
+
     });
 
     it.skip('success - (all included) - COUNTRY', async () => {
