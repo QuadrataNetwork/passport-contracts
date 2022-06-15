@@ -1017,6 +1017,25 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
     });
 
+    it("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const initialBalancePassport = await usdc.balanceOf(passport.address);
+
+      const calcPaymentToken = await reader.calculatePaymentToken(id("AML"), usdc.address, minterA.address);
+      usdc.approve(reader.address, calcPaymentToken)
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+      await reader.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+
+      const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const finalBalancePassport = await usdc.balanceOf(passport.address);
+
+      expect(response[0][0]).equals(hexZeroPad('0x03', 32));
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
+    });
+
     it.skip('success - (all included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
