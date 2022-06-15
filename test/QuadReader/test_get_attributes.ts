@@ -1235,6 +1235,42 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentToken.div(2).add(calcPaymentToken));
     });
 
+    it("success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const initialBalancePassport = await usdc.balanceOf(passport.address);
+
+      const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
+      usdc.approve(reader.address, calcPaymentToken.mul(2))
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+
+      const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const finalBalancePassport = await usdc.balanceOf(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentToken)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentToken)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawToken(treasury.address, usdc.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentToken.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
+
+      await passport.connect(minterA).burnPassport(1);
+
+      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+    });
+
     it.skip('success - (all included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
