@@ -956,7 +956,13 @@ describe("QuadReader", async () => {
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
 
-      expect(response[0][0]).equals(id("US"));
+      expect(response).to.eqls(
+        [
+          [id("US")],
+          [BigNumber.from(15)],
+          [issuer.address]
+        ]
+      );
       expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentToken)
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentToken)
 
@@ -981,7 +987,13 @@ describe("QuadReader", async () => {
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
 
-      expect(response[0][0]).equals(id("US"));
+      expect(response).to.eqls(
+        [
+          [id("US")],
+          [BigNumber.from(15)],
+          [issuer.address]
+        ]
+      );
       expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentToken)
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentToken)
 
@@ -1006,7 +1018,13 @@ describe("QuadReader", async () => {
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
 
-      expect(response[0][0]).equals(id("MINTER_A"));
+      expect(response).to.eqls(
+        [
+          [id("MINTER_A")],
+          [BigNumber.from(15)],
+          [issuer.address]
+        ]
+      );
       expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentToken)
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentToken)
 
@@ -1031,7 +1049,13 @@ describe("QuadReader", async () => {
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
 
-      expect(response[0][0]).equals(hexZeroPad('0x03', 32));
+      expect(response).to.eqls(
+          [
+            [hexZeroPad('0x03', 32)],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
       expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
