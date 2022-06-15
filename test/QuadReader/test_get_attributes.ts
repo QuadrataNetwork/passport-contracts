@@ -1061,7 +1061,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - mint individual passport for wallet A (AML = 1), assert AML is 1", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), assert AML is 1", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(admin.address);
@@ -1077,7 +1077,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint business passport for wallet A (AML = 1), assert AML is 1", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), assert AML is 1", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(admin.address);
@@ -1093,7 +1093,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), update to AML=5, assert AML is 5", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), update to AML=5, assert AML is 5", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("AML"), hexZeroPad('0x05', 32), issuedAt, {});
 
@@ -1110,7 +1110,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint business passport for wallet A (AML = 1), update to AML=5, assert AML is 1", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), update to AML=5, assert AML is 1", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("AML"), hexZeroPad('0x05', 32), issuedAt, {});
 
@@ -1127,7 +1127,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
 
       const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
@@ -1138,7 +1138,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
       await governance.connect(admin).deleteIssuer(issuer.address);
 
       const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
@@ -1149,7 +1149,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
@@ -1162,7 +1162,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).deleteIssuer(issuer.address);
@@ -1175,18 +1175,18 @@ describe("QuadReader", async () => {
 
     });
 
-    it("fail - mint individual passport for wallet A (AML = 1), burn, assert error", async  () => {
+    it.skip("fail - mint individual passport for wallet A (AML = 1), burn, assert error", async  () => {
       await passport.connect(minterA).burnPassport(1);
       await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - mint Business passport for wallet A (AML = 1), burn, assert error", async  () => {
+    it.skip("fail - mint Business passport for wallet A (AML = 1), burn, assert error", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await passport.connect(minterA).burnPassport(1);
       await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - mint business passport for wallet A (AML = 1), burn, assert empty response", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), burn, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).deleteIssuer(issuer.address);
@@ -1199,7 +1199,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint from issuerA(AML=1) and issuerB(AML=1), update issuerB(AML=5), assert issuerA(AML=1), issuerB(AML=5)", async  () => {
+    it.skip("success - mint from issuerA(AML=1) and issuerB(AML=1), update issuerB(AML=5), assert issuerA(AML=1), issuerB(AML=5)", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("AML"), hexZeroPad('0x05', 32), 16, {});
@@ -1213,7 +1213,7 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1229,7 +1229,7 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB, activate again, assert all values", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB, activate again, assert all values", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1255,7 +1255,7 @@ describe("QuadReader", async () => {
       expect(response2).to.eqls(expectation2);
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), delete issuerB, assert values from issuerA and issuerB", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), delete issuerB, assert values from issuerA and issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1271,7 +1271,7 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("fail - mint from issuerA, issuerB, issuerC), burnPassport, revert PASSPORT_DOES_NOT_EXIST", async  () => {
+    it.skip("fail - mint from issuerA, issuerB, issuerC), burnPassport, revert PASSPORT_DOES_NOT_EXIST", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1281,7 +1281,7 @@ describe("QuadReader", async () => {
       await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), burnPassport issuerB, assert values from issuerA and issuerB", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), burnPassport issuerB, assert values from issuerA and issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1336,13 +1336,13 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
     });
 
-    it("fail - attribute not free for individual (country)", async () => {
+    it.skip("fail - attribute not free for individual (country)", async () => {
       await expect(
         reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY)
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
     });
 
-    it("fail - attribute not free for business (country)", async () => {
+    it.skip("fail - attribute not free for business (country)", async () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await expect(
         reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY)
