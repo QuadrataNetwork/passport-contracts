@@ -1060,6 +1060,31 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
+    it("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const initialBalancePassport = await usdc.balanceOf(passport.address);
+
+      const calcPaymentToken = await reader.calculatePaymentToken(id("AML"), usdc.address, minterA.address);
+      usdc.approve(reader.address, calcPaymentToken)
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+      await reader.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+
+      const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const finalBalancePassport = await usdc.balanceOf(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [hexZeroPad('0x03', 32)],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
+    });
+
     it("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
