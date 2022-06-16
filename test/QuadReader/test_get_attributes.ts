@@ -2447,8 +2447,9 @@ describe("QuadReader", async () => {
       expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
 
-      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+
+      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
       const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       expect(response2).to.eqls([[],[],[]]);
@@ -2529,15 +2530,15 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
 
       await governance.connect(admin).deleteIssuer(issuer.address);
+      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
 
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
       const protocolWithdrawAmount2 = await passport.callStatic.withdrawETH(treasury.address);
 
-      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
 
       expect(issuerWithdrawAmount2).equals(calcPaymentETH.div(2));
       expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH2));
@@ -2578,7 +2579,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -2617,8 +2618,8 @@ describe("QuadReader", async () => {
 
       await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
 
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       expect(response2).to.eqls(
         [
           [id("US"), id("FR")],
