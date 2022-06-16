@@ -11,8 +11,6 @@ import "./storage/QuadReaderStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./storage/QuadGovernanceStore.sol";
 
-import "hardhat/console.sol";
-
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -422,9 +420,7 @@ import "hardhat/console.sol";
         address[] memory _issuers,
         address _account
     ) internal {
-        console.log("Inside Do Token Payments");
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
-        console.log("amountToken: ", amountToken);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             require(
@@ -437,7 +433,6 @@ import "hardhat/console.sol";
                 passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
             passport.increaseAccountBalance(_tokenPayment, governance.treasury(), amountProtocol);
-            console.log("amountProtocol: ", amountProtocol);
         }
     }
 

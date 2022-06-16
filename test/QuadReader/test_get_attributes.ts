@@ -1440,6 +1440,57 @@ describe("QuadReader", async () => {
 
     });
 
+    it("success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const initialBalancePassport = await usdc.balanceOf(passport.address);
+
+      const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
+      usdc.approve(reader.address, calcPaymentToken.mul(2))
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+
+      const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
+      const finalBalancePassport = await usdc.balanceOf(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US"), id("US")],
+            [BigNumber.from(15), BigNumber.from(15)],
+            [issuer.address, issuerB.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentToken)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentToken)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawToken(treasury.address, usdc.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentToken.div(4));
+      expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
+
+      await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
+
+      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      expect(response2).to.eqls(
+        [
+          [id("US"), id("FR")],
+          [BigNumber.from(15), BigNumber.from(16)],
+          [issuer.address, issuerB.address]
+        ]
+      );
+
+      const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
+      const protocolWithdrawAmount2 = await passport.callStatic.withdrawToken(treasury.address, usdc.address);
+
+      expect(issuerWithdrawAmount2).equals(calcPaymentToken.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentToken);
+    });
+
+
     it.skip('success - (all included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
