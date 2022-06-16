@@ -2064,6 +2064,674 @@ describe("QuadReader", async () => {
       )
     });
 
+    it("success - mint individual passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor =await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+        [
+          [id("US")],
+          [BigNumber.from(15)],
+          [issuer.address]
+        ]
+      );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), usdc.address, minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+        [
+          [id("US")],
+          [BigNumber.from(15)],
+          [issuer.address]
+        ]
+      );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address, usdc.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address, usdc.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+    });
+
+    it("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("DID"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+        [
+          [id("MINTER_A")],
+          [BigNumber.from(15)],
+          [issuer.address]
+        ]
+      );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+    });
+
+    it("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("AML"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [hexZeroPad('0x03', 32)],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
+    });
+
+    it("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("AML"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [hexZeroPad('0x03', 32)],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("FR")],
+            [BigNumber.from(16)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+    });
+
+    it("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"));
+      expect(response2).to.eqls([[],[],[]]);
+
+      const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount2 = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount2).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH));
+    });
+
+    it("success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+    });
+
+    it("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await governance.connect(admin).deleteIssuer(issuer.address);
+
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      expect(response2).to.eqls([[],[],[]]);
+
+      const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount2 = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount2).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH));
+    });
+
+    it("success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await passport.connect(minterA).burnPassport(1);
+
+      await expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH= await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      expect(response2).to.eqls([[],[],[]]);
+
+      const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount2 = await passport.callStatic.withdrawETH(treasury.address);
+
+      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      expect(issuerWithdrawAmount2).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH2));
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"));
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"),  minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await governance.connect(admin).deleteIssuer(issuer.address);
+
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      expect(response2).to.eqls([[],[],[]]);
+
+      const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount2 = await passport.callStatic.withdrawETH(treasury.address);
+
+      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+
+      expect(issuerWithdrawAmount2).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH2));
+
+    });
+
+    it("success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US")],
+            [BigNumber.from(15)],
+            [issuer.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await passport.connect(minterA).burnPassport(1);
+
+      await expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+
+    });
+
+    it("success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US"), id("US")],
+            [BigNumber.from(15), BigNumber.from(15)],
+            [issuer.address, issuerB.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(4));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+      await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
+
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH}, {value: calcPaymentETH});
+      expect(response2).to.eqls(
+        [
+          [id("US"), id("FR")],
+          [BigNumber.from(15), BigNumber.from(16)],
+          [issuer.address, issuerB.address]
+        ]
+      );
+
+      const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount2 = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount2).equals(calcPaymentETH.div(2));
+      expect(protocolWithdrawAmount2).equals(calcPaymentETH);
+    });
+
+    it("success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
+
+      await governance.connect(admin).setIssuerStatus(issuerB.address, ISSUER_STATUS.DEACTIVATED);
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      usdc.approve(reader.address, calcPaymentETH)
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US"), id("FR")],
+            [BigNumber.from(15), BigNumber.from(17)],
+            [issuer.address, issuerC.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(4));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+    });
+
+    it("success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
+
+      await governance.connect(admin).deleteIssuer(issuerB.address);
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      usdc.approve(reader.address, calcPaymentETH)
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US"), id("FR")],
+            [BigNumber.from(15), BigNumber.from(17)],
+            [issuer.address, issuerC.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(4));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+    });
+
+    it("success - mint passports from issuerA, issuerB, isseurC, burnPassport, assert only COUNTRY from A, C remain", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
+
+      await passport.connect(minterA).burnPassport(1);
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+
+      expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
+    });
+
+    it("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
+      await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
+      await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
+
+      await passport.connect(issuerB).burnPassportIssuer(minterA.address, 1);
+
+      const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const initialBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      usdc.approve(reader.address, calcPaymentETH)
+      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
+      const finalBalancePassport = await ethers.provider.getBalance(passport.address);
+
+      expect(response).to.eqls(
+          [
+            [id("US"), id("FR")],
+            [BigNumber.from(15), BigNumber.from(17)],
+            [issuer.address, issuerC.address]
+          ]
+        );
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
+
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
+
+      expect(issuerWithdrawAmount).equals(calcPaymentETH.div(4));
+      expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
+
+    });
+
+
+    it('success - (all included) - COUNTRY', async () => {
+      const signers = await ethers.getSigners();
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+      await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
+
+      expect(await governance.getIssuersLength()).to.equal(5);
+
+      await assertMint(minterA, signers[0], signers[0], passport, did, id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await assertMint(minterA, signers[1], signers[1], passport, did, id("MEDIUM"), id("UR"), id("FALSE"), 678, 1, {newIssuerMint: true});
+
+      await assertGetAttributeWrapper(
+        minterA,
+        treasury,
+        usdc,
+        defi,
+        governance,
+        passport,
+        reader,
+        ATTRIBUTE_COUNTRY,
+        [country, id("US"), id("UR")], // expected returned attributes
+        [BigNumber.from(issuedAt), BigNumber.from(15), BigNumber.from(678)], // expected dates of issuance
+        [issuer.address, signers[0].address, signers[1].address], // expected issuers to be returned
+        1,
+        {}
+      )
+    })
 
     it("fail - getAttributesETH(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
