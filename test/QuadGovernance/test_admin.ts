@@ -59,36 +59,30 @@ describe("QuadGovernance", async () => {
   describe("initialize", async () => {
     it("success", async () => {
       expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
+
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
-      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_DID)).to.equal(
-        false
-      );
-      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
-        true
-      );
-      expect(
-        await governance.eligibleAttributesByDID(ATTRIBUTE_COUNTRY)
-      ).to.equal(false);
-      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(
-        true
-      );
-      expect(await governance.eligibleAttributes(ATTRIBUTE_AML)).to.equal(
-        false
-      );
-      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
-        parseEther("0.01")
-      );
-      expect(
-        await governance.mintPricePerAttribute(ATTRIBUTE_COUNTRY)
-      ).to.equal(parseEther("0.01"));
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_DID)).to.equal(false);
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(true);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_COUNTRY)).to.equal(false);
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_IS_BUSINESS)).to.equal(true);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_IS_BUSINESS)).to.equal(false);
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_AML)).to.equal(false);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(true);
+
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(parseEther("0.01"));
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_COUNTRY)).to.equal(parseEther("0.01"));
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_IS_BUSINESS)).to.equal(parseEther("0"));
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(parseEther("0"));
+
       expect(await governance.passportVersion()).to.equal(1);
       expect(await governance.revSplitIssuer()).to.equal(50);
-      expect(await governance.hasRole(GOVERNANCE_ROLE, admin.address)).to.equal(
-        true
-      );
-      expect(
-        await governance.hasRole(DEFAULT_ADMIN_ROLE, admin.address)
-      ).to.equal(true);
+
+      expect(await governance.hasRole(GOVERNANCE_ROLE, admin.address)).to.equal(true);
+
+      expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, admin.address)).to.equal(true);
     });
   });
 
