@@ -2450,8 +2450,8 @@ describe("QuadReader", async () => {
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
 
       const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
