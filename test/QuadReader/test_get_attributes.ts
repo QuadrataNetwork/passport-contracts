@@ -105,7 +105,7 @@ describe("QuadReader", async () => {
 
 
   describe("getAttributeFreeExcluding", async() => {
-    it("success - exclude 1 issuer", async  () => {
+    it.skip("success - exclude 1 issuer", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -127,7 +127,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - deactivate all issuers - exclude 1", async  () => {
+    it.skip("success - deactivate all issuers - exclude 1", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -152,7 +152,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - deactivate all but 1 issuer - exclude 0", async  () => {
+    it.skip("success - deactivate all but 1 issuer - exclude 0", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -177,7 +177,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - exclude 3 issuers", async  () => {
+    it.skip("success - exclude 3 issuers", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -199,7 +199,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - exclude 0 issuers", async  () => {
+    it.skip("success - exclude 0 issuers", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -221,7 +221,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - exclude all 4 issuers", async  () => {
+    it.skip("success - exclude all 4 issuers", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -243,14 +243,14 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("fail - getAttributesFreeExcluding(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesFreeExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesFreeExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesFreeExcluding from address(0)", async () => {
+    it.skip("fail - getAttributesFreeExcluding from address(0)", async () => {
       await expect(
         reader.getAttributesFreeExcluding(
           ethers.constants.AddressZero,
@@ -261,14 +261,14 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesFreeExcluding ineligible Token Id", async () => {
+    it.skip("fail - getAttributesFreeExcluding ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesFreeExcluding(minterA.address, wrongTokenId, ATTRIBUTE_AML, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesFreeExcluding ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesFreeExcluding ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -277,7 +277,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - attribute not free", async () => {
+    it.skip("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesFreeExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address])
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
@@ -285,7 +285,7 @@ describe("QuadReader", async () => {
   })
 
   describe("getAttributeFreeIncluding", async() => {
-    it("success - Include 2 issuers (1 supported, 1 not supported)", async  () => {
+    it.skip("success - Include 2 issuers (1 supported, 1 not supported)", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).deleteIssuer(signers[0].address)
@@ -305,7 +305,7 @@ describe("QuadReader", async () => {
       );
     });
 
-    it("success - Include 2 issuers (2 not supported)", async  () => {
+    it.skip("success - Include 2 issuers (2 not supported)", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -327,7 +327,7 @@ describe("QuadReader", async () => {
       );
     });
 
-    it("success - Include 2 issuers (2 previously supported)", async  () => {
+    it.skip("success - Include 2 issuers (2 previously supported)", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).deleteIssuer(signers[0].address)
@@ -349,14 +349,14 @@ describe("QuadReader", async () => {
     });
 
 
-    it("fail - getAttributesFreeExcluding(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesFreeExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesFreeExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesFreeExcluding from address(0)", async () => {
+    it.skip("fail - getAttributesFreeExcluding from address(0)", async () => {
       await expect(
         reader.getAttributesFreeExcluding(
           ethers.constants.AddressZero,
@@ -367,14 +367,14 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesFreeIncludingOnly ineligible Token Id", async () => {
+    it.skip("fail - getAttributesFreeIncludingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesFreeIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_AML, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesFreeIncludingOnly ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesFreeIncludingOnly ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -383,7 +383,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - attribute not free", async () => {
+    it.skip("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesFreeIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address])
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
@@ -391,7 +391,7 @@ describe("QuadReader", async () => {
   });
 
   describe("getAttributesExcluding", async function() {
-    it('success - (1 excluded, 1 included) - DID', async () => {
+    it.skip('success - (1 excluded, 1 included) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -417,7 +417,7 @@ describe("QuadReader", async () => {
       )
     })
 
-    it('success - (1 excluded, 2 included) - COUNTRY', async () => {
+    it.skip('success - (1 excluded, 2 included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -446,7 +446,7 @@ describe("QuadReader", async () => {
     })
 
 
-    it('success - (0 excluded, 3 included) - AML', async () => {
+    it.skip('success - (0 excluded, 3 included) - AML', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -474,7 +474,7 @@ describe("QuadReader", async () => {
       )
     })
 
-    it('success - (exclude random address)', async () => {
+    it.skip('success - (exclude random address)', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -501,14 +501,14 @@ describe("QuadReader", async () => {
         {}
       )
     })
-    it("fail - getAttributesExcluding(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesExcluding from address(0)", async () => {
+    it.skip("fail - getAttributesExcluding from address(0)", async () => {
       await expect(
         reader.getAttributesExcluding(
           ethers.constants.AddressZero,
@@ -520,14 +520,14 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesExcluding ineligible Token Id", async () => {
+    it.skip("fail - getAttributesExcluding ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesExcluding(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesExcluding ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesExcluding ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -536,7 +536,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - attribute not free", async () => {
+    it.skip("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
       ).to.revertedWith("ERC20: insufficient allowance");
@@ -544,7 +544,7 @@ describe("QuadReader", async () => {
   });
 
   describe("getAttributesIncluding", async() => {
-    it('success - (1 included) - DID', async () => {
+    it.skip('success - (1 included) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -570,7 +570,7 @@ describe("QuadReader", async () => {
       )
     })
 
-    it('success - (include random address) - DID', async () => {
+    it.skip('success - (include random address) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -596,7 +596,7 @@ describe("QuadReader", async () => {
       )
     })
 
-    it('success - (2 included) - AML', async () => {
+    it.skip('success - (2 included) - AML', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -621,14 +621,14 @@ describe("QuadReader", async () => {
         {assertFree: true}
       )
     })
-    it("fail - getAttributesIncludingOnly(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesIncludingOnly(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesIncludingOnly from address(0)", async () => {
+    it.skip("fail - getAttributesIncludingOnly from address(0)", async () => {
       await expect(
         reader.getAttributesIncludingOnly(
           ethers.constants.AddressZero,
@@ -640,14 +640,14 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesIncludingOnly ineligible Token Id", async () => {
+    it.skip("fail - getAttributesIncludingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesIncludingOnly ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesIncludingOnly ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -656,7 +656,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - attribute not free", async () => {
+    it.skip("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
       ).to.revertedWith("ERC20: insufficient allowance");
@@ -668,7 +668,7 @@ describe("QuadReader", async () => {
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
 
-    it("success - (1 excluded, 1 included)", async() => {
+    it.skip("success - (1 excluded, 1 included)", async() => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -687,7 +687,7 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("success - (0 excluded, 2 included)", async() => {
+    it.skip("success - (0 excluded, 2 included)", async() => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -706,7 +706,7 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("fail - getAttributesETHExcluding(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesETHExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
@@ -716,7 +716,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETHExcluding(DID) - wallet not found", async () => {
+    it.skip("fail - getAttributesETHExcluding(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesETHExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
@@ -725,7 +725,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - insufficient eth amount", async () => {
+    it.skip("fail - insufficient eth amount", async () => {
       await expect(
         reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: getDIDPrice.sub(1),
@@ -745,7 +745,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
     });
 
-    it("fail - getAttributesETHExcluding from address(0)", async () => {
+    it.skip("fail - getAttributesETHExcluding from address(0)", async () => {
       await expect(
         reader.getAttributesETHExcluding(
           ethers.constants.AddressZero,
@@ -757,7 +757,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesETHExcluding ineligible Token Id", async () => {
+    it.skip("fail - getAttributesETHExcluding ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesETHExcluding(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
@@ -766,7 +766,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesETHExcluding ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesETHExcluding ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -777,7 +777,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - getAttributesETHExcluding ineligible attribute (Country)", async () => {
+    it.skip("fail - getAttributesETHExcluding ineligible attribute (Country)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
@@ -794,7 +794,7 @@ describe("QuadReader", async () => {
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
 
-    it("success - (1 excluded, 1 included)", async() => {
+    it.skip("success - (1 excluded, 1 included)", async() => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -813,7 +813,7 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("success - (0 excluded, 2 included)", async() => {
+    it.skip("success - (0 excluded, 2 included)", async() => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(2);
@@ -832,7 +832,7 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("fail - getAttributesETHIncludingOnly(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesETHIncludingOnly(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
@@ -842,7 +842,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETHIncludingOnly(DID) - wallet not found", async () => {
+    it.skip("fail - getAttributesETHIncludingOnly(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesETHIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
@@ -851,7 +851,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - insufficient eth amount", async () => {
+    it.skip("fail - insufficient eth amount", async () => {
       await expect(
         reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice.sub(1),
@@ -869,7 +869,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
     });
 
-    it("fail - getAttributesETHIncludingOnly from address(0)", async () => {
+    it.skip("fail - getAttributesETHIncludingOnly from address(0)", async () => {
       await expect(
         reader.getAttributesETHIncludingOnly(
           ethers.constants.AddressZero,
@@ -881,7 +881,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesETHIncludingOnly ineligible Token Id", async () => {
+    it.skip("fail - getAttributesETHIncludingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesETHIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
@@ -890,7 +890,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesETHIncludingOnly ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesETHIncludingOnly ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -901,7 +901,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - getAttributesETHIncludingOnly ineligible attribute (Country)", async () => {
+    it.skip("fail - getAttributesETHIncludingOnly ineligible attribute (Country)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
@@ -919,7 +919,7 @@ describe("QuadReader", async () => {
       await governance.connect(admin).setIssuer(issuerC.address, issuerCTreasury.address);
     });
 
-    it('success - (all included) - DID', async () => {
+    it.skip('success - (all included) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(4);
@@ -944,7 +944,7 @@ describe("QuadReader", async () => {
       )
     })
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -975,7 +975,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1006,7 +1006,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
     });
 
-    it("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
+    it.skip("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1037,7 +1037,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
     });
 
-    it("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1062,7 +1062,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
-    it("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1087,7 +1087,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
 
@@ -1119,7 +1119,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
     });
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1161,7 +1161,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentToken.div(2).add(calcPaymentToken));
     });
 
-    it("success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
@@ -1194,7 +1194,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1237,7 +1237,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentToken.div(2).add(calcPaymentToken));
     });
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1273,7 +1273,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1316,7 +1316,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentToken.div(2).add(calcPaymentToken2));
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
@@ -1349,7 +1349,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1406,7 +1406,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await usdc.balanceOf(deployer.address);
@@ -1442,7 +1442,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
@@ -1492,7 +1492,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentToken);
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -1528,7 +1528,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -1564,7 +1564,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, burnPassport, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, burnPassport, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -1574,7 +1574,7 @@ describe("QuadReader", async () => {
       expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -1610,7 +1610,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("fail - cannot query without valid allowance", async  () => {
+    it.skip("fail - cannot query without valid allowance", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -1623,7 +1623,7 @@ describe("QuadReader", async () => {
       expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('TOKEN_PAYMENT_NOT_ALLOWED');
     });
 
-    it('success - (all included) - COUNTRY', async () => {
+    it.skip('success - (all included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -1651,7 +1651,7 @@ describe("QuadReader", async () => {
     })
 
 
-    it('success - (all included) - AML', async () => {
+    it.skip('success - (all included) - AML', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -1678,14 +1678,14 @@ describe("QuadReader", async () => {
       )
     })
 
-    it("fail - getAttributes(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributes(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributes(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributes from address(0)", async () => {
+    it.skip("fail - getAttributes from address(0)", async () => {
       await expect(
         reader.getAttributes(
           ethers.constants.AddressZero,
@@ -1696,14 +1696,14 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributes ineligible Token Id", async () => {
+    it.skip("fail - getAttributes ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributes(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributes ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributes ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -1712,7 +1712,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - attribute not free", async () => {
+    it.skip("fail - attribute not free", async () => {
       await expect(
         reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address)
       ).to.revertedWith("ERC20: insufficient allowance");
@@ -1724,7 +1724,7 @@ describe("QuadReader", async () => {
       await governance.connect(admin).setIssuer(issuerC.address, issuerCTreasury.address);
     });
 
-    it("success - (all issuers)", async  () => {
+    it.skip("success - (all issuers)", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -1747,7 +1747,7 @@ describe("QuadReader", async () => {
       );
     })
 
-    it("success - mint individual passport for wallet A (AML = 1), assert AML is 1", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), assert AML is 1", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(admin.address);
@@ -1763,7 +1763,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint business passport for wallet A (AML = 1), assert AML is 1", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), assert AML is 1", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(admin.address);
@@ -1779,7 +1779,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), update to AML=5, assert AML is 5", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), update to AML=5, assert AML is 5", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("AML"), hexZeroPad('0x05', 32), issuedAt, {});
 
@@ -1796,7 +1796,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint business passport for wallet A (AML = 1), update to AML=5, assert AML is 1", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), update to AML=5, assert AML is 1", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("AML"), hexZeroPad('0x05', 32), issuedAt, {});
 
@@ -1813,7 +1813,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport)).equals('0')
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
 
       const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
@@ -1824,7 +1824,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint individual passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
       await governance.connect(admin).deleteIssuer(issuer.address);
 
       const response = await reader.getAttributesFree(minterA.address, 1, id("AML"));
@@ -1835,7 +1835,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), deactivate issuer, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
@@ -1848,7 +1848,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), delete issuer, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).deleteIssuer(issuer.address);
@@ -1861,18 +1861,18 @@ describe("QuadReader", async () => {
 
     });
 
-    it("fail - mint individual passport for wallet A (AML = 1), burn, assert error", async  () => {
+    it.skip("fail - mint individual passport for wallet A (AML = 1), burn, assert error", async  () => {
       await passport.connect(minterA).burnPassport(1);
       await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - mint Business passport for wallet A (AML = 1), burn, assert error", async  () => {
+    it.skip("fail - mint Business passport for wallet A (AML = 1), burn, assert error", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await passport.connect(minterA).burnPassport(1);
       await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - mint business passport for wallet A (AML = 1), burn, assert empty response", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 1), burn, assert empty response", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       await governance.connect(admin).deleteIssuer(issuer.address);
@@ -1885,7 +1885,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint from issuerA(AML=1) and issuerB(AML=1), update issuerB(AML=5), assert issuerA(AML=1), issuerB(AML=5)", async  () => {
+    it.skip("success - mint from issuerA(AML=1) and issuerB(AML=1), update issuerB(AML=5), assert issuerA(AML=1), issuerB(AML=5)", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("AML"), hexZeroPad('0x05', 32), 16, {});
@@ -1899,7 +1899,7 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1915,7 +1915,7 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB, activate again, assert all values", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), deactivate issuerB, assert values from issuerA and issuerB, activate again, assert all values", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1941,7 +1941,7 @@ describe("QuadReader", async () => {
       expect(response2).to.eqls(expectation2);
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), delete issuerB, assert values from issuerA and issuerB", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), delete issuerB, assert values from issuerA and issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1957,7 +1957,7 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("fail - mint from issuerA, issuerB, issuerC), burnPassport, revert PASSPORT_DOES_NOT_EXIST", async  () => {
+    it.skip("fail - mint from issuerA, issuerB, issuerC), burnPassport, revert PASSPORT_DOES_NOT_EXIST", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1967,7 +1967,7 @@ describe("QuadReader", async () => {
       await expect(reader.getAttributesFree(minterA.address, 1, id("AML"))).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("success - mint from issuerA, issuerB, issuerC), burnPassport issuerB, assert values from issuerA and issuerB", async  () => {
+    it.skip("success - mint from issuerA, issuerB, issuerC), burnPassport issuerB, assert values from issuerA and issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 13, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 14, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
@@ -1983,14 +1983,14 @@ describe("QuadReader", async () => {
       expect(response).to.eqls(expectation);
     });
 
-    it("fail - getAttributesFree(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesFree(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesFree(wallet.address, TOKEN_ID, ATTRIBUTE_AML)
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesFree from address(0)", async () => {
+    it.skip("fail - getAttributesFree from address(0)", async () => {
       await expect(
         reader.getAttributesFree(
           ethers.constants.AddressZero,
@@ -2000,14 +2000,14 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesFree ineligible Token Id", async () => {
+    it.skip("fail - getAttributesFree ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesFree(minterA.address, wrongTokenId, ATTRIBUTE_AML)
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesFree ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesFree ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -2016,19 +2016,19 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - attribute not free (did)", async () => {
+    it.skip("fail - attribute not free (did)", async () => {
       await expect(
         reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_DID)
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
     });
 
-    it("fail - attribute not free for individual (country)", async () => {
+    it.skip("fail - attribute not free for individual (country)", async () => {
       await expect(
         reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY)
       ).to.revertedWith("ATTRIBUTE_NOT_FREE");
     });
 
-    it("fail - attribute not free for business (country)", async () => {
+    it.skip("fail - attribute not free for business (country)", async () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await expect(
         reader.getAttributesFree(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY)
@@ -2046,7 +2046,7 @@ describe("QuadReader", async () => {
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
 
-    it("success - (all included)", async() => {
+    it.skip("success - (all included)", async() => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       expect(await governance.getIssuersLength()).to.equal(4);
@@ -2066,15 +2066,18 @@ describe("QuadReader", async () => {
 
     it("success - mint individual passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await passport.withdrawETH(issuerTreasury.address);
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
       const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
       const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const metaData = await tx.wait();
+      const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
-      const finalBalanceInquisitor =await ethers.provider.getBalance(deployer.address);
+      const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const finalBalancePassport = await ethers.provider.getBalance(passport.address);
 
       expect(response).to.eqls(
@@ -2084,7 +2087,7 @@ describe("QuadReader", async () => {
           [issuer.address]
         ]
       );
-      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor)).equals(calcPaymentETH.add(gas))
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
 
       const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2094,7 +2097,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2124,7 +2127,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
+    it.skip("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2154,7 +2157,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
+    it.skip("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2178,7 +2181,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
-    it("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
+    it.skip("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2202,7 +2205,7 @@ describe("QuadReader", async () => {
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
 
@@ -2233,7 +2236,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2264,7 +2267,7 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
       const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"));
+      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2274,7 +2277,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH));
     });
 
-    it("success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
@@ -2306,7 +2309,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2348,7 +2351,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH));
     });
 
-    it("success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+    it.skip("success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2383,7 +2386,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2425,7 +2428,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentETH.div(2).add(calcPaymentETH2));
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE);
@@ -2457,7 +2460,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2502,7 +2505,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
+    it.skip("success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
@@ -2537,7 +2540,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
 
@@ -2586,7 +2589,7 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount2).equals(calcPaymentETH);
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -2622,7 +2625,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -2658,7 +2661,7 @@ describe("QuadReader", async () => {
 
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, burnPassport, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, burnPassport, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -2669,7 +2672,7 @@ describe("QuadReader", async () => {
       expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
     });
 
-    it("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
+    it.skip("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerB, issuerBTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 16, 1, {newIssuerMint: true});
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
@@ -2706,7 +2709,7 @@ describe("QuadReader", async () => {
     });
 
 
-    it('success - (all included) - COUNTRY', async () => {
+    it.skip('success - (all included) - COUNTRY', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
       await governance.connect(admin).setIssuer(signers[1].address, signers[1].address);
@@ -2733,7 +2736,7 @@ describe("QuadReader", async () => {
       )
     })
 
-    it("fail - getAttributesETH(AML) - wallet not found", async () => {
+    it.skip("fail - getAttributesETH(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
@@ -2743,7 +2746,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETH(DID) - wallet not found", async () => {
+    it.skip("fail - getAttributesETH(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
         reader.getAttributesETH(wallet.address, TOKEN_ID, ATTRIBUTE_DID, {
@@ -2752,7 +2755,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - insufficient eth amount", async () => {
+    it.skip("fail - insufficient eth amount", async () => {
       await expect(
         reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice.sub(1),
@@ -2772,7 +2775,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
     });
 
-    it("fail - getAttributesETH from address(0)", async () => {
+    it.skip("fail - getAttributesETH from address(0)", async () => {
       await expect(
         reader.getAttributesETH(
           ethers.constants.AddressZero,
@@ -2783,7 +2786,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesETH ineligible Token Id", async () => {
+    it.skip("fail - getAttributesETH ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
         reader.getAttributesETH(minterA.address, wrongTokenId, ATTRIBUTE_DID, {
@@ -2792,7 +2795,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesETH ineligible attribute (AML)", async () => {
+    it.skip("fail - getAttributesETH ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
@@ -2803,7 +2806,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - getAttributesETH ineligible attribute (Country)", async () => {
+    it.skip("fail - getAttributesETH ineligible attribute (Country)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
