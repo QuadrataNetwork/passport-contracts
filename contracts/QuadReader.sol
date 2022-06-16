@@ -11,6 +11,8 @@ import "./storage/QuadReaderStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./storage/QuadGovernanceStore.sol";
 
+import "hardhat/console.sol";
+
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -420,7 +422,9 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal {
+        console.log("Inside Do Token Payments");
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
+        console.log("amountToken: ", amountToken);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
             require(
@@ -433,6 +437,7 @@ import "./storage/QuadGovernanceStore.sol";
                 passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
             }
             passport.increaseAccountBalance(_tokenPayment, governance.treasury(), amountProtocol);
+            console.log("amountProtocol: ", amountProtocol);
         }
     }
 
@@ -499,7 +504,7 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @dev Used to determine if issuers have an attribute
-    /// @param _attribute the value to check existsance on
+    /// @param _attribute the value to check existence on
     /// @param _account account getting requested for attributes
     /// @return unique bytes32 hash or bytes32(0) if issuers have the attribute
     function _issuersContain(
