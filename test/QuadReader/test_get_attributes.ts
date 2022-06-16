@@ -2097,15 +2097,19 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it.skip("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
+    it("success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await passport.withdrawETH(issuerTreasury.address);
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), usdc.address, minterA.address);
+      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
       const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const metaData = await tx.wait();
+      const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
+
 
       const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const finalBalancePassport = await ethers.provider.getBalance(passport.address);
@@ -2117,25 +2121,28 @@ describe("QuadReader", async () => {
           [issuer.address]
         ]
       );
-      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH.add(gas))
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
 
-      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address, usdc.address);
-      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address, usdc.address);
+      const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      const protocolWithdrawAmount = await passport.callStatic.withdrawETH(treasury.address);
 
       expect(issuerWithdrawAmount).equals(calcPaymentETH.div(2));
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it.skip("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
+    it("success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x01', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await passport.withdrawETH(issuerTreasury.address);
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
       const calcPaymentETH = await reader.calculatePaymentETH(id("DID"), minterA.address);
       const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
+      const tx = await reader.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
+      const metaData = await tx.wait();
+      const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
       const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const finalBalancePassport = await ethers.provider.getBalance(passport.address);
@@ -2147,7 +2154,7 @@ describe("QuadReader", async () => {
           [issuer.address]
         ]
       );
-      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH.add(gas))
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
 
       const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2157,15 +2164,18 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
     });
 
-    it.skip("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
+    it("success - mint individual passport for wallet A (AML = 3), assert AML is 3", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+      await passport.withdrawETH(issuerTreasury.address);
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
       const calcPaymentETH = await reader.calculatePaymentETH(id("AML"), minterA.address);
       const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const tx = await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const metaData = await tx.wait();
+      const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
       const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const finalBalancePassport = await ethers.provider.getBalance(passport.address);
@@ -2177,19 +2187,22 @@ describe("QuadReader", async () => {
             [issuer.address]
           ]
         );
-      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(gas)
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
-    it.skip("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
+    it("success - mint business passport for wallet A (AML = 3), assert AML is 3", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
+      await passport.withdrawETH(issuerTreasury.address);
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
       const calcPaymentETH = await reader.calculatePaymentETH(id("AML"), minterA.address);
       const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const tx = await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const metaData = await tx.wait();
+      const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
       const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const finalBalancePassport = await ethers.provider.getBalance(passport.address);
@@ -2201,20 +2214,23 @@ describe("QuadReader", async () => {
             [issuer.address]
           ]
         );
-      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals('0')
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(gas)
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals('0')
     });
 
-    it.skip("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
+    it("success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR", async  () => {
       await assertMint(minterA, issuer, issuerTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("US"), id("TRUE"), 15, 1, {newIssuerMint: true});
       await assertSetAttribute(minterA, issuer, issuerTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
+      await passport.withdrawETH(issuerTreasury.address);
 
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
       const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
       const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const metaData = await tx.wait();
+      const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
       const finalBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const finalBalancePassport = await ethers.provider.getBalance(passport.address);
@@ -2226,7 +2242,7 @@ describe("QuadReader", async () => {
             [issuer.address]
           ]
         );
-      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH)
+      expect(initialBalanceInquisitor.sub(finalBalanceInquisitor).abs()).equals(calcPaymentETH.add(gas))
       expect(initialBalancePassport.sub(finalBalancePassport).abs()).equals(calcPaymentETH)
 
       const issuerWithdrawAmount = await passport.callStatic.withdrawETH(issuerTreasury.address);
