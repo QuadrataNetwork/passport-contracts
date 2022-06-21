@@ -350,9 +350,8 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       await expect(
         governance.connect(admin).setEligibleAttribute(newAttribute, true)
-      )
-        .to.emit(governance, "EligibleAttributeUpdated")
-        .withArgs(newAttribute, true);
+      ).to.emit(governance, "EligibleAttributeUpdated").withArgs(newAttribute, true);
+
       expect(await governance.eligibleAttributes(newAttribute)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
     });
