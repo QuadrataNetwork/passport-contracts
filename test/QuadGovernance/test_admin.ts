@@ -453,12 +453,9 @@ describe("QuadGovernance", async () => {
   describe("setEligibleAttributeByDID", async () => {
     it("succeed", async () => {
       const newAttribute = ethers.utils.id("CREDIT");
-      expect(await governance.eligibleAttributesByDID(newAttribute)).to.equal(
-        false
-      );
-      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(
-        true
-      );
+      expect(await governance.eligibleAttributesByDID(newAttribute)).to.equal(false);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(true);
+
       expect(
         await governance
           .connect(admin)
