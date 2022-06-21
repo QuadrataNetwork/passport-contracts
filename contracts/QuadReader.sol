@@ -3,6 +3,7 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -15,7 +16,7 @@ import "./storage/QuadGovernanceStore.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
+ contract QuadReader is ReentrancyGuard, IQuadReader, UUPSUpgradeable, QuadReaderStore {
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -48,7 +49,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] memory _excluded
-    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public nonReentrant override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -94,7 +95,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] memory _excluded
-    ) public override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public nonReentrant override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -161,7 +162,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] calldata _onlyIssuers
-    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external nonReentrant override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -208,7 +209,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external nonReentrant override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -379,7 +380,7 @@ import "./storage/QuadGovernanceStore.sol";
         );
     }
 
-    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @notice Distribute the fee to query an attribute to issuers and protocol
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The providers of the attributes
@@ -408,7 +409,7 @@ import "./storage/QuadGovernanceStore.sol";
         }
     }
 
-    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @notice Distribute the fee to query an attribute to issuers and protocol
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenPayment address of erc20 payment method
@@ -419,7 +420,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _tokenPayment,
         address[] memory _issuers,
         address _account
-    ) internal {
+    ) internal  {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
