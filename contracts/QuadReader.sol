@@ -4,6 +4,7 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -16,8 +17,8 @@ import "./storage/QuadGovernanceStore.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
-    using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore, ReentrancyGuardUpgradeable {
+     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -381,7 +382,7 @@ import "./storage/QuadGovernanceStore.sol";
         );
     }
 
-    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @notice Distribute the fee to query an attribute to issuers and protocol
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The providers of the attributes
@@ -390,7 +391,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] memory _issuers,
         address _account
-    ) internal {
+    ) internal nonReentrant {
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
             require(
@@ -410,7 +411,7 @@ import "./storage/QuadGovernanceStore.sol";
         }
     }
 
-    /// @notice Distrubte the fee to query an attribute to issuers and protocol
+    /// @notice Distribute the fee to query an attribute to issuers and protocol
     /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenPayment address of erc20 payment method
@@ -421,7 +422,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _tokenPayment,
         address[] memory _issuers,
         address _account
-    ) internal {
+    ) internal nonReentrant {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
