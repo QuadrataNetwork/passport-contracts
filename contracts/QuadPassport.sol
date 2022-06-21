@@ -4,6 +4,8 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "./ERC1155/ERC1155Upgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
@@ -16,6 +18,7 @@ import "./storage/QuadPassportStore.sol";
 /// @notice This represents wallet accounts Web3 Passport
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
+    using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
     event GovernanceUpdated(address _oldGovernance, address _governance);
 
     /// @dev initializer (constructor)
@@ -295,7 +298,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalances[_token][_to] = 0;
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
-       require(erc20.transfer(_to, currentBalance), "FAILED_TO_TRANSFER_ERC_20");
+       erc20.safeTransfer(_to, currentBalance);
        return currentBalance;
     }
 
