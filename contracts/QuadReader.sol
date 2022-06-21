@@ -396,10 +396,10 @@ import "./storage/QuadGovernanceStore.sol";
                  msg.value == amountETH,
                 "INSUFFICIENT_PAYMENT_AMOUNT"
             );
-            require(
-                payable(address(passport)).send(amountETH),
-                "FAILED_TO_SEND_PAYMENT"
-            );
+
+            (bool sent,) = payable(address(passport)).call{value: amountETH}("");
+            require(sent, "FAILED_TO_SEND_PAYMENT");
+
             uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
