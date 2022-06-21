@@ -3,7 +3,7 @@ pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -16,7 +16,7 @@ import "./storage/QuadGovernanceStore.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is ReentrancyGuard, IQuadReader, UUPSUpgradeable, QuadReaderStore {
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore, ReentrancyGuardUpgradeable {
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -49,7 +49,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] memory _excluded
-    ) public nonReentrant override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -95,7 +95,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] memory _excluded
-    ) public nonReentrant override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -162,7 +162,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr,
         address[] calldata _onlyIssuers
-    ) external nonReentrant override returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -209,7 +209,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external nonReentrant override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
             bytes32[] memory attributes,
@@ -389,7 +389,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] memory _issuers,
         address _account
-    ) internal {
+    ) internal nonReentrant {
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
         if (amountETH > 0) {
             require(
@@ -420,7 +420,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _tokenPayment,
         address[] memory _issuers,
         address _account
-    ) internal  {
+    ) internal nonReentrant {
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
