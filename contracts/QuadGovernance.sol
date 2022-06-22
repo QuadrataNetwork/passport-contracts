@@ -12,7 +12,7 @@ import "./storage/QuadGovernanceStore.sol";
 /// @title Governance Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All admin functions to govern the QuadPassport contract
-contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
+contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
     event AllowTokenPayment(address _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
@@ -73,7 +73,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set QuadPassport treasury wallet to withdraw the protocol fees
     /// @notice Restricted behind a TimelockController
     /// @param _treasury address of the treasury
-    function setTreasury(address _treasury)  external {
+    function setTreasury(address _treasury) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ADDRESS_ZERO");
         require(_treasury != config.treasury, "TREASURY_ADDRESS_ALREADY_SET");
@@ -85,7 +85,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set QuadPassport contract address
     /// @notice Restricted behind a TimelockController
     /// @param _passportAddr address of the QuadPassport contract
-    function setPassportContractAddress(address _passportAddr)  external {
+    function setPassportContractAddress(address _passportAddr) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_passportAddr != address(0), "PASSPORT_ADDRESS_ZERO");
         require(address(config.passport) != _passportAddr, "PASSPORT_ADDRESS_ALREADY_SET");
@@ -98,7 +98,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set the QuadGovernance address in the QuadPassport contract
     /// @notice Restricted behind a TimelockController
     /// @param _newGovernance address of the QuadGovernance contract
-    function updateGovernanceInPassport(address _newGovernance)  external {
+    function updateGovernanceInPassport(address _newGovernance) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_newGovernance != address(0), "GOVERNANCE_ADDRESS_ZERO");
         require(address(config.passport) != address(0), "PASSPORT_NOT_SET");
@@ -109,7 +109,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set the QuadPassport deployed version
     /// @notice Restricted behind a TimelockController
     /// @param _version current version of the QuadPassport
-    function setPassportVersion(uint256 _version)  external {
+    function setPassportVersion(uint256 _version) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_version > config.passportVersion, "PASSPORT_VERSION_INCREMENTAL");
 
@@ -121,7 +121,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set the price for minting the QuadPassport
     /// @notice Restricted behind a TimelockController
     /// @param _mintPrice price in wei for minting a passport
-    function setMintPrice(uint256 _mintPrice)  external {
+    function setMintPrice(uint256 _mintPrice) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(config.mintPrice != _mintPrice, "MINT_PRICE_ALREADY_SET");
 
@@ -134,7 +134,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _tokenId tokenId of the passport
     /// @param _eligibleStatus eligiblity boolean for the tokenId
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus)  external {
+    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleTokenId[_tokenId] != _eligibleStatus, "TOKEN_ELIGIBILITY_ALREADY_SET");
 
@@ -146,7 +146,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _eligibleStatus eligiblity boolean for the attribute
-    function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus)  external {
+    function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleAttributes[_attribute] != _eligibleStatus, "ATTRIBUTE_ELIGIBILITY_SET");
 
@@ -170,7 +170,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("AML"))
     /// @param _eligibleStatus eligiblity boolean for the attribute
-    function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus)  external {
+    function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(eligibleAttributesByDID[_attribute] != _eligibleStatus, "ATTRIBUTE_ELIGIBILITY_SET");
 
@@ -182,7 +182,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (wei)
-    function setAttributePrice(bytes32 _attribute, uint256 _price)  external {
+    function setAttributePrice(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(pricePerAttribute[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
         uint256 oldPrice = pricePerAttribute[_attribute];
@@ -195,7 +195,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (wei)
-    function setBusinessAttributePrice(bytes32 _attribute, uint256 _price)  external {
+    function setBusinessAttributePrice(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(pricePerBusinessAttribute[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
         uint256 oldPrice = pricePerBusinessAttribute[_attribute];
@@ -209,7 +209,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (wei)
-    function setAttributeMintPrice(bytes32 _attribute, uint256 _price)  external {
+    function setAttributeMintPrice(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(mintPricePerAttribute[_attribute] != _price, "ATTRIBUTE_MINT_PRICE_ALREADY_SET");
         uint256 oldPrice = mintPricePerAttribute[_attribute];
@@ -221,7 +221,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set the UniswapAnchorView oracle (Using Compound)
     /// @notice Restricted behind a TimelockController
     /// @param _oracleAddr address of UniswapAnchorView contract
-    function setOracle(address _oracleAddr)  external {
+    function setOracle(address _oracleAddr) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_oracleAddr != address(0), "ORACLE_ADDRESS_ZERO");
         require(config.oracle != _oracleAddr, "ORACLE_ADDRESS_ALREADY_SET");
@@ -236,7 +236,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Set the revenue split percentage between Issuers and Quadrata Protocol
     /// @notice Restricted behind a TimelockController
     /// @param _split percentage split (`50` equals 50%)
-    function setRevSplitIssuer(uint256 _split)  external {
+    function setRevSplitIssuer(uint256 _split) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(config.revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
         require(_split <= 100, "SPLIT_MUST_BE_LESS_THAN_100");
@@ -251,7 +251,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @notice Restricted behind a TimelockController
     /// @param _issuer address generating the signature authorizing minting/setting attributes
     /// @param _treasury address of the issuer treasury to withdraw the fees
-    function setIssuer(address _issuer, address _treasury)  external {
+    function setIssuer(address _issuer, address _treasury) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_treasury != address(0), "TREASURY_ISSUER_ADDRESS_ZERO");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
@@ -270,7 +270,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Delete issuer
     /// @notice Restricted behind a TimelockController
     /// @param _issuer address to remove
-    function deleteIssuer(address _issuer)  external {
+    function deleteIssuer(address _issuer) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
         require(issuerIndices[_issuer] < issuers.length + 1, "OUT_OF_BOUNDS");
@@ -290,7 +290,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Deactivate issuer
     /// @notice Restricted behind a TimelockController
     /// @param _issuer address to remove
-    function setIssuerStatus(address _issuer, IssuerStatus _status) external {
+    function setIssuerStatus(address _issuer, IssuerStatus _status) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
@@ -315,7 +315,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     function allowTokenPayment(
         address _tokenAddr,
         bool _isAllowed
-    ) external   {
+    ) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_tokenAddr != address(0), "TOKEN_PAYMENT_ADDRESS_ZERO");
         require(
@@ -333,7 +333,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Get number of eligible attributes currently supported
     /// @notice Restricted behind a TimelockController
     /// @return length of eligible attributes
-    function getEligibleAttributesLength() external view returns(uint256) {
+    function getEligibleAttributesLength() override external view returns(uint256) {
         return eligibleAttributesArray.length;
     }
 
@@ -344,7 +344,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
     /// @dev Get the price in USD of a token using UniswapAnchorView
     /// @param _tokenAddr address of the ERC20 token
     /// @return price in USD
-    function getPrice(address _tokenAddr)  external view returns (uint) {
+    function getPrice(address _tokenAddr) override external view returns (uint) {
         require(config.oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
@@ -353,26 +353,26 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
     /// @dev Get the price in USD for $ETH using UniswapAnchorView
     /// @return price in USD for $ETH
-    function getPriceETH()  external view returns (uint) {
+    function getPriceETH() override external view returns (uint) {
         require(config.oracle != address(0), "ORACLE_ADDRESS_ZERO");
         return IUniswapAnchoredView(config.oracle).price("ETH");
     }
 
     /// @dev Get the length of issuers array
     /// @return number of active issuers
-    function getIssuersLength()  public view returns (uint256) {
+    function getIssuersLength() override public view returns (uint256) {
         return issuers.length;
     }
 
     /// @dev Get the issuers array
     /// @return length
-    function getIssuers()  public view returns (Issuer[] memory) {
+    function getIssuers() override public view returns (Issuer[] memory) {
         return issuers;
     }
 
     /// @dev Get the status of an issuer
     /// @return status
-    function getIssuerStatus(address _issuer) public view returns(IssuerStatus) {
+    function getIssuerStatus(address _issuer) override public view returns(IssuerStatus) {
         if(issuerIndices[_issuer] == 0) {
             // if the issuer isn't in the mapping, just say it's not active
             return IssuerStatus.DEACTIVATED;
@@ -382,38 +382,67 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
 
     /// @dev Get the version of deployment
     /// @return version
-    function passportVersion() public view returns(uint256) {
+    function passportVersion() override public view returns(uint256) {
         return config.passportVersion;
     }
 
     /// @dev Get the revenue split between protocol and issuers
     /// @return ratio of revenue distribution
-    function revSplitIssuer() public view returns(uint256) {
+    function revSplitIssuer() override public view returns(uint256) {
         return config.revSplitIssuer;
     }
 
     /// @dev Get the cost for minting a passport
     /// @return passport mint price
-    function mintPrice() public view returns(uint256) {
+    function mintPrice() override public view returns(uint256) {
         return config.mintPrice;
     }
 
     /// @dev Get the address of protocol treasury
     /// @return treasury address
-    function treasury() public view returns(address) {
+    function treasury() override public view returns(address) {
         return config.treasury;
     }
 
     /// @dev Get the address of price oracle
     /// @return oracle address
-    function oracle() public view returns(address) {
+    function oracle() override public view returns(address) {
         return config.oracle;
     }
 
     /// @dev Get the address of passport
     /// @return passport address
-    function passport() public view returns(IQuadPassport) {
+    function passport() override public view returns(IQuadPassport) {
         return config.passport;
     }
+
+    function getEligibleTokenId(uint256 _tokenId) override external returns(bool) {
+        return eligibleTokenId[_tokenId];
+    }
+
+    function getIssuerTreasury(address _issuer) override external returns(address) {
+        return issuersTreasury[_issuer];
+    }
+
+    function getMintPricePerAttribute(bytes32 _attribute) override external returns(uint256){
+        return mintPricePerAttribute[_attribute];
+    }
+
+    function getHasRole(bytes32 _role, address _sender) override  external returns(bool) {
+        return hasRole(_role, _sender);
+    }
+
+    function getEligibleAttribute(bytes32 _attribute) override external returns(bool) {
+        return eligibleAttributes[_attribute];
+    }
+
+    function getEligibleAttributeByDID(bytes32 _attribute) override external returns(bool) {
+        return eligibleAttributesByDID[_attribute];
+    }
+    function getEligibleAttributeArray(uint256 _index) override external returns(bytes32) {
+        return eligibleAttributesArray[_index];
+    }
 }
+
+
 

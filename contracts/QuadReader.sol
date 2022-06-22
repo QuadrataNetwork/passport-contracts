@@ -35,7 +35,7 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     function _authorizeUpgrade(address) internal view override {
-        require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        require(governance.getHasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable with ERC20)
