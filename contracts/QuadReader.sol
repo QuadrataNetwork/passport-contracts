@@ -2,6 +2,7 @@
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
@@ -17,6 +18,7 @@ import "./storage/QuadGovernanceStore.sol";
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
  contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore, ReentrancyGuardUpgradeable {
+     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -424,10 +426,9 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
         if (amountToken > 0) {
             IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-            require(
-                erc20.transferFrom(msg.sender, address(passport), amountToken),
-                "INSUFFICIENT_PAYMENT_ALLOWANCE"
-            );
+
+            erc20.safeTransferFrom(msg.sender, address(passport), amountToken);
+
             uint256 amountIssuer = _issuers.length == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
             uint256 amountProtocol = amountToken - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {
