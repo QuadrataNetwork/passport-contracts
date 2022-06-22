@@ -790,14 +790,12 @@ describe("QuadGovernance", async () => {
     });
 
     it("success (setIssuer maybe called multiple times without creating dupes)", async () => {
-      expect(await governance.issuersTreasury(issuer1.address)).to.equal(
-        issuerTreasury1.address
-      );
+      expect(await governance.issuersTreasury(issuer1.address)).to.equal(issuerTreasury1.address);
+      expect(await governance.getIssuersLength()).to.equal(3);
       await governance.connect(admin).setIssuer(issuer1.address, admin.address);
 
-      expect(await governance.issuersTreasury(issuer1.address)).to.equal(
-        admin.address
-      );
+      expect(await governance.issuersTreasury(issuer1.address)).to.equal(admin.address);
+      expect(await governance.getIssuersLength()).to.equal(3);
     });
 
     it("fail (issuer address (0))", async () => {
