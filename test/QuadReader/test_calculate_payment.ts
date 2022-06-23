@@ -266,7 +266,7 @@ describe("QuadPassport", async () => {
         {skipOracle: true}
       );
       await expect(
-        reader.calculatePaymentETH(ATTRIBUTE_DID, usdc.address, minterA.address)
+        reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)
       ).to.revertedWith("ORACLE_ADDRESS_ZERO");
     });
   });
