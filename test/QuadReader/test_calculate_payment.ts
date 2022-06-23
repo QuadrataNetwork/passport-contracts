@@ -254,5 +254,20 @@ describe("QuadPassport", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
       await expect(reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
     });
+
+
+    it("fail - oracle zero", async () => {
+      [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
+        admin,
+        [issuer],
+        treasury,
+        [issuerTreasury],
+        baseURI,
+        {skipOracle: true}
+      );
+      await expect(
+        reader.calculatePaymentETH(ATTRIBUTE_DID, usdc.address, minterA.address)
+      ).to.revertedWith("ORACLE_ADDRESS_ZERO");
+    });
   });
 });
