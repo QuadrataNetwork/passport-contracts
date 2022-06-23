@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
-import { constants, Contract } from "ethers";
+import { constants, Contract, Wallet } from "ethers";
 import { id, parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, upgrades } from "hardhat";
 const {
@@ -182,7 +182,7 @@ describe("QuadGovernance", async () => {
   });
 
 
-  describe("deleteIssuer", async () => {
+  describe("deleteIssuer / getIssuerStatus", async () => {
     it("succeed - delete 3rd issuer", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
       expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
@@ -190,6 +190,7 @@ describe("QuadGovernance", async () => {
       expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer3.address);
+      expect(await governance.getIssuerStatus(issuer3.address)).equals(ISSUER_STATUS.DEACTIVATED);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
@@ -205,6 +206,7 @@ describe("QuadGovernance", async () => {
       expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer2.address);
+      expect(await governance.getIssuerStatus(issuer2.address)).equals(ISSUER_STATUS.DEACTIVATED);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
@@ -220,6 +222,7 @@ describe("QuadGovernance", async () => {
       expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer1.address);
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
@@ -237,6 +240,10 @@ describe("QuadGovernance", async () => {
       await governance.connect(admin).deleteIssuer(issuer1.address);
       await governance.connect(admin).deleteIssuer(issuer2.address);
       await governance.connect(admin).deleteIssuer(issuer3.address);
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.getIssuerStatus(issuer2.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.getIssuerStatus(issuer3.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.getIssuerStatus(Wallet.createRandom().address)).equals(ISSUER_STATUS.DEACTIVATED); // random address
 
       expect(await governance.getIssuersLength()).to.equal(0);
 
@@ -771,7 +778,7 @@ describe("QuadGovernance", async () => {
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
-    })
+    });
   });
 
   describe("setIssuer", async () => {
