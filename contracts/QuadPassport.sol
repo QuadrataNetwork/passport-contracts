@@ -284,7 +284,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        uint256 currentBalance = _accountBalancesETH[_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalancesETH[_to] = 0;
-       require(_to.send(currentBalance), "FAILED_TO_TRANSFER_NATIVE_ETH");
+       (bool sent,) = _to.call{value: currentBalance}("");
+       require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
        return currentBalance;
     }
 
