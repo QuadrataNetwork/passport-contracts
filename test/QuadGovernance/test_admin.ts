@@ -691,7 +691,7 @@ describe("QuadGovernance", async () => {
     });
   });
 
-  describe("setIssuerStatus", async () => {
+  describe("setIssuerStatus / getIssuerStatus", async () => {
 
     it("succeed - turns an active issuer into a decativated issuer", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
