@@ -501,7 +501,7 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @dev Used to determine if issuers have an attribute
-    /// @param _attribute the value to check existsance on
+    /// @param _attribute the value to check existence on
     /// @param _account account getting requested for attributes
     /// @return unique bytes32 hash or bytes32(0) if issuers have the attribute
     function _issuersContain(

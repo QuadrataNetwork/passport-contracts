@@ -1,7 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { expect } from "chai";
-import { Contract } from "ethers";
-import { parseEther, parseUnits } from "ethers/lib/utils";
+import { constants, Contract, Wallet } from "ethers";
+import { id, parseEther, parseUnits } from "ethers/lib/utils";
 import { ethers, upgrades } from "hardhat";
 const {
   ATTRIBUTE_AML,
@@ -15,7 +15,8 @@ const {
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
   ATTRIBUTE_IS_BUSINESS,
-  PRICE_PER_BUSINESS_ATTRIBUTES
+  PRICE_PER_BUSINESS_ATTRIBUTES,
+  ISSUER_STATUS
 } = require("../../utils/constant.ts");
 
 const {
@@ -58,36 +59,30 @@ describe("QuadGovernance", async () => {
   describe("initialize", async () => {
     it("success", async () => {
       expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
+
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
-      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_DID)).to.equal(
-        false
-      );
-      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
-        true
-      );
-      expect(
-        await governance.eligibleAttributesByDID(ATTRIBUTE_COUNTRY)
-      ).to.equal(false);
-      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(
-        true
-      );
-      expect(await governance.eligibleAttributes(ATTRIBUTE_AML)).to.equal(
-        false
-      );
-      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
-        parseEther("0.01")
-      );
-      expect(
-        await governance.mintPricePerAttribute(ATTRIBUTE_COUNTRY)
-      ).to.equal(parseEther("0.01"));
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_DID)).to.equal(false);
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(true);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_COUNTRY)).to.equal(false);
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_IS_BUSINESS)).to.equal(true);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_IS_BUSINESS)).to.equal(false);
+
+      expect(await governance.eligibleAttributes(ATTRIBUTE_AML)).to.equal(false);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(true);
+
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(parseEther("0.01"));
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_COUNTRY)).to.equal(parseEther("0.01"));
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_IS_BUSINESS)).to.equal(parseEther("0"));
+      expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(parseEther("0"));
+
       expect(await governance.passportVersion()).to.equal(1);
       expect(await governance.revSplitIssuer()).to.equal(50);
-      expect(await governance.hasRole(GOVERNANCE_ROLE, admin.address)).to.equal(
-        true
-      );
-      expect(
-        await governance.hasRole(DEFAULT_ADMIN_ROLE, admin.address)
-      ).to.equal(true);
+
+      expect(await governance.hasRole(GOVERNANCE_ROLE, admin.address)).to.equal(true);
+
+      expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, admin.address)).to.equal(true);
     });
   });
 
@@ -187,7 +182,7 @@ describe("QuadGovernance", async () => {
   });
 
 
-  describe("deleteIssuer", async () => {
+  describe("deleteIssuer / getIssuerStatus", async () => {
     it("succeed - delete 3rd issuer", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
       expect((await governance.issuers(0))[0]).to.equal(issuer1.address);
@@ -195,6 +190,7 @@ describe("QuadGovernance", async () => {
       expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer3.address);
+      expect(await governance.getIssuerStatus(issuer3.address)).equals(ISSUER_STATUS.DEACTIVATED);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
@@ -210,6 +206,7 @@ describe("QuadGovernance", async () => {
       expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer2.address);
+      expect(await governance.getIssuerStatus(issuer2.address)).equals(ISSUER_STATUS.DEACTIVATED);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
@@ -225,6 +222,7 @@ describe("QuadGovernance", async () => {
       expect((await governance.issuers(2))[0]).to.equal(issuer3.address);
 
       await governance.connect(admin).deleteIssuer(issuer1.address);
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
@@ -242,6 +240,10 @@ describe("QuadGovernance", async () => {
       await governance.connect(admin).deleteIssuer(issuer1.address);
       await governance.connect(admin).deleteIssuer(issuer2.address);
       await governance.connect(admin).deleteIssuer(issuer3.address);
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.getIssuerStatus(issuer2.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.getIssuerStatus(issuer3.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.getIssuerStatus(Wallet.createRandom().address)).equals(ISSUER_STATUS.DEACTIVATED); // random address
 
       expect(await governance.getIssuersLength()).to.equal(0);
 
@@ -355,9 +357,8 @@ describe("QuadGovernance", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       await expect(
         governance.connect(admin).setEligibleAttribute(newAttribute, true)
-      )
-        .to.emit(governance, "EligibleAttributeUpdated")
-        .withArgs(newAttribute, true);
+      ).to.emit(governance, "EligibleAttributeUpdated").withArgs(newAttribute, true);
+
       expect(await governance.eligibleAttributes(newAttribute)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
     });
@@ -392,23 +393,17 @@ describe("QuadGovernance", async () => {
     it("succeed (turn false)", async () => {
       expect(await governance.getEligibleAttributesLength()).to.equal(3);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
-      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
-        true
-      );
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(true);
       expect(await governance.eligibleAttributesArray(0)).to.equal(ATTRIBUTE_DID);
-      expect(await governance.eligibleAttributesArray(1)).to.equal(
-        ATTRIBUTE_COUNTRY
-      );
+      expect(await governance.eligibleAttributesArray(1)).to.equal(ATTRIBUTE_COUNTRY);
       await expect(
         governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false)
-      )
-        .to.emit(governance, "EligibleAttributeUpdated")
-        .withArgs(ATTRIBUTE_COUNTRY, false);
+      ).to.emit(governance, "EligibleAttributeUpdated").withArgs(ATTRIBUTE_COUNTRY, false);
+
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
-      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
-        false
-      );
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(false);
       expect(await governance.eligibleAttributesArray(0)).to.equal(ATTRIBUTE_DID);
+      expect(await governance.eligibleAttributesArray(1)).to.not.equal(ATTRIBUTE_COUNTRY);
       expect(await governance.getEligibleAttributesLength()).to.equal(2);
     });
 
@@ -465,12 +460,9 @@ describe("QuadGovernance", async () => {
   describe("setEligibleAttributeByDID", async () => {
     it("succeed", async () => {
       const newAttribute = ethers.utils.id("CREDIT");
-      expect(await governance.eligibleAttributesByDID(newAttribute)).to.equal(
-        false
-      );
-      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(
-        true
-      );
+      expect(await governance.eligibleAttributesByDID(newAttribute)).to.equal(false);
+      expect(await governance.eligibleAttributesByDID(ATTRIBUTE_AML)).to.equal(true);
+
       expect(
         await governance
           .connect(admin)
@@ -706,6 +698,89 @@ describe("QuadGovernance", async () => {
     });
   });
 
+  describe("setIssuerStatus / getIssuerStatus", async () => {
+
+    it("succeed - turns an active issuer into a decativated issuer", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.DEACTIVATED))
+        .to.emit(governance, "IssuerStatusChanged")
+        .withArgs(issuer1.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
+
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+    })
+
+    it("succeed - turns a decativated issuer into an active issuer", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.DEACTIVATED))
+        .to.emit(governance, "IssuerStatusChanged")
+        .withArgs(issuer1.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
+
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.ACTIVE))
+        .to.emit(governance, "IssuerStatusChanged")
+        .withArgs(issuer1.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+    })
+
+    it("fail - cannot set active issuer to random status", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
+        .to.be.revertedWith("function was called with incorrect parameters");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+    })
+
+    it("fail - cannot set deactivated issuer to random status", async () => {
+      await governance.connect(admin).setIssuerStatus(issuer1.address, ISSUER_STATUS.DEACTIVATED);
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
+        .to.be.revertedWith("function was called with incorrect parameters");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
+    })
+
+    it("fail - must be admin", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(issuer1).setIssuerStatus(issuer1.address, 0))
+        .to.be.revertedWith("INVALID_ADMIN");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+    })
+
+    it("fail - must be valid value", async () => {
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+
+      await expect(governance.connect(admin).setIssuerStatus(constants.AddressZero, 0))
+        .to.be.revertedWith("ISSUER_ADDRESS_ZERO");
+
+      expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
+      expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
+    });
+  });
+
   describe("setIssuer", async () => {
     it("succeed", async () => {
       expect(await governance.issuersTreasury(newIssuer.address)).to.equal(
@@ -722,14 +797,12 @@ describe("QuadGovernance", async () => {
     });
 
     it("success (setIssuer maybe called multiple times without creating dupes)", async () => {
-      expect(await governance.issuersTreasury(issuer1.address)).to.equal(
-        issuerTreasury1.address
-      );
+      expect(await governance.issuersTreasury(issuer1.address)).to.equal(issuerTreasury1.address);
+      expect(await governance.getIssuersLength()).to.equal(3);
       await governance.connect(admin).setIssuer(issuer1.address, admin.address);
 
-      expect(await governance.issuersTreasury(issuer1.address)).to.equal(
-        admin.address
-      );
+      expect(await governance.issuersTreasury(issuer1.address)).to.equal(admin.address);
+      expect(await governance.getIssuersLength()).to.equal(3);
     });
 
     it("fail (issuer address (0))", async () => {

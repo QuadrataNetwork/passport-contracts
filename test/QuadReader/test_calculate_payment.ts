@@ -1,12 +1,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import {
   parseEther,
   parseUnits,
   formatBytes32String,
   id,
+  hexZeroPad,
 } from "ethers/lib/utils";
 import exp from "constants";
 
@@ -183,6 +184,26 @@ describe("QuadPassport", async () => {
       ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
     });
 
+    it("fail - address(0)", async () => {
+      await expect(
+        reader.calculatePaymentToken(ATTRIBUTE_DID, constants.AddressZero, minterA.address)
+      ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
+    });
+
+    it("fail - oracle zero", async () => {
+      [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
+        admin,
+        [issuer],
+        treasury,
+        [issuerTreasury],
+        baseURI,
+        {skipOracle: true}
+      );
+      await expect(
+        reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address)
+      ).to.revertedWith("ORACLE_ADDRESS_ZERO");
+    });
+
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
       await expect(reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address))
@@ -232,6 +253,21 @@ describe("QuadPassport", async () => {
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
       await expect(reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
+    });
+
+
+    it("fail - oracle zero", async () => {
+      [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
+        admin,
+        [issuer],
+        treasury,
+        [issuerTreasury],
+        baseURI,
+        {skipOracle: true}
+      );
+      await expect(
+        reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)
+      ).to.revertedWith("ORACLE_ADDRESS_ZERO");
     });
   });
 });

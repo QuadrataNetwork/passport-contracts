@@ -302,7 +302,7 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         } else if(_status == IssuerStatus.DEACTIVATED) {
             revokeRole(ISSUER_ROLE, _issuer);
         } else {
-            revert("INVALID_STATUS");
+            revert("INVALID_STATUS"); //unreachable code
         }
 
         emit IssuerStatusChanged(_issuer, oldIssuerData.status, _status);
