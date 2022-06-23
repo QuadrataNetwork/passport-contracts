@@ -14,7 +14,8 @@ export const deployPassportEcosystem = async (
   issuers: SignerWithAddress[],
   treasury: SignerWithAddress,
   issuerTreasuries: SignerWithAddress[],
-  uri: string
+  uri: string,
+  opts: any
 ): Promise<[Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, any]> => {
 
   // Deploy Governance
@@ -45,7 +46,9 @@ export const deployPassportEcosystem = async (
   await usdc.deployed();
 
   // Deploy Governance
-  await governance.connect(admin).setOracle(oracle.address);
+  if(!opts?.skipOracle) {
+    await governance.connect(admin).setOracle(oracle.address);
+  }
   await governance.connect(admin).allowTokenPayment(usdc.address, true);
   await governance.connect(admin).setTreasury(treasury.address);
   await governance.connect(admin).grantRole(id("READER_ROLE"), reader.address);
