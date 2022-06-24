@@ -67,8 +67,6 @@ interface IQuadGovernance {
 
     function treasury() external view returns (address);
 
-    function hasRole(bytes32, address) external view returns(bool);
-
     function getIssuersLength() external view returns (uint256);
 
     function getIssuers() external view returns (QuadGovernanceStore.Issuer[] memory);

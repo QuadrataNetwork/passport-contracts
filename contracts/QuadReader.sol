@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20Metadat
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -35,7 +36,7 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     function _authorizeUpgrade(address) internal view override {
-        require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable with ERC20)
