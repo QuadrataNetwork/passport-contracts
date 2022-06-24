@@ -303,17 +303,27 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        return currentBalance;
     }
 
-    /// @dev Admin function to set the address of the IQuadGovernance contract
+    /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
         require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
-        require(_governanceContract != address(governance), "GOVERNANCE_ALREADY_SET");
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
+
+        pendingGovernance = _governanceContract;
+    }
+
+    /// @dev Function for a contract/EOA to accept and set new Governance address
+    function acceptGovernance() public {
+        require(_msgSender() == pendingGovernance, "ONLY_NEW_GOVERNANCE_CONTRACT");
+
         address oldGov = address(governance);
-        governance = IQuadGovernance(_governanceContract);
+
+        governance = IQuadGovernance(_msgSender());
+        pendingGovernance = address(0);
 
         emit GovernanceUpdated(oldGov, address(governance));
     }
+
 
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
