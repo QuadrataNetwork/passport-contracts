@@ -36,6 +36,7 @@ contract QuadPassportStore {
     bytes32 public constant READER_ROLE = keccak256("READER_ROLE");
 
     IQuadGovernance public governance;
+    address public pendingGovernance;
 
     // Hash => bool
     mapping(bytes32 => bool) internal _usedHashes;

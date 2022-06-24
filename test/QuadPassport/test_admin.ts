@@ -35,8 +35,10 @@ describe("QuadPassport", async () => {
 
     it("succeed", async () => {
       expect(await passport.governance()).to.equal(governance.address);
+      await governance.connect(admin).updateGovernanceInPassport(treasury.address)
+
       await expect(
-        governance.connect(admin).updateGovernanceInPassport(treasury.address)
+        await governance.connect(treasury).acceptGovernanceInPassport()
       )
         .to.emit(passport, "GovernanceUpdated")
         .withArgs(governance.address, treasury.address);
@@ -51,13 +53,6 @@ describe("QuadPassport", async () => {
       await expect(
         passport.connect(deployer).setGovernance(deployer.address)
       ).to.be.revertedWith("ONLY_GOVERNANCE_CONTRACT");
-    });
-
-    it("fail (governance already set)", async () => {
-      expect(await passport.governance()).to.equal(governance.address);
-      await expect(
-        governance.connect(admin).updateGovernanceInPassport(governance.address)
-      ).to.be.revertedWith("GOVERNANCE_ALREADY_SET");
     });
   });
 

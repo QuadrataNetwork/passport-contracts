@@ -106,6 +106,12 @@ contract QuadGovernance is AccessControlUpgradeable, UUPSUpgradeable, QuadGovern
         config.passport.setGovernance(_newGovernance);
     }
 
+    function acceptGovernanceInPassport() external {
+        config.passport.acceptGovernance(_msgSender());
+    }
+
+
+
     /// @dev Set the QuadPassport deployed version
     /// @notice Restricted behind a TimelockController
     /// @param _version current version of the QuadPassport

@@ -206,6 +206,7 @@ describe("QuadPassport", async () => {
 
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
+      await governance.connect(admin).acceptGovernanceInPassport();
       await expect(reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address))
         .to.reverted;
     });
@@ -252,6 +253,7 @@ describe("QuadPassport", async () => {
 
     it("fail - governance incorrectly set", async () => {
       await governance.connect(admin).updateGovernanceInPassport(admin.address);
+      await governance.connect(admin).acceptGovernanceInPassport();
       await expect(reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
     });
 

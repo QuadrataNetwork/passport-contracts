@@ -50,6 +50,6 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function increaseAccountBalance(address, address, uint256) external;
 
-
+    function acceptGovernance(address) external;
 
 }
