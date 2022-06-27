@@ -178,7 +178,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
-    /// @dev Set the KYC price for querying a single attribute after owning a passport
+    /// @dev Set the price for querying a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (USD)
@@ -191,7 +191,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
-    /// @dev Set the KYB price for querying a single attribute after owning a passport
+    /// @dev Set the business attribute price for querying a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (USD)
