@@ -90,8 +90,12 @@ describe("QuadGovernance", async () => {
     it("success", async () => {
       expect(await passport.governance()).to.equal(governance.address);
       await governance.connect(admin).updateGovernanceInPassport(deployer.address)
+      await governance
+        .connect(admin)
+        .grantRole(GOVERNANCE_ROLE, admin.address);
+
       await expect(
-        await governance.connect(deployer).acceptGovernanceInPassport()
+        await governance.connect(admin).acceptGovernanceInPassport()
       )
         .to.emit(passport, "GovernanceUpdated")
         .withArgs(governance.address, deployer.address);
