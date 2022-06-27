@@ -1161,9 +1161,9 @@ describe("QuadPassport", async () => {
         .to.emit(governance, 'IssuerStatusChanged')
         .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
-      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(ISSUER_STATUS.DEACTIVATED);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterA).burnPassport(TOKEN_ID);
-      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(ISSUER_STATUS.ACTIVE);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       // enable issuer to query data
       await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE))
