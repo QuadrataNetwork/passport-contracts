@@ -19,7 +19,6 @@ const {
   TOKEN_ID,
   MINT_PRICE,
   PRICE_PER_ATTRIBUTES,
-  DEACTIVATED,
   ISSUER_STATUS,
 } = require("../../utils/constant.ts");
 
@@ -136,9 +135,9 @@ describe("QuadReader", async () => {
       await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
-      await governance.connect(admin).setIssuerStatus(signers[0].address, DEACTIVATED);
-      await governance.connect(admin).setIssuerStatus(signers[1].address, DEACTIVATED);
-      await governance.connect(admin).setIssuerStatus(signers[2].address, DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(signers[0].address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(signers[1].address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(signers[2].address, ISSUER_STATUS.DEACTIVATED);
 
       await assertGetAttributeFreeExcluding(
         [issuer.address],
@@ -161,9 +160,9 @@ describe("QuadReader", async () => {
       await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), id("LOW"), id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[1], signers[1], passport, id("MINTER_A_BRAVO"), id("MEDIUM"), id("US"), id("FALSE"), 12, 1, {newIssuerMint: true});
       await assertMint(minterA, signers[2], signers[2], passport, id("MINTER_A_CHARLIE"), id("LOW"), id("US"), id("FALSE"), 10, 1, {newIssuerMint: true});
-      await governance.connect(admin).setIssuerStatus(signers[0].address, DEACTIVATED);
-      await governance.connect(admin).setIssuerStatus(signers[1].address, DEACTIVATED);
-      await governance.connect(admin).setIssuerStatus(signers[2].address, DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(signers[0].address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(signers[1].address, ISSUER_STATUS.DEACTIVATED);
+      await governance.connect(admin).setIssuerStatus(signers[2].address, ISSUER_STATUS.DEACTIVATED);
 
       await assertGetAttributeFreeExcluding(
         [],
