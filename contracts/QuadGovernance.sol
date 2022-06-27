@@ -239,7 +239,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     function setRevSplitIssuer(uint256 _split) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(config.revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
-        require(_split <= 100, "SPLIT_MUST_BE_LESS_THAN_100");
+        require(_split <= 100, "SPLIT_MUST_BE_LESS_THAN_EQUAL_TO_100");
 
         uint256 oldSplit = config.revSplitIssuer;
         config.revSplitIssuer = _split;
@@ -258,10 +258,10 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         _issuersTreasury[_issuer] = _treasury;
 
-        if(issuerIndices[_issuer] == 0) {
+        if(_issuerIndices[_issuer] == 0) {
             grantRole(ISSUER_ROLE, _issuer);
             _issuers.push(Issuer(_issuer, IssuerStatus.ACTIVE));
-            issuerIndices[_issuer] = _issuers.length;
+            _issuerIndices[_issuer] = _issuers.length;
         }
 
         emit IssuerAdded(_issuer, _treasury);
@@ -273,13 +273,13 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     function deleteIssuer(address _issuer) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
-        require(issuerIndices[_issuer] < _issuers.length + 1, "OUT_OF_BOUNDS");
+        require(_issuerIndices[_issuer] < _issuers.length + 1, "OUT_OF_BOUNDS");
 
         // don't need to delete treasury
-        _issuers[issuerIndices[_issuer]-1] = _issuers[_issuers.length-1];
-        issuerIndices[_issuers[_issuers.length-1].issuer] = issuerIndices[_issuer];
+        _issuers[_issuerIndices[_issuer]-1] = _issuers[_issuers.length-1];
+        _issuerIndices[_issuers[_issuers.length-1].issuer] = _issuerIndices[_issuer];
 
-        delete issuerIndices[_issuer];
+        delete _issuerIndices[_issuer];
         _issuers.pop();
 
         revokeRole(ISSUER_ROLE, _issuer);
@@ -295,8 +295,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
-        Issuer memory oldIssuerData = _issuers[issuerIndices[_issuer]-1];
-        _issuers[issuerIndices[_issuer]-1] = Issuer(oldIssuerData.issuer, _status);
+        Issuer memory oldIssuerData = _issuers[_issuerIndices[_issuer]-1];
+        _issuers[_issuerIndices[_issuer]-1] = Issuer(oldIssuerData.issuer, _status);
 
         if(_status == IssuerStatus.ACTIVE) {
             grantRole(ISSUER_ROLE, _issuer);
@@ -375,11 +375,11 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _issuer address of issuer
     /// @return issuer status
     function getIssuerStatus(address _issuer) override public view returns(IssuerStatus) {
-        if(issuerIndices[_issuer] == 0) {
+        if(_issuerIndices[_issuer] == 0) {
             // if the issuer isn't in the mapping, just say it's not active
             return IssuerStatus.DEACTIVATED;
         }
-        return _issuers[issuerIndices[_issuer]-1].status;
+        return _issuers[_issuerIndices[_issuer]-1].status;
     }
 
     /// @dev Get the version of deployment

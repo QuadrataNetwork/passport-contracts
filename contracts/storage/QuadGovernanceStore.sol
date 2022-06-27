@@ -15,8 +15,8 @@ contract QuadGovernanceStore {
     }
 
     enum IssuerStatus {
-        ACTIVE,
-        DEACTIVATED
+        DEACTIVATED,
+        ACTIVE
     }
 
     struct Issuer {
@@ -48,6 +48,6 @@ contract QuadGovernanceStore {
     mapping(bytes32 => uint256) internal _pricePerBusinessAttribute;
 
     Issuer[] internal _issuers;
-    mapping(address => uint256) internal issuerIndices;
+    mapping(address => uint256) internal _issuerIndices;
 
 }
