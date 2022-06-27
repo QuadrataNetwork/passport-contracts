@@ -107,7 +107,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     }
 
     function acceptGovernanceInPassport() external {
-        config.passport.acceptGovernance(_msgSender());
+        config.passport.acceptGovernance();
     }
 
 
