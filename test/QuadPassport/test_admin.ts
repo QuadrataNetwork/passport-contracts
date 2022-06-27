@@ -51,11 +51,11 @@ describe("QuadPassport", async () => {
     it("fail (not governance contract)", async () => {
       expect(await passport.governance()).to.equal(governance.address);
       await expect(
-        passport.connect(admin).setGovernance(deployer.address)
-      ).to.be.revertedWith("ONLY_GOVERNANCE_CONTRACT");
+        passport.connect(admin).setGovernance(deployer.address, deployer.address)
+      ).to.be.revertedWith("INVALID_GOVERNANCE");
       await expect(
-        passport.connect(deployer).setGovernance(deployer.address)
-      ).to.be.revertedWith("ONLY_GOVERNANCE_CONTRACT");
+        passport.connect(deployer).setGovernance(deployer.address, deployer.address)
+      ).to.be.revertedWith("INVALID_GOVERNANCE");
     });
   });
 
