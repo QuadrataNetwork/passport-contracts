@@ -20,7 +20,7 @@ import "./storage/QuadPassportStore.sol";
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-    event GovernanceUpdated(address _oldGovernance, address _governance);
+    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
@@ -316,7 +316,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
-    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @dev Allow authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @param _issuer the entity that gave the attribute value
@@ -332,7 +332,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _attributes[_account][_attribute][_issuer];
     }
 
-    /// @dev Allow an authorized readers to get information about a QuadDID for a specific issuer
+    /// @dev Allow authorized readers to get information about a QuadDID for a specific issuer
     /// @param _dID did of user
     /// @param _attribute attribute to get respective value from
     /// @param _issuer the entity that gave the attribute value
@@ -350,7 +350,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @dev Increase balance of account
     /// @param _account address of user
-    /// @param _amount the entity that gave the attribute value
+    /// @param _amount amount to credit the account in ETH
     function increaseAccountBalanceETH(
         address _account,
         uint256 _amount
@@ -360,8 +360,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     /// @dev Increase balance of account
+    /// @param _token address of token contract
     /// @param _account address of user
-    /// @param _amount the entity that gave the attribute value
+    /// @param _amount amount to credit the account in specified token
     function increaseAccountBalance(
         address _token,
         address _account,
