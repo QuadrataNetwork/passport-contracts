@@ -11,7 +11,8 @@ const {
   ATTRIBUTE_DID,
   TOKEN_ID,
   MINT_PRICE,
-  PRICE_PER_BUSINESS_ATTRIBUTES
+  PRICE_PER_BUSINESS_ATTRIBUTES,
+  ISSUER_STATUS
 } = require("../../utils/constant.ts");
 
 const {
@@ -1010,18 +1011,18 @@ describe("QuadPassport", async () => {
       expect(isBusinessPreBurnA.value).equals(id("TRUE"));
 
       // disable issuer for burn
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 0, 1);
+        .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
       await mockBusiness.burn();
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
 
       // enable issuer to query data
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 1, 0);
+        .withArgs(issuer.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
 
       // POST BURN
       // did level
@@ -1156,18 +1157,18 @@ describe("QuadPassport", async () => {
 
 
       // disable issuer for burn
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 0, 1);
+        .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
-      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(ISSUER_STATUS.DEACTIVATED);
       await passport.connect(minterA).burnPassport(TOKEN_ID);
-      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(ISSUER_STATUS.ACTIVE);
 
       // enable issuer to query data
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 1, 0);
+        .withArgs(issuer.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
 
       // POST BURN
       // did level
@@ -1510,14 +1511,14 @@ describe("QuadPassport", async () => {
       expect(isBusinessPreBurnA.value).equals(isBusiness);
 
       // disable issuer for burn
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 0, 1);
+        .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
       // enable issuer
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 1, 0);
+        .withArgs(issuer.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
 
       // POST BURN
       // did level
@@ -1570,14 +1571,14 @@ describe("QuadPassport", async () => {
       expect(isBusinessPreBurnA.value).equals(isBusiness);
 
       // disable issuer for burn
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 0, 1);
+        .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
       // enable issuer
-      await expect(governance.connect(admin).setIssuerStatus(issuer.address, 0))
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE))
         .to.emit(governance, 'IssuerStatusChanged')
-        .withArgs(issuer.address, 1, 0);
+        .withArgs(issuer.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
 
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
       await passport.connect(issuer).burnPassportIssuer(minterB.address, TOKEN_ID);
