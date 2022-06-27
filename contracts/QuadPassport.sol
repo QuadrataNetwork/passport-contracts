@@ -307,21 +307,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
-        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_GOVERNANCE");
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
 
         pendingGovernance = _governanceContract;
     }
 
-    /// @dev Function for a contract/EOA to accept and set new Governance address
+    /// @dev Function for the GOVERNANCE_ROLE to accept and set the governance contract address
     function acceptGovernance(address _sender) external override {
-        require(_sender == pendingGovernance, "ONLY_NEW_GOVERNANCE_CONTRACT");
-
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _sender), "INVALID_GOVERNANCE");
         address oldGov = address(governance);
 
         governance = IQuadGovernance(_sender);
-        pendingGovernance = address(0);
-
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
