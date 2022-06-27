@@ -316,7 +316,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
-    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @dev Allow authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @param _issuer the entity that gave the attribute value
@@ -332,7 +332,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _attributes[_account][_attribute][_issuer];
     }
 
-    /// @dev Allow an authorized readers to get information about a QuadDID for a specific issuer
+    /// @dev Allow authorized readers to get information about a QuadDID for a specific issuer
     /// @param _dID did of user
     /// @param _attribute attribute to get respective value from
     /// @param _issuer the entity that gave the attribute value

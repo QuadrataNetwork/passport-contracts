@@ -22,7 +22,6 @@ contract QuadGovernanceStore {
     struct Issuer {
         address issuer;
         IssuerStatus status;
-        // TODO: should we add `bytes data;` in the struct
     }
 
     // Admin Functions
