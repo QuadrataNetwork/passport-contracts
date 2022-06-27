@@ -307,8 +307,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract, address _sender) external override {
         require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
-
-        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _sender), "INVALID_GOVERNANCE");
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
 
         pendingGovernance = _governanceContract;
@@ -318,9 +316,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     function acceptGovernance(address _sender) external override {
         require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
 
-        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _sender), "INVALID_GOVERNANCE");
         address oldGov = address(governance);
-
         governance = IQuadGovernance(pendingGovernance);
         pendingGovernance = address(0);
 
