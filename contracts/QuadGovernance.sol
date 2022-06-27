@@ -13,22 +13,22 @@ import "./storage/QuadGovernanceStore.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All admin functions to govern the QuadPassport contract
 contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
-    event AllowTokenPayment(address _tokenAddr, bool _isAllowed);
+    event AllowTokenPayment(address indexed _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
-    event IssuerAdded(address _issuer, address _newTreasury);
-    event IssuerDeleted(address _issuer);
-    event IssuerStatusChanged(address issuer, IssuerStatus oldStatus, IssuerStatus newStatus);
-    event PassportAddressUpdated(address _oldAddress, address _address);
+    event IssuerAdded(address indexed _issuer, address indexed _newTreasury);
+    event IssuerDeleted(address indexed _issuer);
+    event IssuerStatusChanged(address indexed issuer, IssuerStatus oldStatus, IssuerStatus newStatus);
+    event PassportAddressUpdated(address indexed _oldAddress, address indexed _address);
     event PassportVersionUpdated(uint256 _oldVersion, uint256 _version);
     event PassportMintPriceUpdated(uint256 _oldMintPrice, uint256 _mintPrice);
-    event OracleUpdated(address _oldAddress, address _address);
+    event OracleUpdated(address indexed _oldAddress, address indexed _address);
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
-    event TreasuryUpdated(address _oldAddress, address _address);
+    event TreasuryUpdated(address indexed _oldAddress, address indexed _address);
 
     /// @dev Initializer (constructor)
     /// @param _admin address of the admin account
@@ -178,10 +178,10 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
-    /// @dev Set the price to update/set a single attribute after owning a passport
+    /// @dev Set the KYC price for querying a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
-    /// @param _price price (wei)
+    /// @param _price price (USD)
     function setAttributePrice(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_pricePerAttribute[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
@@ -191,10 +191,10 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit AttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
-    /// @dev Set the price to update/set a single attribute after owning a passport
+    /// @dev Set the KYB price for querying a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
-    /// @param _price price (wei)
+    /// @param _price price (USD)
     function setBusinessAttributePrice(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_pricePerBusinessAttribute[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
@@ -287,9 +287,10 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit IssuerDeleted(_issuer);
     }
 
-    /// @dev Deactivate issuer
+    /// @dev Sets the status for specified issuer
     /// @notice Restricted behind a TimelockController
-    /// @param _issuer address to remove
+    /// @param _issuer address to change status
+    /// @param _status new status for issuer
     function setIssuerStatus(address _issuer, IssuerStatus _status) external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
@@ -308,7 +309,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit IssuerStatusChanged(_issuer, oldIssuerData.status, _status);
     }
 
-    /// @dev Authorize or Denied a payment to be received in Toke
+    /// @dev Authorize or deny a payment to be received in specified token
     /// @notice Restricted behind a TimelockController
     /// @param _tokenAddr address of the ERC20 token for payment
     /// @param _isAllowed authorize or deny this token
@@ -344,7 +345,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @dev Get the price in USD of a token using UniswapAnchorView
     /// @param _tokenAddr address of the ERC20 token
     /// @return price in USD
-    function getPrice(address _tokenAddr) override external view returns (uint) {
+    function getPrice(address _tokenAddr) override external view returns (uint256) {
         require(config.oracle != address(0), "ORACLE_ADDRESS_ZERO");
         require(eligibleTokenPayments[_tokenAddr], "TOKEN_PAYMENT_NOT_ALLOWED");
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenAddr);
@@ -353,25 +354,26 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
     /// @dev Get the price in USD for $ETH using UniswapAnchorView
     /// @return price in USD for $ETH
-    function getPriceETH() override external view returns (uint) {
+    function getPriceETH() override external view returns (uint256) {
         require(config.oracle != address(0), "ORACLE_ADDRESS_ZERO");
         return IUniswapAnchoredView(config.oracle).price("ETH");
     }
 
     /// @dev Get the length of _issuers array
-    /// @return number of active _issuers
+    /// @return total number of _issuers
     function getIssuersLength() override public view returns (uint256) {
         return _issuers.length;
     }
 
     /// @dev Get the _issuers array
-    /// @return length
+    /// @return list of issuers
     function getIssuers() override public view returns (Issuer[] memory) {
         return _issuers;
     }
 
     /// @dev Get the status of an issuer
-    /// @return status
+    /// @param _issuer address of issuer
+    /// @return issuer status
     function getIssuerStatus(address _issuer) override public view returns(IssuerStatus) {
         if(issuerIndices[_issuer] == 0) {
             // if the issuer isn't in the mapping, just say it's not active

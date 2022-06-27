@@ -44,6 +44,7 @@ contract QuadGovernanceStore {
 
     Config public config;
 
+    // Price in $USD (1e6 decimals)
     mapping(bytes32 => uint256) internal _pricePerBusinessAttribute;
 
     Issuer[] internal _issuers;

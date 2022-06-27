@@ -20,7 +20,7 @@ import "./storage/QuadPassportStore.sol";
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-    event GovernanceUpdated(address _oldGovernance, address _governance);
+    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
@@ -350,7 +350,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @dev Increase balance of account
     /// @param _account address of user
-    /// @param _amount the entity that gave the attribute value
+    /// @param _amount amount to credit the account in ETH
     function increaseAccountBalanceETH(
         address _account,
         uint256 _amount
@@ -360,8 +360,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     /// @dev Increase balance of account
+    /// @param _token address of token contract
     /// @param _account address of user
-    /// @param _amount the entity that gave the attribute value
+    /// @param _amount amount to credit the account in specified token
     function increaseAccountBalance(
         address _token,
         address _account,
