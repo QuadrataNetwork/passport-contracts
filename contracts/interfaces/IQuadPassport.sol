@@ -33,7 +33,7 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function burnPassportIssuer(address _account, uint256 _tokenId) external;
 
-    function setGovernance(address _governanceContract) external;
+    function setGovernance(address _governanceContract, address _sender) external;
 
     function withdrawETH(address payable _to) external returns (uint256);
 
