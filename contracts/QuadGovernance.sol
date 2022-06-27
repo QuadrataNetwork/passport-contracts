@@ -258,7 +258,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         _issuersTreasury[_issuer] = _treasury;
 
-        if(_issuerIndices[_issuer] == 1) {
+        if(_issuerIndices[_issuer] == 0) {
             grantRole(ISSUER_ROLE, _issuer);
             _issuers.push(Issuer(_issuer, IssuerStatus.ACTIVE));
             _issuerIndices[_issuer] = _issuers.length;
