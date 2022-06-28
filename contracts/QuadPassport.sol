@@ -167,8 +167,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
+            bytes32 attributeType = governance.eligibleAttributesArray(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attributeType = governance.eligibleAttributesArray(i);
                 delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
             }
         }
