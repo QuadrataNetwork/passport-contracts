@@ -54,7 +54,7 @@ describe("QuadPassport", async () => {
       expect(await passport.governance()).to.equal(governance.address);
 
       await expect(
-        passport.connect(treasury).setGovernance(deployer.address, deployer.address)
+        passport.connect(treasury).setGovernance(deployer.address)
       ).to.be.revertedWith("ONLY_GOVERNANCE_CONTRACT");
     });
   });

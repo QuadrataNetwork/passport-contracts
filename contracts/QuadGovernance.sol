@@ -103,7 +103,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(_newGovernance != address(0), "GOVERNANCE_ADDRESS_ZERO");
         require(address(config.passport) != address(0), "PASSPORT_NOT_SET");
 
-        config.passport.setGovernance(_newGovernance, _msgSender());
+        config.passport.setGovernance(_newGovernance);
     }
 
     function acceptGovernanceInPassport() external {
