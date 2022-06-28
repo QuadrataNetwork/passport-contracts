@@ -70,7 +70,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
+        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
 
@@ -102,6 +104,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sig
     ) external payable override {
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
+        require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_account, _tokenId, _attribute, _value, _issuedAt, _sig);
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
         _usedHashes[hash] = true;
@@ -123,6 +129,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _issuedAt
     ) external override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+
         _setAttributeInternal(_account, _tokenId, _attribute, _value, _issuedAt, _msgSender());
     }
 
@@ -216,6 +226,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
+        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
