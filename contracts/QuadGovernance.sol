@@ -34,6 +34,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _admin address of the admin account
     function initialize(address _admin) public initializer {
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
+        __AccessControl_init_unchained();
 
         _eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
         config.passportVersion = 1;  // Passport Version
