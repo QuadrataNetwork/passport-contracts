@@ -77,7 +77,8 @@ describe("QuadPassport", async () => {
         .grantRole(GOVERNANCE_ROLE, deployer.address);
       const passportv2 = await upgrades.upgradeProxy(
         passport.address,
-        QuadPassportV2
+        QuadPassportV2,
+        {unsafeAllow: ['constructor']}
       );
       expect(await passportv2.foo()).to.equal(1337);
       expect(passport.address).to.equal(passportv2.address);
