@@ -719,8 +719,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
 
-      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
-        .to.be.revertedWith("function was called with incorrect parameters");
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2)).to.be.reverted;
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
@@ -732,8 +731,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
 
-      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
-        .to.be.revertedWith("function was called with incorrect parameters");
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2)).to.be.reverted;
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
