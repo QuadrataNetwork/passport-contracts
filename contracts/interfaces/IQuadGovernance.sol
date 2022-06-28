@@ -10,8 +10,6 @@ interface IQuadGovernance {
 
     function updateGovernanceInPassport(address _newGovernance) external;
 
-    function setPassportVersion(uint256 _version) external;
-
     function setMintPrice(uint256 _mintPrice) external;
 
     function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external;
