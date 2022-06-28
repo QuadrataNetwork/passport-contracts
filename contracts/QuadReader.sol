@@ -295,7 +295,9 @@ import "./storage/QuadGovernanceStore.sol";
         return newIssuers;
     }
 
-    /// @notice creates a list of attribute values from filtered issuers that have attested to the data
+    /// @notice creates a list of attribute values from filtered issuers that have attested to the data.
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
