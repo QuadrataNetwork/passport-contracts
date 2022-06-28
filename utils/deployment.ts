@@ -10,7 +10,7 @@ export const deployPassport = async (
   const passport = await upgrades.deployProxy(
     QuadPassport,
     [governance.address, uri],
-    { initializer: "initialize", kind: "uups" }
+    { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor'] }
   );
   await passport.deployed();
   return passport;
@@ -23,7 +23,7 @@ export const deployGovernance = async (
   const governance = await upgrades.deployProxy(
     QuadGovernance,
     [admin.address],
-    { initializer: "initialize", kind: "uups" }
+    { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor']  }
   );
   await governance.deployed();
   return governance;
@@ -40,20 +40,8 @@ export const deployReader = async (
       governance.address,
       passport.address
     ],
-    { initializer: "initialize", kind: "uups" }
+    { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor']  }
   );
   await reader.deployed();
   return reader;
-};
-
-
-export const deployFaucetERC20 = async(
-  name: string,
-  symbol: string,
-  decimal: BigNumber
-): Promise<Contract> => {
-  const contractFactory = await ethers.getContractFactory("FaucetERC20");
-  const erc20 = await contractFactory.deploy(name, symbol, decimal)
-  await erc20.deployed();
-  return erc20;
 };

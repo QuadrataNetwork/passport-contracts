@@ -918,8 +918,9 @@ describe("QuadGovernance", async () => {
         .grantRole(GOVERNANCE_ROLE, deployer.address);
       const governanceV2 = await upgrades.upgradeProxy(
         governance.address,
-        QuadGovernanceV2
-      );
+        QuadGovernanceV2,
+        { unsafeAllow: ['constructor'] }
+        );
       expect(await governanceV2.getPriceETHV2()).to.equal(1337);
       expect(await governanceV2.oracle()).to.equal(oracle.address);
       expect(governanceV2.address).to.equal(governance.address);
@@ -930,7 +931,7 @@ describe("QuadGovernance", async () => {
         "QuadGovernanceV2"
       );
       await expect(
-        upgrades.upgradeProxy(governance.address, QuadGovernanceV2)
+        upgrades.upgradeProxy(governance.address, QuadGovernanceV2, { unsafeAllow: ['constructor'] })
       ).to.revertedWith("INVALID_ADMIN");
     });
   });

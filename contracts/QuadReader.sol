@@ -21,6 +21,10 @@ import "./storage/QuadGovernanceStore.sol";
  contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore, ReentrancyGuardUpgradeable {
      using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
 
+    constructor() initializer {
+        // used to prevent logic contract self destruct take over
+    }
+
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
     /// @param _passport address of the IQuadPassport contract
