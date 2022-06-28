@@ -314,7 +314,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @dev Admin function to accept and set the governance contract address
     function acceptGovernance() external override {
-        require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
+        require(_msgSender() == address(pendingGovernance), 'ONLY_PENDING_GOVERNANCE_CONTRACT');
 
         address oldGov = address(governance);
         governance = IQuadGovernance(pendingGovernance);

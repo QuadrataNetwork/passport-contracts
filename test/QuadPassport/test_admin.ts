@@ -9,6 +9,9 @@ const {
   deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
+const { deployGovernance } = require("../../utils/deployment.ts");
+
+
 describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract;
@@ -35,17 +38,16 @@ describe("QuadPassport", async () => {
 
     it("succeed", async () => {
       expect(await passport.governance()).to.equal(governance.address);
-      await governance.connect(admin).updateGovernanceInPassport(treasury.address)
-      await governance
-        .connect(admin)
-        .grantRole(GOVERNANCE_ROLE, admin.address);
+      const newGovernance = await deployGovernance(admin);
+      await governance.connect(admin).updateGovernanceInPassport(newGovernance.address)
+      await newGovernance.connect(admin).setPassportContractAddress(passport.address)
 
       await expect(
-        await governance.connect(admin).acceptGovernanceInPassport()
+        await newGovernance.connect(admin).acceptGovernanceInPassport()
       )
         .to.emit(passport, "GovernanceUpdated")
-        .withArgs(governance.address, treasury.address);
-      expect(await passport.governance()).to.equal(treasury.address);
+        .withArgs(governance.address, newGovernance.address);
+      expect(await passport.governance()).to.equal(newGovernance.address);
     });
 
     it("fail (not governance contract)", async () => {
