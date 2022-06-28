@@ -41,9 +41,9 @@ interface IQuadGovernance {
 
     function getEligibleAttributesLength() external view returns(uint256);
 
-    function getPrice(address _tokenAddr) external view returns (uint);
+    function getPrice(address _tokenAddr) external view returns (uint256);
 
-    function getPriceETH() external view returns (uint);
+    function getPriceETH() external view returns (uint256);
 
     function mintPrice() external view returns (uint256);
 
