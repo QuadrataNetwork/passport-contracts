@@ -95,7 +95,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit PassportAddressUpdated(_oldPassport, address(config.passport));
     }
 
-    /// @dev Set the QuadGovernance address in the QuadPassport contract
+    /// @dev Set the pending QuadGovernance address in the QuadPassport contract
     /// @notice Restricted behind a TimelockController
     /// @param _newGovernance address of the QuadGovernance contract
     function updateGovernanceInPassport(address _newGovernance)  external override {
@@ -104,6 +104,12 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(address(config.passport) != address(0), "PASSPORT_NOT_SET");
 
         config.passport.setGovernance(_newGovernance);
+    }
+
+    /// @dev Confirms the pending QuadGovernance address in the QuadPassport contract
+    function acceptGovernanceInPassport() external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        config.passport.acceptGovernance();
     }
 
     /// @dev Set the price for minting the QuadPassport

@@ -88,12 +88,17 @@ describe("QuadGovernance", async () => {
   describe("updateGovernanceInPassport", async () => {
     it("success", async () => {
       expect(await passport.governance()).to.equal(governance.address);
+      const newGovernance = await deployGovernance(admin);
+      await governance.connect(admin).updateGovernanceInPassport(newGovernance.address)
+      await newGovernance.connect(admin).setPassportContractAddress(passport.address)
+
       await expect(
-        governance.connect(admin).updateGovernanceInPassport(deployer.address)
+        await newGovernance.connect(admin).acceptGovernanceInPassport()
       )
         .to.emit(passport, "GovernanceUpdated")
-        .withArgs(governance.address, deployer.address);
-      expect(await passport.governance()).to.equal(deployer.address);
+        .withArgs(governance.address, newGovernance.address);
+
+      expect(await passport.governance()).to.equal(newGovernance.address);
     });
 
     it("fail (not admin)", async () => {

@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -21,6 +20,7 @@ import "./storage/QuadPassportStore.sol";
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
     event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
+    event SetPendingGovernance(address indexed _pendingGovernance);
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
@@ -304,19 +304,29 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        return currentBalance;
     }
 
-    /// @dev Admin function to set the address of the IQuadGovernance contract
+    /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
-        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
-        require(_governanceContract != address(governance), "GOVERNANCE_ALREADY_SET");
+        require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
+
+        pendingGovernance = _governanceContract;
+        emit SetPendingGovernance(pendingGovernance);
+    }
+
+    /// @dev Admin function to accept and set the governance contract address
+    function acceptGovernance() external override {
+        require(_msgSender() == pendingGovernance, 'ONLY_PENDING_GOVERNANCE_CONTRACT');
+
         address oldGov = address(governance);
-        governance = IQuadGovernance(_governanceContract);
+        governance = IQuadGovernance(pendingGovernance);
+        pendingGovernance = address(0);
 
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
-    /// @dev Allow authorized readers to get attribute information about a passport holder for a specific issuer
+
+    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @param _issuer the entity that gave the attribute value
@@ -332,7 +342,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return _attributes[_account][_attribute][_issuer];
     }
 
-    /// @dev Allow authorized readers to get information about a QuadDID for a specific issuer
+    /// @dev Allow an authorized readers to get information about a QuadDID for a specific issuer
     /// @param _dID did of user
     /// @param _attribute attribute to get respective value from
     /// @param _issuer the entity that gave the attribute value
@@ -350,7 +360,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @dev Increase balance of account
     /// @param _account address of user
-    /// @param _amount amount to credit the account in ETH
+    /// @param _amount the entity that gave the attribute value
     function increaseAccountBalanceETH(
         address _account,
         uint256 _amount
@@ -360,9 +370,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     /// @dev Increase balance of account
-    /// @param _token address of token contract
     /// @param _account address of user
-    /// @param _amount amount to credit the account in specified token
+    /// @param _amount the entity that gave the attribute value
     function increaseAccountBalance(
         address _token,
         address _account,
