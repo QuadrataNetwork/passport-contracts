@@ -39,7 +39,11 @@ describe("QuadPassport", async () => {
     it("succeed", async () => {
       expect(await passport.governance()).to.equal(governance.address);
       const newGovernance = await deployGovernance(admin);
-      await governance.connect(admin).updateGovernanceInPassport(newGovernance.address)
+      await expect(
+        await governance.connect(admin).updateGovernanceInPassport(newGovernance.address)
+      ).to.emit(passport, "SetPendingGovernance")
+       .withArgs(newGovernance.address)
+
       await newGovernance.connect(admin).setPassportContractAddress(passport.address)
 
       await expect(
