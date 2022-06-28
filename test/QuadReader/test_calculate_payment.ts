@@ -26,6 +26,8 @@ const {
   deployPassportEcosystem,
 } = require("../utils/deployment_and_init.ts");
 
+const { deployGovernance } = require("../../utils/deployment.ts");
+
 const { signMint, signMessage } = require("../utils/signature.ts");
 
 describe("QuadPassport", async () => {
@@ -205,8 +207,13 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - governance incorrectly set", async () => {
-      await governance.connect(admin).updateGovernanceInPassport(admin.address);
-      await governance.connect(admin).acceptGovernanceInPassport();
+      const newGovernance = await deployGovernance(admin);
+
+      await governance.connect(admin).updateGovernanceInPassport(newGovernance.address);
+
+      await newGovernance.connect(admin).setPassportContractAddress(passport.address)
+      await newGovernance.connect(admin).acceptGovernanceInPassport();
+
       await expect(reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address))
         .to.reverted;
     });
@@ -252,8 +259,13 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - governance incorrectly set", async () => {
-      await governance.connect(admin).updateGovernanceInPassport(admin.address);
-      await governance.connect(admin).acceptGovernanceInPassport();
+      const newGovernance = await deployGovernance(admin);
+
+      await governance.connect(admin).updateGovernanceInPassport(newGovernance.address);
+
+      await newGovernance.connect(admin).setPassportContractAddress(passport.address)
+      await newGovernance.connect(admin).acceptGovernanceInPassport();
+
       await expect(reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
     });
 
