@@ -37,7 +37,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         __AccessControl_init_unchained();
 
         _eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
-        config.passportVersion = 1;  // Passport Version
 
         // Add DID, COUNTRY, AML as valid attributes
         _eligibleAttributes[keccak256("DID")] = true;
@@ -105,18 +104,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(address(config.passport) != address(0), "PASSPORT_NOT_SET");
 
         config.passport.setGovernance(_newGovernance);
-    }
-
-    /// @dev Set the QuadPassport deployed version
-    /// @notice Restricted behind a TimelockController
-    /// @param _version current version of the QuadPassport
-    function setPassportVersion(uint256 _version)  external override {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_version > config.passportVersion, "PASSPORT_VERSION_INCREMENTAL");
-
-        uint256 oldVersion = config.passportVersion;
-        config.passportVersion = _version;
-        emit PassportVersionUpdated(oldVersion, config.passportVersion);
     }
 
     /// @dev Set the price for minting the QuadPassport
@@ -381,12 +368,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
             return IssuerStatus.DEACTIVATED;
         }
         return _issuers[_issuerIndices[_issuer]-1].status;
-    }
-
-    /// @dev Get the version of deployment
-    /// @return version
-    function passportVersion() public view returns(uint256) {
-        return config.passportVersion;
     }
 
     /// @dev Get the revenue split between protocol and _issuers

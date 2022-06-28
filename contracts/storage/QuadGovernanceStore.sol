@@ -7,7 +7,6 @@ contract QuadGovernanceStore {
 
     struct Config {
         uint256  revSplitIssuer; // 50 means 50%;
-        uint256  passportVersion;
         uint256  mintPrice; // Price in $ETH
         IQuadPassport  passport;
         address  oracle;
