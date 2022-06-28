@@ -10,8 +10,6 @@ interface IQuadGovernance {
 
     function updateGovernanceInPassport(address _newGovernance) external;
 
-    function setPassportVersion(uint256 _version) external;
-
     function setMintPrice(uint256 _mintPrice) external;
 
     function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external;
@@ -41,9 +39,9 @@ interface IQuadGovernance {
 
     function getEligibleAttributesLength() external view returns(uint256);
 
-    function getPrice(address _tokenAddr) external view returns (uint);
+    function getPrice(address _tokenAddr) external view returns (uint256);
 
-    function getPriceETH() external view returns (uint);
+    function getPriceETH() external view returns (uint256);
 
     function mintPrice() external view returns (uint256);
 

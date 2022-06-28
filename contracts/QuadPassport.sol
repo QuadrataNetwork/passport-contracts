@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -20,7 +19,8 @@ import "./storage/QuadPassportStore.sol";
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-    event GovernanceUpdated(address _oldGovernance, address _governance);
+    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
+    event SetPendingGovernance(address indexed _pendingGovernance);
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
@@ -168,8 +168,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
+            bytes32 attributeType = governance.eligibleAttributesArray(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attributeType = governance.eligibleAttributesArray(i);
                 delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
             }
         }
@@ -305,17 +305,27 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        return currentBalance;
     }
 
-    /// @dev Admin function to set the address of the IQuadGovernance contract
+    /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
-        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
-        require(_governanceContract != address(governance), "GOVERNANCE_ALREADY_SET");
+        require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
+
+        pendingGovernance = _governanceContract;
+        emit SetPendingGovernance(pendingGovernance);
+    }
+
+    /// @dev Admin function to accept and set the governance contract address
+    function acceptGovernance() external override {
+        require(_msgSender() == pendingGovernance, 'ONLY_PENDING_GOVERNANCE_CONTRACT');
+
         address oldGov = address(governance);
-        governance = IQuadGovernance(_governanceContract);
+        governance = IQuadGovernance(pendingGovernance);
+        pendingGovernance = address(0);
 
         emit GovernanceUpdated(oldGov, address(governance));
     }
+
 
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user

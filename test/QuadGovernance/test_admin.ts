@@ -77,7 +77,6 @@ describe("QuadGovernance", async () => {
       expect(await governance.mintPricePerAttribute(ATTRIBUTE_IS_BUSINESS)).to.equal(parseEther("0"));
       expect(await governance.mintPricePerAttribute(ATTRIBUTE_DID)).to.equal(parseEther("0"));
 
-      expect(await governance.passportVersion()).to.equal(1);
       expect(await governance.revSplitIssuer()).to.equal(50);
 
       expect(await governance.hasRole(GOVERNANCE_ROLE, admin.address)).to.equal(true);
@@ -89,12 +88,17 @@ describe("QuadGovernance", async () => {
   describe("updateGovernanceInPassport", async () => {
     it("success", async () => {
       expect(await passport.governance()).to.equal(governance.address);
+      const newGovernance = await deployGovernance(admin);
+      await governance.connect(admin).updateGovernanceInPassport(newGovernance.address)
+      await newGovernance.connect(admin).setPassportContractAddress(passport.address)
+
       await expect(
-        governance.connect(admin).updateGovernanceInPassport(deployer.address)
+        await newGovernance.connect(admin).acceptGovernanceInPassport()
       )
         .to.emit(passport, "GovernanceUpdated")
-        .withArgs(governance.address, deployer.address);
-      expect(await passport.governance()).to.equal(deployer.address);
+        .withArgs(governance.address, newGovernance.address);
+
+      expect(await passport.governance()).to.equal(newGovernance.address);
     });
 
     it("fail (not admin)", async () => {
@@ -261,29 +265,6 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
       await expect(governance.connect(admin).deleteIssuer(ethers.constants.AddressZero)).to.be.revertedWith("ISSUER_ADDRESS_ZERO");
       expect(await governance.getIssuersLength()).to.equal(3);
-    });
-  });
-
-
-  describe("setPassportVersion", async () => {
-    it("succeed", async () => {
-      expect(await governance.passportVersion()).to.equal(1);
-      await expect(governance.connect(admin).setPassportVersion(2))
-        .to.emit(governance, "PassportVersionUpdated")
-        .withArgs(1, 2);
-      expect(await governance.passportVersion()).to.equal(2);
-    });
-
-    it("fail (not admin)", async () => {
-      await expect(governance.setPassportVersion(2)).to.be.revertedWith(
-        "INVALID_ADMIN"
-      );
-    });
-
-    it("fail (version non-incremental)", async () => {
-      await expect(
-        governance.connect(admin).setPassportVersion(0)
-      ).to.be.revertedWith("PASSPORT_VERSION_INCREMENTAL");
     });
   });
 
@@ -864,7 +845,7 @@ describe("QuadGovernance", async () => {
     it("fail (rev split > 100)", async () => {
       await expect(
         governance.connect(admin).setRevSplitIssuer(101)
-      ).to.be.revertedWith("SPLIT_MUST_BE_LESS_THAN_100");
+      ).to.be.revertedWith("SPLIT_MUST_BE_LESS_THAN_EQUAL_TO_100");
     });
   });
 

@@ -299,7 +299,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _account address of the passport holder to query
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
-    /// @return the filter non-null values
+    /// @return the filtered non-null values
     function _applyFilter(
         address _account,
         bytes32 _attribute,
