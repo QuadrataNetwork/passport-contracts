@@ -30,6 +30,10 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdated(address indexed _oldAddress, address indexed _address);
 
+    constructor() initializer {
+        // used to prevent logic contract self destruct take over
+    }
+
     /// @dev Initializer (constructor)
     /// @param _admin address of the admin account
     function initialize(address _admin) public initializer {

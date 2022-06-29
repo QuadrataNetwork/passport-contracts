@@ -719,8 +719,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
 
-      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
-        .to.be.revertedWith("function was called with incorrect parameters");
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2)).to.be.reverted;
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.ACTIVE);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(true);
@@ -732,8 +731,7 @@ describe("QuadGovernance", async () => {
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
 
-      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2))
-        .to.be.revertedWith("function was called with incorrect parameters");
+      await expect(governance.connect(admin).setIssuerStatus(issuer1.address, 2)).to.be.reverted;
 
       expect(await governance.getIssuerStatus(issuer1.address)).equals(ISSUER_STATUS.DEACTIVATED);
       expect(await governance.hasRole(id("ISSUER_ROLE"), issuer1.address)).equals(false);
@@ -918,8 +916,9 @@ describe("QuadGovernance", async () => {
         .grantRole(GOVERNANCE_ROLE, deployer.address);
       const governanceV2 = await upgrades.upgradeProxy(
         governance.address,
-        QuadGovernanceV2
-      );
+        QuadGovernanceV2,
+        { unsafeAllow: ['constructor'] }
+        );
       expect(await governanceV2.getPriceETHV2()).to.equal(1337);
       expect(await governanceV2.oracle()).to.equal(oracle.address);
       expect(governanceV2.address).to.equal(governance.address);
@@ -930,7 +929,7 @@ describe("QuadGovernance", async () => {
         "QuadGovernanceV2"
       );
       await expect(
-        upgrades.upgradeProxy(governance.address, QuadGovernanceV2)
+        upgrades.upgradeProxy(governance.address, QuadGovernanceV2, { unsafeAllow: ['constructor'] })
       ).to.revertedWith("INVALID_ADMIN");
     });
   });

@@ -67,7 +67,7 @@ describe("QuadPassport", async () => {
     it("fail (not admin)", async () => {
       const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
       await expect(
-        upgrades.upgradeProxy(passport.address, QuadPassportV2)
+        upgrades.upgradeProxy(passport.address, QuadPassportV2, {unsafeAllow: ['constructor']})
       ).to.revertedWith("INVALID_ADMIN");
     });
     it("succeed", async () => {
@@ -77,7 +77,8 @@ describe("QuadPassport", async () => {
         .grantRole(GOVERNANCE_ROLE, deployer.address);
       const passportv2 = await upgrades.upgradeProxy(
         passport.address,
-        QuadPassportV2
+        QuadPassportV2,
+        {unsafeAllow: ['constructor']}
       );
       expect(await passportv2.foo()).to.equal(1337);
       expect(passport.address).to.equal(passportv2.address);
