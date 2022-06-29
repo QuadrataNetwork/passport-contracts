@@ -1001,6 +1001,74 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
+    it("fail - zero account", async () => {
+      const sig = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        issuedAt
+      );
+      const sigAccount = await signMessage(minterA, minterA.address);
+      await expect(
+        passport
+          .connect(minterA)
+          .mintPassport(['0x0000000000000000000000000000000000000000', TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
+            value: MINT_PRICE,
+          })
+      ).to.be.revertedWith("ACCOUNT_CANNOT_BE_ZERO");
+    });
+
+
+    it("fail - zero issuedAt", async () => {
+      const sig = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        0
+      );
+      const sigAccount = await signMessage(minterA, minterA.address);
+      await expect(
+        passport
+          .connect(minterA)
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, 0], sig, sigAccount, {
+            value: MINT_PRICE,
+          })
+      ).to.be.revertedWith("ISSUED_AT_CANNOT_BE_ZERO");
+    });
+
+
+    it("fail - future issuedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber()
+      const blockAfter = await ethers.provider.getBlock(blockNumAfter)
+
+      const sig = await signMint(
+        issuer,
+        minterA,
+        TOKEN_ID,
+        did,
+        aml,
+        country,
+        isBusiness,
+        blockAfter.timestamp + 100,
+      );
+      const sigAccount = await signMessage(minterA, minterA.address);
+      await expect(
+        passport
+          .connect(minterA)
+          .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, (blockAfter.timestamp + 100)], sig, sigAccount, {
+            value: MINT_PRICE,
+          })
+      ).to.be.revertedWith("INVALID_ISSUED_AT");
+    });
+
     it("fail - passport already exists", async () => {
       await assertMint(
         minterA,
