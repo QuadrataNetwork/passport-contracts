@@ -2543,6 +2543,55 @@ describe("QuadPassport", async () => {
       );
     });
 
+    it("fail - zero address", async () => {
+      const newCountry = id("USA");
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            '0x0000000000000000000000000000000000000000',
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            newCountry,
+            issuedAt
+          )
+      ).to.revertedWith("ACCOUNT_CANNOT_BE_ZERO");
+    });
+
+    it("fail - zero issuedAt", async () => {
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            id("USA"),
+            0,
+          )
+      ).to.revertedWith("ISSUED_AT_CANNOT_BE_ZERO");
+    });
+
+    it("fail - future issuedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber()
+      const blockAfter = await ethers.provider.getBlock(blockNumAfter)
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributeIssuer(
+            minterA.address,
+            TOKEN_ID,
+            ATTRIBUTE_COUNTRY,
+            id("USA"),
+            blockAfter.timestamp + 100,
+          )
+      ).to.revertedWith("INVALID_ISSUED_AT");
+    });
+
+
     it("fail - passport tokenId invalid as Individual", async () => {
       const newCountry = id("USA");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
