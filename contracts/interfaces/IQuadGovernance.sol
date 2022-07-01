@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 import "../storage/QuadGovernanceStore.sol";
 
@@ -9,8 +9,6 @@ interface IQuadGovernance {
     function setPassportContractAddress(address _passportAddr) external;
 
     function updateGovernanceInPassport(address _newGovernance) external;
-
-    function setPassportVersion(uint256 _version) external;
 
     function setMintPrice(uint256 _mintPrice) external;
 
@@ -41,9 +39,9 @@ interface IQuadGovernance {
 
     function getEligibleAttributesLength() external view returns(uint256);
 
-    function getPrice(address _tokenAddr) external view returns (uint);
+    function getPrice(address _tokenAddr) external view returns (uint256);
 
-    function getPriceETH() external view returns (uint);
+    function getPriceETH() external view returns (uint256);
 
     function mintPrice() external view returns (uint256);
 
@@ -66,8 +64,6 @@ interface IQuadGovernance {
     function revSplitIssuer() external view returns (uint256);
 
     function treasury() external view returns (address);
-
-    function hasRole(bytes32, address) external view returns(bool);
 
     function getIssuersLength() external view returns (uint256);
 

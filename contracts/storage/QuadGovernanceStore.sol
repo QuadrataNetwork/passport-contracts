@@ -7,7 +7,6 @@ contract QuadGovernanceStore {
 
     struct Config {
         uint256  revSplitIssuer; // 50 means 50%;
-        uint256  passportVersion;
         uint256  mintPrice; // Price in $ETH
         IQuadPassport  passport;
         address  oracle;
@@ -15,28 +14,27 @@ contract QuadGovernanceStore {
     }
 
     enum IssuerStatus {
-        ACTIVE,
-        DEACTIVATED
+        DEACTIVATED,
+        ACTIVE
     }
 
     struct Issuer {
         address issuer;
         IssuerStatus status;
-        // TODO: should we add `bytes data;` in the struct
     }
 
     // Admin Functions
-    bytes32[] public eligibleAttributesArray;
-    mapping(uint256 => bool) public eligibleTokenId;
-    mapping(bytes32 => bool) public eligibleAttributes;
-    mapping(bytes32 => bool) public eligibleAttributesByDID;
+    bytes32[] internal _eligibleAttributesArray;
+    mapping(uint256 => bool) internal _eligibleTokenId;
+    mapping(bytes32 => bool) internal _eligibleAttributes;
+    mapping(bytes32 => bool) internal _eligibleAttributesByDID;
     // Price in $USD (1e6 decimals)
-    mapping(bytes32 => uint256) public pricePerAttribute;
+    mapping(bytes32 => uint256) internal _pricePerAttribute;
     // Price in $ETH
-    mapping(bytes32 => uint256) public mintPricePerAttribute;
+    mapping(bytes32 => uint256) internal _mintPricePerAttribute;
 
     mapping(address => bool) public eligibleTokenPayments;
-    mapping(address => address) public issuersTreasury;
+    mapping(address => address) internal _issuersTreasury;
 
     bytes32 public constant ISSUER_ROLE = keccak256("ISSUER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -45,9 +43,10 @@ contract QuadGovernanceStore {
 
     Config public config;
 
-    mapping(bytes32 => uint256) public pricePerBusinessAttribute;
+    // Price in $USD (1e6 decimals)
+    mapping(bytes32 => uint256) internal _pricePerBusinessAttribute;
 
-    Issuer[] public issuers;
-    mapping(address => uint256) internal issuerIndices;
+    Issuer[] internal _issuers;
+    mapping(address => uint256) internal _issuerIndices;
 
 }

@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "./ERC1155/ERC1155Upgradeable.sol";
@@ -19,7 +19,12 @@ import "./storage/QuadPassportStore.sol";
 /// @dev Passport extended the ERC1155 standard with restrictions on transfers
 contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, QuadPassportStore {
     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-    event GovernanceUpdated(address _oldGovernance, address _governance);
+    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
+    event SetPendingGovernance(address indexed _pendingGovernance);
+
+    constructor() initializer {
+        // used to prevent logic contract self destruct take over
+    }
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
@@ -69,6 +74,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
+        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
 
@@ -100,6 +108,10 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sig
     ) external payable override {
         require(msg.value == governance.mintPricePerAttribute(_attribute), "INVALID_ATTR_MINT_PRICE");
+        require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_account, _tokenId, _attribute, _value, _issuedAt, _sig);
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
         _usedHashes[hash] = true;
@@ -120,7 +132,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _value,
         uint256 _issuedAt
     ) external override {
-        require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+
         _setAttributeInternal(_account, _tokenId, _attribute, _value, _issuedAt, _msgSender());
     }
 
@@ -166,8 +182,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _burn(_msgSender(), _tokenId, 1);
 
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
+            bytes32 attributeType = governance.eligibleAttributesArray(i);
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attributeType = governance.eligibleAttributesArray(i);
                 delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
             }
         }
@@ -181,7 +197,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _tokenId
     ) external override {
-        require(governance.hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
         // only delete attributes from sender
@@ -214,6 +230,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
+        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
@@ -222,7 +241,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
 
         require(!_usedHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
-        require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
 
         // if the account isn't a Business, then ensure account is EOA
         // Businesses can be Smart Contracts or EOAs
@@ -250,7 +269,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(hash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sig);
-        require(governance.hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
 
         return (hash, issuer);
     }
@@ -284,7 +303,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        uint256 currentBalance = _accountBalancesETH[_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
        _accountBalancesETH[_to] = 0;
-       require(_to.send(currentBalance), "FAILED_TO_TRANSFER_NATIVE_ETH");
+       (bool sent,) = _to.call{value: currentBalance}("");
+       require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
        return currentBalance;
     }
 
@@ -302,17 +322,27 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
        return currentBalance;
     }
 
-    /// @dev Admin function to set the address of the IQuadGovernance contract
+    /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
-        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
-        require(_governanceContract != address(governance), "GOVERNANCE_ALREADY_SET");
+        require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
+
+        pendingGovernance = _governanceContract;
+        emit SetPendingGovernance(pendingGovernance);
+    }
+
+    /// @dev Admin function to accept and set the governance contract address
+    function acceptGovernance() external override {
+        require(_msgSender() == pendingGovernance, 'ONLY_PENDING_GOVERNANCE_CONTRACT');
+
         address oldGov = address(governance);
-        governance = IQuadGovernance(_governanceContract);
+        governance = IQuadGovernance(pendingGovernance);
+        pendingGovernance = address(0);
 
         emit GovernanceUpdated(oldGov, address(governance));
     }
+
 
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     /// @param _account address of user
@@ -324,8 +354,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _issuer
     ) public view override returns (Attribute memory) {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        if (!governance.hasRole(ISSUER_ROLE, _issuer))
+        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        if (!IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
         return _attributes[_account][_attribute][_issuer];
     }
@@ -340,8 +370,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes32 _attribute,
         address _issuer
     ) public view override returns (Attribute memory) {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        if (!governance.hasRole(ISSUER_ROLE, _issuer))
+        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        if (!IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
         return _attributesByDID[_dID][_attribute][_issuer];
     }
@@ -353,7 +383,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _amount
     ) public override {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         _accountBalancesETH[_account] += _amount;
     }
 
@@ -365,12 +395,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _amount
     ) public override {
-        require(governance.hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         _accountBalances[_token][_account] += _amount;
     }
 
     function _authorizeUpgrade(address) internal view override {
-        require(governance.hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
 }
 

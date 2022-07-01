@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20Metadat
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -19,6 +20,10 @@ import "./storage/QuadGovernanceStore.sol";
 
  contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore, ReentrancyGuardUpgradeable {
      using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
+
+    constructor() initializer {
+        // used to prevent logic contract self destruct take over
+    }
 
     /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
@@ -35,10 +40,12 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     function _authorizeUpgrade(address) internal view override {
-        require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable with ERC20)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -65,6 +72,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Query the values of an attribute for a passport holder (free)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -87,6 +96,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -111,6 +122,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Get all values of an attribute for a passport holder (payable ETH)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -124,6 +137,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Get all values of an attribute for a passport holder (free)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -137,6 +152,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Get all values of an attribute for a passport holder (payable with ERC20)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -152,6 +169,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -178,6 +197,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Query the values of an attribute for a passport holder (Free)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -201,6 +222,8 @@ import "./storage/QuadGovernanceStore.sol";
     }
 
     /// @notice Query the values of an attribute for a passport holder (Payable ETH)
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
@@ -294,11 +317,13 @@ import "./storage/QuadGovernanceStore.sol";
         return newIssuers;
     }
 
-    /// @notice creates a list of attribute values from filtered issuers that have attested to the data
+    /// @notice creates a list of attribute values from filtered issuers that have attested to the data.
+    ///         lists length being returned are <= number of active passport issuers.
+    ///         the list size is not expected to grow quickly since issuers are added via governance
     /// @param _account address of the passport holder to query
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
-    /// @return the filter non-null values
+    /// @return the filtered non-null values
     function _applyFilter(
         address _account,
         bytes32 _attribute,
@@ -398,10 +423,10 @@ import "./storage/QuadGovernanceStore.sol";
                  msg.value == amountETH,
                 "INSUFFICIENT_PAYMENT_AMOUNT"
             );
-            require(
-                payable(address(passport)).send(amountETH),
-                "FAILED_TO_SEND_PAYMENT"
-            );
+
+            (bool sent,) = payable(address(passport)).call{value: amountETH}("");
+            require(sent, "FAILED_TO_SEND_PAYMENT");
+
             uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
             uint256 amountProtocol = amountETH - amountIssuer;
             for(uint256 i = 0; i < _issuers.length; i++) {

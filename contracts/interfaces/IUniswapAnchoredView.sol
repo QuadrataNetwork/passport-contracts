@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.4;
 
 interface IUniswapAnchoredView  {
     /**
@@ -7,5 +7,5 @@ interface IUniswapAnchoredView  {
      * @param symbol The symbol to fetch the price of
      * @return Price denominated in USD, with 6 decimals
      */
-    function price(string memory symbol) external view returns (uint);
+    function price(string memory symbol) external view returns (uint256);
 }

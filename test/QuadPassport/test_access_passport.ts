@@ -7,6 +7,7 @@ import { id, parseUnits, formatBytes32String, zeroPad, hexZeroPad, parseEther } 
 const {
     TOKEN_ID,
     MINT_PRICE,
+    ISSUER_STATUS,
 } = require("../../utils/constant.ts");
 
 const {
@@ -126,9 +127,9 @@ describe("READER_ROLE Privileges", async () => {
         it("fail - a READER_ROLE gets null attributes if an issuer is disabled", async () => {
             expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(true);
 
-            await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+            await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
                 .to.emit(governance, 'IssuerStatusChanged')
-                .withArgs(issuer.address, 0, 1);
+                .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
             const didResponse = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
             const countryResponse = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
@@ -184,9 +185,9 @@ describe("READER_ROLE Privileges", async () => {
         it("fail - a READER_ROLE gets null attributes if an issuer is disabled", async () => {
             expect(await governance.connect(admin).hasRole(id("READER_ROLE"), dataChecker.address)).equals(true);
 
-            await expect(governance.connect(admin).setIssuerStatus(issuer.address, 1))
+            await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
                 .to.emit(governance, 'IssuerStatusChanged')
-                .withArgs(issuer.address, 0, 1);
+                .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
                 const amlResponse = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
 
