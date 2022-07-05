@@ -12,7 +12,7 @@ const deployGovernance = async (
     const governance = await upgrades.deployProxy(
         QuadGovernance,
         [admin],
-        { initializer: "initialize", kind: "uups" }
+        { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor']  }
     );
     await governance.deployed();
     console.log(`QuadGovernance is deployed: ${governance.address}`);
@@ -28,7 +28,7 @@ const deployPassport = async (
     const passport = await upgrades.deployProxy(
         QuadPassport,
         [governance, uri],
-        { initializer: "initialize", kind: "uups" }
+        { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor']  }
     );
     await passport.deployed();
     console.log(`QuadPassport is deployed: ${passport.address}`);
@@ -46,7 +46,7 @@ export const deployReader = async (
         governance.address,
         passport.address
       ],
-      { initializer: "initialize", kind: "uups" }
+      { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor'] }
     );
     console.log("QuadReader is deployed: ", reader.address);
     await reader.deployed();
