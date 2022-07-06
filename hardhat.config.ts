@@ -33,7 +33,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 2000,
+            runs: 1000,
           },
         }
       },
@@ -42,7 +42,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 2000,
+            runs: 1000,
           },
         }
       }
@@ -53,9 +53,8 @@ const config: HardhatUserConfig = {
       url: process.env.MUMBAI_URI || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
-
-    rinkeby: {
-      url: process.env.RINKEBY_URI || "",
+    goerli: {
+      url: process.env.GOERLI_URI || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
   },
@@ -63,7 +62,7 @@ const config: HardhatUserConfig = {
     enabled: true,
   },
   etherscan: {
-    apiKey: process.env.POLYGONSCAN_API_KEY,
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
   typechain: {
     outDir: "types",
