@@ -1,21 +1,93 @@
-MIT License
+BUSINESS SOURCE LICENSE 1.1
+2022/07/05
 
-Copyright (c) 2021 Quadrata
+This BUSINESS SOURCE LICENSE 1.1. (aka INITIAL SOFTWARE LICENSE AGREEMENT) (“Agreement”) is made as of the Effective Date by and between Quadrata, Inc., a Delaware entity, having a place of business at 4136 Del Rey Avenue, Suite 639, Marina Del Rey, CA 90292 and website www.quadrata.com (“Website”) ( “Licensor”), and the user (“Licensee”) regarding the Quadrata Passport™ software (“Software”).  Each being referred to as a “Party” and collectively as the “Parties”.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. BACKGROUND.
+    Licensor has developed the initial version of the Software which is proprietary software, but the Software will change to open source software pursuant to the terms of this Agreement by the “Conversion Date”.  This Agreement is the primary license for the Software and will be updated from time to time.  User’s continued use of the Software constitutes their agreement to the terms of any updated version of this Agreement then in place.  The updated version of this Agreement will be maintained on the Website and the intent of the Parties is to develop derivative works of the Software and new decentralized finance applications (“DeFi Apps” or “dApps”) based off of the Software subject to the terms and conditions of this Agreement.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. DEFINITIONS.
+    Unless otherwise specifically provided, and in addition to the other defined terms set forth herein, the following terms shall have the meanings set forth below:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+    “Additional Use Rights” means additional rights granted by Licensor to Licensee separate from this Agreement and listed on the Site.
+
+    “Agreement” means this Business Source License 1.1 (aka Initial Software License Agreement), together with all schedules, exhibits, and other attachments hereto, all of which are incorporated into this Agreement by reference, as the same may be modified, amended, or supplemented from time to time, as well as any updates to this Agreement.
+
+    “Authorized User” means persons authorized to use and access the Software in accordance with the terms and conditions of this Agreement.
+
+    “Confidential Information” means any information disclosed by or on behalf of the Discloser to the Recipient during the term of this Agreement, except information that Recipient can demonstrate:
+      (a)    is or becomes generally available to the public other than as a result of disclosure by the Recipient;
+      (b)    is already known by or in the possession of the Recipient at the time of disclosure by the Discloser as evidenced by written documentation in the Recipient’s possession prior to receipt of the Confidential Information;
+      (c)    is independently developed by the Recipient without use of or reference to the Confidential Information; or
+      (d)    is obtained by the Recipient from a third party that has not breached any obligations of confidentiality.
+      “Conversion Date” shall be 2024-11-01 or any date specified at https://quadrata.com/license/quadrata-passport-busl-1_1.
+
+    “Conversion License Agreement” means the license agreement that becomes controlling between the Parties upon the Conversion Date as set forth on the Site (aka the Lesser General Public License).
+
+    “Party” means Licensor or Licensee individually, and collectively they are referred to herein as “Parties.”
+
+    “Recipient” means the Party receiving Confidential Information hereunder.
+
+    “Software” means the Quadrata Passport™ software available on the Site including any updates thereto, e.g., including without limitation derivative works of same such as dApps, etc.
+
+3. SCOPE OF THE AGREEMENT.
+
+    3.1 Scope of Services.  This Agreement sets forth the terms and conditions that will govern Licensor’s Software license grant to Licensee.
+
+    3.2 Controlling Documents.  This Agreement is controlling and represents the entire understanding between the Parties with respect to the subject matter hereof, and supersedes all prior agreements and discussions concerning the subject matter hereof, whether oral or written.  As stated herein, the Business Source License (aka Initial Software License Agreement) governs the Parties relationship with respect to the licensed Software up to the Conversion Date, and thereafter the Conversion License Agreement governs the Parties relationship with respect to the licensed Software.
+
+4. LICENSE GRANT; RESERVATION OF RIGHTS.
+
+    4.1 License. Subject to the terms and conditions of this Agreement, Licensor hereby grants to Licensee the right to copy, modify, create derivative works, redistribute, and make non-production use of the Software.  Licensor may grant “Additional Use Rights” permitting limited production of the Software separate from this Agreement.  All copies of the original and modified Software, and derivative works of the Software, are subject to the terms of this Agreement. This Agreement and the license granted hereunder applies separately for each work created with or from the Software and the Conversion Date may vary for each work.
+
+    4.2 Conversion License Agreement.  Effective on the Conversion Date, the Licensor hereby grants Licensee rights under the terms of the Conversion License Agreement set forth on the Site.  Except for the explicit license granted hereunder, Licensor retains all right, title and interest in and to the Software, and nothing in this Agreement shall restrict, impair, transfer, license, convey or otherwise alter or deprive Licensor of any of its rights or proprietary interests in any intellectual property, content, data, information or any other materials or rights, tangible or intangible.
+
+    4.3 Notice.  Licensee shall conspicuously display notice of the license granted under this Agreement on each work utilizing the Software by including the phrase: Notice: Subject to License of Quadrata Passport™ Software. © 2022 Quadrata, Inc.  This Agreement does not grant Licensee any right in any trademark or logo of Licensor or its affiliates and any use of same subject to the terms of this Agreement inure to the benefit of the Licensor.
+
+    4.4 Non-compliant Use.  If Licensee’s use of the Software does not comply with the requirements currently in effect as described herein, Licensee must purchase a commercial license from the Licensor, its affiliated entities, or authorized resellers, or Licensee must refrain from using the Software.  Any use of the Software in violation of this Agreement will automatically terminate Licensee’s rights under this Agreement for the current and all other versions of the Software.
+
+    4.5 DISCLAIMER OF WARRANTIES.  TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED ON AN “AS IS” BASIS.  LICENSOR HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
+
+5. COVENANTS OF LICENSOR
+
+    5.1 Covenants.  In consideration of the right to use the Software granted under this Agreement, Licensee covenants to Licensor, and to all recipients of the Software:
+
+      5.1.1 Conversion License Agreement.  To specify as the Conversion License Agreement (aka the Lesser General Public License) or any later version, or a license that is compatible with the Conversion License Agreement where “compatible” means that software provided under the Conversion License Agreement can be included in a program with software provided under the Conversion License Agreement or later version thereof.  Licensor may specify additional Conversion License Agreements without limitation.
+
+      5.1.2 Additional grants.  To either: (a) specify an additional grant of rights to use that does not impose any additional restriction on the right granted in this Agreement, as the Additional Use Rights; or (b) specify “Not Applicable” if none.
+
+      5.1.3 Conversion Date.  To specify a Conversion Date.
+
+      5.1.4 No Further Modification.  Not to modify this Agreement in any other way.
+
+6. GENERAL PROVISIONS
+
+    6.1 Notices.  All notices required or permitted under this Agreement will be in writing and will be deemed received when (i) delivered personally; (ii) when sent by confirmed fax; (iii) three days after having been sent by registered or certified mail; or (iv) one day after deposit with a recognized commercial express courier specifying next day delivery.  All communications will be sent to the persons and addresses identified below or to such other address as may be designated in a SOW or by a Party by giving written notice to the other party pursuant to this paragraph.
+
+    If to Licensor:
+    Quadrata, Inc.
+    4136 Del Rey Ave, Ste 639
+    Marina Del Rey, CA 90292
+
+    With a copy to:
+    General Counsel
+    Quadrata, Inc.
+    4136 Del Rey Ave, Ste 639
+    Marina Del Rey, CA 90292
+    jeffrey@quadrata.com
+
+    6.2 Assignment. Either Party shall have the right to assign its rights under this Agreement to any affiliate company or any entity purchasing all or substantially all of its assets to which this Agreement pertains without the other Party’s consent.  This Agreement shall be binding upon and inure to the benefit of the Parties and to their respective successors, assignees and licensees.
+
+    6.3 Relationship of Parties.  This Agreement shall not be construed as creating any agency, partnership, joint venture, or other similar legal relationship between the Parties; nor will either Party hold itself out as an agent, partner, or joint venture party of the other party.  Both Parties shall be, and shall act as, independent contractors.  Neither Party shall have authority to create any obligation for the other Party, except to the extent stated herein.
+
+    6.4 Section Headings.  The headings of the sections, paragraphs, and appendices herein are for the Parties’ convenient reference only and shall not define or limit any of the terms or provisions hereof.
+
+    6.5 Counterparts. This Agreement may be executed in any number of original or facsimile counterparts, each of which shall be deemed an original and all of which together shall constitute one instrument.  The Parties acknowledge and agree that the use of facsimile or electronic signatures and electronic records shall be of the same legal effect, validity and enforceability as a manually executed signature or paper-based record.
+
+    6.6 Severability.  If any provision or provisions of this Agreement shall, for any reason, be deemed unenforceable or in violation of law, such unenforceability or violation shall not affect the remaining provisions of this Agreement, which shall continue in full force and effect and be binding upon the Parties hereto.  If provisions are allowed in the jurisdiction of enforcement (e.g., blue penciling, red penciling, purple penciling, reformation, etc.) and the condition or term can be amended by the Parties to make the condition or term legal, valid and enforceable and in accordance with the Parties intent, the Parties agree to so amend the term or condition so that it remains part of the Agreement.
+
+    6.7 Governing Law.  This Agreement will be governed by and construed in accordance with the laws of the State of California, without regard to its conflict of law principles.  The parties irrevocably submit to the jurisdiction of the state and federal courts of the State of Delaware to resolve any disputes arising under or related to this Agreement.  The provisions of this Agreement shall be effective worldwide.
+
+    6.8 Mutual Negotiation.  The Parties agree that the terms and conditions of this Agreement are the result of negotiations between the Parties and that this Agreement shall not be construed in favor of or against any Party by reason of the extent to which any Party or its professional advisors participated in the preparation of this Agreement.  Each Party shall bear its own attorney’s fees and costs arising from this negotiation, this Agreement and the matters and documents referred to herein, and all related matters.
+
+    6.9 Rights & Remedies.  Any enumeration of a Party’s rights and remedies set forth in this Agreement is not intended to be exhaustive.  A Party’s exercise of any right or remedy under this Agreement does not preclude the exercise of any other right or remedy.  All of a Party’s rights and remedies are cumulative and are in addition to any other right or remedy set forth in this Agreement, any other agreement between the parties, or which may now or subsequently exist at law or in equity, by statute or otherwise.
