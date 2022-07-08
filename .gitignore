@@ -3,6 +3,7 @@ node_modules
 .idea
 coverage
 coverage.json
+package-lock.json
 
 #Hardhat files
 cache
@@ -11,5 +12,3 @@ artifacts
 
 ## Typechain
 types
-
-package-lock.json
