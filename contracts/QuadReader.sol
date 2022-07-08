@@ -338,6 +338,7 @@ import "./storage/QuadGovernanceStore.sol";
                 }
             } else if(governance.eligibleAttributesByDID(_attribute)) {
                 if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
+
                     vars.gaps++;
                     continue;
                 }
@@ -353,7 +354,6 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32[] memory attributes = new bytes32[](vars.delta);
         uint256[] memory epochs = new uint256[](vars.delta);
         address[] memory issuers = new address[](vars.delta);
-
         QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {

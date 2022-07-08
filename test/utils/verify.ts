@@ -44,7 +44,6 @@ export const assertMint = async (
     account.address
   );
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(opts?.newIssuerMint ? 1 : 0);
-
   const initalPassportBalance = await ethers.provider.getBalance(passport.address);
   var initialIssuerBalance = ethers.BigNumber.from(0);
   // Cannot assume the eth within passport contract belongs to the current issuer
@@ -57,6 +56,7 @@ export const assertMint = async (
     .mintPassport([account.address, tokenId, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
       value: MINT_PRICE,
     });
+
   expect(await passport.balanceOf(account.address, tokenId)).to.equal(1);
   expect(await passport.provider.getBalance(passport.address)).to.equal(
     initalPassportBalance.add(MINT_PRICE)
