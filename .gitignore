@@ -11,3 +11,5 @@ artifacts
 
 ## Typechain
 types
+
+package-lock.json
