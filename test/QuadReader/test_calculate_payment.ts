@@ -30,7 +30,7 @@ const { deployGovernance } = require("../../utils/deployment.ts");
 
 const { signMint, signMessage } = require("../utils/signature.ts");
 
-describe("QuadPassport", async () => {
+describe("QuadReader", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract;

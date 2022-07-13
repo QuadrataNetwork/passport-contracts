@@ -126,6 +126,26 @@ describe("QuadReader", async () => {
       );
     })
 
+    it("success - no data available by DID (exclude 1)", async  () => {
+      const signers = await ethers.getSigners()
+      await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
+
+      await assertMint(minterA, signers[0], signers[0], passport, id("MINTER_A_ALPHA"), ethers.constants.HashZero, id("US"), id("FALSE"), 15, 1, {newIssuerMint: true});
+
+      expect(await governance.getIssuersLength()).to.equal(2);
+
+      await assertGetAttributeFreeExcluding(
+        [issuer.address],
+        minterA,
+        defi,
+        passport,
+        reader,
+        ATTRIBUTE_AML,
+        [],
+        [],
+      );
+    })
+
     it("success - deactivate all issuers - exclude 1", async  () => {
       const signers = await ethers.getSigners()
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
@@ -1717,6 +1737,7 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ERC20: transfer amount exceeds allowance");
     });
   });
+
   describe("getAttributeFree", async() => {
     beforeEach(async () => {
       await governance.connect(admin).setIssuer(issuerB.address, issuerBTreasury.address);

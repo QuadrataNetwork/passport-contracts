@@ -64,6 +64,17 @@ describe("QuadPassport", async () => {
   });
 
   describe("upgrade", async () => {
+    it("implements ERC-165 upgradeable", async () => {
+      [governance, passport, reader] = await deployPassportEcosystem(
+        admin,
+        [issuer],
+        treasury,
+        [issuerTreasury],
+        baseURI
+      );
+
+      expect(await passport.supportsInterface('0x01ffc9a7')).to.equal(true)
+    });
     it("fail (not admin)", async () => {
       const QuadPassportV2 = await ethers.getContractFactory("QuadPassportV2");
       await expect(
