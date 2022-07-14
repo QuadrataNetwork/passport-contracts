@@ -81,9 +81,12 @@ contract UniswapAnchoredViewAdapter {
      * @return The underlying asset price mantissa (scaled by 1e18).
      *  Zero means the price is unavailable.
      */
-    function getAdaptedPrice(string calldata symbol) public view returns (uint256) {
-        uint256 price = uav.price(symbol);
-        return scalePriceInternal(price);
+    function _getAdaptedPrice(string calldata symbol) internal view returns (uint256) {
+        return scalePriceInternal(uav.price(adaptedSymbols[symbol]));
+    }
+
+    function price(string calldata symbol) public view returns (uint256) {
+        return _getAdaptedPrice(symbol);
     }
 
     /**

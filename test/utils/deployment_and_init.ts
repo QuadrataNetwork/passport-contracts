@@ -37,8 +37,13 @@ export const deployPassportEcosystem = async (
   const UniswapAnchoredView = await ethers.getContractFactory(
     "UniswapAnchoredViewMock"
   );
+
   const oracle = await UniswapAnchoredView.deploy();
   await oracle.deployed();
+
+  // Deploy Oracle Adapter
+  const UAVAdapter = await ethers.getContractFactory("UniswapAnchoredViewAdapter");
+  const adapter = await UAVAdapter.deploy(admin.address, oracle.address);
 
   // Deploy USDC
   const ERC20 = await ethers.getContractFactory("USDC");
@@ -47,7 +52,7 @@ export const deployPassportEcosystem = async (
 
   // Deploy Governance
   if(!opts?.skipOracle) {
-    await governance.connect(admin).setOracle(oracle.address);
+    await governance.connect(admin).setOracle(adapter.address);
   }
   await governance.connect(admin).allowTokenPayment(usdc.address, true);
   await governance.connect(admin).setTreasury(treasury.address);
