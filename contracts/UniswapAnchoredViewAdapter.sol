@@ -47,6 +47,7 @@ contract UniswapAnchoredViewAdapter {
 
         adaptedSymbols["WETH"] = "ETH";
         adaptedSymbols["WBTC"] = "BTC";
+
         adaptedSymbols["USDC"] = "USDC";
         adaptedSymbols["USDT"] = "USDT";
         adaptedSymbols["DAI"] = "DAI";
