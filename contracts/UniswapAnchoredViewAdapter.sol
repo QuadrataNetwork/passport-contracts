@@ -45,6 +45,7 @@ contract UniswapAnchoredViewAdapter {
         priceDecimals = 6;
         targetDecimals = 6;
 
+        adaptedSymbols["ETH"] = "ETH";
         adaptedSymbols["WETH"] = "ETH";
         adaptedSymbols["WBTC"] = "BTC";
 
