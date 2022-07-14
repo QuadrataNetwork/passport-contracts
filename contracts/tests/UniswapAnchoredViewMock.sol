@@ -2,6 +2,22 @@
 pragma solidity ^0.8.0;
 
 contract UniswapAnchoredViewMock  {
+
+    mapping(string => PriceData) public stringPrices;
+    mapping(bytes32 => PriceData) public bytes32Prices;
+
+    constructor() public {
+
+        string memory eth = "ETH";
+        string memory btc = "BTC";
+        string memory usdc = "USDC";
+        string memory usdt = "USDT";
+        string memory dai = "DAI";
+
+        stringPrices[eth] = PriceData(4000e6, false);
+
+    }
+
     /**
      * @notice Get the official price for a symbol
      * @param symbol The symbol to fetch the price of
