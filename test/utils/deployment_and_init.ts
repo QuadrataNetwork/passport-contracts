@@ -35,7 +35,7 @@ export const deployPassportEcosystem = async (
 
   // Deploy Oracle
   const UniswapAnchoredView = await ethers.getContractFactory(
-    "UniswapAnchoredView"
+    "UniswapAnchoredViewMock"
   );
   const oracle = await UniswapAnchoredView.deploy();
   await oracle.deployed();

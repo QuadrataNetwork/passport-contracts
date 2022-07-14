@@ -643,7 +643,7 @@ describe("QuadGovernance", async () => {
     let newOracle: Contract;
     beforeEach(async () => {
       const UniswapAnchoredView = await ethers.getContractFactory(
-        "UniswapAnchoredView"
+        "UniswapAnchoredViewMock"
       );
       newOracle = await UniswapAnchoredView.deploy();
       await newOracle.deployed();
