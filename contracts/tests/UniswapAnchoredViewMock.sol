@@ -3,10 +3,10 @@ pragma solidity ^0.8.0;
 
 contract UniswapAnchoredViewMock  {
 
-    mapping(string => PriceData) public stringPrices;
+    mapping(string => uint256) public stringPrices;
     mapping(bytes32 => PriceData) public bytes32Prices;
 
-    constructor() public {
+    constructor() {
 
         string memory eth = "ETH";
         string memory btc = "BTC";
@@ -14,7 +14,17 @@ contract UniswapAnchoredViewMock  {
         string memory usdt = "USDT";
         string memory dai = "DAI";
 
-        stringPrices[eth] = PriceData(4000e6, false);
+        stringPrices[eth] = 1188280000;
+        stringPrices[btc] = 2046730000;
+        stringPrices[usdc] = 1000000;
+        stringPrices[usdt] = 1000000;
+        stringPrices[dai] = 1000964;
+
+        bytes32Prices[keccak256(abi.encodePacked(eth))] = PriceData(1188280000, false);
+        bytes32Prices[keccak256(abi.encodePacked(btc))] = PriceData(20467300000, false);
+        bytes32Prices[keccak256(abi.encodePacked(usdc))] = PriceData(1000000, false);
+        bytes32Prices[keccak256(abi.encodePacked(usdt))] = PriceData(1000000, false);
+        bytes32Prices[keccak256(abi.encodePacked(dai))] = PriceData(1000964, false);
 
     }
 
@@ -23,12 +33,8 @@ contract UniswapAnchoredViewMock  {
      * @param symbol The symbol to fetch the price of
      * @return Price denominated in USD, with 6 decimals
      */
-    function price(string memory symbol) external view returns (uint) {
-        if (keccak256(abi.encodePacked(symbol)) == keccak256(abi.encodePacked("ETH"))) {
-            return 4000e6;
-        } else {
-            return 1e6;
-        }
+    function price(string memory symbol) external view returns (uint256) {
+        return stringPrices[symbol];
     }
 
     struct PriceData {
@@ -36,10 +42,6 @@ contract UniswapAnchoredViewMock  {
         bool failoverActive;
     }
     function prices(bytes32 symbolHash) external view returns (PriceData memory) {
-        if(symbolHash == keccak256("ETH")) {
-            return PriceData(4000e6, false);
-        } else {
-            return PriceData(1e6, false);
-        }
+        return bytes32Prices[symbolHash];
     }
 }
