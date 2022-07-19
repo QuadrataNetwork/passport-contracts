@@ -66,13 +66,14 @@ describe("QuadPassport", async () => {
             );
             const sigAccount = await signMessage(minterA, minterA.address);
 
-            await expect(
-                passport
-                    .connect(minterA)
-                    .mintPassport([minterA.address, 1, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
-                        value: parseEther("0.006"),
-                    })
-            ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+            const result = await passport.callStatic
+                    .asmMintPassport(
+                        [minterA.address, 1, did, aml, country, isBusiness, issuedAt], sig, sigAccount,
+                        {
+                            value: parseEther("0.006")
+                        });
+
+            console.log(result);
         });
     });
 });
