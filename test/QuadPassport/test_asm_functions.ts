@@ -63,15 +63,16 @@ describe("QuadPassport", async () => {
                 country,
                 isBusiness,
                 issuedAt
-              );
-              const sigAccount = await signMessage(minterA, minterA.address);
+            );
+            const sigAccount = await signMessage(minterA, minterA.address);
 
-              await expect(
+            await expect(
                 passport
-                  .connect(minterA)
-                  .mintPassport([minterA.address, 1, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
-                    value: parseEther("0.006"),
-                  })
-              ).to.be.revertedWith("SIGNATURE_ALREADY_USED");        });
+                    .connect(minterA)
+                    .mintPassport([minterA.address, 1, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
+                        value: parseEther("0.006"),
+                    })
+            ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+        });
     });
 });
