@@ -91,6 +91,19 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             _mint(_config.account, _config.tokenId, 1, "");
     }
 
+    function asmMintPassport(
+        MintConfig calldata _config,
+        bytes calldata _sigIssuer,
+        bytes calldata _sigAccount
+    ) external payable {
+        assembly {
+            let fmp := mload(0x40)
+            call(100, governance, 0, fmp, 0, fmp, 0x32)
+            revert(eq(msg.value, 1), "INVALID_MINT_PRICE")
+
+        }
+    }
+
     /// @notice Update or set a new attribute for your existing passport
     /// @dev Only when authorized by an eligible issuer
     /// @param _account the account to be updated
