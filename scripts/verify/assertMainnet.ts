@@ -81,6 +81,8 @@ const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
     const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
     const priceDAI = await priceOracle.price("DAI");
 
+    await expect(reader.calculatePaymentToken(AML, WBTC, TEDDY)).to.be.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
+
     // CHECK INDIVIDUAL QUERY PRICE (USDC)
     var paymentTokenAML = await reader.calculatePaymentToken(AML, USDC, TEDDY);
     expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
