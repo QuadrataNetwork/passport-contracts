@@ -1,5 +1,3 @@
-### New Feature Submissions:
-
 ## Description
 <!--- Describe your changes in detail -->
 
