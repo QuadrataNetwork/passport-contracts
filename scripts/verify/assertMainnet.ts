@@ -1,5 +1,6 @@
 import { network } from "hardhat";
 import * as dotenv from "dotenv";
+import { COUNTRY_CODES } from "./countryCodes"
 dotenv.config();
 
 const { expect } = require("chai");
@@ -25,7 +26,7 @@ const EXPECTED_INDIVIDUAL_COST_COUNTRY = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_DID = parseUnits("2", 6);
 
 // This means the price data must be 100% accurate for the first 5 most significant digits
-const EXPECTED_MARGIN_OF_SAFTY = {MIN: 0, MAX: parseUnits("1", 7)}
+const EXPECTED_MARGIN_OF_SAFTY = { MIN: 0, MAX: parseUnits("1", 7) }
 
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad('0x01', 32);
 const EXPECTED_COUNTRY_SCORE_TEDDY = id("US");
@@ -85,195 +86,204 @@ const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
 const ALL_2_LETTER_ISO_CODES = [id("US"), id("UK"), id("CH")]; // TODO: Populate full list of codes to add better country testing
 
 const EXPECTED_USER_ROLES_PASSPORT = [
-  {USER: TEDDY, ROLES: []},
-  {USER: DANIEL, ROLES: []},
-  {USER: TRAVIS, ROLES: []},
-  {USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: [ISSUER_ROLE]},
-  {USER: EXPECTED_TREASURY, ROLES: [PAUSER_ROLE]}, // we expect treasury to be a pauser bc it is our multisig
-  {USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: []},
-  {USER: DEPLOYER, ROLES: []},
-  {USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE]},
-  {USER: MULTISIG, ROLES: [PAUSER_ROLE]},
-  {USER: QUAD_READER, ROLES: [READER_ROLE]},
-  {USER: QUAD_GOV, ROLES: []},
-  {USER: QUAD_PASSPORT, ROLES: []}
+  { USER: TEDDY, ROLES: [] },
+  { USER: DANIEL, ROLES: [] },
+  { USER: TRAVIS, ROLES: [] },
+  { USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: [ISSUER_ROLE] },
+  { USER: EXPECTED_TREASURY, ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
+  { USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: [] },
+  { USER: DEPLOYER, ROLES: [] },
+  { USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE] },
+  { USER: MULTISIG, ROLES: [PAUSER_ROLE] },
+  { USER: QUAD_READER, ROLES: [READER_ROLE] },
+  { USER: QUAD_GOV, ROLES: [] },
+  { USER: QUAD_PASSPORT, ROLES: [] }
 ];
 
 const EXPECTED_USER_ROLES_TIMELOCK = [
-  {USER: TEDDY, ROLES: [EXECUTOR_ROLE]},
-  {USER: DANIEL, ROLES: []},
-  {USER: TRAVIS, ROLES: []},
-  {USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: []},
-  {USER: EXPECTED_TREASURY, ROLES: [PROPOSER_ROLE]}, // we expect treasury to be a proposer bc it is our multisig
-  {USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: []},
-  {USER: DEPLOYER, ROLES: []},
-  {USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE]},
-  {USER: MULTISIG, ROLES: [PROPOSER_ROLE]},
-  {USER: QUAD_READER, ROLES: []},
-  {USER: QUAD_GOV, ROLES: []},
-  {USER: QUAD_PASSPORT, ROLES: []}];
+  { USER: TEDDY, ROLES: [EXECUTOR_ROLE] },
+  { USER: DANIEL, ROLES: [] },
+  { USER: TRAVIS, ROLES: [] },
+  { USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: [] },
+  { USER: EXPECTED_TREASURY, ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
+  { USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: [] },
+  { USER: DEPLOYER, ROLES: [] },
+  { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
+  { USER: MULTISIG, ROLES: [PROPOSER_ROLE] },
+  { USER: QUAD_READER, ROLES: [] },
+  { USER: QUAD_GOV, ROLES: [] },
+  { USER: QUAD_PASSPORT, ROLES: [] }];
 
 
 // MAINNET CHECKS
-;(async () => {
+; (async () => {
 
-    await network.provider.request({
-        method: "hardhat_reset",
-        params: [
-          {
-            forking: {
-              jsonRpcUrl: process.env.ETHEREUM_MAINNET,
-            },
-          },
-        ],
-      });
+  await network.provider.request({
+    method: "hardhat_reset",
+    params: [
+      {
+        forking: {
+          jsonRpcUrl: process.env.ETHEREUM_MAINNET,
+        },
+      },
+    ],
+  });
 
-      let mockIssuer;
-      [mockIssuer] = await ethers.getSigners();
+  let mockIssuer;
+  [mockIssuer] = await ethers.getSigners();
 
-      const passport = await ethers.getContractAt('QuadPassport', QUAD_PASSPORT);
-      const governance = await ethers.getContractAt('QuadGovernance', QUAD_GOV)
-      const reader = await ethers.getContractAt('QuadReader', QUAD_READER)
-      const timelock = await ethers.getContractAt('IAccessControlUpgradeable', TIMELOCK);
+  const passport = await ethers.getContractAt('QuadPassport', QUAD_PASSPORT);
+  const governance = await ethers.getContractAt('QuadGovernance', QUAD_GOV)
+  const reader = await ethers.getContractAt('QuadReader', QUAD_READER)
+  const timelock = await ethers.getContractAt('IAccessControlUpgradeable', TIMELOCK);
 
-      const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
-      const priceDAI = await priceOracle.price("DAI");
+  const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
+  const priceDAI = await priceOracle.price("DAI");
 
-{
-  const user = '0x4e95fEdB012831e3207c8167be1690f812f964a5';
-          const paymentEthCountry = await reader.calculatePaymentETH(AML, user);
-          const resultTeddyGetAttributesETHCountry = await reader.callStatic.getAttributesETH(user, 1, COUNTRY, {value: paymentEthCountry});
-          ALL_2_LETTER_ISO_CODES.forEach((e) => {
-            console.log(e)
-          })
+  const getUserCountry = async (user: any, reader: any, isoCodes: any): Promise<string> => {
+    const paymentEthCountry = await reader.calculatePaymentETH(AML, user);
+    const result = await reader.callStatic.getAttributesETH(user, 1, COUNTRY, { value: paymentEthCountry });
+    var userSymbol = 'nothing found';
+    isoCodes.forEach((code: any) => {
+      if (code.HASH == result[0][0]) {
+        userSymbol = code.SYMBOL;
+        return;
+      }
+    })
 
-          console.log(resultTeddyGetAttributesETHCountry)
-}
-    expect(await passport.symbol()).equals("QP");
-    expect(await passport.name()).equals("Quadrata Passport");
+    return userSymbol;
+  }
 
-    expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID)).equals(true);
-    expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID+1)).equals(false);
-    expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID-1)).equals(false);
-    console.log("COMPLETE CHECKS ON TOKEN ID")
+  expect(await getUserCountry('0x4e95fEdB012831e3207c8167be1690f812f964a5', reader, COUNTRY_CODES)).equals('CH')
 
-    console.log("CHECKING ELIGIBLE ATTRIBUTES BY DID...")
-    for(const attribute of ALL_ATTRIBUTES) {
-      console.log(attribute);
-      expect(await governance.eligibleAttributesByDID(attribute)).equals(ALL_EXPECTED_ELIGIBLE_ATTRIBUTES_BY_DID.includes(attribute));
-    }
-    console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS BY DID")
+  console.log(await getUserCountry('0xE8c150212ecCE414202D4cC00e86ae24f95037c0', reader, COUNTRY_CODES))
 
-    console.log("CHECKING ELIGIBLE PAYMENT TOKENS...")
-    for(const token of ALL_TOKENS) {
-      console.log(token);
-      expect(await governance.eligibleTokenPayments(token)).equals(ALL_EXPECTED_ELIGIBLE_TOKENS.includes(token));
-    }
-    console.log("COMPLETE TOKEN PAYMENT ELIGIBILITY CHECKS")
+  expect(await passport.symbol()).equals("QP");
+  expect(await passport.name()).equals("Quadrata Passport");
+  console.log("COMPLETE CHECKS ON TOKEN NAME")
 
-    console.log("CHECKING ELIGIBLE ATTRIBUTES...")
-    for(const attribute of ALL_ATTRIBUTES) {
-      console.log(attribute)
-      expect(await governance.eligibleAttributes(attribute)).equals(ALL_EXPECTED_ACCOUNT_LEVEL_ATTRIBUTES.includes(attribute));
-    }
-    console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS")
+  expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID)).equals(true);
+  expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID + 1)).equals(false);
+  expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID - 1)).equals(false);
+  console.log("COMPLETE CHECKS ON TOKEN ID")
 
-    const checkUserRoles = async (expectedUserRoles: any, allRoles: any, accessControlContract: any) => {
-      for(const userRoles of expectedUserRoles) {
-        console.log(userRoles);
-        for(const role of allRoles) {
-          console.log(role)
-          expect(await accessControlContract.hasRole(role, userRoles.USER)).equals(userRoles.ROLES.includes(role));
-        }
+  console.log("CHECKING ELIGIBLE ATTRIBUTES BY DID...")
+  for (const attribute of ALL_ATTRIBUTES) {
+    console.log(attribute);
+    expect(await governance.eligibleAttributesByDID(attribute)).equals(ALL_EXPECTED_ELIGIBLE_ATTRIBUTES_BY_DID.includes(attribute));
+  }
+  console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS BY DID")
+
+  console.log("CHECKING ELIGIBLE PAYMENT TOKENS...")
+  for (const token of ALL_TOKENS) {
+    console.log(token);
+    expect(await governance.eligibleTokenPayments(token)).equals(ALL_EXPECTED_ELIGIBLE_TOKENS.includes(token));
+  }
+  console.log("COMPLETE TOKEN PAYMENT ELIGIBILITY CHECKS")
+
+  console.log("CHECKING ELIGIBLE ATTRIBUTES...")
+  for (const attribute of ALL_ATTRIBUTES) {
+    console.log(attribute)
+    expect(await governance.eligibleAttributes(attribute)).equals(ALL_EXPECTED_ACCOUNT_LEVEL_ATTRIBUTES.includes(attribute));
+  }
+  console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS")
+
+  const checkUserRoles = async (expectedUserRoles: any, allRoles: any, accessControlContract: any) => {
+    for (const userRoles of expectedUserRoles) {
+      console.log(userRoles);
+      for (const role of allRoles) {
+        console.log(role)
+        expect(await accessControlContract.hasRole(role, userRoles.USER)).equals(userRoles.ROLES.includes(role));
       }
     }
+  }
 
-    await checkUserRoles(EXPECTED_USER_ROLES_PASSPORT, ALL_PASSPORT_ROLES, governance);
-    await checkUserRoles(EXPECTED_USER_ROLES_TIMELOCK, ALL_TIMELOCK_ROLES, timelock);
+  await checkUserRoles(EXPECTED_USER_ROLES_PASSPORT, ALL_PASSPORT_ROLES, governance);
+  await checkUserRoles(EXPECTED_USER_ROLES_TIMELOCK, ALL_TIMELOCK_ROLES, timelock);
 
-    console.log("COMPLETE ACCESS ROLE CHECKS");
+  console.log("COMPLETE ACCESS ROLE CHECKS");
 
-    await expect(reader.calculatePaymentToken(AML, WBTC, TEDDY)).to.be.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
+  await expect(reader.calculatePaymentToken(AML, WBTC, TEDDY)).to.be.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
 
-    // CHECK INDIVIDUAL QUERY PRICE (USDC)
-    var paymentTokenAML = await reader.calculatePaymentToken(AML, USDC, TEDDY);
-    expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
-    var paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDC, TEDDY);
-    expect(paymentTokenCOUNTRY.toString()).equals(EXPECTED_INDIVIDUAL_COST_COUNTRY.toString());
-    var paymentTokenDID = await reader.calculatePaymentToken(DID, USDC, TEDDY);
-    expect(paymentTokenDID.toString()).equals(EXPECTED_INDIVIDUAL_COST_DID.toString());
-    var paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDC, TEDDY);
-    expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
+  // CHECK INDIVIDUAL QUERY PRICE (USDC)
+  var paymentTokenAML = await reader.calculatePaymentToken(AML, USDC, TEDDY);
+  expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
+  var paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDC, TEDDY);
+  expect(paymentTokenCOUNTRY.toString()).equals(EXPECTED_INDIVIDUAL_COST_COUNTRY.toString());
+  var paymentTokenDID = await reader.calculatePaymentToken(DID, USDC, TEDDY);
+  expect(paymentTokenDID.toString()).equals(EXPECTED_INDIVIDUAL_COST_DID.toString());
+  var paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDC, TEDDY);
+  expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
 
-    console.log("COMPLETE PAYMENT USDC CHECKS");
+  console.log("COMPLETE PAYMENT USDC CHECKS");
 
-    // CHECK INDIVIDUAL QUERY PRICE (USDT)
-    paymentTokenAML = await reader.calculatePaymentToken(AML, USDT, TEDDY);
-    expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
-    paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDT, TEDDY);
-    expect(paymentTokenCOUNTRY.toString()).equals(EXPECTED_INDIVIDUAL_COST_COUNTRY.toString());
-    paymentTokenDID = await reader.calculatePaymentToken(DID, USDT, TEDDY);
-    expect(paymentTokenDID.toString()).equals(EXPECTED_INDIVIDUAL_COST_DID.toString());
-    paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDT, TEDDY);
-    expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
+  // CHECK INDIVIDUAL QUERY PRICE (USDT)
+  paymentTokenAML = await reader.calculatePaymentToken(AML, USDT, TEDDY);
+  expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
+  paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDT, TEDDY);
+  expect(paymentTokenCOUNTRY.toString()).equals(EXPECTED_INDIVIDUAL_COST_COUNTRY.toString());
+  paymentTokenDID = await reader.calculatePaymentToken(DID, USDT, TEDDY);
+  expect(paymentTokenDID.toString()).equals(EXPECTED_INDIVIDUAL_COST_DID.toString());
+  paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDT, TEDDY);
+  expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
 
-    console.log("COMPLETE PAYMENT USDT CHECKS");
+  console.log("COMPLETE PAYMENT USDT CHECKS");
 
-    // CHECK INDIVIDUAL QUERY PRICE (DAI)
-    paymentTokenAML = await reader.calculatePaymentToken(AML, DAI, TEDDY);
-    const expectedAMLPrice = EXPECTED_INDIVIDUAL_COST_AML.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedAMLPrice.sub(paymentTokenAML).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
+  // CHECK INDIVIDUAL QUERY PRICE (DAI)
+  paymentTokenAML = await reader.calculatePaymentToken(AML, DAI, TEDDY);
+  const expectedAMLPrice = EXPECTED_INDIVIDUAL_COST_AML.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+  expect(expectedAMLPrice.sub(paymentTokenAML).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
 
-    paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, DAI, TEDDY);
-    const expectedCOUNTRYPrice = EXPECTED_INDIVIDUAL_COST_COUNTRY.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedCOUNTRYPrice.sub(paymentTokenCOUNTRY).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
+  paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, DAI, TEDDY);
+  const expectedCOUNTRYPrice = EXPECTED_INDIVIDUAL_COST_COUNTRY.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+  expect(expectedCOUNTRYPrice.sub(paymentTokenCOUNTRY).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
 
-    paymentTokenDID = await reader.calculatePaymentToken(DID, DAI, TEDDY);
-    const expectedDIDPrice = EXPECTED_INDIVIDUAL_COST_DID.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedDIDPrice.sub(paymentTokenDID).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
+  paymentTokenDID = await reader.calculatePaymentToken(DID, DAI, TEDDY);
+  const expectedDIDPrice = EXPECTED_INDIVIDUAL_COST_DID.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+  expect(expectedDIDPrice.sub(paymentTokenDID).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
 
-    paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, DAI, TEDDY);
-    const expectedIS_BUSINESSPrice = EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedIS_BUSINESSPrice.sub(paymentTokenIS_BUSINESS).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
-    console.log("COMPLETE PAYMENT DAI CHECKS");
+  paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, DAI, TEDDY);
+  const expectedIS_BUSINESSPrice = EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+  expect(expectedIS_BUSINESSPrice.sub(paymentTokenIS_BUSINESS).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
+  console.log("COMPLETE PAYMENT DAI CHECKS");
 
-    console.log("COMPLETE ALL PAYMENT METHOD CHECKS");
+  console.log("COMPLETE ALL PAYMENT METHOD CHECKS");
 
-    const paymentEth = await reader.calculatePaymentETH(AML, TEDDY);
-    const resultTeddyGetAttributesETH = await reader.callStatic.getAttributesETH(TEDDY, 1, AML, {value: paymentEth});
-    expect(resultTeddyGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TEDDY); // teddy is clean
+  const paymentEth = await reader.calculatePaymentETH(AML, TEDDY);
+  const resultTeddyGetAttributesETH = await reader.callStatic.getAttributesETH(TEDDY, 1, AML, { value: paymentEth });
+  expect(resultTeddyGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TEDDY); // teddy is clean
 
-    const paymentEthCountry = await reader.calculatePaymentETH(AML, TEDDY);
-    const resultTeddyGetAttributesETHCountry = await reader.callStatic.getAttributesETH(TEDDY, 1, COUNTRY, {value: paymentEthCountry});
-    expect(resultTeddyGetAttributesETHCountry[0][0]).equals(EXPECTED_COUNTRY_SCORE_TEDDY); // teddy is clean
+  const paymentEthCountry = await reader.calculatePaymentETH(AML, TEDDY);
+  const resultTeddyGetAttributesETHCountry = await reader.callStatic.getAttributesETH(TEDDY, 1, COUNTRY, { value: paymentEthCountry });
+  expect(resultTeddyGetAttributesETHCountry[0][0]).equals(EXPECTED_COUNTRY_SCORE_TEDDY); // teddy is clean
 
-    const resultDanielGetAttributesETH = await reader.callStatic.getAttributesETH(DANIEL, 1, AML, {value: paymentEth});
-    expect(resultDanielGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_DANIEL); // daniel is a sketchy guy
+  const resultDanielGetAttributesETH = await reader.callStatic.getAttributesETH(DANIEL, 1, AML, { value: paymentEth });
+  expect(resultDanielGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_DANIEL); // daniel is a sketchy guy
 
-    const resultTravisGetAttributesETH = await reader.callStatic.getAttributesETH(TRAVIS, 1, AML, {value: paymentEth});
-    expect(resultTravisGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TRAVIS); // travis is a sketchy guy
+  const resultTravisGetAttributesETH = await reader.callStatic.getAttributesETH(TRAVIS, 1, AML, { value: paymentEth });
+  expect(resultTravisGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TRAVIS); // travis is a sketchy guy
 
-    console.log("COMPLETE LOCAL STATIC CHECKS");
+  console.log("COMPLETE LOCAL STATIC CHECKS");
 
-    const oracle = await governance.oracle();
-    const treasury = await governance.treasury();
-    const issuers = await governance.getIssuers();
-    const springLabs = issuers[0].issuer;
-    const springLabsTreasury = await governance.issuersTreasury(springLabs);
-    const issuerCount = await governance.getIssuersLength();
-    const springLabsActivationStatus = await governance.getIssuerStatus(springLabs);
-    const mintPrice = await governance.mintPrice();
-    const revSplitIssuer = await governance.revSplitIssuer();
+  const oracle = await governance.oracle();
+  const treasury = await governance.treasury();
+  const issuers = await governance.getIssuers();
+  const springLabs = issuers[0].issuer;
+  const springLabsTreasury = await governance.issuersTreasury(springLabs);
+  const issuerCount = await governance.getIssuersLength();
+  const springLabsActivationStatus = await governance.getIssuerStatus(springLabs);
+  const mintPrice = await governance.mintPrice();
+  const revSplitIssuer = await governance.revSplitIssuer();
 
-    expect(oracle.toLowerCase()).equals(EXPECTED_ORACLE.toLowerCase());
-    expect(treasury.toLowerCase()).equals(EXPECTED_TREASURY.toLowerCase());
-    expect(springLabs.toLowerCase()).equals(EXPECTED_SPRINGLABS_ISSUER.toLowerCase());
-    expect(springLabsTreasury.toLowerCase()).equals(EXPECTED_SPRINGLABS_TREASURY.toLowerCase());
-    expect(issuerCount.toString()).equals(EXPECTED_ISSUER_COUNT);
-    expect(springLabsActivationStatus.toString()).equals(ACTIVATED);
-    expect(mintPrice.toString()).equals(EXPECTED_MINT_PRICE.toString());
-    expect(revSplitIssuer.toString()).equals(EXPECTED_REV_SPLIT_ISSUER);
+  expect(oracle.toLowerCase()).equals(EXPECTED_ORACLE.toLowerCase());
+  expect(treasury.toLowerCase()).equals(EXPECTED_TREASURY.toLowerCase());
+  expect(springLabs.toLowerCase()).equals(EXPECTED_SPRINGLABS_ISSUER.toLowerCase());
+  expect(springLabsTreasury.toLowerCase()).equals(EXPECTED_SPRINGLABS_TREASURY.toLowerCase());
+  expect(issuerCount.toString()).equals(EXPECTED_ISSUER_COUNT);
+  expect(springLabsActivationStatus.toString()).equals(ACTIVATED);
+  expect(mintPrice.toString()).equals(EXPECTED_MINT_PRICE.toString());
+  expect(revSplitIssuer.toString()).equals(EXPECTED_REV_SPLIT_ISSUER);
 
-    console.log("COMPLETE GOV STORAGE CHECKS");
+  console.log("COMPLETE GOV STORAGE CHECKS");
 
 })();

@@ -1,7 +1,7 @@
 import { id } from "ethers/lib/utils";
 
 
-const COUNTRY_CODES = [
+export const COUNTRY_CODES = [
     {SYMBOL: 'AF', HASH: id('AF')},
     {SYMBOL: 'AL', HASH: id('AL')},
     {SYMBOL: 'DZ', HASH: id('DZ')},
