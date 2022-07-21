@@ -24,8 +24,8 @@ const EXPECTED_INDIVIDUAL_COST_AML = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_COUNTRY = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_DID = parseUnits("2", 6);
 
-// This means the price data must be 100% accurate for the first 6 most significant digits
-const EXPECTED_MARGIN_OF_SAFTY = {MIN: 0, MAX: parseUnits("1", 6)}
+// This means the price data must be 100% accurate for the first 5 most significant digits
+const EXPECTED_MARGIN_OF_SAFTY = {MIN: 0, MAX: parseUnits("1", 7)}
 
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad('0x01', 32);
 const EXPECTED_AML_SCORE_DANIEL = hexZeroPad('0x03', 32);
@@ -57,7 +57,9 @@ const DID = id("DID");
 const COUNTRY = id("COUNTRY");
 const IS_BUSINESS = id("IS_BUSINESS");
 
-const ALL_EXPECTED_ELIGIBLE_ATTRIBUTES = [AML, DID, COUNTRY, IS_BUSINESS];
+const ALL_ATTRIBUTES = [AML, DID, COUNTRY, IS_BUSINESS]
+const ALL_EXPECTED_ACCOUNT_LEVEL_ATTRIBUTES = [DID, COUNTRY, IS_BUSINESS];
+const ALL_EXPECTED_ELIGIBLE_ATTRIBUTES_BY_DID = [AML];
 
 const TEDDY = '0xffE462ed723275eF8E7655C4883e8cD428826669';
 const DANIEL = '0x5501CC22Be0F12381489D0980f20f872e1E6bfb9';
@@ -125,17 +127,25 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
     const priceDAI = await priceOracle.price("DAI");
 
+    console.log("CHECKING ELIGIBLE ATTRIBUTES BY DID...")
+    for(const attribute of ALL_ATTRIBUTES) {
+      console.log(attribute);
+      expect(await governance.eligibleAttributesByDID(attribute)).equals(ALL_EXPECTED_ELIGIBLE_ATTRIBUTES_BY_DID.includes(attribute));
+    }
+    console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS BY DID")
 
+    console.log("CHECKING ELIGIBLE PAYMENT TOKENS...")
     for(const token of ALL_TOKENS) {
+      console.log(token);
       expect(await governance.eligibleTokenPayments(token)).equals(ALL_EXPECTED_ELIGIBLE_TOKENS.includes(token));
     }
-
     console.log("COMPLETE TOKEN PAYMENT ELIGIBILITY CHECKS")
 
-    for(const attribute of ALL_EXPECTED_ELIGIBLE_ATTRIBUTES) {
-      expect(await governance.eligibleAttributes(attribute)).equals(true);
+    console.log("CHECKING ELIGIBLE ATTRIBUTES...")
+    for(const attribute of ALL_ATTRIBUTES) {
+      console.log(attribute)
+      expect(await governance.eligibleAttributes(attribute)).equals(ALL_EXPECTED_ACCOUNT_LEVEL_ATTRIBUTES.includes(attribute));
     }
-
     console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS")
 
     const checkUserRoles = async (expectedUserRoles: any, allRoles: any, accessControlContract: any) => {
