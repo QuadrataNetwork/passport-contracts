@@ -140,7 +140,7 @@ const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
     expect(await governance.hasRole(ISSUER_ROLE, TIMELOCK)).equals(false);
 
     expect(await governance.hasRole(GOVERNANCE_ROLE, MULTISIG)).equals(false);
-    // expect(await governance.hasRole(PAUSER_ROLE, MULTISIG)).equals(true); // This should be true
+    expect(await governance.hasRole(PAUSER_ROLE, MULTISIG)).equals(true);
     expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, MULTISIG)).equals(false);
     expect(await governance.hasRole(ISSUER_ROLE, MULTISIG)).equals(false);
 
