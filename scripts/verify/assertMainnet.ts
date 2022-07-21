@@ -24,6 +24,7 @@ const EXPECTED_INDIVIDUAL_COST_AML = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_COUNTRY = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_DID = parseUnits("2", 6);
 
+// This means the price data must be 100% accurate for the first 6 most significant digits
 const EXPECTED_MARGIN_OF_SAFTY = {MIN: 0, MAX: parseUnits("1", 6)}
 
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad('0x01', 32);
@@ -43,9 +44,13 @@ const PAUSER_ROLE = id("PAUSER_ROLE");
 const ISSUER_ROLE = id("ISSUER_ROLE");
 const DEFAULT_ADMIN_ROLE = hexZeroPad('0x00', 32);
 
+const ALL_PASSPORT_ROLES = [GOVERNANCE_ROLE, PAUSER_ROLE, ISSUER_ROLE, DEFAULT_ADMIN_ROLE];
+
 const TIMELOCK_ADMIN_ROLE = '0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5';
 const PROPOSER_ROLE = '0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1';
 const EXECUTOR_ROLE = '0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63';
+
+const ALL_TIMELOCK_ROLES = [TIMELOCK_ADMIN_ROLE, PROPOSER_ROLE, EXECUTOR_ROLE, DEFAULT_ADMIN_ROLE];
 
 const AML = id("AML");
 const DID = id("DID");
@@ -64,6 +69,30 @@ const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const QUAD_PASSPORT = '0x32791980a332F1283c69660eC8e426de3aD66E7f';
 const QUAD_GOV = '0xA16E936425df96b9dA6125B03f19C4d34b315212';
 const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
+
+const EXPECTED_USER_ROLES_PASSPORT = [
+  {USER: TEDDY, ROLES: []},
+  {USER: DANIEL, ROLES: []},
+  {USER: TRAVIS, ROLES: []},
+  {USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: [ISSUER_ROLE]},
+  {USER: EXPECTED_TREASURY, ROLES: [PAUSER_ROLE]},
+  {USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: []},
+  {USER: DEPLOYER, ROLES: []},
+  {USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE]},
+  {USER: MULTISIG, ROLES: [PAUSER_ROLE]}
+];
+
+const EXPECTED_USER_ROLES_TIMELOCK = [
+  {USER: TEDDY, ROLES: [EXECUTOR_ROLE]},
+  {USER: DANIEL, ROLES: []},
+  {USER: TRAVIS, ROLES: []},
+  {USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: []},
+  {USER: EXPECTED_TREASURY, ROLES: [PROPOSER_ROLE]}, // we expect treasury to be a proposer bc it is our multisig
+  {USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: []},
+  {USER: DEPLOYER, ROLES: []},
+  {USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE]},
+  {USER: MULTISIG, ROLES: [PROPOSER_ROLE]}
+];
 
 
 // MAINNET CHECKS
@@ -90,6 +119,21 @@ const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
 
     const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
     const priceDAI = await priceOracle.price("DAI");
+
+    const checkUserRoles = async (expectedUserRoles: any, allRoles: any, accessControlContract: any) => {
+      for(const userRoles of expectedUserRoles) {
+        console.log(userRoles);
+        for(const role of allRoles) {
+          console.log(role)
+          expect(await accessControlContract.hasRole(role, userRoles.USER)).equals(userRoles.ROLES.includes(role));
+        }
+      }
+    }
+
+    await checkUserRoles(EXPECTED_USER_ROLES_PASSPORT, ALL_PASSPORT_ROLES, governance);
+    await checkUserRoles(EXPECTED_USER_ROLES_TIMELOCK, ALL_TIMELOCK_ROLES, timelock);
+
+    console.log("COMPLETE ACCESS ROLE CHECKS");
 
     await expect(reader.calculatePaymentToken(AML, WBTC, TEDDY)).to.be.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
 
@@ -169,47 +213,5 @@ const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
     expect(revSplitIssuer.toString()).equals(EXPECTED_REV_SPLIT_ISSUER);
 
     console.log("COMPLETE GOV STORAGE CHECKS");
-
-    expect(await governance.hasRole(GOVERNANCE_ROLE, EXPECTED_SPRINGLABS_ISSUER)).equals(false);
-    expect(await governance.hasRole(PAUSER_ROLE, EXPECTED_SPRINGLABS_ISSUER)).equals(false);
-    expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, EXPECTED_SPRINGLABS_ISSUER)).equals(false);
-    expect(await governance.hasRole(ISSUER_ROLE, EXPECTED_SPRINGLABS_ISSUER)).equals(true);
-
-    expect(await governance.hasRole(GOVERNANCE_ROLE, EXPECTED_SPRINGLABS_TREASURY)).equals(false);
-    expect(await governance.hasRole(PAUSER_ROLE, EXPECTED_SPRINGLABS_TREASURY)).equals(false);
-    expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, EXPECTED_SPRINGLABS_TREASURY)).equals(false);
-    expect(await governance.hasRole(ISSUER_ROLE, EXPECTED_SPRINGLABS_TREASURY)).equals(false);
-
-    expect(await governance.hasRole(GOVERNANCE_ROLE, TIMELOCK)).equals(true);
-    expect(await governance.hasRole(PAUSER_ROLE, TIMELOCK)).equals(false);
-    expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, TIMELOCK)).equals(true);
-    expect(await governance.hasRole(ISSUER_ROLE, TIMELOCK)).equals(false);
-
-    expect(await governance.hasRole(GOVERNANCE_ROLE, MULTISIG)).equals(false);
-    expect(await governance.hasRole(PAUSER_ROLE, MULTISIG)).equals(true);
-    expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, MULTISIG)).equals(false);
-    expect(await governance.hasRole(ISSUER_ROLE, MULTISIG)).equals(false);
-
-    expect(await governance.hasRole(GOVERNANCE_ROLE, DEPLOYER)).equals(false);
-    expect(await governance.hasRole(PAUSER_ROLE, DEPLOYER)).equals(false);
-    expect(await governance.hasRole(DEFAULT_ADMIN_ROLE, DEPLOYER)).equals(false);
-    expect(await governance.hasRole(ISSUER_ROLE, DEPLOYER)).equals(false);
-
-    expect(await timelock.hasRole(TIMELOCK_ADMIN_ROLE, DEPLOYER)).equals(false);
-    expect(await timelock.hasRole(EXECUTOR_ROLE, DEPLOYER)).equals(false);
-    expect(await timelock.hasRole(PROPOSER_ROLE, DEPLOYER)).equals(false);
-    expect(await timelock.hasRole(DEFAULT_ADMIN_ROLE, DEPLOYER)).equals(false);
-
-    expect(await timelock.hasRole(TIMELOCK_ADMIN_ROLE, TIMELOCK)).equals(true);
-    expect(await timelock.hasRole(EXECUTOR_ROLE, TIMELOCK)).equals(false);
-    expect(await timelock.hasRole(PROPOSER_ROLE, TIMELOCK)).equals(false);
-    expect(await timelock.hasRole(DEFAULT_ADMIN_ROLE, TIMELOCK)).equals(false);
-
-    expect(await timelock.hasRole(TIMELOCK_ADMIN_ROLE, MULTISIG)).equals(false);
-    expect(await timelock.hasRole(EXECUTOR_ROLE, MULTISIG)).equals(false);
-    expect(await timelock.hasRole(PROPOSER_ROLE, MULTISIG)).equals(true);
-    expect(await timelock.hasRole(DEFAULT_ADMIN_ROLE, MULTISIG)).equals(false);
-
-    console.log("COMPLETE ACCESS ROLE CHECKS");
 
 })();
