@@ -154,9 +154,47 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     return userSymbol;
   }
 
-  expect(await getUserCountry('0x4e95fEdB012831e3207c8167be1690f812f964a5', reader, COUNTRY_CODES)).equals('CH')
+  const getUserAML = async (user: any, reader: any) => {
+    const paymentEth = await reader.calculatePaymentETH(AML, user);
+    const result = await reader.callStatic.getAttributesETH(user, 1, AML, { value: paymentEth });
+    return result[0][0]
+  }
 
-  console.log(await getUserCountry('0xE8c150212ecCE414202D4cC00e86ae24f95037c0', reader, COUNTRY_CODES))
+  const getUserDID = async (user: any, reader: any) => {
+    const paymentEth = await reader.calculatePaymentETH(DID, user);
+    const result = await reader.callStatic.getAttributesETH(user, 1, DID, { value: paymentEth });
+    return result[0][0]
+  }
+
+  const getUserIS_BUSINESS = async (user: any, reader: any) => {
+    const paymentEth = await reader.calculatePaymentETH(IS_BUSINESS, user);
+    const result = await reader.callStatic.getAttributesETH(user, 1, IS_BUSINESS, { value: paymentEth });
+    return result[0][0]
+  }
+
+  const getUserData = async (user: any, reader: any, isoCodes: any) => {
+    const country = await getUserCountry(user, reader, isoCodes);
+    const aml = await getUserAML(user, reader);
+    const did = await getUserDID(user, reader);
+    const isBusiness = await getUserIS_BUSINESS(user, reader);
+
+    return {
+      country: country,
+      aml: aml,
+      did: did,
+      isBusiness: isBusiness,
+    }
+  }
+
+
+  // USER_1
+  expect(await getUserCountry('0x4e95fEdB012831e3207c8167be1690f812f964a5', reader, COUNTRY_CODES)).equals('CH')
+  console.log(await getUserData('0x4e95fEdB012831e3207c8167be1690f812f964a5', reader, COUNTRY_CODES));
+
+  // USER_2
+  expect(await getUserCountry('0xE8c150212ecCE414202D4cC00e86ae24f95037c0', reader, COUNTRY_CODES)).equals("GB")
+  console.log(await getUserData('0xE8c150212ecCE414202D4cC00e86ae24f95037c0', reader, COUNTRY_CODES));
+
 
   expect(await passport.symbol()).equals("QP");
   expect(await passport.name()).equals("Quadrata Passport");
