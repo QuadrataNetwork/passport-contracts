@@ -19,7 +19,7 @@ const EXPECTED_ISSUER_COUNT = '1';
 const EXPECTED_MINT_PRICE = parseEther('0.006');
 const EXPECTED_REV_SPLIT_ISSUER = '50';
 
-const EXPECTED_INDIVIDUAL_COST_IS_BUSINESS = 0;
+const EXPECTED_INDIVIDUAL_COST_IS_BUSINESS = parseUnits("0", 6);
 const EXPECTED_INDIVIDUAL_COST_AML = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_COUNTRY = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_DID = parseUnits("2", 6);
@@ -51,6 +51,9 @@ const DANIEL = '0x5501CC22Be0F12381489D0980f20f872e1E6bfb9';
 const TRAVIS = '0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E';
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
+const USDT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
+const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 
 
 // MAINNET CHECKS
@@ -75,19 +78,45 @@ const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
     const reader = await ethers.getContractAt('QuadReader', '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9')
     const timelock = await ethers.getContractAt('IAccessControlUpgradeable', TIMELOCK);
 
+    const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
+    const priceDAI = await priceOracle.price("DAI");
 
-    // CHECK RETAIL
-    const paymentTokenAML = await reader.calculatePaymentToken(AML, USDC, TEDDY);
+    // CHECK INDIVIDUAL QUERY PRICE (USDC)
+    var paymentTokenAML = await reader.calculatePaymentToken(AML, USDC, TEDDY);
     expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
-
-    const paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDC, TEDDY);
+    var paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDC, TEDDY);
     expect(paymentTokenCOUNTRY.toString()).equals(EXPECTED_INDIVIDUAL_COST_COUNTRY.toString());
-
-    const paymentTokenDID = await reader.calculatePaymentToken(DID, USDC, TEDDY);
+    var paymentTokenDID = await reader.calculatePaymentToken(DID, USDC, TEDDY);
     expect(paymentTokenDID.toString()).equals(EXPECTED_INDIVIDUAL_COST_DID.toString());
-
-    const paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDC, TEDDY);
+    var paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDC, TEDDY);
     expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
+
+    // CHECK INDIVIDUAL QUERY PRICE (USDT)
+    paymentTokenAML = await reader.calculatePaymentToken(AML, USDT, TEDDY);
+    expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
+    paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, USDT, TEDDY);
+    expect(paymentTokenCOUNTRY.toString()).equals(EXPECTED_INDIVIDUAL_COST_COUNTRY.toString());
+    paymentTokenDID = await reader.calculatePaymentToken(DID, USDT, TEDDY);
+    expect(paymentTokenDID.toString()).equals(EXPECTED_INDIVIDUAL_COST_DID.toString());
+    paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDT, TEDDY);
+    expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
+
+    // CHECK INDIVIDUAL QUERY PRICE (DAI)
+    paymentTokenAML = await reader.calculatePaymentToken(AML, DAI, TEDDY);
+    const expectedAMLPrice = EXPECTED_INDIVIDUAL_COST_AML.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+    expect(expectedAMLPrice.sub(paymentTokenAML).abs()).to.be.within(0, parseUnits("1", 7))
+
+    paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, DAI, TEDDY);
+    const expectedCOUNTRYPrice = EXPECTED_INDIVIDUAL_COST_COUNTRY.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+    expect(expectedCOUNTRYPrice.sub(paymentTokenCOUNTRY).abs()).to.be.within(0, parseUnits("1", 7))
+
+    paymentTokenDID = await reader.calculatePaymentToken(DID, DAI, TEDDY);
+    const expectedDIDPrice = EXPECTED_INDIVIDUAL_COST_DID.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+    expect(expectedDIDPrice.sub(paymentTokenDID).abs()).to.be.within(0, parseUnits("1", 7))
+
+    paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, DAI, TEDDY);
+    const expectedIS_BUSINESSPrice = EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
+    expect(expectedIS_BUSINESSPrice.sub(paymentTokenIS_BUSINESS).abs()).to.be.within(0, parseUnits("1", 7))
 
     console.log("COMPLETE PAYMENT METHOD CHECKS");
 
