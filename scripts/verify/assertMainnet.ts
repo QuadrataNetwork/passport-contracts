@@ -28,6 +28,8 @@ const EXPECTED_INDIVIDUAL_COST_DID = parseUnits("2", 6);
 const EXPECTED_MARGIN_OF_SAFTY = {MIN: 0, MAX: parseUnits("1", 7)}
 
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad('0x01', 32);
+const EXPECTED_COUNTRY_SCORE_TEDDY = id("US");
+
 const EXPECTED_AML_SCORE_DANIEL = hexZeroPad('0x03', 32);
 const EXPECTED_AML_SCORE_TRAVIS = hexZeroPad('0x03', 32);
 
@@ -80,6 +82,8 @@ const QUAD_PASSPORT = '0x32791980a332F1283c69660eC8e426de3aD66E7f';
 const QUAD_GOV = '0xA16E936425df96b9dA6125B03f19C4d34b315212';
 const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
 
+const ALL_2_LETTER_ISO_CODES = [id("US"), id("UK"), id("CH")]; // TODO: Populate full list of codes to add better country testing
+
 const EXPECTED_USER_ROLES_PASSPORT = [
   {USER: TEDDY, ROLES: []},
   {USER: DANIEL, ROLES: []},
@@ -91,7 +95,7 @@ const EXPECTED_USER_ROLES_PASSPORT = [
   {USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE]},
   {USER: MULTISIG, ROLES: [PAUSER_ROLE]},
   {USER: QUAD_READER, ROLES: [READER_ROLE]},
-  {USER: QUAD_GOV, ROLES: [GOVERNANCE_ROLE]},
+  {USER: QUAD_GOV, ROLES: []},
   {USER: QUAD_PASSPORT, ROLES: []}
 ];
 
@@ -124,16 +128,29 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
         ],
       });
 
-    let mockIssuer;
-    [mockIssuer] = await ethers.getSigners();
+      let mockIssuer;
+      [mockIssuer] = await ethers.getSigners();
 
-    const passport = await ethers.getContractAt('QuadPassport', QUAD_PASSPORT);
-    const governance = await ethers.getContractAt('QuadGovernance', QUAD_GOV)
-    const reader = await ethers.getContractAt('QuadReader', QUAD_READER)
-    const timelock = await ethers.getContractAt('IAccessControlUpgradeable', TIMELOCK);
+      const passport = await ethers.getContractAt('QuadPassport', QUAD_PASSPORT);
+      const governance = await ethers.getContractAt('QuadGovernance', QUAD_GOV)
+      const reader = await ethers.getContractAt('QuadReader', QUAD_READER)
+      const timelock = await ethers.getContractAt('IAccessControlUpgradeable', TIMELOCK);
 
-    const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
-    const priceDAI = await priceOracle.price("DAI");
+      const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
+      const priceDAI = await priceOracle.price("DAI");
+
+{
+  const user = '0x4e95fEdB012831e3207c8167be1690f812f964a5';
+          const paymentEthCountry = await reader.calculatePaymentETH(AML, user);
+          const resultTeddyGetAttributesETHCountry = await reader.callStatic.getAttributesETH(user, 1, COUNTRY, {value: paymentEthCountry});
+          ALL_2_LETTER_ISO_CODES.forEach((e) => {
+            console.log(e)
+          })
+
+          console.log(resultTeddyGetAttributesETHCountry)
+}
+    expect(await passport.symbol()).equals("QP");
+    expect(await passport.name()).equals("Quadrata Passport");
 
     expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID)).equals(true);
     expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID+1)).equals(false);
@@ -225,6 +242,10 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     const paymentEth = await reader.calculatePaymentETH(AML, TEDDY);
     const resultTeddyGetAttributesETH = await reader.callStatic.getAttributesETH(TEDDY, 1, AML, {value: paymentEth});
     expect(resultTeddyGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TEDDY); // teddy is clean
+
+    const paymentEthCountry = await reader.calculatePaymentETH(AML, TEDDY);
+    const resultTeddyGetAttributesETHCountry = await reader.callStatic.getAttributesETH(TEDDY, 1, COUNTRY, {value: paymentEthCountry});
+    expect(resultTeddyGetAttributesETHCountry[0][0]).equals(EXPECTED_COUNTRY_SCORE_TEDDY); // teddy is clean
 
     const resultDanielGetAttributesETH = await reader.callStatic.getAttributesETH(DANIEL, 1, AML, {value: paymentEth});
     expect(resultDanielGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_DANIEL); // daniel is a sketchy guy
