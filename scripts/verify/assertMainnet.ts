@@ -24,6 +24,12 @@ const EXPECTED_INDIVIDUAL_COST_AML = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_COUNTRY = parseUnits("1", 6);
 const EXPECTED_INDIVIDUAL_COST_DID = parseUnits("2", 6);
 
+const EXPECTED_MARGIN_OF_SAFTY = {MIN: 0, MAX: parseUnits("1", 6)}
+
+const EXPECTED_AML_SCORE_TEDDY = hexZeroPad('0x01', 32);
+const EXPECTED_AML_SCORE_DANIEL = hexZeroPad('0x03', 32);
+const EXPECTED_AML_SCORE_TRAVIS = hexZeroPad('0x03', 32);
+
 const EXPECTED_BUSINESS_COST_IS_BUSINESS = 0
 const EXPECTED_BUSINESS_COST_AML = parseUnits("5", 6);
 const EXPECTED_BUSINESS_COST_COUNTRY = parseUnits("5", 6);
@@ -97,6 +103,8 @@ const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
     var paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDC, TEDDY);
     expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
 
+    console.log("COMPLETE PAYMENT USDC CHECKS");
+
     // CHECK INDIVIDUAL QUERY PRICE (USDT)
     paymentTokenAML = await reader.calculatePaymentToken(AML, USDT, TEDDY);
     expect(paymentTokenAML.toString()).equals(EXPECTED_INDIVIDUAL_COST_AML.toString());
@@ -107,34 +115,37 @@ const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
     paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, USDT, TEDDY);
     expect(paymentTokenIS_BUSINESS.toString()).equals(EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.toString());
 
+    console.log("COMPLETE PAYMENT USDT CHECKS");
+
     // CHECK INDIVIDUAL QUERY PRICE (DAI)
     paymentTokenAML = await reader.calculatePaymentToken(AML, DAI, TEDDY);
     const expectedAMLPrice = EXPECTED_INDIVIDUAL_COST_AML.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedAMLPrice.sub(paymentTokenAML).abs()).to.be.within(0, parseUnits("1", 7))
+    expect(expectedAMLPrice.sub(paymentTokenAML).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
 
     paymentTokenCOUNTRY = await reader.calculatePaymentToken(COUNTRY, DAI, TEDDY);
     const expectedCOUNTRYPrice = EXPECTED_INDIVIDUAL_COST_COUNTRY.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedCOUNTRYPrice.sub(paymentTokenCOUNTRY).abs()).to.be.within(0, parseUnits("1", 7))
+    expect(expectedCOUNTRYPrice.sub(paymentTokenCOUNTRY).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
 
     paymentTokenDID = await reader.calculatePaymentToken(DID, DAI, TEDDY);
     const expectedDIDPrice = EXPECTED_INDIVIDUAL_COST_DID.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedDIDPrice.sub(paymentTokenDID).abs()).to.be.within(0, parseUnits("1", 7))
+    expect(expectedDIDPrice.sub(paymentTokenDID).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
 
     paymentTokenIS_BUSINESS = await reader.calculatePaymentToken(IS_BUSINESS, DAI, TEDDY);
     const expectedIS_BUSINESSPrice = EXPECTED_INDIVIDUAL_COST_IS_BUSINESS.mul(ethers.BigNumber.from("10").pow(18).div(priceDAI));
-    expect(expectedIS_BUSINESSPrice.sub(paymentTokenIS_BUSINESS).abs()).to.be.within(0, parseUnits("1", 7))
+    expect(expectedIS_BUSINESSPrice.sub(paymentTokenIS_BUSINESS).abs()).to.be.within(EXPECTED_MARGIN_OF_SAFTY.MIN, EXPECTED_MARGIN_OF_SAFTY.MAX)
+    console.log("COMPLETE PAYMENT DAI CHECKS");
 
-    console.log("COMPLETE PAYMENT METHOD CHECKS");
+    console.log("COMPLETE ALL PAYMENT METHOD CHECKS");
 
     const paymentEth = await reader.calculatePaymentETH(AML, TEDDY);
     const resultTeddyGetAttributesETH = await reader.callStatic.getAttributesETH(TEDDY, 1, AML, {value: paymentEth});
-    expect(resultTeddyGetAttributesETH[0][0]).equals(hexZeroPad('0x01', 32)); // teddy is clean
+    expect(resultTeddyGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TEDDY); // teddy is clean
 
     const resultDanielGetAttributesETH = await reader.callStatic.getAttributesETH(DANIEL, 1, AML, {value: paymentEth});
-    expect(resultDanielGetAttributesETH[0][0]).equals(hexZeroPad('0x03', 32)); // daniel is a sketchy guy
+    expect(resultDanielGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_DANIEL); // daniel is a sketchy guy
 
     const resultTravisGetAttributesETH = await reader.callStatic.getAttributesETH(TRAVIS, 1, AML, {value: paymentEth});
-    expect(resultTravisGetAttributesETH[0][0]).equals(hexZeroPad('0x03', 32)); // travis is a sketchy guy
+    expect(resultTravisGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TRAVIS); // travis is a sketchy guy
 
     console.log("COMPLETE LOCAL STATIC CHECKS");
 
