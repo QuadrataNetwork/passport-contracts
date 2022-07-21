@@ -61,6 +61,8 @@ const ALL_ATTRIBUTES = [AML, DID, COUNTRY, IS_BUSINESS]
 const ALL_EXPECTED_ACCOUNT_LEVEL_ATTRIBUTES = [DID, COUNTRY, IS_BUSINESS];
 const ALL_EXPECTED_ELIGIBLE_ATTRIBUTES_BY_DID = [AML];
 
+const EXPECTED_TOKEN_ID = 0;
+
 const TEDDY = '0xffE462ed723275eF8E7655C4883e8cD428826669';
 const DANIEL = '0x5501CC22Be0F12381489D0980f20f872e1E6bfb9';
 const TRAVIS = '0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E';
@@ -126,6 +128,11 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
     const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
     const priceDAI = await priceOracle.price("DAI");
+
+    expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID)).equals(true);
+    expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID+1)).equals(false);
+    expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID-1)).equals(false);
+    console.log("COMPLETE CHECKS ON TOKEN ID")
 
     console.log("CHECKING ELIGIBLE ATTRIBUTES BY DID...")
     for(const attribute of ALL_ATTRIBUTES) {
