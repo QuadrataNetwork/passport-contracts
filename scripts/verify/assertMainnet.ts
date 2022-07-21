@@ -184,7 +184,6 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     }
   }
 
-
   // USER_1
   expect(await getUserCountry('0x4e95fEdB012831e3207c8167be1690f812f964a5', reader, COUNTRY_CODES)).equals('CH')
   console.log(await getUserData('0x4e95fEdB012831e3207c8167be1690f812f964a5', reader, COUNTRY_CODES));
@@ -192,7 +191,6 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
   // USER_2
   expect(await getUserCountry('0xE8c150212ecCE414202D4cC00e86ae24f95037c0', reader, COUNTRY_CODES)).equals("GB")
   console.log(await getUserData('0xE8c150212ecCE414202D4cC00e86ae24f95037c0', reader, COUNTRY_CODES));
-
 
   expect(await passport.symbol()).equals("QP");
   expect(await passport.name()).equals("Quadrata Passport");
