@@ -57,6 +57,8 @@ const DID = id("DID");
 const COUNTRY = id("COUNTRY");
 const IS_BUSINESS = id("IS_BUSINESS");
 
+const ALL_EXPECTED_ELIGIBLE_ATTRIBUTES = [AML, DID, COUNTRY, IS_BUSINESS];
+
 const TEDDY = '0xffE462ed723275eF8E7655C4883e8cD428826669';
 const DANIEL = '0x5501CC22Be0F12381489D0980f20f872e1E6bfb9';
 const TRAVIS = '0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E';
@@ -65,6 +67,9 @@ const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
 const USDT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
+
+const ALL_TOKENS = [USDC, DAI, USDT, WBTC];
+const ALL_EXPECTED_ELIGIBLE_TOKENS = [USDC, DAI, USDT];
 
 const QUAD_PASSPORT = '0x32791980a332F1283c69660eC8e426de3aD66E7f';
 const QUAD_GOV = '0xA16E936425df96b9dA6125B03f19C4d34b315212';
@@ -75,7 +80,7 @@ const EXPECTED_USER_ROLES_PASSPORT = [
   {USER: DANIEL, ROLES: []},
   {USER: TRAVIS, ROLES: []},
   {USER: EXPECTED_SPRINGLABS_ISSUER, ROLES: [ISSUER_ROLE]},
-  {USER: EXPECTED_TREASURY, ROLES: [PAUSER_ROLE]},
+  {USER: EXPECTED_TREASURY, ROLES: [PAUSER_ROLE]}, // we expect treasury to be a pauser bc it is our multisig
   {USER: EXPECTED_SPRINGLABS_TREASURY, ROLES: []},
   {USER: DEPLOYER, ROLES: []},
   {USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE]},
@@ -119,6 +124,19 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
     const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
     const priceDAI = await priceOracle.price("DAI");
+
+
+    for(const token of ALL_TOKENS) {
+      expect(await governance.eligibleTokenPayments(token)).equals(ALL_EXPECTED_ELIGIBLE_TOKENS.includes(token));
+    }
+
+    console.log("COMPLETE TOKEN PAYMENT ELIGIBILITY CHECKS")
+
+    for(const attribute of ALL_EXPECTED_ELIGIBLE_ATTRIBUTES) {
+      expect(await governance.eligibleAttributes(attribute)).equals(true);
+    }
+
+    console.log("COMPLETE ATTRIBUTE ELIGIBILITY CHECKS")
 
     const checkUserRoles = async (expectedUserRoles: any, allRoles: any, accessControlContract: any) => {
       for(const userRoles of expectedUserRoles) {
