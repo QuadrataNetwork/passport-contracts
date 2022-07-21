@@ -55,6 +55,10 @@ const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F';
 const USDT = '0xdAC17F958D2ee523a2206206994597C13D831ec7';
 const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 
+const QUAD_PASSPORT = '0x32791980a332F1283c69660eC8e426de3aD66E7f';
+const QUAD_GOV = '0xA16E936425df96b9dA6125B03f19C4d34b315212';
+const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
+
 
 // MAINNET CHECKS
 ;(async () => {
@@ -73,9 +77,9 @@ const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
     let mockIssuer;
     [mockIssuer] = await ethers.getSigners();
 
-    const passport = await ethers.getContractAt('QuadPassport', '0x32791980a332F1283c69660eC8e426de3aD66E7f');
-    const governance = await ethers.getContractAt('QuadGovernance', '0xA16E936425df96b9dA6125B03f19C4d34b315212')
-    const reader = await ethers.getContractAt('QuadReader', '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9')
+    const passport = await ethers.getContractAt('QuadPassport', QUAD_PASSPORT);
+    const governance = await ethers.getContractAt('QuadGovernance', QUAD_GOV)
+    const reader = await ethers.getContractAt('QuadReader', QUAD_READER)
     const timelock = await ethers.getContractAt('IAccessControlUpgradeable', TIMELOCK);
 
     const priceOracle = await ethers.getContractAt('IUniswapAnchoredView', await governance.oracle())
