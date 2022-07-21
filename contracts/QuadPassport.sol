@@ -95,15 +95,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         MintConfig calldata _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
-    ) external payable returns(uint256[] memory){
+    ) external payable returns(uint256){
         uint256 msgValue = msg.value;
         address gov = address(governance);
         assembly {
-            let fmp := mload(0x40)
-            let success := call(10000, gov, 0, fmp, 0, fmp, 0x32)
-            //revert(eq(fmp, msgValue), "INVALID_MINT_PRICE")
-
-            return(fmp, 0x32)
+            mstore(0x00, 77)
+            return(0x00, 0x20)
         }
     }
 

@@ -32,8 +32,8 @@ const config: HardhatUserConfig = {
         version: "0.8.2",
         settings: {
           optimizer: {
-            enabled: true,
-            runs: 1000,
+            //enabled: true,
+            //runs: 1000,
           },
         }
       },
@@ -41,14 +41,17 @@ const config: HardhatUserConfig = {
         version: "0.8.4",
         settings: {
           optimizer: {
-            enabled: true,
-            runs: 1000,
+           // enabled: true,
+           // runs: 1000,
           },
         }
       }
     ]
   },
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     mumbai: {
       url: process.env.MUMBAI_URI || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
