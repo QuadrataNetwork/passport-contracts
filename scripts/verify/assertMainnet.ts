@@ -83,8 +83,6 @@ const QUAD_PASSPORT = '0x32791980a332F1283c69660eC8e426de3aD66E7f';
 const QUAD_GOV = '0xA16E936425df96b9dA6125B03f19C4d34b315212';
 const QUAD_READER = '0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9';
 
-const ALL_2_LETTER_ISO_CODES = [id("US"), id("UK"), id("CH")]; // TODO: Populate full list of codes to add better country testing
-
 const EXPECTED_USER_ROLES_PASSPORT = [
   { USER: TEDDY, ROLES: [] },
   { USER: DANIEL, ROLES: [] },
@@ -198,6 +196,8 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   expect(await passport.symbol()).equals("QP");
   expect(await passport.name()).equals("Quadrata Passport");
+  expect(await passport.governance()).equals(QUAD_GOV);
+  expect(await passport.pendingGovernance()).equals(constants.AddressZero);
   console.log("COMPLETE CHECKS ON TOKEN NAME")
 
   expect(await governance.eligibleTokenId(EXPECTED_TOKEN_ID)).equals(true);
