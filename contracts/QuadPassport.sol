@@ -99,7 +99,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 msgValue = msg.value;
         address gov = address(governance);
         assembly {
-            mstore(0x00, 77)
+            mstore(0x00, msgValue)
             return(0x00, 0x20)
         }
     }
