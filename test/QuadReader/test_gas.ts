@@ -102,7 +102,7 @@ describe("QuadReader - calculate gas", async () => {
         .setIssuer(issuerB.address, issuerBTreasury.address);
     });
 
-    it("success - mint individual passport for wallet A", async () => {
+    it("calculate gas cost for `getAttributesETH` with one issuer", async () => {
       const calcPaymentETH = await reader.calculatePaymentETH(
         ATTRIBUTE_AML,
         minterA.address
