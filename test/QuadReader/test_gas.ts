@@ -95,14 +95,14 @@ describe("QuadReader - calculate gas", async () => {
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
   });
 
-  describe("getAttributeETH", async () => {
+  describe("Calculate Gas Cost", async () => {
     beforeEach(async () => {
       await governance
         .connect(admin)
         .setIssuer(issuerB.address, issuerBTreasury.address);
     });
 
-    it("calculate gas cost for `getAttributesETH` with one issuer", async () => {
+    it("getAttributesETH", async () => {
       const calcPaymentETH = await reader.calculatePaymentETH(
         ATTRIBUTE_AML,
         minterA.address
