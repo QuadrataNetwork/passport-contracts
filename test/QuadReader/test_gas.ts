@@ -123,41 +123,5 @@ describe("QuadReader - calculate gas", async () => {
         value: calcPaymentETH,
       });
     });
-
-    it("getAttribute (single)", async () => {
-      const calcPaymentETH = await reader.calculatePaymentETH(
-        ATTRIBUTE_COUNTRY,
-        minterA.address
-      );
-      console.log({ ATTRIBUTE_COUNTRY });
-      let response = await reader.callStatic.getAttribute(
-        minterA.address,
-        1,
-        ATTRIBUTE_COUNTRY,
-        { value: calcPaymentETH }
-      );
-
-      expect(response).to.eqls([
-        country,
-        BigNumber.from(issuedAt),
-        issuer.address,
-      ]);
-      await reader.getAttribute(minterA.address, 1, ATTRIBUTE_COUNTRY, {
-        value: calcPaymentETH,
-      });
-
-      response = await reader.callStatic.getAttributeV2(
-        minterA.address,
-        1,
-        ATTRIBUTE_COUNTRY,
-        { value: calcPaymentETH }
-      );
-
-      expect(response).to.eqls(country);
-
-      await reader.getAttributeV2(minterA.address, 1, ATTRIBUTE_COUNTRY, {
-        value: calcPaymentETH,
-      });
-    });
   });
 });

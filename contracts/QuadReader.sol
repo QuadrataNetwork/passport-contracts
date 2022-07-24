@@ -13,7 +13,6 @@ import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./storage/QuadGovernanceStore.sol";
-import "hardhat/console.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
@@ -135,33 +134,6 @@ import "hardhat/console.sol";
         bytes32 _attribute
     )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         return getAttributesETHExcluding(_account, _tokenId, _attribute, new address[](0));
-    }
-
-    function getAttribute(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    ) external payable returns (bytes32, uint256, address) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        (bytes32 _value, uint256 _epoch, address _issuer) = _applyFilterSingleAttribute(_account, _attribute, _excludedIssuers(new address[](0)));
-
-        _doETHPayments(_attribute, new address[](0), _account);
-
-        return (_value, _epoch, _issuer);
-    }
-
-    function getAttributeV2(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    ) external payable returns (bytes32) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-
-        bytes32 _value = _applyFilterSingleAttributeV2(_account, _attribute, _excludedIssuers(new address[](0)));
-
-        _doETHPayments(_attribute, new address[](0), _account);
-
-        return _value;
     }
 
     /// @notice Get all values of an attribute for a passport holder (free)
@@ -352,74 +324,6 @@ import "hardhat/console.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
     /// @return the filtered non-null values
-    function _applyFilterSingleAttribute(
-        address _account,
-        bytes32 _attribute,
-        address[] memory _issuers
-    ) internal view returns (bytes32, uint256, address) {
-        QuadPassportStore.Attribute memory attribute;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
-                }
-
-                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                return (attribute.value, attribute.epoch, _issuers[i]);
-            }
-
-            if (!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                continue;
-            }
-
-            attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            return (attribute.value, attribute.epoch, _issuers[i]);
-        }
-        return (bytes32(0), uint256(0), address(0));
-    }
-
-
-    function _applyFilterSingleAttributeV2(
-        address _account,
-        bytes32 _attribute,
-        address[] memory _issuers
-    ) internal view returns (bytes32) {
-        QuadPassportStore.Attribute memory attribute;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
-                }
-
-                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                return attribute.value;
-            }
-
-            if (!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                continue;
-            }
-
-            attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            return attribute.value;
-        }
-        return bytes32(0);
-    }
-
-    /// @notice creates a list of attribute values from filtered issuers that have attested to the data.
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
-    /// @return the filtered non-null values
     function _applyFilter(
         address _account,
         bytes32 _attribute,
@@ -514,22 +418,22 @@ import "hardhat/console.sol";
         address _account
     ) internal nonReentrant {
         uint256 amountETH = calculatePaymentETH(_attribute, _account);
-        require(
-             msg.value == amountETH,
-            "INSUFFICIENT_PAYMENT_AMOUNT"
-        );
-        // if (amountETH > 0) {
+        if (amountETH > 0) {
+            require(
+                 msg.value == amountETH,
+                "INSUFFICIENT_PAYMENT_AMOUNT"
+            );
 
-            // (bool sent,) = payable(address(passport)).call{value: amountETH}("");
-            // require(sent, "FAILED_TO_SEND_PAYMENT");
+            (bool sent,) = payable(address(passport)).call{value: amountETH}("");
+            require(sent, "FAILED_TO_SEND_PAYMENT");
 
-            // uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
-            // uint256 amountProtocol = amountETH - amountIssuer;
-            // for(uint256 i = 0; i < _issuers.length; i++) {
-            //     passport.increaseAccountBalanceETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
-            // }
-            // passport.increaseAccountBalanceETH(governance.treasury(), amountProtocol);
-        // }
+            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
+            uint256 amountProtocol = amountETH - amountIssuer;
+            for(uint256 i = 0; i < _issuers.length; i++) {
+                passport.increaseAccountBalanceETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
+            }
+            passport.increaseAccountBalanceETH(governance.treasury(), amountProtocol);
+        }
     }
 
     /// @notice Distribute the fee to query an attribute to issuers and protocol
@@ -587,10 +491,10 @@ import "hardhat/console.sol";
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {
-        if (passport.attributeBusiness(_account).value)
-             return governance.pricePerBusinessAttribute(_attribute);
-
-        return governance.pricePerAttribute(_attribute);
+        uint256 tokenPrice = governance.getPriceETH();
+        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
+        uint256 amountETH = (price * 1e18 / tokenPrice) ;
+        return amountETH;
     }
 
     /// @dev Used to determine if issuer has returned something useful
