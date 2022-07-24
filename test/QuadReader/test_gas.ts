@@ -10,7 +10,7 @@ import {
 } from "ethers/lib/utils";
 
 const {
-  ATTRIBUTE_AML,
+  ATTRIBUTE_COUNTRY,
   TOKEN_ID,
   MINT_PRICE,
 } = require("../../utils/constant.ts");
@@ -104,22 +104,58 @@ describe("QuadReader - calculate gas", async () => {
 
     it("getAttributesETH", async () => {
       const calcPaymentETH = await reader.calculatePaymentETH(
-        ATTRIBUTE_AML,
+        ATTRIBUTE_COUNTRY,
         minterA.address
       );
       const response = await reader.callStatic.getAttributesETH(
         minterA.address,
         1,
-        ATTRIBUTE_AML,
+        ATTRIBUTE_COUNTRY,
         { value: calcPaymentETH }
       );
 
       expect(response).to.eqls([
-        [aml],
+        [country],
         [BigNumber.from(issuedAt)],
         [issuer.address],
       ]);
-      await reader.getAttributesETH(minterA.address, 1, ATTRIBUTE_AML, {
+      await reader.getAttributesETH(minterA.address, 1, ATTRIBUTE_COUNTRY, {
+        value: calcPaymentETH,
+      });
+    });
+
+    it("getAttribute (single)", async () => {
+      const calcPaymentETH = await reader.calculatePaymentETH(
+        ATTRIBUTE_COUNTRY,
+        minterA.address
+      );
+      console.log({ ATTRIBUTE_COUNTRY });
+      let response = await reader.callStatic.getAttribute(
+        minterA.address,
+        1,
+        ATTRIBUTE_COUNTRY,
+        { value: calcPaymentETH }
+      );
+
+      expect(response).to.eqls([
+        country,
+        BigNumber.from(issuedAt),
+        issuer.address,
+      ]);
+      await reader.getAttribute(minterA.address, 1, ATTRIBUTE_COUNTRY, {
+        value: calcPaymentETH,
+      });
+
+      response = await reader.callStatic.getAttributeV2(
+        minterA.address,
+        1,
+        ATTRIBUTE_COUNTRY,
+        { value: calcPaymentETH }
+      );
+
+      expect(response).to.eqls(country);
+
+      await reader.getAttributeV2(minterA.address, 1, ATTRIBUTE_COUNTRY, {
         value: calcPaymentETH,
       });
     });

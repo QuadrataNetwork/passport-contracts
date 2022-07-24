@@ -46,13 +46,21 @@ contract QuadPassportStore {
     mapping(address => mapping(bytes32 => mapping(address => Attribute))) internal _attributes;
     // DID => (AttributeType => (Issuer => Attribute(value, epoch)))
     mapping(bytes32 => mapping(bytes32 => mapping(address => Attribute))) internal _attributesByDID;
-
     // Accounting
     // ERC20 => Account => balance
     mapping(address => mapping(address => uint256)) internal _accountBalances;
     mapping(address => uint256) internal _accountBalancesETH;
 
-
     string public symbol;
     string public name;
+
+    struct AttributeBusiness {
+        bool value;
+        uint256 epoch;
+        address issuer;
+    }
+
+    // Wallet => IS_BUSINESS
+    mapping(address => AttributeBusiness) internal _isBusiness;
+
 }

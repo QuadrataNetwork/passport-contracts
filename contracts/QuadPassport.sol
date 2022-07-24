@@ -73,19 +73,24 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sigAccount
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
-        require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+        require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
 
         (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
 
-        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
+        // Accounting off-chain
+        // _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
         _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
         _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
+        _isBusiness[_config.account] = AttributeBusiness({
+            value: _config.isBusiness == keccak256("TRUE"),
+            epoch: _config.issuedAt,
+            issuer: issuer
+        });
 
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
@@ -111,6 +116,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+
+        // TODO: Add usecase for IS_BUSINESS
 
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_account, _tokenId, _attribute, _value, _issuedAt, _sig);
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
@@ -230,10 +237,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
-        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
-        require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
-        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
-
         bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
@@ -374,6 +377,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         if (!IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _issuer))
            return Attribute({value: bytes32(0), epoch: 0});
         return _attributesByDID[_dID][_attribute][_issuer];
+    }
+
+    function attributeBusiness(
+        address _account
+    ) public view override returns (AttributeBusiness memory) {
+        return _isBusiness[_account];
     }
 
     /// @dev Increase balance of account
