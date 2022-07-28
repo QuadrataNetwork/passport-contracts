@@ -17,7 +17,7 @@ interface IQuadReader {
             uint256 _tokenId,
             bytes32 _attribute,
             address[] calldata _excludedIssuers
-        ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
+        ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
 
 
     function getAttributesETHExcluding(
@@ -37,7 +37,7 @@ interface IQuadReader {
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
 
     function getAttributes(
         address _account,
@@ -59,7 +59,7 @@ interface IQuadReader {
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
+    ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
 
     function getAttributesETHIncludingOnly(
         address _account,

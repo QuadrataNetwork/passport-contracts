@@ -17,4 +17,8 @@ contract QuadReaderStore {
         uint256 filteredIndex;
     }
 
+    bytes32[] internal _attributeCache;
+    uint256[] internal _epochCache;
+    address[] internal _issuerCache;
+
 }

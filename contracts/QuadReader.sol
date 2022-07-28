@@ -84,7 +84,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] memory _excluded
-    ) public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         _validateAttributeQuery(_account, _tokenId, _attribute);
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         (
@@ -147,7 +147,7 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
-    )external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         return getAttributesFreeExcluding(_account, _tokenId, _attribute, new address[](0));
     }
 
@@ -209,7 +209,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _onlyIssuers
-    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
         require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
         _validateAttributeQuery(_account, _tokenId, _attribute);
         (
@@ -328,32 +328,11 @@ import "./storage/QuadGovernanceStore.sol";
         address _account,
         bytes32 _attribute,
         address[] memory _issuers
-    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        // find gap values
-        ApplyFilterVars memory vars;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributes(_attribute)) {
-                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            } else if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
+    ) internal returns (bytes32[] memory, uint256[] memory, address[] memory) {
+        _attributeCache = new bytes32[](0);
+        _epochCache = new uint256[](0);
+        _issuerCache = new address[](0);
 
-                    vars.gaps++;
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            }
-        }
-
-        vars.delta = _issuers.length - vars.gaps;
-
-        bytes32[] memory attributes = new bytes32[](vars.delta);
-        uint256[] memory epochs = new uint256[](vars.delta);
-        address[] memory issuers = new address[](vars.delta);
         QuadPassportStore.Attribute memory attribute;
         for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
@@ -366,10 +345,9 @@ import "./storage/QuadGovernanceStore.sol";
                 }
 
                 attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                attributes[vars.filteredIndex] = attribute.value;
-                epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = _issuers[i];
-                vars.filteredIndex++;
+                _attributeCache.push(attribute.value);
+                _epochCache.push(attribute.epoch);
+                _issuerCache.push(_issuers[i]);
                 continue;
             }
 
@@ -378,15 +356,14 @@ import "./storage/QuadGovernanceStore.sol";
             }
 
             attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            attributes[vars.filteredIndex] = attribute.value;
-            epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = _issuers[i];
-            vars.filteredIndex++;
+            _attributeCache.push(attribute.value);
+            _epochCache.push(attribute.epoch);
+            _issuerCache.push(_issuers[i]);
         }
 
-        require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
+        require(_safetyCheckIssuers(_issuerCache), "NO_DATA_FOUND");
 
-        return (attributes, epochs, issuers);
+        return (_attributeCache, _epochCache, _issuerCache);
     }
 
     /// @notice safty checks for all getAttribute functions
