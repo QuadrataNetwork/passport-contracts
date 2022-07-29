@@ -52,4 +52,14 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function acceptGovernance() external;
 
+    function attributeCache(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) external view returns(bool);
+
+    function attributeCount(
+        address _account,
+        bytes32 _attribute
+    ) external view returns(uint256);
 }

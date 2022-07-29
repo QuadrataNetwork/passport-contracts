@@ -329,59 +329,33 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address[] memory _issuers
     ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        // find gap values
-        ApplyFilterVars memory vars;
+
+        bytes32[] memory attributes = new bytes32[](passport.attributeCount(_account, _attribute));
+        uint256[] memory epochs = new uint256[](passport.attributeCount(_account, _attribute));
+        address[] memory issuers = new address[](passport.attributeCount(_account, _attribute));
+
+        uint256 counter = 0;
+
         for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributes(_attribute)) {
-                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            } else if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
 
-                    vars.gaps++;
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            }
-        }
-
-        vars.delta = _issuers.length - vars.gaps;
-
-        bytes32[] memory attributes = new bytes32[](vars.delta);
-        uint256[] memory epochs = new uint256[](vars.delta);
-        address[] memory issuers = new address[](vars.delta);
-        QuadPassportStore.Attribute memory attribute;
-        for(uint256 i = 0; i < _issuers.length; i++) {
             if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
                 QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
+                if(passport.attributeCache(_account, _attribute, _issuers[i])) {
+                    QuadPassportStore.Attribute memory attribute = passport.attributesByDID(dID.value, _attribute, _issuers[i]);
+                    attributes[counter] = attribute.value;
+                    epochs[counter] = attribute.epoch;
+                    issuers[counter] = _issuers[i];
+                    counter++;
                 }
-
-                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                attributes[vars.filteredIndex] = attribute.value;
-                epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = _issuers[i];
-                vars.filteredIndex++;
-                continue;
+            } else {
+                if(passport.attributeCache(_account, _attribute, _issuers[i])) {
+                    QuadPassportStore.Attribute memory attribute = passport.attributes(_account, _attribute, _issuers[i]);
+                    attributes[counter] = attribute.value;
+                    epochs[counter] = attribute.epoch;
+                    issuers[counter] = _issuers[i];
+                    counter++;
+                }
             }
-
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                continue;
-            }
-
-            attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            attributes[vars.filteredIndex] = attribute.value;
-            epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = _issuers[i];
-            vars.filteredIndex++;
         }
 
         require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");

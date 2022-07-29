@@ -57,6 +57,9 @@ const config: HardhatUserConfig = {
       url: process.env.GOERLI_URI || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    hardhat: {
+      allowUnlimitedContractSize: true
+    }
   },
   gasReporter: {
     enabled: true,

@@ -1,0 +1,672 @@
+Compiling 53 files with 0.8.4
+Generating typings for: 53 artifacts in dir: types for target: ethers-v5
+Successfully generated 89 typings!
+Compilation finished successfully
+
+  QuadReader
+    getAttributeFreeExcluding
+
+      1) success - exclude 1 issuer
+
+      2) success - no data available by DID (exclude 1)
+
+      3) success - deactivate all issuers - exclude 1
+
+      4) success - deactivate all but 1 issuer - exclude 0
+
+      5) success - exclude 3 issuers
+      ✓ success - exclude 0 issuers
+
+      6) success - exclude all 4 issuers
+      ✓ fail - getAttributesFreeExcluding(AML) - wallet not found
+      ✓ fail - getAttributesFreeExcluding from address(0)
+      ✓ fail - getAttributesFreeExcluding ineligible Token Id
+      ✓ fail - getAttributesFreeExcluding ineligible attribute (AML)
+      ✓ fail - attribute not free
+    getAttributeFreeIncluding
+      ✓ success - Include 2 issuers (1 supported, 1 not supported)
+
+      7) success - Include 2 issuers (2 not supported)
+
+      8) success - Include 2 issuers (2 previously supported)
+      ✓ fail - getAttributesFreeExcluding(AML) - wallet not found
+      ✓ fail - getAttributesFreeExcluding from address(0)
+      ✓ fail - getAttributesFreeIncludingOnly ineligible Token Id
+      ✓ fail - getAttributesFreeIncludingOnly ineligible attribute (AML)
+      ✓ fail - attribute not free
+    getAttributesExcluding
+
+      9) success - (1 excluded, 1 included) - DID
+
+      10) success - (1 excluded, 2 included) - COUNTRY
+      ✓ success - (0 excluded, 3 included) - AML
+      ✓ success - (exclude random address)
+      ✓ fail - getAttributesExcluding(AML) - wallet not found
+      ✓ fail - getAttributesExcluding from address(0)
+      ✓ fail - getAttributesExcluding ineligible Token Id
+      ✓ fail - getAttributesExcluding ineligible attribute (AML)
+      ✓ fail - attribute not free
+    getAttributesIncluding
+
+      11) success - (1 included) - DID
+
+      12) success - (include random address) - DID
+      ✓ success - (2 included) - AML
+      ✓ fail - getAttributesIncludingOnly(AML) - wallet not found
+      ✓ fail - getAttributesIncludingOnly from address(0)
+      ✓ fail - getAttributesIncludingOnly ineligible Token Id
+      ✓ fail - getAttributesIncludingOnly ineligible attribute (AML)
+      ✓ fail - attribute not free
+    getAttributeETHExcluding
+
+      13) success - (1 excluded, 1 included)
+      ✓ success - (0 excluded, 2 included)
+      ✓ fail - getAttributesETHExcluding(AML) - wallet not found
+      ✓ fail - getAttributesETHExcluding(DID) - wallet not found
+      ✓ fail - insufficient eth amount
+      ✓ fail - getAttributesETHExcluding from address(0)
+      ✓ fail - getAttributesETHExcluding ineligible Token Id
+      ✓ fail - getAttributesETHExcluding ineligible attribute (AML)
+      ✓ fail - getAttributesETHExcluding ineligible attribute (Country)
+    getAttributeETHIncluding
+
+      14) success - (1 excluded, 1 included)
+      ✓ success - (0 excluded, 2 included)
+      ✓ fail - getAttributesETHIncludingOnly(AML) - wallet not found
+      ✓ fail - getAttributesETHIncludingOnly(DID) - wallet not found
+      ✓ fail - insufficient eth amount
+      ✓ fail - getAttributesETHIncludingOnly from address(0)
+      ✓ fail - getAttributesETHIncludingOnly ineligible Token Id
+      ✓ fail - getAttributesETHIncludingOnly ineligible attribute (AML)
+      ✓ fail - getAttributesETHIncludingOnly ineligible attribute (Country)
+    getAttributes
+      ✓ success - (all included) - DID
+
+      15) success - mint individual passport for wallet A (COUNTRY = US), assert COUNTRY is US
+
+      16) success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US
+
+      17) success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A
+
+      18) success - mint individual passport for wallet A (AML = 3), assert AML is 3
+
+      19) success - mint business passport for wallet A (AML = 3), assert AML is 3
+
+      20) success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR
+
+      21) success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US
+
+      22) success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US
+
+      23) success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US
+
+      24) success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US
+
+      25) success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US
+
+      26) success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US
+
+      27) success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US
+
+      28) success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US
+
+      29) success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB
+
+      30) success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain
+
+      31) success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain
+      ✓ success - mint passports from issuerA, issuerB, isseurC, burnPassport, assert only COUNTRY from A, C remain
+
+      32) success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain
+      ✓ fail - cannot query without valid allowance
+
+      33) fail - cannot query without valid allowance
+      ✓ success - (all included) - COUNTRY
+
+·-----------------------------------------------------------------------|---------------------------|--------------|-----------------------------·
+|                          [90mSolc version: 0.8.2[39m                          ·  [90mOptimizer enabled: true[39m  ·  [90mRuns: 1000[39m  ·  [90mBlock limit: 30000000 gas[39m  │
+········································································|···························|··············|······························
+|  [32m[1mMethods[22m[39m                                                                                                                                       │
+·········································|······························|·············|·············|··············|···············|··············
+|  [1mContract[22m                              ·  [1mMethod[22m                      ·  [32mMin[39m        ·  [32mMax[39m        ·  [32mAvg[39m         ·  [1m# calls[22m      ·  [1meur (avg)[22m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingETHExcluding     ·          -  ·          -  ·      271997  ·            [90m2[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingETHIncluding     ·          -  ·          -  ·      274568  ·            [90m2[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingExcluding        ·     [36m289071[39m  ·     [31m411233[39m  ·      350152  ·            [90m4[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingFreeExcluding    ·          -  ·          -  ·      229666  ·            [90m2[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingFreeIncluding    ·          -  ·          -  ·      131208  ·            [90m2[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingIncluding        ·          -  ·          -  ·      237208  ·            [90m2[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mDeFi[39m                                  ·  doSomethingWrapper          ·     [36m374630[39m  ·     [31m428427[39m  ·      401529  ·            [90m4[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mERC1155PresetMinterPauserUpgradeable[39m  ·  grantRole                   ·      [36m56316[39m  ·      [31m56328[39m  ·       56327  ·           [90m77[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  allowTokenPayment           ·      [36m36519[39m  ·      [31m58431[39m  ·       58149  ·           [90m78[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  deleteIssuer                ·      [36m46345[39m  ·      [31m54105[39m  ·       48932  ·            [90m6[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setEligibleAttribute        ·          -  ·          -  ·       44836  ·            [90m2[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setEligibleAttributeByDID   ·          -  ·          -  ·       31078  ·            [90m6[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setIssuer                   ·     [36m130207[39m  ·     [31m147331[39m  ·      138407  ·          [90m161[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setIssuerStatus             ·      [36m46873[39m  ·      [31m68808[39m  ·       50869  ·           [90m11[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setOracle                   ·      [36m56917[39m  ·      [31m56929[39m  ·       56928  ·           [90m77[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setPassportContractAddress  ·      [36m52845[39m  ·      [31m52857[39m  ·       52856  ·           [90m77[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadGovernance[39m                        ·  setTreasury                 ·          -  ·          -  ·       52858  ·           [90m77[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadPassport[39m                          ·  burnPassport                ·          -  ·          -  ·      162220  ·            [90m1[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadPassport[39m                          ·  burnPassportIssuer          ·          -  ·          -  ·       85804  ·            [90m1[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadPassport[39m                          ·  mintPassport                ·     [36m201347[39m  ·     [31m497845[39m  ·      426138  ·          [90m144[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadPassport[39m                          ·  setAttribute                ·          -  ·          -  ·      105373  ·            [90m1[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mQuadPassport[39m                          ·  withdrawToken               ·      [36m44730[39m  ·      [31m61830[39m  ·       55418  ·            [90m8[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mUSDC[39m                                  ·  approve                     ·      [36m26302[39m  ·      [31m46238[39m  ·       43390  ·           [90m28[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [90mUSDC[39m                                  ·  transfer                    ·      [36m51493[39m  ·      [31m51505[39m  ·       51499  ·          [90m154[39m  ·          [32m[90m-[32m[39m  │
+·········································|······························|·············|·············|··············|···············|··············
+|  [32m[1mDeployments[22m[39m                                                          ·                                          ·  [1m% of limit[22m   ·             │
+········································································|·············|·············|··············|···············|··············
+|  DeFi                                                                 ·    [36m1729191[39m  ·    [31m1729203[39m  ·     1729202  ·        [90m5.8 %[39m  ·          [32m[90m-[32m[39m  │
+········································································|·············|·············|··············|···············|··············
+|  QuadGovernance                                                       ·          -  ·          -  ·     3877280  ·       [90m12.9 %[39m  ·          [32m[90m-[32m[39m  │
+········································································|·············|·············|··············|···············|··············
+|  QuadPassport                                                         ·          -  ·          -  ·     5410219  ·         [90m18 %[39m  ·          [32m[90m-[32m[39m  │
+········································································|·············|·············|··············|···············|··············
+|  QuadReader                                                           ·          -  ·          -  ·     3687738  ·       [90m12.3 %[39m  ·          [32m[90m-[32m[39m  │
+········································································|·············|·············|··············|···············|··············
+|  UniswapAnchoredView                                                  ·          -  ·          -  ·      171043  ·        [90m0.6 %[39m  ·          [32m[90m-[32m[39m  │
+········································································|·············|·············|··············|···············|··············
+|  USDC                                                                 ·          -  ·          -  ·      678756  ·        [90m2.3 %[39m  ·          [32m[90m-[32m[39m  │
+·-----------------------------------------------------------------------|-------------|-------------|--------------|---------------|-------------·
+
+  45 passing (47s)
+  33 failing
+
+  1) QuadReader
+       getAttributeFreeExcluding
+         success - exclude 1 issuer:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:82)
+      at <UnrecognizedContract>.<unknown> (0x5fc8d32690cc91d4c39d9d3abcbd16989f875707)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+
+  2) QuadReader
+       getAttributeFreeExcluding
+         success - no data available by DID (exclude 1):
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:82)
+      at <UnrecognizedContract>.<unknown> (0x0dcd1bf9a1b36ce34237eeafef220932846bcd82)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+
+  3) QuadReader
+       getAttributeFreeExcluding
+         success - deactivate all issuers - exclude 1:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:82)
+      at <UnrecognizedContract>.<unknown> (0x59b670e9fa9d0a427751af201d676719a970857b)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+
+  4) QuadReader
+       getAttributeFreeExcluding
+         success - deactivate all but 1 issuer - exclude 0:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:82)
+      at <UnrecognizedContract>.<unknown> (0x67d269191c92caf3cd7723f116c85e6e9bf55933)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+
+  5) QuadReader
+       getAttributeFreeExcluding
+         success - exclude 3 issuers:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:82)
+      at <UnrecognizedContract>.<unknown> (0xf5059a5d33d5853360d16c683c16e67980206f36)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+
+  6) QuadReader
+       getAttributeFreeExcluding
+         success - exclude all 4 issuers:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:82)
+      at <UnrecognizedContract>.<unknown> (0xcd8a1c3ba11cf5ecfa6267617243239504a98d90)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+
+  7) QuadReader
+       getAttributeFreeIncluding
+         success - Include 2 issuers (2 not supported):
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeIncludingOnly (contracts/QuadReader.sol:207)
+      at <UnrecognizedContract>.<unknown> (0x34b40ba116d5dec75548a9e9a8f15411461e8c70)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+
+  8) QuadReader
+       getAttributeFreeIncluding
+         success - Include 2 issuers (2 previously supported):
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesFreeIncludingOnly (contracts/QuadReader.sol:207)
+      at <UnrecognizedContract>.<unknown> (0x3155755b79aa083bd953911c92705b7aa82a18f9)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+
+  9) QuadReader
+       getAttributesExcluding
+         success - (1 excluded, 1 included) - DID:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesExcluding (contracts/QuadReader.sol:55)
+      at <UnrecognizedContract>.<unknown> (0xb377a2eed7566ac9fcb0ba673604f9bf875e2bab)
+      at DeFi.doSomethingIncluding (contracts/tests/DeFi.sol:133)
+      at DeFi.doSomethingExcluding (contracts/tests/DeFi.sol:56)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1602:23)
+      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
+
+  10) QuadReader
+       getAttributesExcluding
+         success - (1 excluded, 2 included) - COUNTRY:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesExcluding (contracts/QuadReader.sol:55)
+      at <UnrecognizedContract>.<unknown> (0x5d42ebdbba61412295d7b0302d6f50ac449ddb4f)
+      at DeFi.doSomethingIncluding (contracts/tests/DeFi.sol:133)
+      at DeFi.doSomethingExcluding (contracts/tests/DeFi.sol:56)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1602:23)
+      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
+
+  11) QuadReader
+       getAttributesIncluding
+         success - (1 included) - DID:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesIncludingOnly (contracts/QuadReader.sol:180)
+      at <UnrecognizedContract>.<unknown> (0x1343248cbd4e291c6979e70a138f4c774e902561)
+      at DeFi.doSomethingIncluding (contracts/tests/DeFi.sol:133)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1602:23)
+      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
+
+  12) QuadReader
+       getAttributesIncluding
+         success - (include random address) - DID:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesIncludingOnly (contracts/QuadReader.sol:180)
+      at <UnrecognizedContract>.<unknown> (0x95775fd3afb1f4072794ca4dda27f2444bcf8ac3)
+      at DeFi.doSomethingIncluding (contracts/tests/DeFi.sol:133)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1602:23)
+      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
+
+  13) QuadReader
+       getAttributeETHExcluding
+         success - (1 excluded, 1 included):
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at <UnrecognizedContract>.<unknown> (0x6b39b761b1b64c8c095bf0e3bb0c6a74705b4788)
+      at DeFi.doSomethingETHIncluding (contracts/tests/DeFi.sol:154)
+      at DeFi.doSomethingETHExcluding (contracts/tests/DeFi.sol:79)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1602:23)
+      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
+
+  14) QuadReader
+       getAttributeETHIncluding
+         success - (1 excluded, 1 included):
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributesETHIncludingOnly (contracts/QuadReader.sol:232)
+      at <UnrecognizedContract>.<unknown> (0x0b27a79cb9c0b38ee06ca3d94daa68e0ed17f953)
+      at DeFi.doSomethingETHIncluding (contracts/tests/DeFi.sol:154)
+      at runMicrotasks (<anonymous>)
+      at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      at runNextTicks (node:internal/process/task_queues:65:3)
+      at listOnTimeout (node:internal/timers:528:9)
+      at processTimers (node:internal/timers:502:7)
+      at async HardhatNode._mineBlockWithPendingTxs (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:1602:23)
+      at async HardhatNode.mineBlock (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:435:16)
+
+  15) QuadReader
+       getAttributes
+         success - mint individual passport for wallet A (COUNTRY = US), assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x840748f7fd3ea956e5f4c88001da5cc1abcbc038)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  16) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (COUNTRY = US), assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0xd9abc93f81394bd161a1b24b03518e0a570bdead)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  17) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (DID = MINTER_A), assert DID is MINTER_A:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x9cc8b5379c40e24f374cd55973c138fff83ed214)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  18) QuadReader
+       getAttributes
+         success - mint individual passport for wallet A (AML = 3), assert AML is 3:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0xa8d297d643a11ce83b432e87eebce6bee0fd2bab)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  19) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (AML = 3), assert AML is 3:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x89ec9355b1bcc964e576211c8b011bd709083f8d)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  20) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (COUNTRY = US), update COUNTRY = FR, assert COUNTRY is FR:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x32cd5ecda7f2b8633c00a0434de28db111e60636)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  21) QuadReader
+       getAttributes
+         success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x20bbe62b175134d21b10c157498b663f048672ba)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  22) QuadReader
+       getAttributes
+         success - mint indiviual passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x4432a6dcfaeab227673b43c30c6fef40eabd5d30)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  23) QuadReader
+       getAttributes
+         success - mint individual passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x20f5f006a0184883068bbf58fb0c526a8eea8bfd)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  24) QuadReader
+       getAttributes
+         success - mint individual passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x721a1ecb9105f2335a8ea7505d343a5a09803a06)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  25) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0xcdb63c58b907e76872474a0597c5252edc97c883)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  26) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (COUNTRY = US), disable the enable issuer, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x9abb5861e3a1edf19c51f8ac74a81782e94f8fdc)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  27) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (COUNTRY = US), disable issuer, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x15f2ea83eb97ede71d84bd04fff29444f6b7cd52)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  28) QuadReader
+       getAttributes
+         success - mint business passport for wallet A (COUNTRY = US), burnPassport, assert COUNTRY is US:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x0d92d35d311e54ab8eea0394d7e773fc5144491a)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  29) QuadReader
+       getAttributes
+         success - mint passports from issuerA, issuerB, update COUNTRY=FR, assert COUNTRY is FR from issuerB:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x91a1eee63f300b8f41ae6af67edea2e2ed8c3f79)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  30) QuadReader
+       getAttributes
+         success - mint passports from issuerA, issuerB, isseurC, disable issuerB, assert only COUNTRY from A, C remain:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x4c04377f90eb1e42d845ab21de874803b8773669)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  31) QuadReader
+       getAttributes
+         success - mint passports from issuerA, issuerB, isseurC, delete issuerB, assert only COUNTRY from A, C remain:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x834ea01e45f9b5365314358159d92d134d89feeb)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  32) QuadReader
+       getAttributes
+         success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain:
+     Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+      at QuadReader.getAttributesFreeExcluding (contracts/QuadReader.sol:89)
+      at QuadReader.getAttributesETHExcluding (contracts/QuadReader.sol:117)
+      at QuadReader.getAttributes (contracts/QuadReader.sol:168)
+      at <UnrecognizedContract>.<unknown> (0x28227b230d3945e580ed3b1c6c8ea1df658a7aa9)
+      at async HardhatNode.runCall (node_modules/hardhat/src/internal/hardhat-network/provider/node.ts:503:20)
+      at async EthModule._callAction (node_modules/hardhat/src/internal/hardhat-network/provider/modules/eth.ts:353:9)
+      at async HardhatNetworkProvider.request (node_modules/hardhat/src/internal/hardhat-network/provider/provider.ts:110:18)
+      at async EthersProviderWrapper.send (node_modules/@nomiclabs/hardhat-ethers/src/internal/ethers-provider-wrapper.ts:13:20)
+
+  33) QuadReader
+       getAttributes
+         fail - cannot query without valid allowance:
+     Uncaught AssertionError: Expected transaction to be reverted with TOKEN_PAYMENT_NOT_ALLOWED, but other exception was thrown: Error: VM Exception while processing transaction: reverted with reason string 'NO_DATA_FOUND'
+  
+
+
+

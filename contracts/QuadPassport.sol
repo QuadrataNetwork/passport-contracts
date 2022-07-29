@@ -87,6 +87,17 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
         _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
 
+        _attributeCache[keccak256(abi.encode(_config.account, keccak256("COUNTRY"), issuer))] = true;
+        _attributeCache[keccak256(abi.encode(_config.account, keccak256("DID"), issuer))] = true;
+        _attributeCache[keccak256(abi.encode(_config.account, keccak256("IS_BUSINESS"), issuer))] = true;
+        _attributeCache[keccak256(abi.encode(_config.account, keccak256("AML"), issuer))] = true;
+
+        // TODO: only count if values are no bytes32(0)
+        _attributeCount[_config.account][keccak256("COUNTRY")]++;
+        _attributeCount[_config.account][keccak256("DID")]++;
+        _attributeCount[_config.account][keccak256("IS_BUSINESS")]++;
+        _attributeCount[_config.account][keccak256("AML")]++;
+
         if(balanceOf(_config.account, _config.tokenId) == 0)
             _mint(_config.account, _config.tokenId, 1, "");
     }
@@ -325,7 +336,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
-        require(_msgSender() == address(governance), 'ONLY_GOVERNANCE_CONTRACT');
+        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
 
         pendingGovernance = _governanceContract;
@@ -334,7 +345,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @dev Admin function to accept and set the governance contract address
     function acceptGovernance() external override {
-        require(_msgSender() == pendingGovernance, 'ONLY_PENDING_GOVERNANCE_CONTRACT');
+        require(_msgSender() == pendingGovernance, "ONLY_PENDING_GOVERNANCE_CONTRACT");
 
         address oldGov = address(governance);
         governance = IQuadGovernance(pendingGovernance);
@@ -385,6 +396,21 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     ) public override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         _accountBalancesETH[_account] += _amount;
+    }
+
+    function attributeCache(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) public view override returns(bool)  {
+        return _attributeCache[keccak256(abi.encode(_account, _attribute, _issuer))];
+    }
+
+    function attributeCount(
+        address _account,
+        bytes32 _attribute
+    ) public view override returns(uint256)  {
+        return _attributeCount[_account][_attribute];
     }
 
     /// @dev Increase balance of account
