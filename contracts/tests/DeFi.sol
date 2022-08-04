@@ -44,7 +44,7 @@ contract DeFi {
     function doSomethingETH(bytes32 _attribute) public payable returns(bytes32, uint256) {
         uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETHExcluding{value: paymentAmount}(msg.sender, 1, _attribute, new address[](0));
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding{value: paymentAmount}(msg.sender, 1, _attribute, new address[](0));
         emit GetAttributeEvent(attrValue[0], epoch[0]);
         return (attrValue[0], epoch[0]);
     }
@@ -82,7 +82,7 @@ contract DeFi {
     ) public payable returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETHExcluding{value: paymentAmount}(msg.sender, 1, _attribute, _excludedIssuers);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding{value: paymentAmount}(msg.sender, 1, _attribute, _excludedIssuers);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
     }

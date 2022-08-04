@@ -20,7 +20,7 @@ interface IQuadReader {
         ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
 
 
-    function getAttributesETHExcluding(
+    function getAttributesExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,

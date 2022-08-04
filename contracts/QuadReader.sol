@@ -103,7 +103,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of an attribute from all issuers ignoring the excluded list
-    function getAttributesETHExcluding(
+    function getAttributesExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -133,7 +133,7 @@ import "./storage/QuadGovernanceStore.sol";
         uint256 _tokenId,
         bytes32 _attribute
     )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesETHExcluding(_account, _tokenId, _attribute, new address[](0));
+        return getAttributesExcluding(_account, _tokenId, _attribute, new address[](0));
     }
 
     /// @notice Get all values of an attribute for a passport holder (free)
