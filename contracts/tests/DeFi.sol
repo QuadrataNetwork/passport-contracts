@@ -114,7 +114,7 @@ contract DeFi {
     ) public payable returns(bytes32[] memory, uint256[] memory) {
         uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesETH{value: paymentAmount}(msg.sender, 1, _attribute);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributes{value: paymentAmount}(msg.sender, 1, _attribute);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
     }

@@ -27,7 +27,7 @@ interface IQuadReader {
         address[] calldata _excludedIssuers
     ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributesETH(
+    function getAttributes(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute

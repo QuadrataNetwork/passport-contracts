@@ -128,7 +128,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @return all values from all issuers
-    function getAttributesETH(
+    function getAttributes(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
