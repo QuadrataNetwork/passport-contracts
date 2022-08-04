@@ -971,8 +971,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1002,8 +1002,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1033,8 +1033,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("DID"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("DID"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("DID"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("DID"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("DID"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1064,8 +1064,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("AML"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1089,8 +1089,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("AML"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1115,8 +1115,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1146,8 +1146,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1169,8 +1169,8 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1189,8 +1189,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1221,8 +1221,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1245,8 +1245,8 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).deleteIssuer(issuer.address);
 
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1264,8 +1264,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1288,7 +1288,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -1300,8 +1300,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1323,8 +1323,8 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1344,8 +1344,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1376,8 +1376,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1410,8 +1410,8 @@ describe("QuadReader", async () => {
        * and not as a business
        */
 
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1433,8 +1433,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1457,7 +1457,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -1470,8 +1470,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1494,8 +1494,8 @@ describe("QuadReader", async () => {
 
       await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
 
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls(
         [
           [id("US"), id("FR")],
@@ -1523,8 +1523,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1559,8 +1559,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1590,7 +1590,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
+      expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
     });
 
     it("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
@@ -1605,8 +1605,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1639,7 +1639,7 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).allowTokenPayment(usdc.address, false);
 
-      expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('TOKEN_PAYMENT_NOT_ALLOWED');
+      expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('TOKEN_PAYMENT_NOT_ALLOWED');
     });
 
     it('success - (all included) - COUNTRY', async () => {
@@ -1697,16 +1697,16 @@ describe("QuadReader", async () => {
       )
     })
 
-    it("fail - getAttributes(AML) - wallet not found", async () => {
+    it("fail - getAttributesToken(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributes(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
+        reader.getAttributesToken(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
     it("fail - getAttributes from address(0)", async () => {
       await expect(
-        reader.getAttributes(
+        reader.getAttributesToken(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -1718,7 +1718,7 @@ describe("QuadReader", async () => {
     it("fail - getAttributes ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributes(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address)
+        reader.getAttributesToken(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
@@ -1727,13 +1727,13 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
+        reader.getAttributesToken(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
     it("fail - attribute not free", async () => {
       await expect(
-        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address)
+        reader.getAttributesToken(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address)
       ).to.revertedWith("ERC20: transfer amount exceeds allowance");
     });
   });

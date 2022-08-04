@@ -159,7 +159,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @return all values of the attribute from all issuers
-    function getAttributes(
+    function getAttributesToken(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,

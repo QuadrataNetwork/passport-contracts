@@ -39,7 +39,7 @@ interface IQuadReader {
         bytes32 _attribute
     ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributes(
+    function getAttributesToken(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
