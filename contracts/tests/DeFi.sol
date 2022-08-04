@@ -28,7 +28,7 @@ contract DeFi {
         uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(reader), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding(msg.sender, 1, _attribute, _tokenPayment, new address[](0));
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesTokenExcluding(msg.sender, 1, _attribute, _tokenPayment, new address[](0));
         emit GetAttributeEvent(attrValue[0], epoch[0]);
         return (attrValue[0], epoch[0]);
     }
@@ -61,7 +61,7 @@ contract DeFi {
         uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
         IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
         IERC20(_tokenPayment).approve(address(reader), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding(msg.sender, 1, _attribute, _tokenPayment, _excludedIssuers);
+        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesTokenExcluding(msg.sender, 1, _attribute, _tokenPayment, _excludedIssuers);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
     }

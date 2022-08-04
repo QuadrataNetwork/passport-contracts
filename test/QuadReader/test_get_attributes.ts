@@ -409,7 +409,7 @@ describe("QuadReader", async () => {
     });
   });
 
-  describe("getAttributesExcluding", async function() {
+  describe("getAttributesTokenExcluding", async function() {
     it('success - (1 excluded, 1 included) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
@@ -520,16 +520,16 @@ describe("QuadReader", async () => {
         {}
       )
     })
-    it("fail - getAttributesExcluding(AML) - wallet not found", async () => {
+    it("fail - getAttributesTokenExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
+        reader.getAttributesTokenExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesExcluding from address(0)", async () => {
+    it("fail - getAttributesTokenExcluding from address(0)", async () => {
       await expect(
-        reader.getAttributesExcluding(
+        reader.getAttributesTokenExcluding(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -539,25 +539,25 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesExcluding ineligible Token Id", async () => {
+    it("fail - getAttributesTokenExcluding ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesExcluding(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
+        reader.getAttributesTokenExcluding(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesExcluding ineligible attribute (AML)", async () => {
+    it("fail - getAttributesTokenExcluding ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
+        reader.getAttributesTokenExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
     it("fail - attribute not free", async () => {
       await expect(
-        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
+        reader.getAttributesTokenExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
       ).to.revertedWith("ERC20: transfer amount exceeds allowance");
     });
   });

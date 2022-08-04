@@ -3,7 +3,7 @@ pragma solidity 0.8.4;
 
 interface IQuadReader {
 
-    function getAttributesExcluding(
+    function getAttributesTokenExcluding(
             address _account,
             uint256 _tokenId,
             bytes32 _attribute,

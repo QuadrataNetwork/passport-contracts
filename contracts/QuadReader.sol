@@ -52,7 +52,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of the attribute from all issuers ignoring the excluded list
-    function getAttributesExcluding(
+    function getAttributesTokenExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -165,7 +165,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _tokenAddr
     )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
+        return getAttributesTokenExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
