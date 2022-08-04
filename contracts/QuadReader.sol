@@ -177,7 +177,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesIncludingOnly(
+    function getAttributesTokenIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -229,7 +229,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesETHIncludingOnly(
+    function getAttributesIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,

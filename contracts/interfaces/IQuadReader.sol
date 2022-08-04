@@ -46,7 +46,7 @@ interface IQuadReader {
         address _tokenAddr
     ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributesIncludingOnly(
+    function getAttributesTokenIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -61,7 +61,7 @@ interface IQuadReader {
         address[] calldata _onlyIssuers
     ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributesETHIncludingOnly(
+    function getAttributesIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
