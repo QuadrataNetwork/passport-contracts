@@ -225,7 +225,7 @@ describe("QuadPassport", async () => {
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
 
       await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
@@ -277,7 +277,7 @@ describe("QuadPassport", async () => {
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
 
       await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
@@ -331,7 +331,7 @@ describe("QuadPassport", async () => {
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
 
       await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
@@ -398,7 +398,7 @@ describe("QuadPassport", async () => {
         passport.address
       );
 
-      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
       await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       const expectedAmountPerIssuer = expectedWithdrawAmount.div(2);
@@ -495,7 +495,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
       await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
       await expect(passport.connect(issuerTreasury).withdrawETH(admin.address)).to.revertedWith(
@@ -818,7 +818,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const priceAttribute = await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
       await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
       await expect(passport.connect(issuerTreasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(

@@ -417,7 +417,7 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal nonReentrant {
-        uint256 amountETH = calculatePaymentETH(_attribute, _account);
+        uint256 amountETH = calculatePayment(_attribute, _account);
         if (amountETH > 0) {
             require(
                  msg.value == amountETH,
@@ -487,7 +487,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @param _account account getting requested for attributes
     /// @return the amount of $ETH necessary to query the attribute
-    function calculatePaymentETH(
+    function calculatePayment(
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {

@@ -42,7 +42,7 @@ contract DeFi {
     }
 
     function doSomethingETH(bytes32 _attribute) public payable returns(bytes32, uint256) {
-        uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
+        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding{value: paymentAmount}(msg.sender, 1, _attribute, new address[](0));
         emit GetAttributeEvent(attrValue[0], epoch[0]);
@@ -80,7 +80,7 @@ contract DeFi {
         bytes32 _attribute,
         address[] calldata _excludedIssuers
     ) public payable returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
+        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding{value: paymentAmount}(msg.sender, 1, _attribute, _excludedIssuers);
         emit GetAttributeEvents(attrValue, epoch);
@@ -112,7 +112,7 @@ contract DeFi {
     function doSomethingETHWrapper(
         bytes32 _attribute
     ) public payable returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
+        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributes{value: paymentAmount}(msg.sender, 1, _attribute);
         emit GetAttributeEvents(attrValue, epoch);
@@ -149,7 +149,7 @@ contract DeFi {
         bytes32 _attribute,
         address[] calldata _includedIssuers
     ) public payable returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePaymentETH(_attribute, msg.sender);
+        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
         require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesIncludingOnly{value: paymentAmount}(msg.sender, 1, _attribute, _includedIssuers);
         emit GetAttributeEvents(attrValue, epoch);

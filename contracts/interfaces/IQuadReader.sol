@@ -74,7 +74,7 @@ interface IQuadReader {
         address _account
     ) external view returns(uint256);
 
-    function calculatePaymentETH(
+    function calculatePayment(
         bytes32 _attribute,
         address _account
     ) external view returns(uint256);

@@ -80,7 +80,7 @@ export const assertGetAttributeFree = async (
   tokenId: number = TOKEN_ID,
   opts: any
 ) => {
-  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address)
+  const priceAttribute = await reader.calculatePayment(attribute, account.address)
 
   expect(priceAttribute).to.equal(parseEther("0"));
 
@@ -136,7 +136,7 @@ export const assertGetAttribute = async (
     await passport.withdrawToken(issuerTreasury.address, paymentToken.address);
   } catch (err) { }
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
-  const priceAttributeETH = await reader.calculatePaymentETH(attribute, account.address)
+  const priceAttributeETH = await reader.calculatePayment(attribute, account.address)
   expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Retrieve initialBalances
@@ -533,7 +533,7 @@ export const assertGetAttributeIncluding = async (
   }
 
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
-  const priceAttributeETH = await reader.calculatePaymentETH(attribute, account.address)
+  const priceAttributeETH = await reader.calculatePayment(attribute, account.address)
   if(!opts?.assertFree)
     expect(priceAttribute).to.not.equal(parseEther("0"));
 
@@ -594,7 +594,7 @@ async function getInitialValuesToken(passport: Contract, treasury: SignerWithAdd
   }
 
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address);
-  const priceAttributeETH = await reader.calculatePaymentETH(attribute, account.address);
+  const priceAttributeETH = await reader.calculatePayment(attribute, account.address);
   if (!opts?.assertFree)
     expect(priceAttribute).to.not.equal(parseEther("0"));
 
@@ -641,7 +641,7 @@ function assertReturnValuesFree(response: any, expectedAttributeValues: string[]
 }
 
 async function getInitialValuesFree(reader: Contract, attribute: string, account: SignerWithAddress, passport: Contract) {
-  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address);
+  const priceAttribute = await reader.calculatePayment(attribute, account.address);
 
   expect(priceAttribute).to.equal(parseEther("0"));
 
@@ -664,7 +664,7 @@ async function getInitialValuesETH(defi: Contract, attribute: string, account: S
   const provider = defi.provider;
 
   const reader = await ethers.getContractAt('QuadReader', defi.reader());
-  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address);
+  const priceAttribute = await reader.calculatePayment(attribute, account.address);
 
   // Test with potential actual transfer of Token
   const initialBalance = await provider.getBalance(account.address);
@@ -673,7 +673,7 @@ async function getInitialValuesETH(defi: Contract, attribute: string, account: S
 }
 
 async function getAttributeFree(reader: Contract, attribute: string, account: SignerWithAddress, passport: Contract, tokenId: number, issuers: string[], expectedAttributeValues: any[], expectedIssuedAt: BigNumber[]) {
-  const priceAttribute = await reader.calculatePaymentETH(attribute, account.address);
+  const priceAttribute = await reader.calculatePayment(attribute, account.address);
 
   expect(priceAttribute).to.equal(parseEther("0"));
 
