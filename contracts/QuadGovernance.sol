@@ -452,6 +452,18 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         return _pricePerBusinessAttribute[_value];
     }
 
+    /// @dev Get query price for an attribute in eth
+    /// @return attribute price for using getter in eth
+    function pricePerAttributeETH(bytes32 _value) override public view returns(uint256) {
+        return _pricePerAttributeETH[_value];
+    }
+
+    /// @dev Get query price for an attribute given a business is asking (in eth)
+    /// @return attribute price for using getter given a business is asking (in eth)
+    function pricePerBusinessAttributeETH(bytes32 _value) override public view returns(uint256) {
+        return _pricePerBusinessAttributeETH[_value];
+    }
+
     /// @dev Get an issuer at a certain index
     /// @return issuer element
     function issuers(uint256 _value) override public view returns(Issuer memory) {

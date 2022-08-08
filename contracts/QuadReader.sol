@@ -491,10 +491,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {
-        uint256 tokenPrice = governance.getPriceETH();
-        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
-        uint256 amountETH = (price * 1e18 / tokenPrice) ;
-        return amountETH;
+        return _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttributeETH(_attribute) : governance.pricePerAttributeETH(_attribute);
     }
 
     /// @dev Used to determine if issuer has returned something useful

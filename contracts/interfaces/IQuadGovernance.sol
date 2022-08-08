@@ -61,6 +61,10 @@ interface IQuadGovernance {
 
     function pricePerBusinessAttribute(bytes32) external view returns(uint256);
 
+    function pricePerAttributeETH(bytes32) external view returns(uint256);
+
+    function pricePerBusinessAttributeETH(bytes32) external view returns(uint256);
+
     function revSplitIssuer() external view returns (uint256);
 
     function treasury() external view returns (address);
