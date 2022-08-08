@@ -52,7 +52,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of the attribute from all issuers ignoring the excluded list
-    function getAttributesExcluding(
+    function getAttributesTokenExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -103,7 +103,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _excluded The list of issuers to ignore. Keep empty for full list
     /// @return the values of an attribute from all issuers ignoring the excluded list
-    function getAttributesETHExcluding(
+    function getAttributesExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -128,12 +128,12 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenId tokenId of the Passport (1 for now)
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @return all values from all issuers
-    function getAttributesETH(
+    function getAttributes(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
     )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesETHExcluding(_account, _tokenId, _attribute, new address[](0));
+        return getAttributesExcluding(_account, _tokenId, _attribute, new address[](0));
     }
 
     /// @notice Get all values of an attribute for a passport holder (free)
@@ -159,13 +159,13 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @return all values of the attribute from all issuers
-    function getAttributes(
+    function getAttributesToken(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
     )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
+        return getAttributesTokenExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
     }
 
     /// @notice Query the values of an attribute for a passport holder (payable ETH)
@@ -177,7 +177,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _tokenAddr address of the ERC20 token to use as a payment
     /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesIncludingOnly(
+    function getAttributesTokenIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -229,7 +229,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
     /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
     /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesETHIncludingOnly(
+    function getAttributesIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -417,7 +417,7 @@ import "./storage/QuadGovernanceStore.sol";
         address[] memory _issuers,
         address _account
     ) internal nonReentrant {
-        uint256 amountETH = calculatePaymentETH(_attribute, _account);
+        uint256 amountETH = calculatePayment(_attribute, _account);
         if (amountETH > 0) {
             require(
                  msg.value == amountETH,
@@ -487,7 +487,7 @@ import "./storage/QuadGovernanceStore.sol";
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @param _account account getting requested for attributes
     /// @return the amount of $ETH necessary to query the attribute
-    function calculatePaymentETH(
+    function calculatePayment(
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {

@@ -3,7 +3,7 @@ pragma solidity 0.8.4;
 
 interface IQuadReader {
 
-    function getAttributesExcluding(
+    function getAttributesTokenExcluding(
             address _account,
             uint256 _tokenId,
             bytes32 _attribute,
@@ -20,14 +20,14 @@ interface IQuadReader {
         ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
 
 
-    function getAttributesETHExcluding(
+    function getAttributesExcluding(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address[] calldata _excludedIssuers
     ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributesETH(
+    function getAttributes(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute
@@ -39,14 +39,14 @@ interface IQuadReader {
         bytes32 _attribute
     ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributes(
+    function getAttributesToken(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
         address _tokenAddr
     ) external returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributesIncludingOnly(
+    function getAttributesTokenIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -61,7 +61,7 @@ interface IQuadReader {
         address[] calldata _onlyIssuers
     ) external view returns(bytes32[] memory, uint256[] memory, address[] memory);
 
-    function getAttributesETHIncludingOnly(
+    function getAttributesIncludingOnly(
         address _account,
         uint256 _tokenId,
         bytes32 _attribute,
@@ -74,7 +74,7 @@ interface IQuadReader {
         address _account
     ) external view returns(uint256);
 
-    function calculatePaymentETH(
+    function calculatePayment(
         bytes32 _attribute,
         address _account
     ) external view returns(uint256);

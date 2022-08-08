@@ -221,21 +221,21 @@ describe("QuadReader", async () => {
 
   describe("calculatePaymentETH", async () => {
     it("success (AML)", async () => {
-      expect(await reader.calculatePaymentETH(ATTRIBUTE_AML, minterA.address)).to.equal(0);
+      expect(await reader.calculatePayment(ATTRIBUTE_AML, minterA.address)).to.equal(0);
     });
 
     it("success (COUNTRY)", async () => {
       const priceAttribute = parseEther(
         (PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
       );
-      expect(await reader.calculatePaymentETH(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
+      expect(await reader.calculatePayment(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
         priceAttribute
       );
 
       const priceBusinessAttribute = parseEther(
         (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
       );
-      expect(await reader.calculatePaymentETH(ATTRIBUTE_COUNTRY, mockBusiness.address)).to.equal(
+      expect(await reader.calculatePayment(ATTRIBUTE_COUNTRY, mockBusiness.address)).to.equal(
         priceBusinessAttribute
       );
     });
@@ -245,7 +245,7 @@ describe("QuadReader", async () => {
         (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
       );
 
-      expect(await reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.equal(
+      expect(await reader.calculatePayment(ATTRIBUTE_DID, minterA.address)).to.equal(
         priceAttribute
       );
 
@@ -253,7 +253,7 @@ describe("QuadReader", async () => {
         (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
       );
 
-      expect(await reader.calculatePaymentETH(ATTRIBUTE_DID, mockBusiness.address)).to.equal(
+      expect(await reader.calculatePayment(ATTRIBUTE_DID, mockBusiness.address)).to.equal(
         priceBusniessAttribute
       );
     });
@@ -266,7 +266,7 @@ describe("QuadReader", async () => {
       await newGovernance.connect(admin).setPassportContractAddress(passport.address)
       await newGovernance.connect(admin).acceptGovernanceInPassport();
 
-      await expect(reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)).to.reverted;
+      await expect(reader.calculatePayment(ATTRIBUTE_DID, minterA.address)).to.reverted;
     });
 
 
@@ -280,7 +280,7 @@ describe("QuadReader", async () => {
         {skipOracle: true}
       );
       await expect(
-        reader.calculatePaymentETH(ATTRIBUTE_DID, minterA.address)
+        reader.calculatePayment(ATTRIBUTE_DID, minterA.address)
       ).to.revertedWith("ORACLE_ADDRESS_ZERO");
     });
   });
