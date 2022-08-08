@@ -558,7 +558,7 @@ describe("QuadReader", async () => {
     it("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesTokenExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
-      ).to.revertedWith("ERC20: transfer amount exceeds allowance");
+      ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
 
@@ -678,7 +678,7 @@ describe("QuadReader", async () => {
     it("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesTokenIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
-      ).to.revertedWith("ERC20: transfer amount exceeds allowance");
+      ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
 
@@ -1734,7 +1734,7 @@ describe("QuadReader", async () => {
     it("fail - attribute not free", async () => {
       await expect(
         reader.getAttributesToken(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address)
-      ).to.revertedWith("ERC20: transfer amount exceeds allowance");
+      ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
 
