@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
-import { id } from "ethers/lib/utils";
+import { id, parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const {
@@ -29,6 +29,12 @@ export const deployPassportEcosystem = async (
   // Deploy Passport
   const passport = await deployPassport(governance, uri);
   await governance.connect(admin).setPassportContractAddress(passport.address);
+
+  await governance.connect(admin).setAttributePriceETH(id("DID"), parseEther("0.001"));
+  await governance.connect(admin).setAttributePriceETH(id("COUNTRY"), parseEther("0.002"));
+
+  await governance.connect(admin).setBusinessAttributePriceETH(id("DID"), parseEther("0.002"));
+  await governance.connect(admin).setBusinessAttributePriceETH(id("COUNTRY"), parseEther("0.004"));
 
   // Deploy Reader
   const reader = await deployReader(governance, passport);

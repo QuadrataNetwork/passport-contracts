@@ -66,7 +66,7 @@ describe("QuadReader", async () => {
     aml = id("LOW");
     country = id("FRANCE");
     isBusiness = id("FALSE");
-    issuedAt = Math.floor(new Date().getTime() / 1000);
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 100000000;
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, issuerB, issuerBTreasury, issuerC, issuerCTreasury] =
       await ethers.getSigners();

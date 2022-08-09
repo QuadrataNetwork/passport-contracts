@@ -22,6 +22,10 @@ interface IQuadGovernance {
 
     function setBusinessAttributePrice(bytes32 _attribute, uint256 _price) external;
 
+    function setAttributePriceETH(bytes32 _attribute, uint256 _price) external;
+
+    function setBusinessAttributePriceETH(bytes32 _attribute, uint256 _price) external;
+
     function setAttributeMintPrice(bytes32 _attribute, uint256 _price) external;
 
      function setOracle(address _oracleAddr) external;

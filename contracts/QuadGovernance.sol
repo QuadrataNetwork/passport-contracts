@@ -16,6 +16,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     event AllowTokenPayment(address indexed _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event AttributePriceUpdatedETH(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event BusinessAttributePriceUpdatedETH(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
@@ -202,6 +204,31 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit BusinessAttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
+    /// @dev Set the price for querying a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (USD)
+    function setAttributePriceETH(bytes32 _attribute, uint256 _price) override external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_pricePerAttributeETH[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = _pricePerAttributeETH[_attribute];
+        _pricePerAttributeETH[_attribute] = _price;
+
+        emit AttributePriceUpdatedETH(_attribute, oldPrice, _price);
+    }
+
+    /// @dev Set the business attribute price for querying a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (USD)
+    function setBusinessAttributePriceETH(bytes32 _attribute, uint256 _price) override external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_pricePerBusinessAttributeETH[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = _pricePerBusinessAttributeETH[_attribute];
+        _pricePerBusinessAttributeETH[_attribute] = _price;
+
+        emit BusinessAttributePriceUpdatedETH(_attribute, oldPrice, _price);
+    }
 
     /// @dev Set the price to update/set a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
