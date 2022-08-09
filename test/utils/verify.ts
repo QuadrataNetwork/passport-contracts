@@ -287,6 +287,7 @@ export const assertGetAttributeETHIncluding = async (
   includedIssuers: string[],
   defi: Contract,
   passport: Contract,
+  reader: Contract,
   attribute: string,
   expectedAttributeValue: any[],
   expectedIssuedAt: BigNumber[],
@@ -294,9 +295,8 @@ export const assertGetAttributeETHIncluding = async (
 ) => {
 
   const provider = defi.provider;
-  const priceAttribute = parseEther(
-    (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
-  );
+  const priceAttribute = await reader.calculatePayment(attribute, account.address)
+
   expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Test with potential actual transfer of Token

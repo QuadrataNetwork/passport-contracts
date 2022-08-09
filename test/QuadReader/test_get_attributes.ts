@@ -826,6 +826,7 @@ describe("QuadReader", async () => {
         [issuer.address],
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         [did],
         [BigNumber.from(issuedAt)]
@@ -845,6 +846,7 @@ describe("QuadReader", async () => {
         [issuer.address, signers[0].address],
         defi,
         passport,
+        reader,
         ATTRIBUTE_DID,
         [did, did],
         [BigNumber.from(issuedAt), BigNumber.from(15)]
