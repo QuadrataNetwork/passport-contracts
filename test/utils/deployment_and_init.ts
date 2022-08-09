@@ -9,6 +9,13 @@ const {
   deployReader
 } = require("../../utils/deployment.ts");
 
+const {
+  ATTRIBUTE_DID,
+  PRICE_PER_ATTRIBUTES_ETH,
+  ATTRIBUTE_COUNTRY,
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH
+} = require("../../utils/constant.ts")
+
 export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
   issuers: SignerWithAddress[],
@@ -30,11 +37,11 @@ export const deployPassportEcosystem = async (
   const passport = await deployPassport(governance, uri);
   await governance.connect(admin).setPassportContractAddress(passport.address);
 
-  await governance.connect(admin).setAttributePriceETH(id("DID"), parseEther("0.001"));
-  await governance.connect(admin).setAttributePriceETH(id("COUNTRY"), parseEther("0.002"));
+  await governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
+  await governance.connect(admin).setAttributePriceETH(ATTRIBUTE_COUNTRY, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
 
-  await governance.connect(admin).setBusinessAttributePriceETH(id("DID"), parseEther("0.002"));
-  await governance.connect(admin).setBusinessAttributePriceETH(id("COUNTRY"), parseEther("0.004"));
+  await governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
+  await governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_COUNTRY, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
 
   // Deploy Reader
   const reader = await deployReader(governance, passport);

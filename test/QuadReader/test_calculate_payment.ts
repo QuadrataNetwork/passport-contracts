@@ -19,7 +19,9 @@ const {
   MINT_PRICE,
   PRICE_PER_ATTRIBUTES,
   PRICE_PER_BUSINESS_ATTRIBUTES,
-  READER_ROLE
+  READER_ROLE,
+  PRICE_PER_ATTRIBUTES_ETH,
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH
 } = require("../../utils/constant.ts");
 
 const {
@@ -225,33 +227,25 @@ describe("QuadReader", async () => {
     });
 
     it("success (COUNTRY)", async () => {
-      const priceAttribute = parseEther(
-        (PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
-      );
+      const priceAttribute = (PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY])
       expect(await reader.calculatePayment(ATTRIBUTE_COUNTRY, minterA.address)).to.equal(
         priceAttribute
       );
 
-      const priceBusinessAttribute = parseEther(
-        (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY] / 4000).toString()
-      );
+      const priceBusinessAttribute = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       expect(await reader.calculatePayment(ATTRIBUTE_COUNTRY, mockBusiness.address)).to.equal(
         priceBusinessAttribute
       );
     });
 
     it("success (DID)", async () => {
-      const priceAttribute = parseEther(
-        (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
-      );
+      const priceAttribute = (PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID])
 
       expect(await reader.calculatePayment(ATTRIBUTE_DID, minterA.address)).to.equal(
         priceAttribute
       );
 
-      const priceBusniessAttribute = parseEther(
-        (PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
-      );
+      const priceBusniessAttribute = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]
 
       expect(await reader.calculatePayment(ATTRIBUTE_DID, mockBusiness.address)).to.equal(
         priceBusniessAttribute
@@ -267,21 +261,6 @@ describe("QuadReader", async () => {
       await newGovernance.connect(admin).acceptGovernanceInPassport();
 
       await expect(reader.calculatePayment(ATTRIBUTE_DID, minterA.address)).to.reverted;
-    });
-
-
-    it("fail - oracle zero", async () => {
-      [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
-        admin,
-        [issuer],
-        treasury,
-        [issuerTreasury],
-        baseURI,
-        {skipOracle: true}
-      );
-      await expect(
-        reader.calculatePayment(ATTRIBUTE_DID, minterA.address)
-      ).to.revertedWith("ORACLE_ADDRESS_ZERO");
     });
   });
 });
