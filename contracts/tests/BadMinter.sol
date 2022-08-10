@@ -15,6 +15,7 @@ contract BadMinter {
         bytes32[] memory _attributeValues;
         IQuadPassport(_passport).mintPassport{value: msg.value}(
             msg.sender,
+            bytes32(0),
             _attributeNames,
             _attributeValues,
             1,

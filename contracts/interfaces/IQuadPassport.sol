@@ -8,6 +8,7 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function mintPassport(
         address _account,
+        bytes32 _quadDid,
         bytes32[] memory _attributeNames,
         bytes32[] memory _attributeValues,
         uint256 _tokenId,
