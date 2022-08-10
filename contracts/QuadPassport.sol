@@ -89,22 +89,37 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
 
-        bytes32 did = _getValue(_attributeNames, _attributeValues, keccak256("DID"));
-        _attributes[_account][keccak256("COUNTRY")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak256("COUNTRY")),
-            epoch: _issuedAt });
-        _attributes[_account][keccak256("DID")][issuer] = Attribute({
-            value: did,
-            epoch: _issuedAt });
-        _attributes[_account][keccak256("IS_BUSINESS")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS")),
-            epoch: _issuedAt });
-        _attributesByDID[did][keccak256("AML")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak256("AML")),
-            epoch: _issuedAt });
+        _storeAttributes(_attributeNames, _attributeValues, issuer, _account, _issuedAt);
 
         if(balanceOf(_account, _tokenId) == 0)
             _mint(_account, _tokenId, 1, "");
+    }
+
+    function _storeAttributes(
+        bytes32[] memory _attributeNames,
+        bytes32[] memory _attributeValues,
+        address _issuer,
+        address _account,
+        uint256 _issuedAt
+    ) internal {
+
+
+        for(uint256 i = 0; i < _attributeNames.length;){
+            if(governance.eligibleAttributes(_attributeNames[i])){
+                _attributes[_account][_attributeNames[i]][_issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
+            }
+            i++;
+        }
+
+        Attribute memory dID = attributes(_account, keccak256("DID"), _issuer);
+        if (dID.value!= bytes32(0)){
+            for(uint256 i = 0; i < _attributeNames.length;){
+                if(governance.eligibleAttributesByDID(_attributeNames[i])){
+                    _attributesByDID[dID.value][_attributeNames[i]][_issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
+                }
+                i++;
+            }
+        }
     }
 
     /// @notice Update or set a new attribute for your existing passport
@@ -265,7 +280,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         // if the account isn't a Business, then ensure account is EOA
         // Businesses can be Smart Contracts or EOAs
         // Individuals can only be EOAs
-        if(_getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS")) == keccak256("FALSE")) {
+        bytes32 isBusiness = _getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS"));
+        if(isBusiness == keccak256("FALSE")) {
             extractionHash = keccak256(abi.encodePacked(_account));
             signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
             require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _account, "INVALID_ACCOUNT");
@@ -284,6 +300,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
                 return _attributeValues[i];
             }
         }
+        return bytes32(0);
     }
 
     function _verifyIssuerSetAttr(
