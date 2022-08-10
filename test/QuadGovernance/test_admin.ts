@@ -537,6 +537,65 @@ describe("QuadGovernance", async () => {
     });
   });
 
+  describe("setAttributePriceETH", async () => {
+    it("succeed", async () => {
+      expect(await governance.pricePerAttributeETH(ATTRIBUTE_DID)).to.equal(
+        PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
+      );
+      const newPrice = parseEther("1");
+      await expect(
+        governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, newPrice)
+      ).to.emit(governance, "AttributePriceUpdatedETH").withArgs(
+          ATTRIBUTE_DID,
+          PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
+          newPrice
+        );
+      expect(await governance.pricePerAttributeETH(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
+
+    it("succeed (price 0)", async () => {
+      expect(await governance.pricePerAttributeETH(ATTRIBUTE_DID)).to.equal(
+        PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
+      );
+      const newPrice = parseEther("0");
+      await expect(
+        governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, newPrice)
+      ).to.emit(governance, "AttributePriceUpdatedETH").withArgs(
+          ATTRIBUTE_DID,
+          PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
+          newPrice
+        );
+      expect(await governance.pricePerAttributeETH(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
+
+    it("fail (not admin)", async () => {
+      const newPrice = parseEther("0");
+      await expect(
+        governance.setAttributePriceETH(ATTRIBUTE_DID, newPrice)
+      ).to.be.revertedWith("INVALID_ADMIN");
+
+      await expect(
+        governance.setBusinessAttributePriceETH(ATTRIBUTE_DID, newPrice)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
+
+    it("fail (price already set)", async () => {
+      await expect(
+        governance
+          .connect(admin)
+          .setAttributePriceETH(
+            ATTRIBUTE_DID,
+            PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
+          )
+      ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
+
+
+    });
+  });
   describe("setBusinessAttributePrice", async () => {
     it("succeed", async () => {
       const newBusinessPrice = parseEther("3.14");
@@ -630,7 +689,7 @@ describe("QuadGovernance", async () => {
       const newPrice = parseEther("0");
 
       await expect(
-        governance.setBusinessAttributePrice(ATTRIBUTE_DID, newPrice)
+        governance.setBusinessAttributePriceETH(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
@@ -639,9 +698,9 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .setBusinessAttributePrice(
+          .setBusinessAttributePriceETH(
             ATTRIBUTE_DID,
-            parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+            PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]
           )
       ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
     })
