@@ -102,8 +102,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _issuedAt
     ) internal {
-
-
+        // Handle storing attributes
         for(uint256 i = 0; i < _attributeNames.length;){
             if(governance.eligibleAttributes(_attributeNames[i])){
                 _attributes[_account][_attributeNames[i]][_issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
@@ -111,11 +110,12 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             i++;
         }
 
-        Attribute memory dID = attributes(_account, keccak256("DID"), _issuer);
-        if (dID.value!= bytes32(0)){
+        // Handle storing attributes by DID
+        Attribute memory didAttr = attributes(_account, keccak256("DID"), _issuer);
+        if (didAttr.value!= bytes32(0)){
             for(uint256 i = 0; i < _attributeNames.length;){
                 if(governance.eligibleAttributesByDID(_attributeNames[i])){
-                    _attributesByDID[dID.value][_attributeNames[i]][_issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
+                    _attributesByDID[didAttr.value][_attributeNames[i]][_issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
                 }
                 i++;
             }
@@ -281,7 +281,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         // Businesses can be Smart Contracts or EOAs
         // Individuals can only be EOAs
         bytes32 isBusiness = _getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS"));
-        if(isBusiness == keccak256("FALSE")) {
+        if(isBusiness != keccak256("TRUE")) {
             extractionHash = keccak256(abi.encodePacked(_account));
             signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
             require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _account, "INVALID_ACCOUNT");
