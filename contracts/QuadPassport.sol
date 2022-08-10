@@ -68,27 +68,41 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
     function mintPassport(
-        MintConfig calldata _config,
+        address _account,
+        bytes[] _attributeNames,
+        bytes[] _attributeValues,
+        uint256 _tokenId,
+        uint256 _issuedAt,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
-        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
-        require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
-        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+        require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+        require(_attributeNames.length == _attributeValues.length, "MISMATCH_ARRAY_LENGTHS");
 
-        (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
+        (bytes32 hash, address issuer) = _verifySignersMint(
+            _account, _issuedAt, _tokenId, _attributeNames, _attributeValues, _sigIssuer, _sigAccount);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
-        _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
-        _attributes[_config.account][keccak256("IS_BUSINESS")][issuer] = Attribute({value: _config.isBusiness, epoch: _config.issuedAt});
-        _attributesByDID[_config.quadDID][keccak256("AML")][issuer] = Attribute({value: _config.aml, epoch: _config.issuedAt});
+        _attributes[_account][keccak256("COUNTRY")][issuer] = Attribute({
+            value: _getValue(_attributeNames, _attributeValues, keccak("COUNTRY")),
+            epoch: _issuedAt });
+        _attributes[_account][keccak256("DID")][issuer] = Attribute({
+            value: _getValue(_attributeNames, _attributeValues, keccak("DID")),
+            epoch: _issuedAt });
+        _attributes[_account][keccak256("IS_BUSINESS")][issuer] = Attribute({
+            value: _getValue(_attributeNames, _attributeValues, keccak("IS_BUSINESS")),
+            epoch: _issuedAt });
+        _attributesByDID[_quadDID][keccak256("AML")][issuer] = Attribute({
+            value: _getValue(_attributeNames, _attributeValues, keccak("AML")),
+            epoch: _issuedAt });
 
-        if(balanceOf(_config.account, _config.tokenId) == 0)
-            _mint(_config.account, _config.tokenId, 1, "");
+        if(balanceOf(_account, tokenId) == 0)
+            _mint(_account, _tokenId, 1, "");
     }
 
     /// @notice Update or set a new attribute for your existing passport
@@ -226,15 +240,19 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @param _sigAccount sig of EOA authorizing claim of passport NFT
     /// @return unique hash of mintPassport invocation and extracted issuer of passport
     function _verifySignersMint(
-        MintConfig calldata _config,
+        address _account,
+        uint256 _issuedAt,
+        uint256 _tokenId,
+        bytes32[] _attributeNames,
+        bytes32[] _attributeValues,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
-        require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
-        require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
-        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+        require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
-        bytes32 extractionHash = keccak256(abi.encode(_config.account, _config.tokenId, _config.quadDID, _config.aml, _config.country, _config.isBusiness, _config.issuedAt));
+        bytes32 extractionHash = keccak256(abi.encode(_account, _tokenId, _attributeNames, _attributeValues, _issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
 
@@ -246,13 +264,25 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         // if the account isn't a Business, then ensure account is EOA
         // Businesses can be Smart Contracts or EOAs
         // Individuals can only be EOAs
-        if(_config.isBusiness == keccak256("FALSE")) {
-            extractionHash = keccak256(abi.encodePacked(_config.account));
+        if(_getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS")) == keccak256("FALSE")) {
+            extractionHash = keccak256(abi.encodePacked(_account));
             signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-            require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _config.account, "INVALID_ACCOUNT");
+            require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _account, "INVALID_ACCOUNT");
         }
 
         return (issuerMintHash, issuer);
+    }
+
+    function _getValue(
+        bytes32[] _attributeNames,
+        bytes32[] _attributeValues,
+        bytes32 _targetName
+    ) internal view returns(bytes32){
+        for(uint256 i = 0; i < _attributeNames.length; i++) {
+            if(_attributeNames[i] == _targetName){
+                return _attributeValues[i];
+            }
+        }
     }
 
     function _verifyIssuerSetAttr(
