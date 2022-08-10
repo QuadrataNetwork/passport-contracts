@@ -280,7 +280,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         // if the account isn't a Business, then ensure account is EOA
         // Businesses can be Smart Contracts or EOAs
         // Individuals can only be EOAs
-        bytes32 isBusiness = _getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS"));
+        bytes32 isBusiness = _getAttrInputValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS"));
         if(isBusiness != keccak256("TRUE")) {
             extractionHash = keccak256(abi.encodePacked(_account));
             signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
@@ -290,7 +290,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         return (issuerMintHash, issuer);
     }
 
-    function _getValue(
+    function _getAttrInputValue(
         bytes32[] memory _attributeNames,
         bytes32[] memory _attributeValues,
         bytes32 _targetName
