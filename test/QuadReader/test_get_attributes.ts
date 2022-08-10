@@ -409,7 +409,7 @@ describe("QuadReader", async () => {
     });
   });
 
-  describe("getAttributesExcluding", async function() {
+  describe("getAttributesTokenExcluding", async function() {
     it('success - (1 excluded, 1 included) - DID', async () => {
       const signers = await ethers.getSigners();
       await governance.connect(admin).setIssuer(signers[0].address, signers[0].address);
@@ -520,16 +520,16 @@ describe("QuadReader", async () => {
         {}
       )
     })
-    it("fail - getAttributesExcluding(AML) - wallet not found", async () => {
+    it("fail - getAttributesTokenExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
+        reader.getAttributesTokenExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesExcluding from address(0)", async () => {
+    it("fail - getAttributesTokenExcluding from address(0)", async () => {
       await expect(
-        reader.getAttributesExcluding(
+        reader.getAttributesTokenExcluding(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -539,25 +539,25 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesExcluding ineligible Token Id", async () => {
+    it("fail - getAttributesTokenExcluding ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesExcluding(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
+        reader.getAttributesTokenExcluding(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesExcluding ineligible attribute (AML)", async () => {
+    it("fail - getAttributesTokenExcluding ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
+        reader.getAttributesTokenExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
     it("fail - attribute not free", async () => {
       await expect(
-        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
+        reader.getAttributesTokenExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [])
       ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
@@ -640,16 +640,16 @@ describe("QuadReader", async () => {
         {assertFree: true}
       )
     })
-    it("fail - getAttributesIncludingOnly(AML) - wallet not found", async () => {
+    it("fail - getAttributesTokenIncludingOnly(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
+        reader.getAttributesTokenIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [wallet.address])
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
     it("fail - getAttributesIncludingOnly from address(0)", async () => {
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -662,7 +662,7 @@ describe("QuadReader", async () => {
     it("fail - getAttributesIncludingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
+        reader.getAttributesTokenIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
@@ -671,13 +671,13 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
+        reader.getAttributesTokenIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address, [issuer.address])
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
     it("fail - attribute not free", async () => {
       await expect(
-        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
+        reader.getAttributesTokenIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address, [issuer.address])
       ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
@@ -725,20 +725,20 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("fail - getAttributesETHExcluding(AML) - wallet not found", async () => {
+    it("fail - getAttributesExcluding(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
-        reader.getAttributesETHExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
+        reader.getAttributesExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETHExcluding(DID) - wallet not found", async () => {
+    it("fail - getAttributesExcluding(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesETHExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesExcluding(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
@@ -746,27 +746,27 @@ describe("QuadReader", async () => {
 
     it("fail - insufficient eth amount", async () => {
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
+        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: getDIDPrice.sub(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
 
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
+        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: getDIDPrice.add(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
 
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
+        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [], {
           value: parseEther("0"),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
     });
 
-    it("fail - getAttributesETHExcluding from address(0)", async () => {
+    it("fail - getAttributesExcluding from address(0)", async () => {
       await expect(
-        reader.getAttributesETHExcluding(
+        reader.getAttributesExcluding(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -776,32 +776,32 @@ describe("QuadReader", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - getAttributesETHExcluding ineligible Token Id", async () => {
+    it("fail - getAttributesExcluding ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesExcluding(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    it("fail - getAttributesETHExcluding ineligible attribute (AML)", async () => {
+    it("fail - getAttributesExcluding ineligible attribute (AML)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
+        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
-    it("fail - getAttributesETHExcluding ineligible attribute (Country)", async () => {
+    it("fail - getAttributesExcluding ineligible attribute (Country)", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
       await expect(
-        reader.getAttributesETHExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, [issuer.address], {
+        reader.getAttributesExcluding(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -851,20 +851,20 @@ describe("QuadReader", async () => {
       )
     });
 
-    it("fail - getAttributesETHIncludingOnly(AML) - wallet not found", async () => {
+    it("fail - getAttributesIncludingOnly(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
-        reader.getAttributesETHIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
+        reader.getAttributesIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETHIncludingOnly(DID) - wallet not found", async () => {
+    it("fail - getAttributesIncludingOnly(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesETHIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesIncludingOnly(wallet.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
@@ -872,17 +872,17 @@ describe("QuadReader", async () => {
 
     it("fail - insufficient eth amount", async () => {
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice.sub(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice.add(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_DID, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
@@ -890,7 +890,7 @@ describe("QuadReader", async () => {
 
     it("fail - getAttributesETHIncludingOnly from address(0)", async () => {
       await expect(
-        reader.getAttributesETHIncludingOnly(
+        reader.getAttributesIncludingOnly(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -903,7 +903,7 @@ describe("QuadReader", async () => {
     it("fail - getAttributesETHIncludingOnly ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
+        reader.getAttributesIncludingOnly(minterA.address, wrongTokenId, ATTRIBUTE_DID, [issuer.address], {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
@@ -914,7 +914,7 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_AML, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -925,7 +925,7 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
       await expect(
-        reader.getAttributesETHIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, [issuer.address], {
+        reader.getAttributesIncludingOnly(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY, [issuer.address], {
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -971,8 +971,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1002,8 +1002,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1033,8 +1033,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("DID"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("DID"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("DID"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("DID"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("DID"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1064,8 +1064,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("AML"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1089,8 +1089,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("AML"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("AML"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("AML"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1115,8 +1115,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1146,8 +1146,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1169,8 +1169,8 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1189,8 +1189,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1221,8 +1221,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1245,8 +1245,8 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).deleteIssuer(issuer.address);
 
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1264,8 +1264,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1288,7 +1288,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -1300,8 +1300,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1323,8 +1323,8 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentToken.div(2));
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1344,8 +1344,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1376,8 +1376,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1410,8 +1410,8 @@ describe("QuadReader", async () => {
        * and not as a business
        */
 
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawToken(issuerTreasury.address, usdc.address);
@@ -1433,8 +1433,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1457,7 +1457,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -1470,8 +1470,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken.mul(2))
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1494,8 +1494,8 @@ describe("QuadReader", async () => {
 
       await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
 
-      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response2 = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
       expect(response2).to.eqls(
         [
           [id("US"), id("FR")],
@@ -1523,8 +1523,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1559,8 +1559,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1590,7 +1590,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
+      expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
     });
 
     it("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
@@ -1605,8 +1605,8 @@ describe("QuadReader", async () => {
 
       const calcPaymentToken = await reader.calculatePaymentToken(id("COUNTRY"), usdc.address, minterA.address);
       usdc.approve(reader.address, calcPaymentToken)
-      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
-      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address);
+      const response = await reader.callStatic.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
+      await reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address);
 
       const finalBalanceInquisitor = await usdc.balanceOf(deployer.address);
       const finalBalancePassport = await usdc.balanceOf(passport.address);
@@ -1639,7 +1639,7 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).allowTokenPayment(usdc.address, false);
 
-      expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('TOKEN_PAYMENT_NOT_ALLOWED');
+      expect(reader.getAttributesToken(minterA.address, 1, id("COUNTRY"), usdc.address)).to.be.revertedWith('TOKEN_PAYMENT_NOT_ALLOWED');
     });
 
     it('success - (all included) - COUNTRY', async () => {
@@ -1697,16 +1697,16 @@ describe("QuadReader", async () => {
       )
     })
 
-    it("fail - getAttributes(AML) - wallet not found", async () => {
+    it("fail - getAttributesToken(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributes(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
+        reader.getAttributesToken(wallet.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
     it("fail - getAttributes from address(0)", async () => {
       await expect(
-        reader.getAttributes(
+        reader.getAttributesToken(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -1718,7 +1718,7 @@ describe("QuadReader", async () => {
     it("fail - getAttributes ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributes(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address)
+        reader.getAttributesToken(minterA.address, wrongTokenId, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
@@ -1727,13 +1727,13 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
+        reader.getAttributesToken(minterA.address, TOKEN_ID, ATTRIBUTE_AML, usdc.address)
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
 
     it("fail - attribute not free", async () => {
       await expect(
-        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address)
+        reader.getAttributesToken(minterA.address, TOKEN_ID, ATTRIBUTE_DID,usdc.address)
       ).to.revertedWith("ERC20: insufficient allowance");
     });
   });
@@ -2091,9 +2091,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2124,9 +2124,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2158,9 +2158,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("DID"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("DID"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("DID"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("DID"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("DID"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2191,9 +2191,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("AML"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("AML"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("AML"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2218,9 +2218,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("AML"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("AML"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("AML"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("AML"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2246,9 +2246,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2279,9 +2279,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2305,8 +2305,8 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2325,9 +2325,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2359,9 +2359,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2386,8 +2386,8 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).deleteIssuer(issuer.address);
 
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2404,9 +2404,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2431,7 +2431,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -2442,9 +2442,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH= await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH= await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2469,9 +2469,9 @@ describe("QuadReader", async () => {
 
       await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
 
-      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
+      const calcPaymentETH2 = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2490,9 +2490,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2524,9 +2524,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"),  minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"),  minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2550,10 +2550,10 @@ describe("QuadReader", async () => {
       expect(protocolWithdrawAmount).equals(calcPaymentETH.div(2));
 
       await governance.connect(admin).deleteIssuer(issuer.address);
-      const calcPaymentETH2 = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const calcPaymentETH2 = await reader.calculatePayment(id("COUNTRY"), minterA.address);
 
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
+      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH2});
       expect(response2).to.eqls([[],[],[]]);
 
       const issuerWithdrawAmount2 = await passport.callStatic.withdrawETH(issuerTreasury.address);
@@ -2572,9 +2572,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2599,7 +2599,7 @@ describe("QuadReader", async () => {
 
       await passport.connect(minterA).burnPassport(1);
 
-      await expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
     });
 
@@ -2611,9 +2611,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2638,8 +2638,8 @@ describe("QuadReader", async () => {
 
       await assertSetAttribute(minterA, issuerB, issuerBTreasury, passport, id("COUNTRY"), id("FR"), 16, {});
 
-      const response2 = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const response2 = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       expect(response2).to.eqls(
         [
           [id("US"), id("FR")],
@@ -2666,9 +2666,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2704,9 +2704,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2737,9 +2737,9 @@ describe("QuadReader", async () => {
       await assertMint(minterA, issuerC, issuerCTreasury, passport, id("MINTER_A"), hexZeroPad('0x03', 32), id("FR"), id("TRUE"), 17, 1, {newIssuerMint: true});
 
       await passport.connect(minterA).burnPassport(1);
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
 
-      expect(reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
+      expect(reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH})).to.be.revertedWith('PASSPORT_DOES_NOT_EXIST');
     });
 
     it("success - mint passports from issuerA, issuerB, isseurC, burn issuerB, assert only COUNTRY from A, C remain", async  () => {
@@ -2753,9 +2753,9 @@ describe("QuadReader", async () => {
       const initialBalanceInquisitor = await ethers.provider.getBalance(deployer.address);
       const initialBalancePassport = await ethers.provider.getBalance(passport.address);
 
-      const calcPaymentETH = await reader.calculatePaymentETH(id("COUNTRY"), minterA.address);
-      const response = await reader.callStatic.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
-      const tx = await reader.getAttributesETH(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const calcPaymentETH = await reader.calculatePayment(id("COUNTRY"), minterA.address);
+      const response = await reader.callStatic.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
+      const tx = await reader.getAttributes(minterA.address, 1, id("COUNTRY"), {value: calcPaymentETH});
       const metaData = await tx.wait();
       const gas = metaData.cumulativeGasUsed.mul(metaData.effectiveGasPrice);
 
@@ -2808,20 +2808,20 @@ describe("QuadReader", async () => {
       )
     })
 
-    it("fail - getAttributesETH(AML) - wallet not found", async () => {
+    it("fail - getAttributes(AML) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
 
       await expect(
-        reader.getAttributesETH(wallet.address, TOKEN_ID, ATTRIBUTE_AML, {
+        reader.getAttributes(wallet.address, TOKEN_ID, ATTRIBUTE_AML, {
           value: parseEther("0"),
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
     });
 
-    it("fail - getAttributesETH(DID) - wallet not found", async () => {
+    it("fail - getAttributes(DID) - wallet not found", async () => {
       const wallet = ethers.Wallet.createRandom();
       await expect(
-        reader.getAttributesETH(wallet.address, TOKEN_ID, ATTRIBUTE_DID, {
+        reader.getAttributes(wallet.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_DOES_NOT_EXIST");
@@ -2829,19 +2829,19 @@ describe("QuadReader", async () => {
 
     it("fail - insufficient eth amount", async () => {
       await expect(
-        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
+        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice.sub(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
 
       await expect(
-        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
+        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: getDIDPrice.add(1),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
 
       await expect(
-        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
+        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_DID, {
           value: parseEther("0"),
         })
       ).to.revertedWith("INSUFFICIENT_PAYMENT_AMOUNT");
@@ -2849,7 +2849,7 @@ describe("QuadReader", async () => {
 
     it("fail - getAttributesETH from address(0)", async () => {
       await expect(
-        reader.getAttributesETH(
+        reader.getAttributes(
           ethers.constants.AddressZero,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -2861,7 +2861,7 @@ describe("QuadReader", async () => {
     it("fail - getAttributesETH ineligible Token Id", async () => {
       const wrongTokenId = 2;
       await expect(
-        reader.getAttributesETH(minterA.address, wrongTokenId, ATTRIBUTE_DID, {
+        reader.getAttributes(minterA.address, wrongTokenId, ATTRIBUTE_DID, {
           value: getDIDPrice,
         })
       ).to.revertedWith("PASSPORT_TOKENID_INVALID");
@@ -2872,7 +2872,7 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttributeByDID(ATTRIBUTE_AML, false);
       await expect(
-        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_AML, {
+        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_AML, {
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -2883,7 +2883,7 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
       await expect(
-        reader.getAttributesETH(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY,{
+        reader.getAttributes(minterA.address, TOKEN_ID, ATTRIBUTE_COUNTRY,{
           value: parseEther("0"),
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");

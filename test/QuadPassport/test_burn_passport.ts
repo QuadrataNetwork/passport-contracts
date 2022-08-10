@@ -166,7 +166,7 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -176,7 +176,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
@@ -186,7 +186,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -265,7 +265,7 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -275,7 +275,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
@@ -285,7 +285,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterA.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -406,7 +406,7 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -416,7 +416,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
@@ -426,7 +426,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -580,7 +580,7 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -590,7 +590,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
@@ -600,7 +600,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -680,7 +680,7 @@ describe("QuadPassport", async () => {
       await passport.connect(minterB).burnPassport(TOKEN_ID);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterB.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -690,7 +690,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterB.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
@@ -700,7 +700,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           minterB.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -1447,7 +1447,7 @@ describe("QuadPassport", async () => {
       expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_AML,
@@ -1457,7 +1457,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_COUNTRY,
@@ -1467,7 +1467,7 @@ describe("QuadPassport", async () => {
       ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
       await expect(
-        reader.getAttributesIncludingOnly(
+        reader.getAttributesTokenIncludingOnly(
           mockBusiness.address,
           TOKEN_ID,
           ATTRIBUTE_DID,
@@ -1844,7 +1844,7 @@ describe("QuadPassport", async () => {
 
 
         await expect(
-          reader.getAttributesIncludingOnly(
+          reader.getAttributesTokenIncludingOnly(
             minterA.address,
             TOKEN_ID,
             ATTRIBUTE_AML,
@@ -1854,7 +1854,7 @@ describe("QuadPassport", async () => {
         ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
         await expect(
-          reader.getAttributesIncludingOnly(
+          reader.getAttributesTokenIncludingOnly(
             minterA.address,
             TOKEN_ID,
             ATTRIBUTE_COUNTRY,
@@ -1864,7 +1864,7 @@ describe("QuadPassport", async () => {
         ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
 
         await expect(
-          reader.getAttributesIncludingOnly(
+          reader.getAttributesTokenIncludingOnly(
             minterA.address,
             TOKEN_ID,
             ATTRIBUTE_DID,
