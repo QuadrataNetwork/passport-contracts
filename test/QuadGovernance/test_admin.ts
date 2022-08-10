@@ -12,11 +12,13 @@ const {
   MINT_PRICE,
   TOKEN_ID,
   PRICE_PER_ATTRIBUTES,
+  PRICE_PER_ATTRIBUTES_ETH,
   PRICE_SET_ATTRIBUTE,
   ISSUER_SPLIT,
   ATTRIBUTE_IS_BUSINESS,
   PRICE_PER_BUSINESS_ATTRIBUTES,
-  ISSUER_STATUS
+  ISSUER_STATUS,
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH
 } = require("../../utils/constant.ts");
 
 const {
@@ -590,6 +592,60 @@ describe("QuadGovernance", async () => {
     })
   });
 
+  describe("setBusinessAttributePriceETH", async () => {
+    it("succeed", async () => {
+      const newBusinessPrice = parseEther("3.14");
+      await expect(
+        governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, newBusinessPrice)
+      )
+        .to.emit(governance, "BusinessAttributePriceUpdatedETH")
+        .withArgs(
+          ATTRIBUTE_DID,
+          PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],
+          newBusinessPrice
+        );
+      expect(await governance.pricePerBusinessAttributeETH(ATTRIBUTE_DID)).to.equal(
+        newBusinessPrice
+      );
+    });
+
+    it("succeed (price 0)", async () => {
+      const newPrice = parseEther("0");
+
+      await expect(
+        governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, newPrice)
+      )
+        .to.emit(governance, "BusinessAttributePriceUpdatedETH")
+        .withArgs(
+          ATTRIBUTE_DID,
+          PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],
+          newPrice
+        );
+      expect(await governance.pricePerBusinessAttributeETH(ATTRIBUTE_DID)).to.equal(
+        newPrice
+      );
+    });
+
+    it("fail (not admin)", async () => {
+      const newPrice = parseEther("0");
+
+      await expect(
+        governance.setBusinessAttributePrice(ATTRIBUTE_DID, newPrice)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
+
+
+    it("fail (price already set)", async () => {
+      await expect(
+        governance
+          .connect(admin)
+          .setBusinessAttributePrice(
+            ATTRIBUTE_DID,
+            parseUnits(PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(), 6)
+          )
+      ).to.be.revertedWith("ATTRIBUTE_PRICE_ALREADY_SET");
+    })
+  });
   describe("setAttributeMintPrice", async () => {
     it("succeed", async () => {
       expect(await governance.mintPricePerAttribute(ATTRIBUTE_AML)).to.equal(
