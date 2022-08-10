@@ -64,20 +64,19 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
     /// @notice Claim and mint a wallet account Quadrata Passport
     /// @dev Only when authorized by an eligible issuer
-    /// @param _config Input paramters required to mint
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
-    /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
+    /// @param _sigAccount ECDSA signature computed by an eligible EOA to authorize the mint
     function mintPassport(
         address _account,
-        bytes[] _attributeNames,
-        bytes[] _attributeValues,
+        bytes32[] memory _attributeNames,
+        bytes32[] memory _attributeValues,
         uint256 _tokenId,
         uint256 _issuedAt,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
-        require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
+        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
@@ -86,22 +85,25 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         (bytes32 hash, address issuer) = _verifySignersMint(
             _account, _issuedAt, _tokenId, _attributeNames, _attributeValues, _sigIssuer, _sigAccount);
 
+
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
+
+        bytes32 did = _getValue(_attributeNames, _attributeValues, keccak256("DID"));
         _attributes[_account][keccak256("COUNTRY")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak("COUNTRY")),
+            value: _getValue(_attributeNames, _attributeValues, keccak256("COUNTRY")),
             epoch: _issuedAt });
         _attributes[_account][keccak256("DID")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak("DID")),
+            value: did,
             epoch: _issuedAt });
         _attributes[_account][keccak256("IS_BUSINESS")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak("IS_BUSINESS")),
+            value: _getValue(_attributeNames, _attributeValues, keccak256("IS_BUSINESS")),
             epoch: _issuedAt });
-        _attributesByDID[_quadDID][keccak256("AML")][issuer] = Attribute({
-            value: _getValue(_attributeNames, _attributeValues, keccak("AML")),
+        _attributesByDID[did][keccak256("AML")][issuer] = Attribute({
+            value: _getValue(_attributeNames, _attributeValues, keccak256("AML")),
             epoch: _issuedAt });
 
-        if(balanceOf(_account, tokenId) == 0)
+        if(balanceOf(_account, _tokenId) == 0)
             _mint(_account, _tokenId, 1, "");
     }
 
@@ -235,7 +237,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     /// @dev Verify sigs and ensure account is an EOA or Smart Contract depending on IS_BUSINESS status
-    /// @param _config all the mint function parameters
     /// @param _sigIssuer sig of issuer EOA
     /// @param _sigAccount sig of EOA authorizing claim of passport NFT
     /// @return unique hash of mintPassport invocation and extracted issuer of passport
@@ -243,8 +244,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         address _account,
         uint256 _issuedAt,
         uint256 _tokenId,
-        bytes32[] _attributeNames,
-        bytes32[] _attributeValues,
+        bytes32[] memory _attributeNames,
+        bytes32[] memory _attributeValues,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) internal view returns(bytes32, address){
@@ -274,8 +275,8 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
     function _getValue(
-        bytes32[] _attributeNames,
-        bytes32[] _attributeValues,
+        bytes32[] memory _attributeNames,
+        bytes32[] memory _attributeValues,
         bytes32 _targetName
     ) internal view returns(bytes32){
         for(uint256 i = 0; i < _attributeNames.length; i++) {
