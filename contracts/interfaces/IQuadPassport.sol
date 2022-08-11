@@ -52,4 +52,5 @@ interface IQuadPassport is IERC1155Upgradeable {
 
     function acceptGovernance() external;
 
+    function attributes2(address, bytes32) external view returns (QuadPassportStore.Attribute[] memory);
 }

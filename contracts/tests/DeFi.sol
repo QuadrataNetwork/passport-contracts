@@ -2,8 +2,10 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 import "../interfaces/IQuadPassport.sol";
+import "../storage/QuadPassportStore.sol";
 import "../QuadReader.sol";
 
 contract DeFi {
@@ -154,5 +156,52 @@ contract DeFi {
         (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesIncludingOnly{value: paymentAmount}(msg.sender, 1, _attribute, _includedIssuers);
         emit GetAttributeEvents(attrValue, epoch);
         return (attrValue, epoch);
+    }
+
+
+    function queryMultipleAttributesOptimized(
+        bytes32[] calldata _attributes
+    ) public payable {
+        uint256 paymentAmount;
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            paymentAmount = reader.calculatePayment(_attributes[i], msg.sender);
+
+            QuadPassportStore.Attribute[] memory attributes = reader.getAttributes2{value: paymentAmount}(
+                msg.sender, 1, _attributes[i]
+            );
+            // ) = reader.getAttributes{value: paymentAmount}(
+            //     msg.sender, 1, _attributes[i]
+            // );
+            console.log(attributes[0].epoch);
+            console.log(attributes[0].issuer);
+        }
+    }
+
+    function queryMultipleAttributes(
+        bytes32[] calldata _attributes
+    ) public payable {
+        uint256 paymentAmount;
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            paymentAmount = reader.calculatePayment(_attributes[i], msg.sender);
+            console.log(paymentAmount);
+            (
+                bytes32[] memory attrValue, uint256[] memory epoch, address[] memory issuer
+            ) = reader.getAttributes{value: paymentAmount}(
+                msg.sender, 1, _attributes[i]
+            );
+            console.log(epoch[0]);
+            console.log(issuer[0]);
+        }
+    }
+
+    function queryMultipleBulk(
+        bytes32[] calldata _attributes
+    ) public payable {
+        uint256 paymentAmount = 1 ether;
+        QuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: paymentAmount}(
+            msg.sender, 1, _attributes
+        );
+        console.log(attributes[0].epoch);
+        console.log(attributes[0].issuer);
     }
 }

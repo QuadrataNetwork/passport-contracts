@@ -13,13 +13,17 @@ import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./storage/QuadGovernanceStore.sol";
+import "hardhat/console.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
  contract QuadReader is IQuadReader, UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadReaderStore {
+     bytes32 constant ATTRIBUTE_IS_BUSINESS = 0xaf369ce728c816785c72f1ff0222ca9553b2cb93729d6a803be6af0d2369239b;
      using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
+     event QueryEvent(address indexed _account, address indexed _source, bytes32 _attribute);
+     event QueryFeeReceipt(address indexed _issuer, uint256 _fee);
 
     constructor() initializer {
         // used to prevent logic contract self destruct take over
@@ -419,8 +423,9 @@ import "./storage/QuadGovernanceStore.sol";
     ) internal nonReentrant {
         uint256 amountETH = calculatePayment(_attribute, _account);
         if (amountETH > 0) {
+            // TODO: Fix
             require(
-                 msg.value == amountETH,
+                 msg.value >= amountETH,
                 "INSUFFICIENT_PAYMENT_AMOUNT"
             );
 
@@ -491,7 +496,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {
-        return _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttributeETH(_attribute) : governance.pricePerAttributeETH(_attribute);
+        return _issuersContain(_account, keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttributeETH(_attribute) : governance.pricePerAttributeETH(_attribute);
     }
 
     /// @dev Used to determine if issuer has returned something useful
@@ -550,5 +555,46 @@ import "./storage/QuadGovernanceStore.sol";
                 return false;
         }
         return true;
+    }
+
+    function getAttributes2(
+        address _account, uint256 _tokenId, bytes32 _attribute
+    ) external payable returns(QuadPassportStore.Attribute[] memory attributes) {
+        _validateAttributeQuery(_account, _tokenId, _attribute);
+
+        attributes = passport.attributes2(_account, _attribute);
+        console.log(attributes.length);
+        console.log(attributes[0].issuer);
+
+        uint256 fee = passport.attributes2(_account, ATTRIBUTE_IS_BUSINESS)[0].value == keccak256("TRUE") ? governance.pricePerBusinessAttributeETH(_attribute) : governance.pricePerAttributeETH(_attribute);
+        if (fee > 0) {
+            // TODO: FIX to strict equal
+            require(msg.value >= fee, "INVALID_QUERY_FEE");
+            uint256 feeSplit = attributes.length == 0 ? 0 : (fee / 2) / attributes.length;
+            console.log(feeSplit);
+
+            for (uint256 i = 0; i < attributes.length; i++) {
+                emit QueryFeeReceipt(attributes[i].issuer, feeSplit);
+                emit QueryFeeReceipt(governance.treasury(), fee - feeSplit);
+            }
+
+        }
+
+        emit QueryEvent(_account, msg.sender, _attribute);
+        // _doETHPayments(_attribute, issuers, _account);
+    }
+
+    function getAttributesBulk(
+        address _account, uint256 _tokenId, bytes32[] calldata _attributes
+    ) external payable returns(QuadPassportStore.Attribute[] memory) {
+        QuadPassportStore.Attribute[] memory attributes = new QuadPassportStore.Attribute[](_attributes.length);
+
+        for (uint256 i = 0; i < _attributes.length; i++) {
+           _validateAttributeQuery(_account, _tokenId, _attributes[i]);
+            QuadPassportStore.Attribute memory attr = passport.attributes2(_account, _attributes[i])[0];
+           attributes[i] = attr;
+        }
+        return attributes;
+        // _doETHPayments(_attribute, issuers, _account);
     }
  }

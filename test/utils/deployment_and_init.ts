@@ -6,15 +6,16 @@ import { ethers } from "hardhat";
 const {
   deployPassport,
   deployGovernance,
-  deployReader
+  deployReader,
 } = require("../../utils/deployment.ts");
 
 const {
   ATTRIBUTE_DID,
-  PRICE_PER_ATTRIBUTES_ETH,
   ATTRIBUTE_COUNTRY,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH
-} = require("../../utils/constant.ts")
+  ATTRIBUTE_AML,
+  PRICE_PER_ATTRIBUTES_ETH,
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
+} = require("../../utils/constant.ts");
 
 export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
@@ -23,11 +24,12 @@ export const deployPassportEcosystem = async (
   issuerTreasuries: SignerWithAddress[],
   uri: string,
   opts: any
-): Promise<[Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, any]> => {
-
+): Promise<
+  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, any]
+> => {
   // Deploy Governance
   const governance = await deployGovernance(admin);
-  for(var i = 0; i < issuers.length; i++) {
+  for (var i = 0; i < issuers.length; i++) {
     await governance
       .connect(admin)
       .setIssuer(issuers[i].address, issuerTreasuries[i].address);
@@ -37,11 +39,43 @@ export const deployPassportEcosystem = async (
   const passport = await deployPassport(governance, uri);
   await governance.connect(admin).setPassportContractAddress(passport.address);
 
-  await governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
-  await governance.connect(admin).setAttributePriceETH(ATTRIBUTE_COUNTRY, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
+  await governance
+    .connect(admin)
+    .setAttributePriceETH(
+      ATTRIBUTE_DID,
+      PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
+    );
+  await governance
+    .connect(admin)
+    .setAttributePriceETH(
+      ATTRIBUTE_AML,
+      PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_AML]
+    );
+  await governance
+    .connect(admin)
+    .setAttributePriceETH(
+      ATTRIBUTE_COUNTRY,
+      PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
+    );
 
-  await governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
-  await governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_COUNTRY, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
+  await governance
+    .connect(admin)
+    .setBusinessAttributePriceETH(
+      ATTRIBUTE_DID,
+      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]
+    );
+  await governance
+    .connect(admin)
+    .setBusinessAttributePriceETH(
+      ATTRIBUTE_COUNTRY,
+      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
+    );
+  await governance
+    .connect(admin)
+    .setBusinessAttributePriceETH(
+      ATTRIBUTE_AML,
+      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_AML]
+    );
 
   // Deploy Reader
   const reader = await deployReader(governance, passport);
@@ -59,7 +93,7 @@ export const deployPassportEcosystem = async (
   await usdc.deployed();
 
   // Deploy Governance
-  if(!opts?.skipOracle) {
+  if (!opts?.skipOracle) {
     await governance.connect(admin).setOracle(oracle.address);
   }
   await governance.connect(admin).allowTokenPayment(usdc.address, true);
