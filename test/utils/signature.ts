@@ -23,10 +23,13 @@ export const signMint = async (
   isBusiness: typeof DataHexString,
   issuedAt: number
 ): Promise<typeof DataHexString> => {
+  const attributeNames = [ethers.utils.id('AML'), ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
+  const attributeValues = [aml, country, isBusiness]
+
   const hash = ethers.utils.keccak256(
     ethers.utils.defaultAbiCoder.encode(
-      ["address", "uint256", "bytes32", "bytes32", "bytes32", "bytes32", "uint256"],
-      [minter.address, tokenId, quadDID, aml, country, isBusiness, issuedAt]
+      ["address", "bytes32", "uint256", "bytes32[]", "bytes32[]", "uint256"],
+      [minter.address, quadDID, tokenId, attributeNames, attributeValues, issuedAt]
     )
   );
   const sig = await issuer.signMessage(ethers.utils.arrayify(hash));
