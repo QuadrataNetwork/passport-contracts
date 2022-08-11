@@ -90,21 +90,16 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _usedHashes[hash] = true;
 
         // Handle storing DID
-         _attributes[_account][keccak256('DID')][issuer] = Attribute({value: _quadDid, epoch: _issuedAt });
+        if(_quadDid != bytes32(0)){
+            _attributes[_account][keccak256('DID')][issuer] = Attribute({value: _quadDid, epoch: _issuedAt });
+        } else {
+            _quadDid = _attributes[_account][keccak256("DID")][issuer].value;
+        }
 
         // Handle storing attributes
         for(uint256 i = 0; i < _attributeNames.length;){
             if(governance.eligibleAttributes(_attributeNames[i])){
                 _attributes[_account][_attributeNames[i]][issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
-
-                // if the account isn't a Business, then ensure account is EOA
-                // Businesses can be Smart Contracts or EOAs
-                // Individuals can only be EOAs
-                if(_attributeNames[i] == keccak256("IS_BUSINESS") && _attributeValues[i] != keccak256("TRUE")){
-                    bytes32 extractionHash = keccak256(abi.encodePacked(_account));
-                    bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-                    require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _account, "INVALID_ACCOUNT");
-                }
             }
             i++;
         }
@@ -119,8 +114,18 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             }
         }
 
-        if(balanceOf(_account, _tokenId) == 0)
+        if(balanceOf(_account, _tokenId) == 0){
+            // if the account isn't a Business, then ensure account is EOA
+            // Businesses can be Smart Contracts or EOAs
+            // Individuals can only be EOAs
+            Attribute memory isBusinessAttr = _attributes[_account][keccak256("IS_BUSINESS")][issuer];
+            if(isBusinessAttr.value != keccak256("TRUE")){
+                bytes32 extractionHash = keccak256(abi.encodePacked(_account));
+                bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
+                require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _account, "INVALID_ACCOUNT");
+            }
             _mint(_account, _tokenId, 1, "");
+        }
     }
 
 
