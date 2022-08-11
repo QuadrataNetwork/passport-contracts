@@ -90,10 +90,16 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         _usedHashes[hash] = true;
 
         // Handle storing DID
-        if(_quadDid != bytes32(0)){
-            _attributes[_account][keccak256('DID')][issuer] = Attribute({value: _quadDid, epoch: _issuedAt });
-        } else {
+        if(_quadDid == bytes32(0)){
+            require(_attributes[_account][keccak256("DID")][issuer].value != bytes32(0), "INVALID_DID");
             _quadDid = _attributes[_account][keccak256("DID")][issuer].value;
+        } else {
+            require(
+                (_attributes[_account][keccak256("DID")][issuer].value == 0 || _attributes[_account][keccak256("DID")][issuer].value == _quadDid),
+                "INVALID_DID"
+            );
+            _attributes[_account][keccak256("DID")][issuer] = Attribute({value: _quadDid, epoch: _issuedAt });
+
         }
 
         // Handle storing attributes
