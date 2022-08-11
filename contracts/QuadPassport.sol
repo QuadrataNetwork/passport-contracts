@@ -94,9 +94,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
             if(governance.eligibleAttributes(_attributeNames[i])){
                 _attributes[_account][_attributeNames[i]][issuer] = Attribute({value: _attributeValues[i], epoch: _issuedAt });
                 if(_attributeNames[i] == keccak256("IS_BUSINESS") && _attributeValues[i] != keccak256("TRUE")){
-                    require(ECDSAUpgradeable.recover(
-                        ECDSAUpgradeable.toEthSignedMessageHash(keccak256(abi.encodePacked(_account))),
-                        _sigAccount) == _account, "INVALID_ACCOUNT");
+                    bytes32 extractionHash = keccak256(abi.encodePacked(_account));
+                    bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
+                    require(ECDSAUpgradeable.recover(signedMsg, _sigAccount) == _account, "INVALID_ACCOUNT");
                 }
             }
             i++;
