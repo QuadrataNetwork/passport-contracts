@@ -37,11 +37,11 @@ export const deployPassportEcosystem = async (
   const passport = await deployPassport(governance, uri);
   await governance.connect(admin).setPassportContractAddress(passport.address);
 
-  await governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
-  await governance.connect(admin).setAttributePriceETH(ATTRIBUTE_COUNTRY, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
+  await governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_DID, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
+  await governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_COUNTRY, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
 
-  await governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
-  await governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_COUNTRY, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
+  await governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_DID, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
+  await governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_COUNTRY, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
 
   // Deploy Reader
   const reader = await deployReader(governance, passport);

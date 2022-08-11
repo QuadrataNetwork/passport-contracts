@@ -208,7 +208,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (USD)
-    function setAttributePriceETH(bytes32 _attribute, uint256 _price) override external {
+    function setAttributePriceFixed(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_pricePerAttributeETH[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
         uint256 oldPrice = _pricePerAttributeETH[_attribute];
@@ -221,7 +221,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
     /// @param _price price (USD)
-    function setBusinessAttributePriceETH(bytes32 _attribute, uint256 _price) override external {
+    function setBusinessAttributePriceFixed(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_pricePerBusinessAttributeETH[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
         uint256 oldPrice = _pricePerBusinessAttributeETH[_attribute];

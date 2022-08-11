@@ -537,14 +537,14 @@ describe("QuadGovernance", async () => {
     });
   });
 
-  describe("setAttributePriceETH", async () => {
+  describe("setAttributePriceFixed", async () => {
     it("succeed", async () => {
       expect(await governance.pricePerAttributeETH(ATTRIBUTE_DID)).to.equal(
         PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
       );
       const newPrice = parseEther("1");
       await expect(
-        governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, newPrice)
+        governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.emit(governance, "AttributePriceUpdatedETH").withArgs(
           ATTRIBUTE_DID,
           PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
@@ -561,7 +561,7 @@ describe("QuadGovernance", async () => {
       );
       const newPrice = parseEther("0");
       await expect(
-        governance.connect(admin).setAttributePriceETH(ATTRIBUTE_DID, newPrice)
+        governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.emit(governance, "AttributePriceUpdatedETH").withArgs(
           ATTRIBUTE_DID,
           PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
@@ -575,11 +575,11 @@ describe("QuadGovernance", async () => {
     it("fail (not admin)", async () => {
       const newPrice = parseEther("0");
       await expect(
-        governance.setAttributePriceETH(ATTRIBUTE_DID, newPrice)
+        governance.setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
 
       await expect(
-        governance.setBusinessAttributePriceETH(ATTRIBUTE_DID, newPrice)
+        governance.setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
@@ -587,7 +587,7 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .setAttributePriceETH(
+          .setAttributePriceFixed(
             ATTRIBUTE_DID,
             PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
           )
@@ -651,11 +651,11 @@ describe("QuadGovernance", async () => {
     })
   });
 
-  describe("setBusinessAttributePriceETH", async () => {
+  describe("setBusinessAttributePriceFixed", async () => {
     it("succeed", async () => {
       const newBusinessPrice = parseEther("3.14");
       await expect(
-        governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, newBusinessPrice)
+        governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_DID, newBusinessPrice)
       )
         .to.emit(governance, "BusinessAttributePriceUpdatedETH")
         .withArgs(
@@ -672,7 +672,7 @@ describe("QuadGovernance", async () => {
       const newPrice = parseEther("0");
 
       await expect(
-        governance.connect(admin).setBusinessAttributePriceETH(ATTRIBUTE_DID, newPrice)
+        governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       )
         .to.emit(governance, "BusinessAttributePriceUpdatedETH")
         .withArgs(
@@ -689,7 +689,7 @@ describe("QuadGovernance", async () => {
       const newPrice = parseEther("0");
 
       await expect(
-        governance.setBusinessAttributePriceETH(ATTRIBUTE_DID, newPrice)
+        governance.setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
@@ -698,7 +698,7 @@ describe("QuadGovernance", async () => {
       await expect(
         governance
           .connect(admin)
-          .setBusinessAttributePriceETH(
+          .setBusinessAttributePriceFixed(
             ATTRIBUTE_DID,
             PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]
           )
