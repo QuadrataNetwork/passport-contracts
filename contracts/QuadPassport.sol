@@ -117,8 +117,6 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     }
 
 
-
-
     /// @notice Update or set a new attribute for your existing passport
     /// @dev Only when authorized by an eligible issuer
     /// @param _account the account to be updated
