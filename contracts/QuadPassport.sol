@@ -84,10 +84,13 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(_attributeNames.length == _attributeValues.length, "MISMATCH_ARRAY_LENGTHS");
 
         (bytes32 hash, address issuer) = _verifySignersMint(
-            _account, _issuedAt, _tokenId, _attributeNames, _attributeValues, _sigIssuer);
+            _account, _quadDid, _issuedAt, _tokenId, _attributeNames, _attributeValues, _sigIssuer);
 
         _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
+
+        // Handle storing DID
+         _attributes[_account][keccak256('DID')][issuer] = Attribute({value: _quadDid, epoch: _issuedAt });
 
         // Handle storing attributes
         for(uint256 i = 0; i < _attributeNames.length;){
@@ -255,6 +258,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @return unique hash of mintPassport invocation and extracted issuer of passport
     function _verifySignersMint(
         address _account,
+        bytes32 _quadDid,
         uint256 _issuedAt,
         uint256 _tokenId,
         bytes32[] memory _attributeNames,
@@ -265,7 +269,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(_issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
-        bytes32 extractionHash = keccak256(abi.encode(_account, _tokenId, _attributeNames, _attributeValues, _issuedAt));
+        bytes32 extractionHash = keccak256(abi.encode(_account, _quadDid, _tokenId, _attributeNames, _attributeValues, _issuedAt));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
 
