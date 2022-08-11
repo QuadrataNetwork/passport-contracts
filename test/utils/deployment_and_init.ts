@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
-import { id, parseEther } from "ethers/lib/utils";
+import { id } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const {
@@ -29,7 +29,7 @@ export const deployPassportEcosystem = async (
 > => {
   // Deploy Governance
   const governance = await deployGovernance(admin);
-  for (var i = 0; i < issuers.length; i++) {
+  for (let i = 0; i < issuers.length; i++) {
     await governance
       .connect(admin)
       .setIssuer(issuers[i].address, issuerTreasuries[i].address);
@@ -41,38 +41,38 @@ export const deployPassportEcosystem = async (
 
   await governance
     .connect(admin)
-    .setAttributePriceETH(
+    .setAttributePriceFixed(
       ATTRIBUTE_DID,
       PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
     );
   await governance
     .connect(admin)
-    .setAttributePriceETH(
+    .setAttributePriceFixed(
       ATTRIBUTE_AML,
       PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_AML]
     );
   await governance
     .connect(admin)
-    .setAttributePriceETH(
+    .setAttributePriceFixed(
       ATTRIBUTE_COUNTRY,
       PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
     );
 
   await governance
     .connect(admin)
-    .setBusinessAttributePriceETH(
+    .setBusinessAttributePriceFixed(
       ATTRIBUTE_DID,
       PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]
     );
   await governance
     .connect(admin)
-    .setBusinessAttributePriceETH(
+    .setBusinessAttributePriceFixed(
       ATTRIBUTE_COUNTRY,
       PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
     );
   await governance
     .connect(admin)
-    .setBusinessAttributePriceETH(
+    .setBusinessAttributePriceFixed(
       ATTRIBUTE_AML,
       PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_AML]
     );
