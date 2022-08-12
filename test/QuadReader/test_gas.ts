@@ -10,8 +10,6 @@ const {
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
   TOKEN_ID,
-  PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
 const { deployPassportEcosystem } = require("../utils/deployment_and_init.ts");
@@ -31,8 +29,7 @@ const setAttributeOptimized = async (
 
   Object.keys(attributes).forEach((k, i) => {
     let attrKey;
-    if (k == ATTRIBUTE_AML) {
-      console.log({ attributes, k });
+    if (k === ATTRIBUTE_AML) {
       attrKey = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32"],
@@ -197,13 +194,18 @@ describe("QuadReader", async () => {
     });
 
     it("getAttribute Optimized", async () => {
-      await defi.connect(minterA).queryMultipleAttributesOptimized(attributes, {
+      await defi.connect(minterA).queryMultipleAttributes2(attributes, {
         value: ethers.utils.parseEther("1"),
       });
     });
 
     it("getAttributesBulk", async () => {
       await defi.connect(minterA).queryMultipleBulk(attributes, {
+        value: ethers.utils.parseEther("1"),
+      });
+    });
+    it("getAttributesBulk Optimized", async () => {
+      await defi.connect(minterA).queryMultipleBulk2(attributes, {
         value: ethers.utils.parseEther("1"),
       });
     });
@@ -294,13 +296,19 @@ describe("QuadReader", async () => {
     });
 
     it("getAttribute Optimized", async () => {
-      await defi.connect(minterA).queryMultipleAttributesOptimized(attributes, {
+      await defi.connect(minterA).queryMultipleAttributes2(attributes, {
         value: ethers.utils.parseEther("1"),
       });
     });
 
     it("getAttributesBulk", async () => {
       await defi.connect(minterA).queryMultipleBulk(attributes, {
+        value: ethers.utils.parseEther("1"),
+      });
+    });
+
+    it("getAttributesBulk", async () => {
+      await defi.connect(minterA).queryMultipleBulk2(attributes, {
         value: ethers.utils.parseEther("1"),
       });
     });
