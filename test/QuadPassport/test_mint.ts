@@ -237,7 +237,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      await passport.connect(issuer).withdrawETH(issuerTreasury.address);
+      await passport.connect(issuer).withdraw(issuerTreasury.address);
 
       await assertMint(
         minterB,
@@ -250,7 +250,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      await passport.connect(issuerB).withdrawETH(issuerBTreasury.address);
+      await passport.connect(issuerB).withdraw(issuerBTreasury.address);
 
       await assertGetAttributeFree(
         [issuer.address],
@@ -547,7 +547,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       expect(await passport.provider.getBalance(passport.address)).to.equal(0);
       await expect(
-        passport.withdrawETH(issuerTreasury.address)
+        passport.withdraw(issuerTreasury.address)
       ).to.be.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
@@ -804,7 +804,7 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await expect(
-        passport.withdrawETH(issuerTreasury.address)
+        passport.withdraw(issuerTreasury.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
@@ -929,8 +929,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
 
@@ -945,8 +945,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_MINT_PRICE");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -962,8 +962,8 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       await expect(
@@ -974,8 +974,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_MINT_PRICE");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1158,8 +1158,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       const sigAccount = await signMessage(minterA, minterA.address);
@@ -1171,8 +1171,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1190,8 +1190,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       const sigAccount = await signMessage(issuer, minterA.address);
@@ -1203,8 +1203,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1221,8 +1221,8 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       const sigAccount = await signMessage(minterA, minterA.address);
@@ -1234,8 +1234,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1253,8 +1253,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       await expect(
@@ -1265,8 +1265,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1283,8 +1283,8 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       const sigAccount = await signMessage(minterA, minterA.address);
@@ -1296,8 +1296,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1314,8 +1314,8 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
       const sigAccount = await signMessage(issuer, minterA.address);
 
@@ -1327,8 +1327,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
     });
@@ -1356,8 +1356,8 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterB.address, 1)).equals(0);
 
       const sigAccount = await signMessage(minterA, minterA.address);
@@ -1370,8 +1370,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterB.address, 1)).equals(0);
 
     });
@@ -1392,8 +1392,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       await expect(
@@ -1404,8 +1404,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
     });
@@ -1424,8 +1424,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       const sigAccount = await signMessage(invalidSigner, minterA.address);
@@ -1438,8 +1438,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(invalidSigner.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
 
@@ -1456,8 +1456,8 @@ describe("QuadPassport", async () => {
       );
 
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
 
       await expect(
@@ -1468,8 +1468,8 @@ describe("QuadPassport", async () => {
           })
       ).to.be.revertedWith("INVALID_ISSUER");
 
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
     });
   });
@@ -1531,8 +1531,8 @@ describe("QuadPassport", async () => {
 
       expect(await passport.balanceOf(mockBusiness.address, 1)).equals(0);
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
       const promise = passport
         .connect(minterA)
         .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
@@ -1541,8 +1541,8 @@ describe("QuadPassport", async () => {
 
       await expect(promise).to.be.revertedWith("INVALID_ACCOUNT");
       expect(await passport.balanceOf(mockBusiness.address, 1)).equals(0);
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuer.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
 
     });
     it("fail - mint passport to contract with account forging contract sig while not a business", async () => {
@@ -1594,8 +1594,8 @@ describe("QuadPassport", async () => {
       );
       expect(await passport.balanceOf(mockBusiness.address, 1)).equals(0);
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuerTreasury.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuerTreasury.address)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
 
       const promise = passport
         .connect(minterA)
@@ -1605,8 +1605,8 @@ describe("QuadPassport", async () => {
 
       await promise;
       expect(await passport.balanceOf(mockBusiness.address, 1)).equals(1);
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      const response = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      const response = await passport.callStatic.withdraw(issuerTreasury.address);
       expect(response).to.equals(MINT_PRICE);
     });
 
@@ -1629,8 +1629,8 @@ describe("QuadPassport", async () => {
 
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
       const protocolTreasury = (await governance.config()).treasury;
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      await expect(passport.withdrawETH(issuerTreasury.address)).to.not.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      await expect(passport.withdraw(issuerTreasury.address)).to.not.be.revertedWith('NOT_ENOUGH_BALANCE');
 
       const promise = passport
         .connect(minterA)
@@ -1640,8 +1640,8 @@ describe("QuadPassport", async () => {
 
       await promise;
       expect(await passport.balanceOf(mockBusiness.address, 1)).equals(1);
-      await expect(passport.withdrawETH(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
-      const response = await passport.callStatic.withdrawETH(issuerTreasury.address);
+      await expect(passport.withdraw(protocolTreasury)).to.be.revertedWith('NOT_ENOUGH_BALANCE');
+      const response = await passport.callStatic.withdraw(issuerTreasury.address);
       expect(response).to.equals(MINT_PRICE);
     });
   })

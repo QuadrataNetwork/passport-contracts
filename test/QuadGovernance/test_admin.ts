@@ -545,7 +545,7 @@ describe("QuadGovernance", async () => {
       const newPrice = parseEther("1");
       await expect(
         governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
-      ).to.emit(governance, "AttributePriceUpdatedETH").withArgs(
+      ).to.emit(governance, "AttributePriceUpdatedFixed").withArgs(
           ATTRIBUTE_DID,
           PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
           newPrice
@@ -562,7 +562,7 @@ describe("QuadGovernance", async () => {
       const newPrice = parseEther("0");
       await expect(
         governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
-      ).to.emit(governance, "AttributePriceUpdatedETH").withArgs(
+      ).to.emit(governance, "AttributePriceUpdatedFixed").withArgs(
           ATTRIBUTE_DID,
           PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
           newPrice
@@ -657,7 +657,7 @@ describe("QuadGovernance", async () => {
       await expect(
         governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_DID, newBusinessPrice)
       )
-        .to.emit(governance, "BusinessAttributePriceUpdatedETH")
+        .to.emit(governance, "BusinessAttributePriceUpdatedFixed")
         .withArgs(
           ATTRIBUTE_DID,
           PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],
@@ -674,7 +674,7 @@ describe("QuadGovernance", async () => {
       await expect(
         governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       )
-        .to.emit(governance, "BusinessAttributePriceUpdatedETH")
+        .to.emit(governance, "BusinessAttributePriceUpdatedFixed")
         .withArgs(
           ATTRIBUTE_DID,
           PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],

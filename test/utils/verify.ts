@@ -48,7 +48,7 @@ export const assertMint = async (
   var initialIssuerBalance = ethers.BigNumber.from(0);
   // Cannot assume the eth within passport contract belongs to the current issuer
   try {
-    initialIssuerBalance = await passport.connect(issuer).callStatic.withdrawETH(issuerTreasury.address);
+    initialIssuerBalance = await passport.connect(issuer).callStatic.withdraw(issuerTreasury.address);
   } catch { }
 
   await passport
@@ -63,7 +63,7 @@ export const assertMint = async (
   );
 
   expect(
-    await passport.connect(issuer).callStatic.withdrawETH(issuerTreasury.address)
+    await passport.connect(issuer).callStatic.withdraw(issuerTreasury.address)
   ).to.equal(MINT_PRICE.add(initialIssuerBalance));
 
 };
@@ -337,7 +337,7 @@ export const assertSetAttribute = async (
   const initialBalance = await passport.provider.getBalance(passport.address);
   const initialBalanceIssuer = initialBalance.eq(0)
     ? initialBalance
-    : await passport.callStatic.withdrawETH(issuerTreasury.address);
+    : await passport.callStatic.withdraw(issuerTreasury.address);
 
   await passport
     .connect(opts?.signer || account)
@@ -349,7 +349,7 @@ export const assertSetAttribute = async (
     initialBalance.add(PRICE_SET_ATTRIBUTE[attribute])
   );
   expect(
-    await passport.callStatic.withdrawETH(issuerTreasury.address)
+    await passport.callStatic.withdraw(issuerTreasury.address)
   ).to.equal(PRICE_SET_ATTRIBUTE[attribute].add(initialBalanceIssuer));
 };
 
