@@ -9,7 +9,7 @@ import {
   id,
   hexZeroPad,
 } from "ethers/lib/utils";
-import { assertGetAttributeETHExcluding, assertGetAttributeETHIncluding, assertGetAttributeETHWrapper, assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeFreeWrapper, assertGetAttributeIncluding, assertGetAttributeWrapper, assertMint, assertSetAttribute } from "../utils/verify";
+import { assertGetAttributeFixedExcluding, assertGetAttributeFixedIncluding, assertGetAttributeFixedWrapper, assertGetAttributeExcluding, assertGetAttributeFreeIncluding, assertGetAttributeFreeWrapper, assertGetAttributeIncluding, assertGetAttributeWrapper, assertMint, assertSetAttribute } from "../utils/verify";
 import exp from "constants";
 
 const {
@@ -25,7 +25,7 @@ const {
 const {
   assertGetAttribute,
   assertGetAttributeFree,
-  assertGetAttributeETH,
+  assertGetAttributeFixed,
   assertGetAttributeFreeExcluding
 } = require("../utils/verify.ts");
 
@@ -682,7 +682,7 @@ describe("QuadReader", async () => {
     });
   });
 
-  describe("getAttributeETHExcluding", async () => {
+  describe("getAttributeFixedExcluding", async () => {
     const getDIDPrice = parseEther(
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
@@ -695,7 +695,7 @@ describe("QuadReader", async () => {
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      await assertGetAttributeETHExcluding(
+      await assertGetAttributeFixedExcluding(
         minterA,
         [issuer.address],
         defi,
@@ -714,7 +714,7 @@ describe("QuadReader", async () => {
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      await assertGetAttributeETHExcluding(
+      await assertGetAttributeFixedExcluding(
         minterA,
         [],
         defi,
@@ -808,7 +808,7 @@ describe("QuadReader", async () => {
     });
   });
 
-  describe("getAttributeETHIncluding", async () => {
+  describe("getAttributeFixedIncluding", async () => {
     const getDIDPrice = parseEther(
       (PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID] / 4000).toString()
     );
@@ -821,7 +821,7 @@ describe("QuadReader", async () => {
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      await assertGetAttributeETHIncluding(
+      await assertGetAttributeFixedIncluding(
         minterA,
         [issuer.address],
         defi,
@@ -841,7 +841,7 @@ describe("QuadReader", async () => {
 
       expect(await governance.getIssuersLength()).to.equal(2);
 
-      await assertGetAttributeETHIncluding(
+      await assertGetAttributeFixedIncluding(
         minterA,
         [issuer.address, signers[0].address],
         defi,
@@ -2058,7 +2058,7 @@ describe("QuadReader", async () => {
     });
   })
 
-  describe("getAttributeETH", async () => {
+  describe("getAttributeFixed", async () => {
     beforeEach(async () => {
       await governance.connect(admin).setIssuer(issuerB.address, issuerBTreasury.address);
       await governance.connect(admin).setIssuer(issuerC.address, issuerCTreasury.address);
@@ -2076,7 +2076,7 @@ describe("QuadReader", async () => {
 
       expect(await governance.getIssuersLength()).to.equal(4);
 
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,

@@ -210,9 +210,9 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _price price (Native Token Eth/Matic/etc...)
     function setAttributePriceFixed(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_pricePerAttributeETH[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
-        uint256 oldPrice = _pricePerAttributeETH[_attribute];
-        _pricePerAttributeETH[_attribute] = _price;
+        require(_pricePerAttributeFixed[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = _pricePerAttributeFixed[_attribute];
+        _pricePerAttributeFixed[_attribute] = _price;
 
         emit AttributePriceUpdatedETH(_attribute, oldPrice, _price);
     }
@@ -223,9 +223,9 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _price price (Native Token Eth/Matic/etc...)
     function setBusinessAttributePriceFixed(bytes32 _attribute, uint256 _price) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_pricePerBusinessAttributeETH[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
-        uint256 oldPrice = _pricePerBusinessAttributeETH[_attribute];
-        _pricePerBusinessAttributeETH[_attribute] = _price;
+        require(_pricePerBusinessAttributeFixed[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = _pricePerBusinessAttributeFixed[_attribute];
+        _pricePerBusinessAttributeFixed[_attribute] = _price;
 
         emit BusinessAttributePriceUpdatedETH(_attribute, oldPrice, _price);
     }
@@ -481,14 +481,14 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
     /// @dev Get query price for an attribute in eth
     /// @return attribute price for using getter in eth
-    function pricePerAttributeETH(bytes32 _value) override public view returns(uint256) {
-        return _pricePerAttributeETH[_value];
+    function pricePerAttributeFixed(bytes32 _value) override public view returns(uint256) {
+        return _pricePerAttributeFixed[_value];
     }
 
     /// @dev Get query price for an attribute given a business is asking (in eth)
     /// @return attribute price for using getter given a business is asking (in eth)
-    function pricePerBusinessAttributeETH(bytes32 _value) override public view returns(uint256) {
-        return _pricePerBusinessAttributeETH[_value];
+    function pricePerBusinessAttributeFixed(bytes32 _value) override public view returns(uint256) {
+        return _pricePerBusinessAttributeFixed[_value];
     }
 
     /// @dev Get an issuer at a certain index

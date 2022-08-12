@@ -11,7 +11,7 @@ import {
 } from "ethers/lib/utils";
 import { read } from "fs";
 import { assertGetAttributeExcluding, assertGetAttributeFreeExcluding } from "../utils/verify";
-import { assertGetAttributeETHWrapper, assertGetAttributeFreeWrapper } from "../utils/verify";
+import { assertGetAttributeFixedWrapper, assertGetAttributeFreeWrapper } from "../utils/verify";
 
 const {
   ATTRIBUTE_AML,
@@ -361,7 +361,7 @@ describe("QuadPassport", async () => {
       const expectedIssuedAts = [BigNumber.from(issuedAt), BigNumber.from(issuedAt)];
       const expectedIsBusinesses = [isBusiness, isBusiness];
 
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,
@@ -381,7 +381,7 @@ describe("QuadPassport", async () => {
         1,
         {}
       )
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,
@@ -389,7 +389,7 @@ describe("QuadPassport", async () => {
         expectedCOUNTRYs,
         expectedIssuedAts,
       );
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,
@@ -432,7 +432,7 @@ describe("QuadPassport", async () => {
         { newIssuerMint: true }
       );
 
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,
@@ -453,7 +453,7 @@ describe("QuadPassport", async () => {
         {}
       )
 
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,
@@ -462,7 +462,7 @@ describe("QuadPassport", async () => {
         expectedIssuedAts,
       );
 
-      await assertGetAttributeETHWrapper(
+      await assertGetAttributeFixedWrapper(
         minterA,
         defi,
         passport,
