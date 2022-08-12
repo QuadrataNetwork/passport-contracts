@@ -27,6 +27,20 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES = {
   [ATTRIBUTE_IS_BUSINESS]: 0
 };
 
+export const PRICE_PER_ATTRIBUTES_ETH = {
+  [ATTRIBUTE_AML]: 0,
+  [ATTRIBUTE_COUNTRY]: parseEther("0.001"),
+  [ATTRIBUTE_DID]: parseEther("0.002"),
+  [ATTRIBUTE_IS_BUSINESS]: 0
+};
+
+export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
+  [ATTRIBUTE_AML]: 0,
+  [ATTRIBUTE_COUNTRY]: parseEther("0.005"),
+  [ATTRIBUTE_DID]: parseEther("0.01"),
+  [ATTRIBUTE_IS_BUSINESS]: 0
+};
+
 export const PRICE_SET_ATTRIBUTE = {
   [ATTRIBUTE_AML]: parseEther("0.01"),
   [ATTRIBUTE_COUNTRY]: parseEther("0.01"),

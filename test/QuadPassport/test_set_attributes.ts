@@ -777,7 +777,7 @@ describe("QuadPassport", async () => {
     });
 
     it("success - mintPricePerAttribute(0)", async () => {
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
       await governance
         .connect(admin)
         .setAttributeMintPrice(ATTRIBUTE_AML, parseEther("0"));
@@ -811,7 +811,7 @@ describe("QuadPassport", async () => {
       expect(await ethers.provider.getBalance(passport.address)).to.equal(0);
 
       await expect(
-        passport.callStatic.withdrawETH(issuerTreasury.address)
+        passport.callStatic.withdraw(issuerTreasury.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
@@ -829,7 +829,7 @@ describe("QuadPassport", async () => {
         newIssuedAt
       );
 
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
 
       // Update AML with Issuer 2
       const sig = await signMint(
@@ -896,7 +896,7 @@ describe("QuadPassport", async () => {
     });
 
     it("succes - change issuer treasury", async () => {
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
       const newIssuerTreasury = ethers.Wallet.createRandom();
       await governance
         .connect(admin)
@@ -929,7 +929,7 @@ describe("QuadPassport", async () => {
       );
 
       await expect(
-        passport.withdrawETH(issuerTreasury.address)
+        passport.withdraw(issuerTreasury.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
@@ -1681,7 +1681,7 @@ describe("QuadPassport", async () => {
     });
 
     it("success - Individual setAttribute(AML=5)", async () => {
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
 
       const newAML = hexZeroPad('0x05', 32);
       const newIssuedAt = 1000;
@@ -1737,7 +1737,7 @@ describe("QuadPassport", async () => {
       );
 
       expect(await ethers.provider.getBalance(passport.address)).to.equal(initialBalance);
-      await expect(passport.withdrawETH(issuerTreasury.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+      await expect(passport.withdraw(issuerTreasury.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
     it("success - Business setAttribute(AML=5)", async () => {
@@ -1758,7 +1758,7 @@ describe("QuadPassport", async () => {
           value: MINT_PRICE,
         });
 
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
 
       const newAML = hexZeroPad('0x05', 32);
       const newIssuedAt = 1000;
@@ -1814,11 +1814,11 @@ describe("QuadPassport", async () => {
       );
 
       expect(await ethers.provider.getBalance(passport.address)).to.equal(initialBalance);
-      await expect(passport.withdrawETH(issuerTreasury.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
+      await expect(passport.withdraw(issuerTreasury.address)).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
     it("success - Individual setAttribute(COUNTRY)", async () => {
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
       const newCountry = id("DE");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const initialBalance = await ethers.provider.getBalance(passport.address);
@@ -1848,7 +1848,7 @@ describe("QuadPassport", async () => {
         initialBalance
       );
       await expect(
-        passport.withdrawETH(issuerTreasury.address)
+        passport.withdraw(issuerTreasury.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
@@ -1870,7 +1870,7 @@ describe("QuadPassport", async () => {
           value: MINT_PRICE,
         });
 
-      await passport.withdrawETH(issuerTreasury.address);
+      await passport.withdraw(issuerTreasury.address);
       const newCountry = id("DE");
       const newIssuedAt = Math.floor(new Date().getTime() / 1000);
       const initialBalance = await ethers.provider.getBalance(passport.address);
@@ -1900,7 +1900,7 @@ describe("QuadPassport", async () => {
         initialBalance
       );
       await expect(
-        passport.withdrawETH(issuerTreasury.address)
+        passport.withdraw(issuerTreasury.address)
       ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
     it("success - setAttribute(IS_BUSINESS) Business", async () => {

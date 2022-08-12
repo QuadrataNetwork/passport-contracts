@@ -48,7 +48,7 @@ export const assertMint = async (
   var initialIssuerBalance = ethers.BigNumber.from(0);
   // Cannot assume the eth within passport contract belongs to the current issuer
   try {
-    initialIssuerBalance = await passport.connect(issuer).callStatic.withdrawETH(issuerTreasury.address);
+    initialIssuerBalance = await passport.connect(issuer).callStatic.withdraw(issuerTreasury.address);
   } catch { }
 
   await passport
@@ -63,7 +63,7 @@ export const assertMint = async (
   );
 
   expect(
-    await passport.connect(issuer).callStatic.withdrawETH(issuerTreasury.address)
+    await passport.connect(issuer).callStatic.withdraw(issuerTreasury.address)
   ).to.equal(MINT_PRICE.add(initialIssuerBalance));
 
 };
@@ -136,7 +136,7 @@ export const assertGetAttribute = async (
     await passport.withdrawToken(issuerTreasury.address, paymentToken.address);
   } catch (err) { }
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
-  const priceAttributeETH = await reader.calculatePayment(attribute, account.address)
+  const priceAttributeFixed = await reader.calculatePayment(attribute, account.address)
   expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Retrieve initialBalances
@@ -156,7 +156,7 @@ export const assertGetAttribute = async (
 
   if (opts?.mockBusiness) {
     await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
-    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeETH }))
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeFixed }))
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(expectedAttributeValue, expectedIssuedAt);
   } else {
@@ -215,7 +215,7 @@ export const assertGetAttribute = async (
 };
 
 
-export const assertGetAttributeETH = async (
+export const assertGetAttributeFixed = async (
   account: SignerWithAddress,
   defi: Contract,
   passport: Contract,
@@ -246,7 +246,7 @@ export const assertGetAttributeETH = async (
   );
 };
 
-export const assertGetAttributeETHWrapper = async (
+export const assertGetAttributeFixedWrapper = async (
   account: SignerWithAddress,
   defi: Contract,
   passport: Contract,
@@ -264,7 +264,7 @@ export const assertGetAttributeETHWrapper = async (
 
 }
 
-export const assertGetAttributeETHExcluding = async (
+export const assertGetAttributeFixedExcluding = async (
   account: SignerWithAddress,
   excludedIssuers: string[],
   defi: Contract,
@@ -282,11 +282,12 @@ export const assertGetAttributeETHExcluding = async (
   await checkFinalValuesETH(provider, account, initialBalance, priceAttribute, passport, initialBalancePassport);
 };
 
-export const assertGetAttributeETHIncluding = async (
+export const assertGetAttributeFixedIncluding = async (
   account: SignerWithAddress,
   includedIssuers: string[],
   defi: Contract,
   passport: Contract,
+  reader: Contract,
   attribute: string,
   expectedAttributeValue: any[],
   expectedIssuedAt: BigNumber[],
@@ -294,9 +295,8 @@ export const assertGetAttributeETHIncluding = async (
 ) => {
 
   const provider = defi.provider;
-  const priceAttribute = parseEther(
-    (PRICE_PER_ATTRIBUTES[attribute] / 4000).toString()
-  );
+  const priceAttribute = await reader.calculatePayment(attribute, account.address)
+
   expect(priceAttribute).to.not.equal(parseEther("0"));
 
   // Test with potential actual transfer of Token
@@ -337,7 +337,7 @@ export const assertSetAttribute = async (
   const initialBalance = await passport.provider.getBalance(passport.address);
   const initialBalanceIssuer = initialBalance.eq(0)
     ? initialBalance
-    : await passport.callStatic.withdrawETH(issuerTreasury.address);
+    : await passport.callStatic.withdraw(issuerTreasury.address);
 
   await passport
     .connect(opts?.signer || account)
@@ -349,7 +349,7 @@ export const assertSetAttribute = async (
     initialBalance.add(PRICE_SET_ATTRIBUTE[attribute])
   );
   expect(
-    await passport.callStatic.withdrawETH(issuerTreasury.address)
+    await passport.callStatic.withdraw(issuerTreasury.address)
   ).to.equal(PRICE_SET_ATTRIBUTE[attribute].add(initialBalanceIssuer));
 };
 
@@ -459,7 +459,7 @@ export const assertGetAttributeWrapper  = async (
   tokenId: number = TOKEN_ID,
   opts: any
 ) => {
-  var { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts, defi);
+  var { priceAttribute, priceAttributeFixed, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts, defi);
   await expect(
     defi.connect(opts?.signer || account).doSomethingWrapper(attribute, paymentToken.address)
   ).to.emit(defi, "GetAttributeEvents").withArgs(expectedAttributeValue, expectedIssuedAt);
@@ -486,11 +486,11 @@ export const assertGetAttributeExcluding = async (
   opts: any
 ) => {
 
-  var { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts, defi);
+  var { priceAttribute, priceAttributeFixed, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury } = await getInitialValuesToken(passport, treasury, paymentToken, expectedIssuers, governance, reader, attribute, account, opts, defi);
 
   if (opts?.mockBusiness) {
     await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
-    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeETH }))
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeFixed }))
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(expectedAttributeValue, expectedIssuedAt);
   } else {
@@ -533,7 +533,7 @@ export const assertGetAttributeIncluding = async (
   }
 
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address)
-  const priceAttributeETH = await reader.calculatePayment(attribute, account.address)
+  const priceAttributeFixed = await reader.calculatePayment(attribute, account.address)
   if(!opts?.assertFree)
     expect(priceAttribute).to.not.equal(parseEther("0"));
 
@@ -563,7 +563,7 @@ export const assertGetAttributeIncluding = async (
 
   if (opts?.mockBusiness) {
     await paymentToken.connect(opts?.signer).transfer(account.address, priceAttribute)
-    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeETH }))
+    await expect(opts?.mockBusiness.connect(opts?.signer || account).doSomethingAsBusiness(attribute, { value: priceAttributeFixed }))
       .to.emit(defi, "GetAttributeEvent")
       .withArgs(expectedAttributeValue, expectedIssuedAt);
   } else {
@@ -594,7 +594,7 @@ async function getInitialValuesToken(passport: Contract, treasury: SignerWithAdd
   }
 
   const priceAttribute = await reader.calculatePaymentToken(attribute, paymentToken.address, account.address);
-  const priceAttributeETH = await reader.calculatePayment(attribute, account.address);
+  const priceAttributeFixed = await reader.calculatePayment(attribute, account.address);
   if (!opts?.assertFree)
     expect(priceAttribute).to.not.equal(parseEther("0"));
 
@@ -621,7 +621,7 @@ async function getInitialValuesToken(passport: Contract, treasury: SignerWithAdd
   // GetAttribute function
   await paymentToken.connect(opts?.signer || account).approve(defi.address, priceAttribute);
   expect(await paymentToken.allowance((opts?.signer || account).address, defi.address)).to.equal(priceAttribute);
-  return { priceAttribute, priceAttributeETH, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury };
+  return { priceAttribute, priceAttributeFixed, initialBalance, initialBalancePassport, i, initialBalanceIssuers, expectedTreasuries, initialBalanceIssuerTreasuries, initialBalanceProtocolTreasury };
 }
 
 async function checkFinalValuesFree(passport: Contract, initialBalancePassport: BigNumber) {

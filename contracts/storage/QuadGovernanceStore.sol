@@ -49,4 +49,7 @@ contract QuadGovernanceStore {
     Issuer[] internal _issuers;
     mapping(address => uint256) internal _issuerIndices;
 
+    mapping(bytes32 => uint256) internal _pricePerBusinessAttributeFixed;
+    mapping(bytes32 => uint256) internal _pricePerAttributeFixed;
+
 }

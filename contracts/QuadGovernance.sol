@@ -16,6 +16,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     event AllowTokenPayment(address indexed _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event AttributePriceUpdatedFixed(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
+    event BusinessAttributePriceUpdatedFixed(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
@@ -202,6 +204,31 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit BusinessAttributePriceUpdated(_attribute, oldPrice, _price);
     }
 
+    /// @dev Set the price for querying a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (Native Token Eth/Matic/etc...)
+    function setAttributePriceFixed(bytes32 _attribute, uint256 _price) override external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_pricePerAttributeFixed[_attribute] != _price, "ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = _pricePerAttributeFixed[_attribute];
+        _pricePerAttributeFixed[_attribute] = _price;
+
+        emit AttributePriceUpdatedFixed(_attribute, oldPrice, _price);
+    }
+
+    /// @dev Set the business attribute price for querying a single attribute after owning a passport
+    /// @notice Restricted behind a TimelockController
+    /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
+    /// @param _price price (Native Token Eth/Matic/etc...)
+    function setBusinessAttributePriceFixed(bytes32 _attribute, uint256 _price) override external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_pricePerBusinessAttributeFixed[_attribute] != _price, "KYB_ATTRIBUTE_PRICE_ALREADY_SET");
+        uint256 oldPrice = _pricePerBusinessAttributeFixed[_attribute];
+        _pricePerBusinessAttributeFixed[_attribute] = _price;
+
+        emit BusinessAttributePriceUpdatedFixed(_attribute, oldPrice, _price);
+    }
 
     /// @dev Set the price to update/set a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
@@ -450,6 +477,18 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @return attribute price for using getter given a business is asking
     function pricePerBusinessAttribute(bytes32 _value) override public view returns(uint256) {
         return _pricePerBusinessAttribute[_value];
+    }
+
+    /// @dev Get query price for an attribute in eth
+    /// @return attribute price for using getter in eth
+    function pricePerAttributeFixed(bytes32 _value) override public view returns(uint256) {
+        return _pricePerAttributeFixed[_value];
+    }
+
+    /// @dev Get query price for an attribute given a business is asking (in eth)
+    /// @return attribute price for using getter given a business is asking (in eth)
+    function pricePerBusinessAttributeFixed(bytes32 _value) override public view returns(uint256) {
+        return _pricePerBusinessAttributeFixed[_value];
     }
 
     /// @dev Get an issuer at a certain index

@@ -483,7 +483,7 @@ import "./storage/QuadGovernanceStore.sol";
         return amountToken;
     }
 
-    /// @dev Calculate the amount of $ETH required to call `getAttributeETH`
+    /// @dev Calculate the amount of $ETH required to call `getAttributeFixed`
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @param _account account getting requested for attributes
     /// @return the amount of $ETH necessary to query the attribute
@@ -491,10 +491,7 @@ import "./storage/QuadGovernanceStore.sol";
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {
-        uint256 tokenPrice = governance.getPriceETH();
-        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
-        uint256 amountETH = (price * 1e18 / tokenPrice) ;
-        return amountETH;
+        return _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttributeFixed(_attribute) : governance.pricePerAttributeFixed(_attribute);
     }
 
     /// @dev Used to determine if issuer has returned something useful

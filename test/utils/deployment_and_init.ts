@@ -1,6 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
-import { id } from "ethers/lib/utils";
+import { id, parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const {
@@ -8,6 +8,13 @@ const {
   deployGovernance,
   deployReader
 } = require("../../utils/deployment.ts");
+
+const {
+  ATTRIBUTE_DID,
+  PRICE_PER_ATTRIBUTES_ETH,
+  ATTRIBUTE_COUNTRY,
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH
+} = require("../../utils/constant.ts")
 
 export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
@@ -29,6 +36,12 @@ export const deployPassportEcosystem = async (
   // Deploy Passport
   const passport = await deployPassport(governance, uri);
   await governance.connect(admin).setPassportContractAddress(passport.address);
+
+  await governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_DID, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
+  await governance.connect(admin).setAttributePriceFixed(ATTRIBUTE_COUNTRY, PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
+
+  await governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_DID, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]);
+  await governance.connect(admin).setBusinessAttributePriceFixed(ATTRIBUTE_COUNTRY, PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]);
 
   // Deploy Reader
   const reader = await deployReader(governance, passport);

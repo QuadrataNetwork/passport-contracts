@@ -80,7 +80,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
 
         (bytes32 hash, address issuer) = _verifySignersMint(_config, _sigIssuer, _sigAccount);
 
-        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPrice();
+        _accountBalances[governance.issuersTreasury(issuer)] += governance.mintPrice();
         _usedHashes[hash] = true;
         _attributes[_config.account][keccak256("COUNTRY")][issuer] = Attribute({value: _config.country, epoch: _config.issuedAt});
         _attributes[_config.account][keccak256("DID")][issuer] = Attribute({value: _config.quadDID, epoch: _config.issuedAt});
@@ -113,7 +113,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         require(_issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         (bytes32 hash, address issuer) = _verifyIssuerSetAttr(_account, _tokenId, _attribute, _value, _issuedAt, _sig);
-        _accountBalancesETH[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
+        _accountBalances[governance.issuersTreasury(issuer)] += governance.mintPricePerAttribute(_attribute);
         _usedHashes[hash] = true;
         _setAttributeInternal(_account, _tokenId, _attribute, _value, _issuedAt, issuer);
     }
@@ -298,11 +298,11 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @dev Allow an issuer's treasury or the Quadrata treasury to withdraw $ETH
     /// @param _to address of either an issuer's treasury or the Quadrata treasury
     /// @return the amount of $ETH withdrawn
-    function withdrawETH(address payable _to) external override returns(uint256) {
+    function withdraw(address payable _to) external override returns(uint256) {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
-       uint256 currentBalance = _accountBalancesETH[_to];
+       uint256 currentBalance = _accountBalances[_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
-       _accountBalancesETH[_to] = 0;
+       _accountBalances[_to] = 0;
        (bool sent,) = _to.call{value: currentBalance}("");
        require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
        return currentBalance;
@@ -314,9 +314,9 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
     /// @return the amount of ERC20 withdrawn
     function withdrawToken(address payable _to, address _token) external override returns(uint256) {
        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
-       uint256 currentBalance = _accountBalances[_token][_to];
+       uint256 currentBalance = _accountBalancesToken[_token][_to];
        require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
-       _accountBalances[_token][_to] = 0;
+       _accountBalancesToken[_token][_to] = 0;
         IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
        erc20.safeTransfer(_to, currentBalance);
        return currentBalance;
@@ -384,7 +384,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _amount
     ) public override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        _accountBalancesETH[_account] += _amount;
+        _accountBalances[_account] += _amount;
     }
 
     /// @dev Increase balance of account
@@ -396,7 +396,7 @@ contract QuadPassport is IQuadPassport, ERC1155Upgradeable, UUPSUpgradeable, Qua
         uint256 _amount
     ) public override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        _accountBalances[_token][_account] += _amount;
+        _accountBalancesToken[_token][_account] += _amount;
     }
 
     function _authorizeUpgrade(address) internal view override {

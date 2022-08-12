@@ -22,6 +22,10 @@ interface IQuadGovernance {
 
     function setBusinessAttributePrice(bytes32 _attribute, uint256 _price) external;
 
+    function setAttributePriceFixed(bytes32 _attribute, uint256 _price) external;
+
+    function setBusinessAttributePriceFixed(bytes32 _attribute, uint256 _price) external;
+
     function setAttributeMintPrice(bytes32 _attribute, uint256 _price) external;
 
      function setOracle(address _oracleAddr) external;
@@ -60,6 +64,10 @@ interface IQuadGovernance {
     function pricePerAttribute(bytes32) external view returns(uint256);
 
     function pricePerBusinessAttribute(bytes32) external view returns(uint256);
+
+    function pricePerAttributeFixed(bytes32) external view returns(uint256);
+
+    function pricePerBusinessAttributeFixed(bytes32) external view returns(uint256);
 
     function revSplitIssuer() external view returns (uint256);
 
