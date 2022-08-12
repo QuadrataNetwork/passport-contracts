@@ -58,8 +58,8 @@ contract QuadPassportStore {
 
     // Accounting
     // ERC20 => Account => balance
-    mapping(address => mapping(address => uint256)) internal _accountBalances;
-    mapping(address => uint256) internal _accountBalancesETH;
+    mapping(address => mapping(address => uint256)) internal _accountBalancesToken;
+    mapping(address => uint256) internal _accountBalances;
 
 
     string public symbol;
