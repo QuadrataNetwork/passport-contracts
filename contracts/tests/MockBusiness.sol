@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./DeFi.sol";
-import "../interfaces/IQuadPassport.sol";
+import "../v2/interfaces/IQuadPassport.sol";
 
 contract MockBusiness {
 
@@ -12,15 +12,15 @@ contract MockBusiness {
         defi = DeFi(_defi);
     }
 
-    function doSomethingAsBusiness(bytes32 _attribute) public payable returns(bytes32,uint256) {
-        return defi.doSomethingETH{value: msg.value}(_attribute);
-    }
+    // function doSomethingAsBusiness(bytes32 _attribute) public payable returns(bytes32,uint256) {
+    //     return defi.doSomethingETH{value: msg.value}(_attribute);
+    // }
 
-    function burn() public {
-        burnPassport(1);
-    }
+    // function burn() public {
+    //     burnPassport(1);
+    // }
 
-    function burnPassport(uint256 _tokenId) public {
-        IQuadPassport(defi.passport()).burnPassport(_tokenId);
-    }
+    // function burnPassport(uint256 _tokenId) public {
+    //     IQuadPassport(defi.passport()).burnPassport(_tokenId);
+    // }
 }

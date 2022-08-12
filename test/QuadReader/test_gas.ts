@@ -9,76 +9,25 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
-  TOKEN_ID,
 } = require("../../utils/constant.ts");
 
-const { deployPassportEcosystem } = require("../utils/deployment_and_init.ts");
+const {
+  deployPassportEcosystem,
+} = require("../helpers/deployment_and_init.ts");
 
-const { signMint, signMessage } = require("../utils/signature.ts");
-
-const setAttributeOptimized = async (
-  minter: SignerWithAddress,
-  issuer: SignerWithAddress,
-  passport: Contract,
-  attributes: any,
-  issuedAt: number,
-  price: any
-) => {
-  let attrKeys: string[] = [];
-  let attrValues: string[] = [];
-
-  Object.keys(attributes).forEach((k, i) => {
-    let attrKey;
-    if (k === ATTRIBUTE_AML) {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["bytes32", "bytes32"],
-          [attributes[ATTRIBUTE_DID], k]
-        )
-      );
-    } else {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["address", "bytes32"],
-          [minter.address, k]
-        )
-      );
-    }
-    attrKeys.push(attrKey);
-    attrValues.push(attributes[k]);
-  });
-
-  const hash = ethers.utils.keccak256(
-    ethers.utils.defaultAbiCoder.encode(
-      ["address", "bytes32[]", "bytes32[]", "uint256", "uint256"],
-      [minter.address, attrKeys, attrValues, issuedAt, price]
-    )
-  );
-
-  const sig = await issuer.signMessage(ethers.utils.arrayify(hash));
-
-  const sigAccount = await minter.signMessage(
-    ethers.utils.arrayify(ethers.utils.id("Quadrata"))
-  );
-
-  await passport
-    .connect(minter)
-    .mintPassport2([attrKeys, attrValues, issuedAt, price], sig, sigAccount, {
-      value: price,
-    });
-};
+const { setAttributes } = require("../helpers/set_attributes.ts");
 
 describe("QuadReader", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
-  let usdc: Contract;
+  let usdc: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
     minterA: SignerWithAddress,
-    minterB: SignerWithAddress,
+    minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
     issuerB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuerC: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -87,20 +36,11 @@ describe("QuadReader", async () => {
     issuerCTreasury: SignerWithAddress; // eslint-disable-line no-unused-vars
 
   let baseURI: string;
-  let did: string;
-  let aml: string;
-  let country: string;
-  let isBusiness: string;
   let issuedAt: number;
+  let attributes: Object;
 
   beforeEach(async () => {
     baseURI = "https://quadrata.io";
-    did = formatBytes32String("did:quad:123456789abcdefghi");
-    aml = id("LOW");
-    country = id("FRANCE");
-    isBusiness = id("FALSE");
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-
     [
       deployer,
       admin,
@@ -122,103 +62,79 @@ describe("QuadReader", async () => {
       baseURI
     );
 
-    const sig = await signMint(
-      issuer,
-      minterA,
-      TOKEN_ID,
-      did,
-      aml,
-      country,
-      isBusiness,
-      issuedAt
-    );
-    const sigAccount = await signMessage(minterA, minterA.address);
-    await passport
-      .connect(minterA)
-      .mintPassport(
-        [minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt],
-        sig,
-        sigAccount,
-        {
-          value: MINT_PRICE,
-        }
-      );
-
-    const attributes = {
-      [ATTRIBUTE_DID]: did,
-      [ATTRIBUTE_AML]: aml,
-      [ATTRIBUTE_COUNTRY]: country,
-      [ATTRIBUTE_IS_BUSINESS]: isBusiness,
+    attributes = {
+      [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
+      [ATTRIBUTE_AML]: formatBytes32String("1"),
+      [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+      [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
     };
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
-    const price = MINT_PRICE;
-
-    await setAttributeOptimized(
+    await setAttributes(
       minterA,
       issuer,
       passport,
       attributes,
       issuedAt,
-      price
+      MINT_PRICE
     );
   });
 
   describe("calculate Gas - 1 issuer | 4 attributes", async () => {
-    const attributes = [
+    const attributeToQuery = [
       ATTRIBUTE_DID,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
       ATTRIBUTE_AML,
     ];
 
-    it("getAttributes(directly) - old", async () => {
+    it("getAttributes", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader.queryFee(minterA.address, attribute);
+      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+        value: fee,
+      });
+    });
+
+    it("getAttributes (Legacy)", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader.queryFee(minterA.address, attribute);
       await reader
         .connect(minterA)
-        .getAttributes(minterA.address, 1, ATTRIBUTE_COUNTRY, {
-          value: ethers.utils.parseEther("1"),
+        .getAttributesLegacy(minterA.address, attribute, {
+          value: fee,
         });
     });
 
-    it("getAttributes(directly) - optimized", async () => {
+    it("getAttributesBulk (Legacy)", async () => {
+      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
         .connect(minterA)
-        .getAttributes2(minterA.address, 1, ATTRIBUTE_AML, {
-          value: ethers.utils.parseEther("1"),
+        .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
+          value: fee,
         });
     });
 
-    it("getAttributes Old", async () => {
-      await defi.connect(minterA).queryMultipleAttributes(attributes, {
+    it("getAttributes (DeFi)", async () => {
+      await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
         value: ethers.utils.parseEther("1"),
       });
     });
 
-    it("getAttribute Optimized", async () => {
-      await defi.connect(minterA).queryMultipleAttributes2(attributes, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
-
-    it("getAttributesBulk", async () => {
-      await defi.connect(minterA).queryMultipleBulk(attributes, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
-    it("getAttributesBulk Optimized", async () => {
-      await defi.connect(minterA).queryMultipleBulk2(attributes, {
+    it("getAttributesBulk (DeFi)", async () => {
+      await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
         value: ethers.utils.parseEther("1"),
       });
     });
   });
 
   describe("calculate Gas - 3 issuers | 4 attributes", async () => {
-    const attributes = [
+    const attributeToQuery = [
       ATTRIBUTE_DID,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
       ATTRIBUTE_AML,
     ];
-
     beforeEach(async () => {
       await governance
         .connect(admin)
@@ -227,88 +143,52 @@ describe("QuadReader", async () => {
         .connect(admin)
         .setIssuer(issuerC.address, issuerCTreasury.address);
       for (const iss of [issuerB, issuerC]) {
-        const sig = await signMint(
-          iss,
-          minterA,
-          TOKEN_ID,
-          did,
-          aml,
-          country,
-          isBusiness,
-          issuedAt
-        );
-        const sigAccount = await signMessage(minterA, minterA.address);
-        await passport
-          .connect(minterA)
-          .mintPassport(
-            [
-              minterA.address,
-              TOKEN_ID,
-              did,
-              aml,
-              country,
-              isBusiness,
-              issuedAt,
-            ],
-            sig,
-            sigAccount,
-            {
-              value: MINT_PRICE,
-            }
-          );
-        const attributesDict = {
-          [ATTRIBUTE_DID]: did,
-          [ATTRIBUTE_AML]: aml,
-          [ATTRIBUTE_COUNTRY]: country,
-          [ATTRIBUTE_IS_BUSINESS]: isBusiness,
-        };
-
-        await setAttributeOptimized(
+        await setAttributes(
           minterA,
           iss,
           passport,
-          attributesDict,
+          attributes,
           issuedAt,
           MINT_PRICE
         );
       }
     });
-    it("getAttributes(directly) - old", async () => {
+
+    it("getAttributes", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader.queryFee(minterA.address, attribute);
+      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+        value: fee,
+      });
+    });
+
+    it("getAttributes (Legacy)", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader.queryFee(minterA.address, attribute);
       await reader
         .connect(minterA)
-        .getAttributes(minterA.address, 1, ATTRIBUTE_COUNTRY, {
-          value: ethers.utils.parseEther("1"),
+        .getAttributesLegacy(minterA.address, attribute, {
+          value: fee,
         });
     });
 
-    it("getAttributes(directly) - optimized", async () => {
+    it("getAttributesBulk (Legacy)", async () => {
+      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
         .connect(minterA)
-        .getAttributes2(minterA.address, 1, ATTRIBUTE_COUNTRY, {
-          value: ethers.utils.parseEther("1"),
+        .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
+          value: fee,
         });
     });
 
-    it("getAttribute(through DeFi) Old", async () => {
-      await defi.connect(minterA).queryMultipleAttributes(attributes, {
+    it("getAttributes (DeFi)", async () => {
+      await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
         value: ethers.utils.parseEther("1"),
       });
     });
 
-    it("getAttribute Optimized", async () => {
-      await defi.connect(minterA).queryMultipleAttributes2(attributes, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
-
-    it("getAttributesBulk", async () => {
-      await defi.connect(minterA).queryMultipleBulk(attributes, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
-
-    it("getAttributesBulk", async () => {
-      await defi.connect(minterA).queryMultipleBulk2(attributes, {
+    it("getAttributesBulk (DeFi)", async () => {
+      await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
         value: ethers.utils.parseEther("1"),
       });
     });

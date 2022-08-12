@@ -13,17 +13,13 @@ import "./interfaces/IQuadReader.sol";
 import "./storage/QuadReaderStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./storage/QuadGovernanceStore.sol";
-import "hardhat/console.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is IQuadReader, UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadReaderStore {
-     bytes32 constant ATTRIBUTE_IS_BUSINESS = 0xaf369ce728c816785c72f1ff0222ca9553b2cb93729d6a803be6af0d2369239b;
+ contract QuadReaderV1 is IQuadReader, UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadReaderStore {
      using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-     event QueryEvent(address indexed _account, address indexed _source, bytes32 _attribute);
-     event QueryFeeReceipt(address indexed _issuer, uint256 _fee);
 
     constructor() initializer {
         // used to prevent logic contract self destruct take over
@@ -120,7 +116,7 @@ import "hardhat/console.sol";
             address[] memory issuers
         ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
 
-        // _doETHPayments(_attribute, issuers, _account);
+        _doETHPayments(_attribute, issuers, _account);
 
         return (attributes, epochs, issuers);
     }
@@ -423,9 +419,8 @@ import "hardhat/console.sol";
     ) internal nonReentrant {
         uint256 amountETH = calculatePayment(_attribute, _account);
         if (amountETH > 0) {
-            // TODO: Fix
             require(
-                 msg.value >= amountETH,
+                 msg.value == amountETH,
                 "INSUFFICIENT_PAYMENT_AMOUNT"
             );
 
@@ -555,102 +550,5 @@ import "hardhat/console.sol";
                 return false;
         }
         return true;
-    }
-
-    function getAttributes2(
-        address _account, uint256 _tokenId, bytes32 _attribute
-    ) external payable returns(QuadPassportStore.Attribute[] memory attributes) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-
-        attributes = passport.attributes2(_account, _attribute);
-        console.log(attributes.length);
-        console.log(attributes[0].issuer);
-
-        uint256 fee = passport.attributes2(_account, ATTRIBUTE_IS_BUSINESS)[0].value == keccak256("TRUE") ? governance.pricePerBusinessAttributeETH(_attribute) : governance.pricePerAttributeETH(_attribute);
-        if (fee > 0) {
-            // TODO: FIX to strict equal
-            require(msg.value >= fee, "INVALID_QUERY_FEE");
-            uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
-
-            // (bool sent,) = payable(address(passport)).call{value: fee}("");
-            // require(sent, "FAILED_TO_SEND_PAYMENT");
-            console.log(feeIssuer);
-
-            for (uint256 i = 0; i < attributes.length; i++) {
-                emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
-                // passport.increaseAccountBalanceETH(governance.issuersTreasury(attributes[i].issuer), feeIssuer);
-            }
-            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer);
-            // passport.increaseAccountBalanceETH(governance.treasury(), fee - feeIssuer);
-        }
-        emit QueryEvent(_account, msg.sender, _attribute);
-    }
-
-    function getAttributesBulk(
-        address _account, uint256 _tokenId, bytes32[] calldata _attributes
-    ) external payable returns(QuadPassportStore.Attribute[] memory) {
-        QuadPassportStore.Attribute[] memory attributes = new QuadPassportStore.Attribute[](_attributes.length);
-        uint256 totalFee;
-        uint256 totalFeeIssuer;
-        bool isBusiness = passport.attributes2(_account, ATTRIBUTE_IS_BUSINESS)[0].value == keccak256("TRUE");
-
-        for (uint256 i = 0; i < _attributes.length; i++) {
-            uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeETH(_attributes[i]) : governance.pricePerAttributeETH(_attributes[i]);
-            totalFee += attrFee;
-            _validateAttributeQuery(_account, _tokenId, _attributes[i]);
-
-            (
-                bytes32[] memory attrValues,
-                uint256[] memory epoch,
-                address[] memory issuer
-            ) = _applyFilter(_account, _attributes[i], _excludedIssuers(new address[](0)));
-
-            attributes[i] = QuadPassportStore.Attribute({
-                value: attrValues[0],
-                epoch: epoch[0],
-                issuer: issuer[0]
-            });
-
-            uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-            totalFeeIssuer += feeIssuer;
-            emit QueryFeeReceipt(governance.issuersTreasury(attributes[i].issuer), feeIssuer);
-            // passport.increaseAccountBalanceETH(governance.issuersTreasury(attributes[i].issuer), feeIssuer);
-        }
-        // passport.increaseAccountBalanceETH(governance.treasury(), totalFee - totalFeeIssuer);
-        emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
-        require(msg.value >= totalFee," INVALID_QUERY_FEE");
-
-        // (bool sent,) = payable(address(passport)).call{value: totalFee}("");
-        // require(sent, "FAILED_TO_SEND_PAYMENT");
-        return attributes;
-    }
-
-    function getAttributesBulk2(
-        address _account, uint256 _tokenId, bytes32[] calldata _attributes
-    ) external payable returns(QuadPassportStore.Attribute[] memory) {
-        QuadPassportStore.Attribute[] memory attributes = new QuadPassportStore.Attribute[](_attributes.length);
-        uint256 totalFee;
-        uint256 totalFeeIssuer;
-        bool isBusiness = passport.attributes2(_account, ATTRIBUTE_IS_BUSINESS)[0].value == keccak256("TRUE");
-
-        for (uint256 i = 0; i < _attributes.length; i++) {
-            uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeETH(_attributes[i]) : governance.pricePerAttributeETH(_attributes[i]);
-            totalFee += attrFee;
-            _validateAttributeQuery(_account, _tokenId, _attributes[i]);
-            QuadPassportStore.Attribute memory attr = passport.attributes2(_account, _attributes[i])[0];
-            attributes[i] = attr;
-
-            uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-            totalFeeIssuer += feeIssuer;
-            emit QueryFeeReceipt(governance.issuersTreasury(attr.issuer), feeIssuer);
-            // passport.increaseAccountBalanceETH(governance.issuersTreasury(attr.issuer), feeIssuer);
-        }
-        // passport.increaseAccountBalanceETH(governance.treasury(), totalFee - totalFeeIssuer);
-        emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
-        require(msg.value >= totalFee," INVALID_QUERY_FEE");
-
-        // (bool sent,) = payable(address(passport)).call{value: totalFee}("");
-        // require(sent, "FAILED_TO_SEND_PAYMENT");
-        return attributes;
     }
  }

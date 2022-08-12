@@ -12,7 +12,7 @@ import "./storage/QuadGovernanceStore.sol";
 /// @title Governance Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All admin functions to govern the QuadPassport contract
-contract QuadGovernanceV1 is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
+contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
     event AllowTokenPayment(address indexed _tokenAddr, bool _isAllowed);
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);

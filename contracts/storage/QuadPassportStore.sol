@@ -9,7 +9,6 @@ contract QuadPassportStore {
     struct Attribute {
         bytes32 value;
         uint256 epoch;
-        address issuer;
     }
 
     /// @dev MintConfig is defined to prevent 'stack frame too deep' during compilation
@@ -29,14 +28,6 @@ contract QuadPassportStore {
         bytes32 country;
         bytes32 isBusiness;
         uint256 issuedAt;
-    }
-
-
-    struct AttributeSetterConfig {
-        bytes32[] attrKeys;
-        bytes32[] attrValues;
-        uint256 issuedAt;
-        uint256 price;
     }
 
 
@@ -64,14 +55,4 @@ contract QuadPassportStore {
 
     string public symbol;
     string public name;
-
-    // Key could be:
-    // 1) keccak256(userAddress, keccak256(attrType))
-    // 2) keccak256(DID, keccak256(attrType))
-    mapping(bytes32 => Attribute[]) internal _attributes2;
-
-    // Key could be:
-    // 1) keccak256(userAddress, keccak256(attrType), issuer)
-    // 1) keccak256(DID, keccak256(attrType), issuer)
-    mapping(bytes32 => uint256) internal _position;
 }

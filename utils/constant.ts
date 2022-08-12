@@ -54,3 +54,7 @@ export const ISSUER_STATUS = {
 
 export const MINT_PRICE = parseEther("0.003");
 export const ISSUER_SPLIT = 50;
+
+export const DIGEST_TO_SIGN = ethers.utils.id("Quadrata");
+
+export const HARDHAT_CHAIN_ID = 31337;
