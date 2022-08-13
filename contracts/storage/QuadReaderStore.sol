@@ -4,10 +4,9 @@ pragma solidity 0.8.4;
 import "../interfaces/IQuadPassport.sol";
 import "../interfaces/IQuadGovernance.sol";
 
-contract QuadReaderStore {
+import "./QuadConstant.sol";
 
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-
+contract QuadReaderStore is QuadConstant{
     IQuadGovernance public governance;
     IQuadPassport public passport;
 

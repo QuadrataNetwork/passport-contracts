@@ -21,7 +21,6 @@ describe("QuadReader", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
-  let usdc: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
@@ -35,12 +34,10 @@ describe("QuadReader", async () => {
     issuerBTreasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuerCTreasury: SignerWithAddress; // eslint-disable-line no-unused-vars
 
-  let baseURI: string;
   let issuedAt: number;
   let attributes: Object;
 
   beforeEach(async () => {
-    baseURI = "https://quadrata.io";
     [
       deployer,
       admin,
@@ -54,12 +51,11 @@ describe("QuadReader", async () => {
       issuerC,
       issuerCTreasury,
     ] = await ethers.getSigners();
-    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
+    [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
       [issuer],
       treasury,
-      [issuerTreasury],
-      baseURI
+      [issuerTreasury]
     );
 
     attributes = {
@@ -138,10 +134,10 @@ describe("QuadReader", async () => {
     beforeEach(async () => {
       await governance
         .connect(admin)
-        .setIssuer(issuerB.address, issuerBTreasury.address);
+        .addIssuer(issuerB.address, issuerBTreasury.address);
       await governance
         .connect(admin)
-        .setIssuer(issuerC.address, issuerCTreasury.address);
+        .addIssuer(issuerC.address, issuerCTreasury.address);
       for (const iss of [issuerB, issuerC]) {
         await setAttributes(
           minterA,

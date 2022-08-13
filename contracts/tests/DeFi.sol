@@ -4,9 +4,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-import "../v2/interfaces/IQuadPassport.sol";
-import "../v2/storage/QuadPassportStore.sol";
-import "../v2/QuadReader.sol";
+import "../interfaces/IQuadPassport.sol";
+import "../storage/QuadPassportStore.sol";
+import "../QuadReader.sol";
 
 contract DeFi {
     event GetAttributeEvent(bytes32 _value, uint256 _epoch);

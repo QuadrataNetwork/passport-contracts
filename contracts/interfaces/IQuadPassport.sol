@@ -1,33 +1,31 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.4;
 
-import "../ERC1155/IERC1155Upgradeable.sol";
 import "../storage/QuadPassportStore.sol";
+import "./IQuadSoulbound.sol";
 
-interface IQuadPassport is IERC1155Upgradeable {
+interface IQuadPassport is IQuadSoulbound {
 
-    function mintPassport(
-        QuadPassportStore.MintConfig calldata config,
+    /// @notice Set attributes for a Quadrata Passport (Only Individuals)
+    /// @dev Only when authorized by an eligible issuer
+    /// @param _config Input paramters required to set attributes
+    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
+    /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
+    function setAttributes(
+        QuadPassportStore.AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable;
 
-    function setAttribute(
+    /// @notice Set attributes for a Quadrata Passport (only by Issuers)
+    /// @param _account Address of the Quadrata Passport holder
+    /// @param _config Input paramters required to set attributes
+    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
+    function setAttributesIssuer(
         address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        bytes32 _value,
-        uint256 _issuedAt,
-        bytes calldata _sig
+        QuadPassportStore.AttributeSetterConfig memory _config,
+        bytes calldata _sigIssuer
     ) external payable;
-
-    function setAttributeIssuer(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        bytes32 _value,
-        uint256 _issuedAt
-    ) external ;
 
     function burnPassport(uint256 _tokenId) external;
 
@@ -41,15 +39,7 @@ interface IQuadPassport is IERC1155Upgradeable {
         external
         returns (uint256);
 
-
-    function attributes(address, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
-
-    function attributesByDID(bytes32, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
-
-    function increaseAccountBalanceETH(address, uint256) external;
-
-    function increaseAccountBalance(address, address, uint256) external;
-
     function acceptGovernance() external;
 
+    function attributes(address, bytes32) external view returns (QuadPassportStore.Attribute[] memory);
 }

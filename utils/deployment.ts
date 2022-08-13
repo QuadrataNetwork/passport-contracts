@@ -3,14 +3,13 @@ const { ethers, upgrades } = require("hardhat");
 import { BigNumber, Contract } from "ethers";
 
 export const deployPassport = async (
-  governance: SignerWithAddress,
-  uri: string
+  governance: SignerWithAddress
 ): Promise<Contract> => {
   const QuadPassport = await ethers.getContractFactory("QuadPassport");
   const passport = await upgrades.deployProxy(
     QuadPassport,
-    [governance.address, uri],
-    { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor'] }
+    [governance.address],
+    { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
   );
   await passport.deployed();
   return passport;
@@ -23,7 +22,7 @@ export const deployGovernance = async (
   const governance = await upgrades.deployProxy(
     QuadGovernance,
     [admin.address],
-    { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor']  }
+    { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
   );
   await governance.deployed();
   return governance;
@@ -36,11 +35,8 @@ export const deployReader = async (
   const QuadReader = await ethers.getContractFactory("QuadReader");
   const reader = await upgrades.deployProxy(
     QuadReader,
-    [
-      governance.address,
-      passport.address
-    ],
-    { initializer: "initialize", kind: "uups", unsafeAllow: ['constructor']  }
+    [governance.address, passport.address],
+    { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
   );
   await reader.deployed();
   return reader;

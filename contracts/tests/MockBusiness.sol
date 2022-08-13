@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./DeFi.sol";
-import "../v2/interfaces/IQuadPassport.sol";
+import "../interfaces/IQuadPassport.sol";
 
 contract MockBusiness {
 

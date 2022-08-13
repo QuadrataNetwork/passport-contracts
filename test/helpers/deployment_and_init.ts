@@ -21,82 +21,40 @@ export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
   issuers: SignerWithAddress[],
   treasury: SignerWithAddress,
-  issuerTreasuries: SignerWithAddress[],
-  uri: string,
-  opts: any
-): Promise<
-  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, any]
-> => {
+  issuerTreasuries: SignerWithAddress[]
+): Promise<[Promise<Contract>, Promise<Contract>, Promise<Contract>, any]> => {
   // Deploy Governance
   const governance = await deployGovernance(admin);
   for (let i = 0; i < issuers.length; i++) {
     await governance
       .connect(admin)
-      .setIssuer(issuers[i].address, issuerTreasuries[i].address);
+      .addIssuer(issuers[i].address, issuerTreasuries[i].address);
   }
 
   // Deploy Passport
-  const passport = await deployPassport(governance, uri);
+  const passport = await deployPassport(governance);
   await governance.connect(admin).setPassportContractAddress(passport.address);
 
-  await governance
-    .connect(admin)
-    .setAttributePriceFixed(
-      ATTRIBUTE_DID,
-      PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
-    );
-  await governance
-    .connect(admin)
-    .setAttributePriceFixed(
-      ATTRIBUTE_AML,
-      PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_AML]
-    );
-  await governance
-    .connect(admin)
-    .setAttributePriceFixed(
-      ATTRIBUTE_COUNTRY,
-      PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
-    );
+  // Set Query Price
+  const attributeTypes = [ATTRIBUTE_DID, ATTRIBUTE_AML, ATTRIBUTE_COUNTRY];
 
-  await governance
-    .connect(admin)
-    .setBusinessAttributePriceFixed(
-      ATTRIBUTE_DID,
-      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID]
-    );
-  await governance
-    .connect(admin)
-    .setBusinessAttributePriceFixed(
-      ATTRIBUTE_COUNTRY,
-      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
-    );
-  await governance
-    .connect(admin)
-    .setBusinessAttributePriceFixed(
-      ATTRIBUTE_AML,
-      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_AML]
-    );
+  for (const attr of attributeTypes) {
+    await governance
+      .connect(admin)
+      .setAttributePriceFixed(attr, PRICE_PER_ATTRIBUTES_ETH[attr]);
+
+    await governance
+      .connect(admin)
+      .setBusinessAttributePriceFixed(
+        attr,
+        PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attr]
+      );
+  }
 
   // Deploy Reader
   const reader = await deployReader(governance, passport);
 
-  // Deploy Oracle
-  const UniswapAnchoredView = await ethers.getContractFactory(
-    "UniswapAnchoredView"
-  );
-  const oracle = await UniswapAnchoredView.deploy();
-  await oracle.deployed();
-
-  // Deploy USDC
-  const ERC20 = await ethers.getContractFactory("USDC");
-  const usdc = await ERC20.deploy();
-  await usdc.deployed();
-
-  // Deploy Governance
-  if (!opts?.skipOracle) {
-    await governance.connect(admin).setOracle(oracle.address);
-  }
-  await governance.connect(admin).allowTokenPayment(usdc.address, true);
+  // Deploy QuadGovernance
   await governance.connect(admin).setTreasury(treasury.address);
   await governance.connect(admin).grantRole(id("READER_ROLE"), reader.address);
 
@@ -105,5 +63,5 @@ export const deployPassportEcosystem = async (
   const defi = await DeFi.deploy(passport.address, reader.address);
   await defi.deployed();
 
-  return [governance, passport, reader, usdc, defi, oracle];
+  return [governance, passport, reader, defi];
 };
