@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
-import "./storage/QuadGovernanceStore.sol";
 import "./storage/QuadPassportStore.sol";
 import "./QuadSoulbound.sol";
 import "hardhat/console.sol";
@@ -15,9 +14,6 @@ import "hardhat/console.sol";
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice This represents a Quadrata NFT Passport
 contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPassportStore {
-    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
-    event SetPendingGovernance(address indexed _pendingGovernance);
-    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
 
     constructor() initializer {
         // used to prevent logic contract self destruct take over
@@ -146,15 +142,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     function burnPassport(
         uint256 _tokenId
     ) external override {
-        // require(balanceOf(_msgSender(), _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
-        // _burn(_msgSender(), _tokenId, 1);
+        require(balanceOf(_msgSender(), _tokenId) >= 1, "CANNOT_BURN_ZERO_BALANCE");
 
-        // for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-        //     bytes32 attributeType = governance.eligibleAttributesArray(i);
-        //     for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-        //         delete _attributes[_msgSender()][attributeType][governance.issuers(j).issuer];
-        //     }
-        // }
+        for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
+            bytes32 attributeType = governance.eligibleAttributesArray(i);
+            delete _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+
+            // TODO: Remove positions from _position
+        }
+
+        _burn(_msgSender(), _tokenId, 1);
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
@@ -165,27 +162,30 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         address _account,
         uint256 _tokenId
     ) external override {
-        // require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
-        // require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
-        // // only delete attributes from sender
-        // for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-        //     bytes32 attributeType = governance.eligibleAttributesArray(i);
-        //     delete _attributes[_account][attributeType][_msgSender()];
-        // }
+        bool isEmpty = true;
 
-        // // if another attribute is found, keep the passport, otherwise burn if all values are null
-        // for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-        //     bytes32 attributeType = governance.eligibleAttributesArray(i);
-        //     for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-        //         Attribute memory attribute = _attributes[_account][attributeType][governance.issuers(j).issuer];
-        //         if(attribute.epoch != 0) {
-        //             return;
-        //         }
-        //     }
-        // }
+        // only delete attributes from issuer
+        for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
+            bytes32 attributeType = governance.eligibleAttributesArray(i);
+            uint256 position = _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), _msgSender()))];
+            if (position > 0) {
+                Attribute[] memory attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
+                attrs[position] = attrs[attrs.length - 1];
+                // TODO: Figure out why error message
+                // attrs.pop();
 
-        // _burn(_account, _tokenId, 1);
+                // TODO: Reset positions from _position
+
+                if (attrs.length > 0) {
+                    isEmpty = false;
+                }
+            }
+        }
+        if (isEmpty)
+            _burn(_account, _tokenId, 1);
     }
 
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
@@ -210,33 +210,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         return _attributes[attrKey];
     }
 
-    /// @dev Allow an issuer's treasury or the Quadrata treasury to withdraw $ETH
-    /// @param _to address of either an issuer's treasury or the Quadrata treasury
-    /// @return the amount of $ETH withdrawn
-    function withdraw(address payable _to) external override returns(uint256) {
-       // require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
-       // uint256 currentBalance = _accountBalances[_to];
-       // require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
-       // _accountBalances[_to] = 0;
-       // (bool sent,) = _to.call{value: currentBalance}("");
-       // require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
-       // return currentBalance;
-    }
-
-    /// @dev Allow an issuer's treasury or the Quadrata treasury to withdraw ERC20 tokens
-    /// @param _to address of either an issuer's treasury or the Quadrata treasury
-    /// @param _token address of the ERC20 tokens to withdraw
-    /// @return the amount of ERC20 withdrawn
-    function withdrawToken(address payable _to, address _token) external override returns(uint256) {
-       // require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
-       // uint256 currentBalance = _accountBalancesToken[_token][_to];
-       // require(currentBalance > 0, "NOT_ENOUGH_BALANCE");
-       // _accountBalancesToken[_token][_to] = 0;
-       //  IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_token);
-       // erc20.safeTransfer(_to, currentBalance);
-       // return currentBalance;
-    }
-
     /// @dev Admin function to set the new pending Governance address
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
@@ -259,7 +232,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     }
 
     function _authorizeUpgrade(address) internal view override {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
+            "INVALID_ADMIN"
+        );
     }
 }
 

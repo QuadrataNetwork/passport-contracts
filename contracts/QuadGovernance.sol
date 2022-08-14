@@ -197,6 +197,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         if (!issuerExist) {
             grantRole(ISSUER_ROLE, _issuer);
             _issuers.push(_issuer);
+            _issuerStatus[_issuer] = true;
         }
 
         emit IssuerAdded(_issuer, _treasury);
@@ -209,23 +210,18 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
 
-        bool issuerExist = false;
-
         for (uint256 i = 0; i < _issuers.length; i++) {
             if (_issuers[i] == _issuer) {
                 _issuers[i] = _issuers[_issuers.length-1];
-                issuerExist = true;
-                break;
+
+                _issuers.pop();
+                _issuerStatus[_issuer] = false;
+
+                revokeRole(ISSUER_ROLE, _issuer);
+
+                emit IssuerDeleted(_issuer);
+                return;
             }
-        }
-
-        if (issuerExist) {
-            _issuers.pop();
-            _issuerStatus[_issuer] = false;
-
-            revokeRole(ISSUER_ROLE, _issuer);
-
-            emit IssuerDeleted(_issuer);
         }
     }
 
@@ -249,31 +245,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
     function _authorizeUpgrade(address) override internal view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-    }
-
-    /// @dev Get the length of _issuers array
-    /// @return total number of _issuers
-    function getIssuersLength() override public view returns (uint256) {
-        return _issuers.length;
-    }
-
-    /// @dev Get the _issuers array
-    /// @return list of issuers
-    function getIssuers() override public view returns (address[] memory) {
-        return _issuers;
-    }
-
-    /// @dev Get the status of an issuer
-    /// @param _issuer address of issuer
-    /// @return issuer status
-    function getIssuerStatus(address _issuer) override public view returns(bool) {
-        return _issuerStatus[_issuer];
-    }
-
-    /// @dev Get the revenue split between protocol and _issuers
-    /// @return ratio of revenue distribution
-    function revSplitIssuer() override public view returns(uint256) {
-        return _revSplitIssuer;
     }
 
     /// @dev Get the address of protocol treasury
@@ -335,6 +306,31 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @return attribute price for using getter given a business is asking (in eth)
     function pricePerBusinessAttributeFixed(bytes32 _attribute) override public view returns(uint256) {
         return _pricePerBusinessAttributeFixed[_attribute];
+    }
+
+    /// @dev Get the length of _issuers array
+    /// @return total number of _issuers
+    function getIssuersLength() override public view returns (uint256) {
+        return _issuers.length;
+    }
+
+    /// @dev Get the _issuers array
+    /// @return list of issuers
+    function getIssuers() override public view returns (address[] memory) {
+        return _issuers;
+    }
+
+    /// @dev Get the status of an issuer
+    /// @param _issuer address of issuer
+    /// @return issuer status
+    function getIssuerStatus(address _issuer) override public view returns(bool) {
+        return _issuerStatus[_issuer];
+    }
+
+    /// @dev Get the revenue split between protocol and _issuers
+    /// @return ratio of revenue distribution
+    function revSplitIssuer() override public view returns(uint256) {
+        return _revSplitIssuer;
     }
 
     /// @dev Get an issuer at a certain index

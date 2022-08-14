@@ -1,31 +1,21 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.4;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
+import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadReaderStore.sol";
-import "./storage/QuadPassportStore.sol";
-import "./storage/QuadGovernanceStore.sol";
 import "hardhat/console.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is IQuadReader, UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadReaderStore {
-     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-
-     event QueryEvent(address indexed _account, address indexed _caller, bytes32 _attribute);
-     event QueryBulkEvent(address indexed _account, address indexed _caller, bytes32[] _attributes);
-     event QueryFeeReceipt(address indexed _issuer, uint256 _fee);
-
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
     constructor() initializer {
         // used to prevent logic contract self destruct take over
     }
@@ -46,7 +36,7 @@ import "hardhat/console.sol";
 
     function getAttributes(
         address _account, bytes32 _attribute
-    ) external payable override returns(QuadPassportStore.Attribute[] memory attributes) {
+    ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
         _getAttributesVerify(_account, _attribute);
 
         attributes = passport.attributes(_account, _attribute);
@@ -68,7 +58,7 @@ import "hardhat/console.sol";
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         _getAttributesVerify(_account, _attribute);
 
-        QuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
         values = new bytes32[](attributes.length);
         epochs = new uint256[](attributes.length);
         issuers = new address[](attributes.length);
@@ -92,9 +82,9 @@ import "hardhat/console.sol";
 
     function getAttributesBulk(
         address _account, bytes32[] calldata _attributes
-    ) external payable override returns(QuadPassportStore.Attribute[] memory) {
-        QuadPassportStore.Attribute[] memory attributes = new QuadPassportStore.Attribute[](_attributes.length);
-        QuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+    ) external payable override returns(IQuadPassportStore.Attribute[] memory) {
+        IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
+        IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
         bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
 
         uint256 totalFee;
@@ -104,7 +94,7 @@ import "hardhat/console.sol";
             uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeFixed(_attributes[i]) : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             _getAttributesVerify(_account, _attributes[i]);
-            QuadPassportStore.Attribute memory attr = passport.attributes(_account, _attributes[i])[0];
+            IQuadPassportStore.Attribute memory attr = passport.attributes(_account, _attributes[i])[0];
             attributes[i] = attr;
 
             uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
@@ -125,7 +115,7 @@ import "hardhat/console.sol";
         values = new bytes32[](_attributes.length);
         epochs = new uint256[](_attributes.length);
         issuers = new address[](_attributes.length);
-        QuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
         bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
 
         uint256 totalFee;
@@ -135,7 +125,7 @@ import "hardhat/console.sol";
             uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeFixed(_attributes[i]) : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             _getAttributesVerify(_account, _attributes[i]);
-            QuadPassportStore.Attribute memory attr = passport.attributes(_account, _attributes[i])[0];
+            IQuadPassportStore.Attribute memory attr = passport.attributes(_account, _attributes[i])[0];
             values[i] = attr.value;
             epochs[i] = attr.epoch;
             issuers[i] = attr.issuer;
@@ -173,7 +163,7 @@ import "hardhat/console.sol";
         address _account,
         bytes32 _attribute
     ) public override view returns(uint256) {
-        QuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
         uint256 fee = (attrs.length > 0 && attrs[0].value == keccak256("TRUE"))
             ? governance.pricePerBusinessAttributeFixed(_attribute)
             : governance.pricePerAttributeFixed(_attribute);
@@ -189,7 +179,7 @@ import "hardhat/console.sol";
         address _account,
         bytes32[] calldata _attributes
     ) public override view returns(uint256) {
-        QuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
 
         uint256 fee;
         bool isBusiness = (attrs.length > 0 && attrs[0].value == keccak256("TRUE")) ? true : false;
@@ -202,6 +192,46 @@ import "hardhat/console.sol";
 
         return fee;
     }
+
+
+    /// @dev Returns the number of attestations for an attribute about a Passport holder
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @return the amount of existing attributes
+    function balanceOf(address _account, bytes32 _attribute) public view override returns(uint256) {
+       return passport.attributes(_account, _attribute).length;
+    }
+
+
+    /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
+    /// @param _to address of either an issuer's treasury or the Quadrata treasury
+    /// @param _amount amount to withdraw
+    function withdraw(address payable _to, uint256 _amount) external override {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender),
+            "INVALID_ADMIN"
+        );
+        bool isValid = false;
+
+        if (_to == governance.treasury()) {
+            isValid = true;
+        }
+
+        address[] memory issuers = governance.getIssuers();
+        for (uint256 i = 0; i < issuers.length; i++) {
+            if (_to == governance.issuersTreasury(issuers[i])) {
+                isValid = true;
+                break;
+            }
+        }
+
+        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
+        require(isValid, "WITHDRAWAL_ADDRESS_INVALID");
+        require(_amount <= address(this).balance, "INSUFFICIENT_BALANCE");
+        (bool sent,) = _to.call{value: _amount}("");
+        require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
+    }
+
 
     function _authorizeUpgrade(address) internal view override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");

@@ -4,6 +4,10 @@ pragma solidity 0.8.4;
 import "../storage/QuadPassportStore.sol";
 
 interface IQuadReader {
+    event QueryEvent(address indexed _account, address indexed _caller, bytes32 _attribute);
+    event QueryBulkEvent(address indexed _account, address indexed _caller, bytes32[] _attributes);
+    event QueryFeeReceipt(address indexed _issuer, uint256 _fee);
+
     function queryFee(
         address _account,
         bytes32 _attribute
@@ -29,4 +33,9 @@ interface IQuadReader {
     function getAttributesBulkLegacy(
         address _account, bytes32[] calldata _attributes
     ) external payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers);
+
+    function balanceOf(address _account, bytes32 _attribute) external view returns(uint256);
+
+    function withdraw(address payable _to, uint256 _amount) external;
+
 }

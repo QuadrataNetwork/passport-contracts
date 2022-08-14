@@ -35,7 +35,12 @@ describe("QuadReader", async () => {
     issuerCTreasury: SignerWithAddress; // eslint-disable-line no-unused-vars
 
   let issuedAt: number;
-  let attributes: Object;
+  const attributes: Object = {
+    [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
+    [ATTRIBUTE_AML]: formatBytes32String("1"),
+    [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+    [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+  };
 
   beforeEach(async () => {
     [
@@ -58,12 +63,6 @@ describe("QuadReader", async () => {
       [issuerTreasury]
     );
 
-    attributes = {
-      [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
-      [ATTRIBUTE_AML]: formatBytes32String("1"),
-      [ATTRIBUTE_COUNTRY]: id("FRANCE"),
-      [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-    };
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
     await setAttributes(

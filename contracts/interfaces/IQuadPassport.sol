@@ -1,10 +1,13 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.4;
 
-import "../storage/QuadPassportStore.sol";
+import "./IQuadPassportStore.sol";
 import "./IQuadSoulbound.sol";
 
 interface IQuadPassport is IQuadSoulbound {
+    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
+    event SetPendingGovernance(address indexed _pendingGovernance);
+    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
 
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
     /// @dev Only when authorized by an eligible issuer
@@ -12,7 +15,7 @@ interface IQuadPassport is IQuadSoulbound {
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
     function setAttributes(
-        QuadPassportStore.AttributeSetterConfig memory _config,
+        IQuadPassportStore.AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable;
@@ -23,7 +26,7 @@ interface IQuadPassport is IQuadSoulbound {
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
     function setAttributesIssuer(
         address _account,
-        QuadPassportStore.AttributeSetterConfig memory _config,
+        IQuadPassportStore.AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
     ) external payable;
 
@@ -33,13 +36,7 @@ interface IQuadPassport is IQuadSoulbound {
 
     function setGovernance(address _governanceContract) external;
 
-    function withdraw(address payable _to) external returns (uint256);
-
-    function withdrawToken(address payable _to, address _token)
-        external
-        returns (uint256);
-
     function acceptGovernance() external;
 
-    function attributes(address, bytes32) external view returns (QuadPassportStore.Attribute[] memory);
+    function attributes(address, bytes32) external view returns (IQuadPassportStore.Attribute[] memory);
 }
