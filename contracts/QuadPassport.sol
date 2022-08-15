@@ -78,7 +78,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             uint256 issuerPosition = _position[keccak256(abi.encode(_config.attrKeys[i], issuer))];
             Attribute memory attr = Attribute({
                 value: _config.attrValues[i],
-                epoch: _config.issuedAt,
+                epoch: _config.verifiedAt,
                 issuer: issuer
             });
 
@@ -109,8 +109,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) internal returns(address) {
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
+
+        require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
-        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
+
+        require(_config.verifiedAt <= block.timestamp, "INVALID_VERIFIED_AT");
+
+        require(block.timestamp <= _config.issuedAt + 1.days, "EXPIRED_ISSUED_AT");
+
         require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
 
         bytes32 extractionHash = keccak256(
@@ -118,6 +124,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 _account,
                 _config.attrKeys,
                 _config.attrValues,
+                _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
                 _config.tokenId,
