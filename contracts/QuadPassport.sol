@@ -116,7 +116,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         require(_config.verifiedAt <= block.timestamp, "FUTURE_VERIFIED_AT");
         require(_config.issuedAt <= block.timestamp, "FUTURE_ISSUED_AT");
 
-        require(block.timestamp <= _config.issuedAt + 1.weeks, "EXPIRED_ISSUED_AT");
+        require(block.timestamp <= _config.issuedAt + 1.days, "EXPIRED_ISSUED_AT");
 
         require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
 
