@@ -78,7 +78,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             uint256 issuerPosition = _position[keccak256(abi.encode(_config.attrKeys[i], issuer))];
             Attribute memory attr = Attribute({
                 value: _config.attrValues[i],
-                epoch: _config.issuedAt,
+                epoch: _config.verifiedAt,
                 issuer: issuer
             });
 
