@@ -20,5 +20,5 @@ interface IQuadSoulbound  {
 
     function balanceOf(address account, uint256 id) external view returns (uint256);
 
-    function balanceOf(address account) external view returns (uint256);
+    function balanceOfAll(address account) external view returns (uint256);
 }

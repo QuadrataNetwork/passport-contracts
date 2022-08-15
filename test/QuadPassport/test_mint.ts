@@ -104,6 +104,7 @@ describe("QuadPassport.setAttributes", async () => {
         issuedAt,
         MINT_PRICE
       );
+
       await assertSetAttribute(
         minterA,
         [issuer],
@@ -115,34 +116,45 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
-    // it("setAttributes (Multiple Issuers)", async () => {
-    //   await setAttributes(
-    //     minterA,
-    //     issuer,
-    //     passport,
-    //     attributes,
-    //     issuedAt,
-    //     MINT_PRICE
-    //   );
+    it("setAttributes (Multiple Issuers)", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        issuedAt,
+        MINT_PRICE
+      );
 
-    //   await setAttributes(
-    //     minterA,
-    //     issuer2,
-    //     passport,
-    //     attributes,
-    //     issuedAt,
-    //     MINT_PRICE
-    //   );
-    //   await assertSetAttribute(
-    //     minterA,
-    //     [issuer],
-    //     passport,
-    //     [attributes],
-    //     [issuedAt],
-    //     [MINT_PRICE],
-    //     mockReader
-    //   );
-    // });
+      const attributeByIssuer2 = {
+        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
+        [ATTRIBUTE_AML]: formatBytes32String("9"),
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+
+      await governance
+        .connect(admin)
+        .addIssuer(issuer2.address, issuerTreasury2.address);
+
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attributeByIssuer2,
+        issuedAt + 1,
+        MINT_PRICE.add(1)
+      );
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [attributes, attributeByIssuer2],
+        [issuedAt, issuedAt + 1],
+        [MINT_PRICE, MINT_PRICE.add(1)],
+        mockReader
+      );
+    });
 
     // it("success - mint with default values 0x00....000 ie bytes32(0) for aml", async () => {
     //   await assertMint(

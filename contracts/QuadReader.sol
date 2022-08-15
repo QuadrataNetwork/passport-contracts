@@ -48,7 +48,7 @@ import "hardhat/console.sol";
             for (uint256 i = 0; i < attributes.length; i++) {
                 emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
             }
-            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer);
+            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
         }
         emit QueryEvent(_account, msg.sender, _attribute);
     }
@@ -75,7 +75,7 @@ import "hardhat/console.sol";
                 issuers[i] = attributes[i].issuer;
                 emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
             }
-            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer);
+            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
         }
         emit QueryEvent(_account, msg.sender, _attribute);
     }
@@ -202,6 +202,7 @@ import "hardhat/console.sol";
        return passport.attributes(_account, _attribute).length;
     }
 
+    // TODO: Add a function `hasPassportByIssuer()`
 
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
     /// @param _to address of either an issuer's treasury or the Quadrata treasury

@@ -23,7 +23,7 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
     }
 
     /**
-     * @dev See {IERC1155-balanceOf}.
+     * @dev ERC1155 balanceOf implementation
      *
      * Requirements:
      *
@@ -35,13 +35,13 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
     }
 
     /**
-     * @dev See {IERC1155-balanceOf}.
+     * @dev balanceOf combining all existing tokenId
      *
      * Requirements:
      *
      * - `account` cannot be the zero address.
      */
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOfAll(address account) public view virtual override returns (uint256) {
         require(account != address(0), "ERC1155: address zero is not a valid owner");
         uint256 counter = 0;
         for (uint256 i = 0; i < _idCounter; i++) {
