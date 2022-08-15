@@ -1,4 +1,4 @@
-import { expect } from "chai";
+// import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -59,9 +59,9 @@ describe("QuadPassport.setAttributes", async () => {
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
-      [issuer],
+      [issuer, issuer2],
       treasury,
-      [issuerTreasury]
+      [issuerTreasury, issuerTreasury2]
     );
 
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
@@ -133,10 +133,6 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance
-        .connect(admin)
-        .addIssuer(issuer2.address, issuerTreasury2.address);
-
       await setAttributes(
         minterA,
         issuer2,
@@ -154,6 +150,9 @@ describe("QuadPassport.setAttributes", async () => {
         [MINT_PRICE, MINT_PRICE.add(1)],
         mockReader
       );
+
+      console.log("issuer 1: ", issuer.address);
+      console.log("issuer 2: ", issuer2.address);
     });
 
     // it("success - mint with default values 0x00....000 ie bytes32(0) for aml", async () => {

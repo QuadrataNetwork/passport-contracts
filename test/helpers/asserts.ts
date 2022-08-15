@@ -10,14 +10,14 @@ export const assertSetAttribute = async (
   issuers: SignerWithAddress[],
   passport: Contract,
   attributes: any[],
-  issuedAt: number[],
+  verifiedAt: number[],
   fee: any[],
   mockReader: SignerWithAddress,
   tokenId: number = TOKEN_ID
 ) => {
   // Safety Check
   expect(issuers.length).to.equal(attributes.length);
-  expect(issuers.length).to.equal(issuedAt.length);
+  expect(issuers.length).to.equal(verifiedAt.length);
   expect(issuers.length).to.equal(fee.length);
 
   const initialBalance = await ethers.provider.getBalance(passport.address);
@@ -32,21 +32,22 @@ export const assertSetAttribute = async (
     totalFee.add(fee[i]);
   }
 
-  for (let i = 0; i < issuers.length; i++) {
-    Object.keys(attributes[i]).forEach(async (attrType) => {
-      const response = await passport
-        .connect(mockReader)
-        .attributes(account.address, attrType);
+  Object.keys(attributes[i]).forEach(async (attrType) => {
+    const response = await passport
+      .connect(mockReader)
+      .attributes(account.address, attrType);
 
-      expect(response.length).equals(attrTypeCounter[attrType]);
+    expect(response.length).equals(attrTypeCounter[attrType]);
 
-      response.forEach((item: any) => {
-        expect(item.value).equals(attributes[i][attrType]);
-        expect(item.issuer).equals(issuers[i].address);
-        expect(item.epoch).equals(issuedAt[i]);
-      });
-    });
-  }
+    console.log({ response });
+
+    for (let i = 0; i < response.length; i++) {
+      const attrResp = response[i];
+      expect(attrResp[i].value).equals(attributes[i][attrType]);
+      expect(attrResp[i].issuer).equals(issuers[i].address);
+      expect(attrResp[i].epoch).equals(verifiedAt[i]);
+    }
+  });
 
   expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
   expect(await ethers.provider.getBalance(passport.address)).to.equal(

@@ -34,7 +34,7 @@ describe("QuadReader", async () => {
     issuerBTreasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuerCTreasury: SignerWithAddress; // eslint-disable-line no-unused-vars
 
-  let issuedAt: number;
+  let issuedAt: number, verifiedAt: number;
   const attributes: Object = {
     [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
@@ -64,12 +64,14 @@ describe("QuadReader", async () => {
     );
 
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
     await setAttributes(
       minterA,
       issuer,
       passport,
       attributes,
+      verifiedAt,
       issuedAt,
       MINT_PRICE
     );
@@ -143,6 +145,7 @@ describe("QuadReader", async () => {
           iss,
           passport,
           attributes,
+          verifiedAt,
           issuedAt,
           MINT_PRICE
         );

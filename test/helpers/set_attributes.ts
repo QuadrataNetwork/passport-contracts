@@ -17,6 +17,7 @@ export const setAttributes = async (
   issuer: SignerWithAddress,
   passport: Contract,
   attributes: any,
+  verifiedAt: number,
   issuedAt: number,
   fee: any,
   blockId: number = HARDHAT_CHAIN_ID,
@@ -50,6 +51,7 @@ export const setAttributes = async (
     account,
     issuer,
     attributes,
+    verifiedAt,
     issuedAt,
     fee,
     blockId,
@@ -62,7 +64,7 @@ export const setAttributes = async (
     passport
       .connect(account)
       .setAttributes(
-        [attrKeys, attrValues, tokenId, issuedAt, fee],
+        [attrKeys, attrValues, tokenId, verifiedAt, issuedAt, fee],
         sigIssuer,
         sigAccount,
         {

@@ -31,6 +31,7 @@ export const signSetAttributes = async (
   account: typeof Signer,
   issuer: typeof Signer,
   attributes: any,
+  verifiedAt: number,
   issuedAt: number,
   fee: any,
   blockId: number,
@@ -70,8 +71,18 @@ export const signSetAttributes = async (
         "uint256",
         "uint256",
         "uint256",
+        "uint256",
       ],
-      [account.address, attrKeys, attrValues, issuedAt, fee, tokenId, blockId]
+      [
+        account.address,
+        attrKeys,
+        attrValues,
+        verifiedAt,
+        issuedAt,
+        fee,
+        tokenId,
+        blockId,
+      ]
     )
   );
 
