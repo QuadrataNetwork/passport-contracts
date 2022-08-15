@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -21,8 +22,8 @@ export const setAttributes = async (
   blockId: number = HARDHAT_CHAIN_ID,
   tokenId: number = TOKEN_ID
 ) => {
-  let attrKeys: string[] = [];
-  let attrValues: string[] = [];
+  const attrKeys: string[] = [];
+  const attrValues: string[] = [];
 
   Object.keys(attributes).forEach((k, i) => {
     let attrKey;
@@ -57,14 +58,18 @@ export const setAttributes = async (
 
   const sigAccount = await signAccount(account);
 
-  await passport
-    .connect(account)
-    .setAttributes(
-      [attrKeys, attrValues, tokenId, issuedAt, fee],
-      sigIssuer,
-      sigAccount,
-      {
-        value: fee,
-      }
-    );
+  await expect(
+    passport
+      .connect(account)
+      .setAttributes(
+        [attrKeys, attrValues, tokenId, issuedAt, fee],
+        sigIssuer,
+        sigAccount,
+        {
+          value: fee,
+        }
+      )
+  )
+    .to.emit(passport, "SetAttributeReceipt")
+    .withArgs(account.address, issuer.address, fee);
 };

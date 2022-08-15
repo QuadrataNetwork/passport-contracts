@@ -19,7 +19,7 @@ const {
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
 
-describe("READER_ROLE Privileges", async () => {
+describe("QuadPassport.attributes", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
@@ -75,13 +75,6 @@ describe("READER_ROLE Privileges", async () => {
     );
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
-    // top off passport with token and eth
-    // await admin.sendTransaction({
-    //   to: passport.address,
-    //   value: parseEther("1").sub(
-    //     await ethers.provider.getBalance(passport.address)
-    //   ),
-    // });
   });
 
   describe("attributes", async () => {
