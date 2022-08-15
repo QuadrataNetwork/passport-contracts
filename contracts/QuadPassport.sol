@@ -125,8 +125,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 _account,
                 _config.attrKeys,
                 _config.attrValues,
-                _config.issuedAt,
                 _config.verifiedAt,
+                _config.issuedAt,
                 _config.fee,
                 _config.tokenId,
                 block.chainid

@@ -19,8 +19,8 @@ interface IQuadPassportStore {
         bytes32[] attrKeys;
         bytes32[] attrValues;
         uint256 tokenId;
-        uint256 issuedAt;
         uint256 verifiedAt;
+        uint256 issuedAt;
         uint256 fee;
     }
 }
