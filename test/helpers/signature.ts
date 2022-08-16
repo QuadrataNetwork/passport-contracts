@@ -38,7 +38,8 @@ export const signSetAttributes = async (
   issuedAt: number,
   fee: any,
   blockId: number,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
+  did: any = QUAD_DID
 ): Promise<typeof DataHexString> => {
   let attrKeys: string[] = [];
   let attrValues: string[] = [];
@@ -49,7 +50,7 @@ export const signSetAttributes = async (
       attrKey = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32"],
-          [QUAD_DID, k]
+          [did, k]
         )
       );
     } else {
@@ -70,6 +71,7 @@ export const signSetAttributes = async (
         "address",
         "bytes32[]",
         "bytes32[]",
+        "bytes32",
         "uint256",
         "uint256",
         "uint256",
@@ -80,6 +82,7 @@ export const signSetAttributes = async (
         account.address,
         attrKeys,
         attrValues,
+        did,
         verifiedAt,
         issuedAt,
         fee,

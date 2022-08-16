@@ -78,9 +78,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
 
         // Handle DID
         if(_config.did != bytes32(0)){
+            _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
-                ATTRIBUTE_DID,
                 _config.did,
                 issuer,
                 _config.verifiedAt);
@@ -89,7 +89,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
             // Verify attrKeys computation
             _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
-            _writeAttrToStorage(_config.attrKeys[i], _config.attrTypes[i], _config.attrValues[i], issuer, _config.verifiedAt);
+            _writeAttrToStorage(
+                _config.attrKeys[i],
+                _config.attrValues[i],
+                issuer,
+                _config.verifiedAt);
         }
 
         if(balanceOf(_account, _config.tokenId) == 0)
@@ -97,9 +101,20 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         emit SetAttributeReceipt(_account, issuer, msg.value);
     }
 
+    function _validateDid(address _account, bytes32 _did) internal {
+        Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
+        if(dIDAttrs.length > 0){
+            require(dIDAttrs[0].value == _did, "CANNOT_OVERWRITE_DID");
+        }
+    }
+
+    /// @notice Internal function that writes the attribute value and issuer position to storage
+    /// @param _attrKey attribute key (i.e. keccak256(address, keccak256("AML")))
+    /// @param _attrValue attribute value
+    /// @param _issuer address of issuer who verified attribute
+    /// @param _verifiedAt timestamp of when attribute was verified at
     function _writeAttrToStorage(
         bytes32 _attrKey,
-        bytes32 _attrType,
         bytes32 _attrValue,
         address _issuer,
         uint256 _verifiedAt
@@ -157,6 +172,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 _account,
                 _config.attrKeys,
                 _config.attrValues,
+                _config.did,
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,

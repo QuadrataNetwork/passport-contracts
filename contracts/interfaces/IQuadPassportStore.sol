@@ -19,8 +19,10 @@ interface IQuadPassportStore {
     /// `attrKeys` Array of keys defined by (wallet address/DID + data Type)
     /// `attrValues` Array of attributes values
     /// `attrTypes` Array of attributes types (ex: [keccak256("DID")]) used for validation
+    /// `did` did of entity
     /// `tokenId` tokenId of the Passport
-    /// `issuedAt` epoch when the attribute has been attested by the Issuer
+    /// `issuedAt` epoch when the passport has been issued by the Issuer
+    /// `verifiedAt` epoch when the attribute has been attested by the Issuer
     /// `fee` Fee (in Native token) to pay the Issuer
     struct AttributeSetterConfig {
         bytes32[] attrKeys;

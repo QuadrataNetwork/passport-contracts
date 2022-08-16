@@ -23,7 +23,8 @@ export const setAttributes = async (
   issuedAt: number,
   fee: any,
   tokenId: number = TOKEN_ID,
-  blockId: number = HARDHAT_CHAIN_ID
+  blockId: number = HARDHAT_CHAIN_ID,
+  did: any = QUAD_DID,
 ) => {
   const attrKeys: string[] = [];
   const attrTypes: string[] = [];
@@ -35,7 +36,7 @@ export const setAttributes = async (
       attrKey = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32"],
-          [QUAD_DID, k]
+          [did, k]
         )
       );
     } else {
@@ -59,7 +60,8 @@ export const setAttributes = async (
     issuedAt,
     fee,
     blockId,
-    tokenId
+    tokenId,
+    did
   );
 
   const sigAccount = await signAccount(account);
