@@ -42,7 +42,6 @@ describe("QuadPassport.setAttributes", async () => {
 
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
-    [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -167,7 +166,6 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const attributeByIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -235,7 +233,6 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const updatedAttributes: any = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("5"),
         [ATTRIBUTE_COUNTRY]: id("BE"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
