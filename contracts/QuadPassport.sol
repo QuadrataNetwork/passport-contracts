@@ -74,25 +74,21 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         bytes calldata _sigIssuer
     ) internal {
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
-        bytes32 _attrKey;
-        bytes32 _attrType;
 
         // Handle DID
         if(_config.did != bytes32(0)){
-            _attrKey = _computeAttrKey(_account, ATTRIBUTE_DID, _config.did);
-            _attrType = ATTRIBUTE_DID;
-
-            _writeAttrToStorage(_attrKey, _attrType, _config.did, issuer, _config.verifiedAt);
+            _writeAttrToStorage(
+                _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
+                ATTRIBUTE_DID,
+                _config.did,
+                issuer,
+                _config.verifiedAt);
         }
 
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
             // Verify attrKeys computation
-
-            _attrKey = _config.attrKeys[i];
-            _attrType = _config.attrTypes[i];
-
-            _verifyAttrKey(_account, _attrType, _attrKey, _config.did);
-            _writeAttrToStorage(_attrKey, _attrType, _config.attrValues[i], issuer, _config.verifiedAt);
+            _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
+            _writeAttrToStorage(_config.attrKeys[i], _config.attrTypes[i], _config.attrValues[i], issuer, _config.verifiedAt);
         }
 
         if(balanceOf(_account, _config.tokenId) == 0)
