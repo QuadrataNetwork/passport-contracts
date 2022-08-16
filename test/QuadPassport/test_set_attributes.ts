@@ -472,7 +472,7 @@ describe("QuadPassport.setAttributes", async () => {
           HARDHAT_CHAIN_ID,
           formatBytes32String("did:quad:newdid")
         )
-      ).to.revertedWith("CANNOT_OVERWRITE_DID");
+      ).to.revertedWith("INVALID_DID");
     });
 
     it("fail - invalid tokenId", async () => {

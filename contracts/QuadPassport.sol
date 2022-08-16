@@ -108,7 +108,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     function _validateDid(address _account, bytes32 _did) internal {
         Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
         if(dIDAttrs.length > 0){
-            require(dIDAttrs[0].value == _did, "CANNOT_OVERWRITE_DID");
+            require(dIDAttrs[0].value == _did, "INVALID_DID");
         }
     }
 
