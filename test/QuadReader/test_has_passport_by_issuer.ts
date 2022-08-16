@@ -30,10 +30,8 @@ describe("QuadReader", async () => {
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
     issuerB: SignerWithAddress, // eslint-disable-line no-unused-vars
-    issuerC: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuerTreasury: SignerWithAddress,
-    issuerBTreasury: SignerWithAddress, // eslint-disable-line no-unused-vars
-    issuerCTreasury: SignerWithAddress; // eslint-disable-line no-unused-vars
+    issuerBTreasury: SignerWithAddress // eslint-disable-line no-unused-vars
 
   let issuedAt: number, verifiedAt: number;
   const attributes: Object = {
@@ -54,8 +52,6 @@ describe("QuadReader", async () => {
       issuerTreasury,
       issuerB,
       issuerBTreasury,
-      issuerC,
-      issuerCTreasury,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
@@ -84,6 +80,11 @@ describe("QuadReader", async () => {
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_AML, issuer.address)).to.equal(true);
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_COUNTRY, issuer.address)).to.equal(true);
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address)).to.equal(true);
+
+      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_DID, issuer.address)).to.equal(false);
+      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_COUNTRY, issuer.address)).to.equal(false);
+      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_IS_BUSINESS, issuer.address)).to.equal(false);
+      await expect(reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_AML, issuer.address)).to.revertedWith('MISSING_DID')
     });
 
     it("returns false for issuers w/ no attestations", async () => {
@@ -99,5 +100,6 @@ describe("QuadReader", async () => {
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_COUNTRY, minterA.address)).to.equal(false);
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, minterA.address)).to.equal(false);
     });
+
   });
 });
