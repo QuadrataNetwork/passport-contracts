@@ -35,7 +35,6 @@ describe("QuadReader", async () => {
 
   let issuedAt: number, verifiedAt: number;
   const attributes: Object = {
-    [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
