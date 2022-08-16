@@ -2,12 +2,14 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { id } from "ethers/lib/utils";
 
 const {
   ATTRIBUTE_DID,
   ATTRIBUTE_AML,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const { signSetAttributes, signAccount } = require("./signature.ts");
@@ -21,7 +23,8 @@ export const setAttributes = async (
   issuedAt: number,
   fee: any,
   tokenId: number = TOKEN_ID,
-  blockId: number = HARDHAT_CHAIN_ID
+  blockId: number = HARDHAT_CHAIN_ID,
+  did: any = QUAD_DID,
 ) => {
   const attrKeys: string[] = [];
   const attrTypes: string[] = [];
@@ -33,7 +36,7 @@ export const setAttributes = async (
       attrKey = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32"],
-          [attributes[ATTRIBUTE_DID], k]
+          [did, k]
         )
       );
     } else {
@@ -57,7 +60,8 @@ export const setAttributes = async (
     issuedAt,
     fee,
     blockId,
-    tokenId
+    tokenId,
+    did
   );
 
   const sigAccount = await signAccount(account);
@@ -66,7 +70,7 @@ export const setAttributes = async (
     passport
       .connect(account)
       .setAttributes(
-        [attrKeys, attrValues, attrTypes, tokenId, verifiedAt, issuedAt, fee],
+        [attrKeys, attrValues, attrTypes, did,  tokenId, verifiedAt, issuedAt, fee],
         sigIssuer,
         sigAccount,
         {

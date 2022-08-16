@@ -5,7 +5,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import {
   parseEther,
   parseUnits,
-  formatBytes32String,
   id,
   hexZeroPad,
 } from "ethers/lib/utils";
@@ -21,7 +20,8 @@ const {
   PRICE_PER_BUSINESS_ATTRIBUTES,
   READER_ROLE,
   PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
+  QUAD_DID
 } = require("../../utils/constant.ts");
 
 const {
@@ -56,7 +56,7 @@ describe("QuadReader", async () => {
 
   beforeEach(async () => {
     baseURI = "https://quadrata.io";
-    did = formatBytes32String("did:quad:123456789abcdefghi");
+    did = QUAD_DID;
     aml = id("LOW");
     country = id("FRANCE");
     isBusiness = id("FALSE");

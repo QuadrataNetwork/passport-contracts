@@ -75,27 +75,26 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         bytes calldata _sigIssuer
     ) internal {
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
+
+        // Handle DID
+        if(_config.did != bytes32(0)){
+            _validateDid(_account, _config.did);
+            _writeAttrToStorage(
+                _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
+                _config.did,
+                issuer,
+                _config.verifiedAt);
+        }
+
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
             // Verify attrKeys computation
-            bytes32 _attrKey = _config.attrKeys[i];
-            bytes32 _attrType = _config.attrTypes[i];
-            _verifyAttrKey(_account, _attrType, _attrKey);
+            _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
+            _writeAttrToStorage(
+                _config.attrKeys[i],
+                _config.attrValues[i],
+                issuer,
+                _config.verifiedAt);
 
-            uint256 issuerPosition = _position[keccak256(abi.encode(_config.attrKeys[i], issuer))];
-            Attribute memory attr = Attribute({
-                value: _config.attrValues[i],
-                epoch: _config.verifiedAt,
-                issuer: issuer
-            });
-
-            if (issuerPosition == 0) {
-            // Means the issuer hasn't yet attested to that attribute type
-                _attributes[_attrKey].push(attr);
-                _position[keccak256(abi.encode(_attrKey, issuer))] = _attributes[_attrKey].length;
-            } else {
-                // Issuer already attested to that attribute - override
-                _attributes[_attrKey][issuerPosition - 1] = attr;
-            }
         }
 
         if(balanceOf(_account, _config.tokenId) == 0)
@@ -103,12 +102,50 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         emit SetAttributeReceipt(_account, issuer, msg.value);
     }
 
+    /// @notice Internal function that validates supplied DID on updates do not change
+    /// @param _account address of entity being attested to
+    /// @param _did new DID value
+    function _validateDid(address _account, bytes32 _did) internal {
+        Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
+        if(dIDAttrs.length > 0){
+            require(dIDAttrs[0].value == _did, "INVALID_DID");
+        }
+    }
+
+    /// @notice Internal function that writes the attribute value and issuer position to storage
+    /// @param _attrKey attribute key (i.e. keccak256(address, keccak256("AML")))
+    /// @param _attrValue attribute value
+    /// @param _issuer address of issuer who verified attribute
+    /// @param _verifiedAt timestamp of when attribute was verified at
+    function _writeAttrToStorage(
+        bytes32 _attrKey,
+        bytes32 _attrValue,
+        address _issuer,
+        uint256 _verifiedAt
+    ) internal {
+        uint256 issuerPosition = _position[keccak256(abi.encode(_attrKey, _issuer))];
+        Attribute memory attr = Attribute({
+            value:  _attrValue,
+            epoch: _verifiedAt,
+            issuer: _issuer
+        });
+
+        if (issuerPosition == 0) {
+        // Means the issuer hasn't yet attested to that attribute type
+            _attributes[_attrKey].push(attr);
+            _position[keccak256(abi.encode(_attrKey, _issuer))] = _attributes[_attrKey].length;
+        } else {
+            // Issuer already attested to that attribute - override
+            _attributes[_attrKey][issuerPosition-1] = attr;
+        }
+    }
+
     /// @notice Verify that the attrKey has been correctly computed based on account and attrType
     /// @param _account Address of the Quadrata Passport holder
     /// @param _attrType bytes32 of the attribute type
     /// @param _attrKey bytes32 of the attrKey to compare against/verify
-    function _verifyAttrKey(address _account, bytes32 _attrType, bytes32 _attrKey) internal view {
-        bytes32 expectedAttrKey = _computeAttrKey(_account, _attrType);
+    function _verifyAttrKey(address _account, bytes32 _attrType, bytes32 _attrKey, bytes32 _did) internal view {
+        bytes32 expectedAttrKey = _computeAttrKey(_account, _attrType, _did);
 
         require(_attrKey == expectedAttrKey, "MISMATCH_ATTR_KEY");
     }
@@ -139,6 +176,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 _account,
                 _config.attrKeys,
                 _config.attrValues,
+                _config.did,
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
@@ -161,14 +199,18 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @notice Compute the attrKey for the mapping `_attributes`
     /// @param _account address of the wallet owner
     /// @param _attribute attribute type (ex: keccak256("COUNTRY"))
-    function _computeAttrKey(address _account, bytes32 _attribute) internal view returns(bytes32) {
+    function _computeAttrKey(address _account, bytes32 _attribute, bytes32 _did) internal view returns(bytes32) {
         if (governance.eligibleAttributes(_attribute)) {
             return keccak256(abi.encode(_account, _attribute));
         }
         if (governance.eligibleAttributesByDID(_attribute)){
-            Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-            require(dIDAttrs.length > 0 && dIDAttrs[0].value != bytes32(0), "MISSING_DID");
-            return keccak256(abi.encode(dIDAttrs[0].value, _attribute));
+            if(_did == bytes32(0)){
+                Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
+                require(dIDAttrs.length > 0 && dIDAttrs[0].value != bytes32(0), "MISSING_DID");
+                _did = dIDAttrs[0].value;
+
+            }
+            return keccak256(abi.encode(_did, _attribute));
         }
 
         require(false, "ATTRIBUTE_NOT_ELIGIBLE");
@@ -236,7 +278,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) public view override returns (Attribute[] memory) {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
 
-        bytes32 attrKey = _computeAttrKey(_account, _attribute);
+        bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0));
         return _attributes[attrKey];
     }
 

@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { formatBytes32String, id } from "ethers/lib/utils";
+import { id } from "ethers/lib/utils";
 
 const {
   MINT_PRICE,
@@ -35,7 +35,6 @@ describe("QuadPassport.attributes", async () => {
 
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
-    [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
