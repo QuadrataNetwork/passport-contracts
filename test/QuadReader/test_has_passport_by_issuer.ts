@@ -99,6 +99,5 @@ describe("QuadReader", async () => {
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_COUNTRY, minterA.address)).to.equal(false);
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, minterA.address)).to.equal(false);
     });
-
   });
 });
