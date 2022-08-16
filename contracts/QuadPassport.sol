@@ -90,11 +90,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
 
             if (issuerPosition == 0) {
             // Means the issuer hasn't yet attested to that attribute type
-                _attributes[_config.attrKeys[i]].push(attr);
-                _position[keccak256(abi.encode(_config.attrKeys[i], issuer))] = _attributes[_config.attrKeys[i]].length;
+                _attributes[_attrKey].push(attr);
+                _position[keccak256(abi.encode(_attrKey, issuer))] = _attributes[_attrKey].length;
             } else {
                 // Issuer already attested to that attribute - override
-                _attributes[_config.attrKeys[i]][issuerPosition] = attr;
+                _attributes[_attrKey][issuerPosition - 1] = attr;
             }
         }
 

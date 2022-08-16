@@ -35,7 +35,7 @@ describe("QuadPassport.attributes", async () => {
     issuerTreasury2: SignerWithAddress,
     mockReader: SignerWithAddress;
 
-  let issuedAt: number;
+  let issuedAt: number, verifiedAt: number;
   const attributes: any = {
     [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
@@ -58,18 +58,20 @@ describe("QuadPassport.attributes", async () => {
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
-      [issuer],
+      [issuer, issuer2],
       treasury,
-      [issuerTreasury]
+      [issuerTreasury, issuerTreasury2]
     );
 
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
     await setAttributes(
       minterA,
       issuer,
       passport,
       attributes,
+      verifiedAt,
       issuedAt,
       MINT_PRICE
     );
@@ -78,7 +80,7 @@ describe("QuadPassport.attributes", async () => {
   });
 
   describe("attributes", async () => {
-    it("success - a READER_ROLE may query attributes", async () => {
+    it("success - 1 issuer", async () => {
       expect(
         await governance.connect(admin).hasRole(READER_ROLE, mockReader.address)
       ).equals(true);
@@ -110,9 +112,6 @@ describe("QuadPassport.attributes", async () => {
     });
 
     it("success with two issuers", async () => {
-      await governance
-        .connect(admin)
-        .addIssuer(issuer2.address, issuerTreasury2.address);
       const updatedAttributes = {
         [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
@@ -124,6 +123,7 @@ describe("QuadPassport.attributes", async () => {
         issuer2,
         passport,
         updatedAttributes,
+        verifiedAt,
         issuedAt,
         MINT_PRICE
       );
@@ -173,6 +173,7 @@ describe("QuadPassport.attributes", async () => {
         issuer,
         passport,
         attrs,
+        verifiedAt,
         issuedAt,
         MINT_PRICE
       );
