@@ -74,285 +74,285 @@ describe("QuadPassport.setAttributes", async () => {
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
 
-  // describe("QuadPassport.setAttributes (success)", async () => {
-  //   beforeEach(async () => {});
+  describe("QuadPassport.setAttributes (success)", async () => {
+    beforeEach(async () => {});
 
-  //   it("setAttributes (Single Attribute)", async () => {
-  //     const attributes: any = {
-  //       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-  //     };
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer],
-  //       passport,
-  //       [attributes],
-  //       [verifiedAt],
-  //       [MINT_PRICE],
-  //       mockReader
-  //     );
-  //   });
+    it("setAttributes (Single Attribute)", async () => {
+      const attributes: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributes],
+        [verifiedAt],
+        [MINT_PRICE],
+        mockReader
+      );
+    });
 
-  //   it("setAttributes (Multiple Attribute)", async () => {
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
+    it("setAttributes (Multiple Attribute)", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
 
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer],
-  //       passport,
-  //       [attributes],
-  //       [verifiedAt],
-  //       [MINT_PRICE],
-  //       mockReader
-  //     );
-  //   });
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributes],
+        [verifiedAt],
+        [MINT_PRICE],
+        mockReader
+      );
+    });
 
-  //   it("setAttributes (Multiple issuers for exact same Attribute)", async () => {
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
+    it("setAttributes (Multiple issuers for exact same Attribute)", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
 
-  //     await setAttributes(
-  //       minterA,
-  //       issuer2,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
 
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer, issuer2],
-  //       passport,
-  //       [attributes, attributes],
-  //       [verifiedAt, verifiedAt],
-  //       [MINT_PRICE, MINT_PRICE],
-  //       mockReader
-  //     );
-  //   });
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [attributes, attributes],
+        [verifiedAt, verifiedAt],
+        [MINT_PRICE, MINT_PRICE],
+        mockReader
+      );
+    });
 
-  //   it("setAttributes (Multiple Issuers - same wallet same DID)", async () => {
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
+    it("setAttributes (Multiple Issuers - same wallet same DID)", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
 
-  //     const attributeByIssuer2 = {
-  //       [ATTRIBUTE_AML]: formatBytes32String("9"),
-  //       [ATTRIBUTE_COUNTRY]: id("US"),
-  //       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-  //     };
+      const attributeByIssuer2 = {
+        [ATTRIBUTE_AML]: formatBytes32String("9"),
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
 
-  //     await governance.connect(admin).setEligibleTokenId(2, true);
+      await governance.connect(admin).setEligibleTokenId(2, true);
 
-  //     await setAttributes(
-  //       minterA,
-  //       issuer2,
-  //       passport,
-  //       attributeByIssuer2,
-  //       verifiedAt + 1,
-  //       issuedAt + 1,
-  //       MINT_PRICE.add(1),
-  //       2 // new TokenId
-  //     );
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer, issuer2],
-  //       passport,
-  //       [attributes, attributeByIssuer2],
-  //       [verifiedAt, verifiedAt + 1],
-  //       [MINT_PRICE, MINT_PRICE.add(1)],
-  //       mockReader
-  //     );
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attributeByIssuer2,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE.add(1),
+        2 // new TokenId
+      );
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [attributes, attributeByIssuer2],
+        [verifiedAt, verifiedAt + 1],
+        [MINT_PRICE, MINT_PRICE.add(1)],
+        mockReader
+      );
 
-  //     expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
-  //     expect(await passport.balanceOf(minterA.address, 2)).to.equal(1);
-  //   });
+      expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(1);
+    });
 
-  //   it("setAttributes (fee = 0)", async () => {
-  //     const attributes: any = {
-  //       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-  //     };
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       0
-  //     );
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer],
-  //       passport,
-  //       [attributes],
-  //       [verifiedAt],
-  //       [0],
-  //       mockReader
-  //     );
-  //   });
+    it("setAttributes (fee = 0)", async () => {
+      const attributes: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        0
+      );
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributes],
+        [verifiedAt],
+        [0],
+        mockReader
+      );
+    });
 
-  //   it("success - overwritting position (single issuer)", async () => {
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
+    it("success - overwritting position (single issuer)", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
 
-  //     const updatedAttributes: any = {
-  //       [ATTRIBUTE_AML]: formatBytes32String("5"),
-  //       [ATTRIBUTE_COUNTRY]: id("BE"),
-  //       [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
-  //     };
+      const updatedAttributes: any = {
+        [ATTRIBUTE_AML]: formatBytes32String("5"),
+        [ATTRIBUTE_COUNTRY]: id("BE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
+      };
 
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       updatedAttributes,
-  //       verifiedAt + 1,
-  //       issuedAt + 1,
-  //       MINT_PRICE
-  //     );
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        updatedAttributes,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE
+      );
 
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer],
-  //       passport,
-  //       [updatedAttributes],
-  //       [verifiedAt + 1],
-  //       [MINT_PRICE.mul(2)],
-  //       mockReader
-  //     );
-  //   });
-  //   it("success - overwritting position (multiple issuers)", async () => {
-  //     // Issuer 1
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       attributes,
-  //       verifiedAt,
-  //       issuedAt,
-  //       MINT_PRICE
-  //     );
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [updatedAttributes],
+        [verifiedAt + 1],
+        [MINT_PRICE.mul(2)],
+        mockReader
+      );
+    });
+    it("success - overwritting position (multiple issuers)", async () => {
+      // Issuer 1
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
 
-  //     // Issuer 2
-  //     const attributeByIssuer2 = {
-  //       [ATTRIBUTE_AML]: formatBytes32String("9"),
-  //       [ATTRIBUTE_COUNTRY]: id("US"),
-  //       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-  //     };
+      // Issuer 2
+      const attributeByIssuer2 = {
+        [ATTRIBUTE_AML]: formatBytes32String("9"),
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
 
-  //     await setAttributes(
-  //       minterA,
-  //       issuer2,
-  //       passport,
-  //       attributeByIssuer2,
-  //       verifiedAt + 10,
-  //       issuedAt + 10,
-  //       MINT_PRICE
-  //     );
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attributeByIssuer2,
+        verifiedAt + 10,
+        issuedAt + 10,
+        MINT_PRICE
+      );
 
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer, issuer2],
-  //       passport,
-  //       [attributes, attributeByIssuer2],
-  //       [verifiedAt, verifiedAt + 10],
-  //       [MINT_PRICE, MINT_PRICE],
-  //       mockReader
-  //     );
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [attributes, attributeByIssuer2],
+        [verifiedAt, verifiedAt + 10],
+        [MINT_PRICE, MINT_PRICE],
+        mockReader
+      );
 
-  //     // Update Issuer 1
-  //     const updatedAttributes: any = {
-  //       [ATTRIBUTE_AML]: formatBytes32String("5"),
-  //       [ATTRIBUTE_COUNTRY]: id("BE"),
-  //       [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
-  //     };
+      // Update Issuer 1
+      const updatedAttributes: any = {
+        [ATTRIBUTE_AML]: formatBytes32String("5"),
+        [ATTRIBUTE_COUNTRY]: id("BE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
+      };
 
-  //     await setAttributes(
-  //       minterA,
-  //       issuer,
-  //       passport,
-  //       updatedAttributes,
-  //       verifiedAt + 1,
-  //       issuedAt + 1,
-  //       MINT_PRICE
-  //     );
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        updatedAttributes,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE
+      );
 
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer, issuer2],
-  //       passport,
-  //       [updatedAttributes, attributeByIssuer2],
-  //       [verifiedAt + 1, verifiedAt + 10],
-  //       [MINT_PRICE.mul(2), MINT_PRICE],
-  //       mockReader
-  //     );
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [updatedAttributes, attributeByIssuer2],
+        [verifiedAt + 1, verifiedAt + 10],
+        [MINT_PRICE.mul(2), MINT_PRICE],
+        mockReader
+      );
 
-  //     // Update Issuer 2
-  //     const updatedAttrIssuer2 = {
-  //       [ATTRIBUTE_AML]: formatBytes32String("7"),
-  //       [ATTRIBUTE_COUNTRY]: id("DE"),
-  //       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-  //     };
+      // Update Issuer 2
+      const updatedAttrIssuer2 = {
+        [ATTRIBUTE_AML]: formatBytes32String("7"),
+        [ATTRIBUTE_COUNTRY]: id("DE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
 
-  //     await setAttributes(
-  //       minterA,
-  //       issuer2,
-  //       passport,
-  //       updatedAttrIssuer2,
-  //       verifiedAt + 15,
-  //       issuedAt + 15,
-  //       MINT_PRICE
-  //     );
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        updatedAttrIssuer2,
+        verifiedAt + 15,
+        issuedAt + 15,
+        MINT_PRICE
+      );
 
-  //     await assertSetAttribute(
-  //       minterA,
-  //       [issuer, issuer2],
-  //       passport,
-  //       [updatedAttributes, updatedAttrIssuer2],
-  //       [verifiedAt + 1, verifiedAt + 15],
-  //       [MINT_PRICE.mul(2), MINT_PRICE.mul(2)],
-  //       mockReader
-  //     );
-  //   });
-  // });
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [updatedAttributes, updatedAttrIssuer2],
+        [verifiedAt + 1, verifiedAt + 15],
+        [MINT_PRICE.mul(2), MINT_PRICE.mul(2)],
+        mockReader
+      );
+    });
+  });
 
   // ******************************************************************************* //
   // ******************************************************************************* //
@@ -442,7 +442,6 @@ describe("QuadPassport.setAttributes", async () => {
     //   ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     // });
 
-    // TODO: HUY
     it("fail - same wallet but diff DID)", async () => {
       await setAttributes(
         minterA,
@@ -471,370 +470,370 @@ describe("QuadPassport.setAttributes", async () => {
           MINT_PRICE.add(1),
           TOKEN_ID,
           HARDHAT_CHAIN_ID,
-          formatBytes32String("quad:did:new11111")
+          formatBytes32String("did:quad:newdid")
         )
       ).to.revertedWith("CANNOT_OVERWRITE_DID");
     });
 
-    // it("fail - invalid tokenId", async () => {
-    //   const badTokenId = 1337;
-    //   await expect(
-    //     setAttributes(
-    //       minterA,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       verifiedAt,
-    //       issuedAt,
-    //       MINT_PRICE,
-    //       badTokenId
-    //     )
-    //   ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
-    // });
+    it("fail - invalid tokenId", async () => {
+      const badTokenId = 1337;
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE,
+          badTokenId
+        )
+      ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
+    });
 
-    // it("fail - zero verifiedAt", async () => {
-    //   const verifiedAt = 0;
-    //   await expect(
-    //     setAttributes(
-    //       minterA,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       verifiedAt,
-    //       issuedAt,
-    //       MINT_PRICE
-    //     )
-    //   ).to.be.revertedWith("VERIFIED_AT_CANNOT_BE_ZERO");
-    // });
+    it("fail - zero verifiedAt", async () => {
+      const verifiedAt = 0;
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.be.revertedWith("VERIFIED_AT_CANNOT_BE_ZERO");
+    });
 
-    // it("fail - future verifiedAt", async () => {
-    //   const blockNumAfter = await ethers.provider.getBlockNumber();
-    //   const currentBlock = await ethers.provider.getBlock(blockNumAfter);
-    //   const badVerifiedAt = currentBlock.timestamp + 100;
-    //   await expect(
-    //     setAttributes(
-    //       minterA,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       badVerifiedAt,
-    //       issuedAt,
-    //       MINT_PRICE
-    //     )
-    //   ).to.be.revertedWith("INVALID_VERIFIED_AT");
-    // });
+    it("fail - future verifiedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(blockNumAfter);
+      const badVerifiedAt = currentBlock.timestamp + 100;
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          badVerifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.be.revertedWith("INVALID_VERIFIED_AT");
+    });
 
-    // it("fail - zero issuedAt", async () => {
-    //   const badIssuedAt = 0;
-    //   await expect(
-    //     setAttributes(
-    //       minterA,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       verifiedAt,
-    //       badIssuedAt,
-    //       MINT_PRICE
-    //     )
-    //   ).to.be.revertedWith("ISSUED_AT_CANNOT_BE_ZERO");
-    // });
+    it("fail - zero issuedAt", async () => {
+      const badIssuedAt = 0;
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          badIssuedAt,
+          MINT_PRICE
+        )
+      ).to.be.revertedWith("ISSUED_AT_CANNOT_BE_ZERO");
+    });
 
-    // it("fail - issuedAt expired", async () => {
-    //   const blockNumAfter = await ethers.provider.getBlockNumber();
-    //   const currentBlock = await ethers.provider.getBlock(blockNumAfter);
-    //   const issuedAt = currentBlock.timestamp - 90400;
-    //   await expect(
-    //     setAttributes(
-    //       minterA,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       verifiedAt,
-    //       issuedAt,
-    //       MINT_PRICE
-    //     )
-    //   ).to.be.revertedWith("EXPIRED_ISSUED_AT");
-    // });
+    it("fail - issuedAt expired", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(blockNumAfter);
+      const issuedAt = currentBlock.timestamp - 90400;
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.be.revertedWith("EXPIRED_ISSUED_AT");
+    });
 
-    // it("fail - invalid fee", async () => {
-    //   const wrongFee = fee.sub(1);
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: wrongFee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_FEE");
-    // });
+    it("fail - invalid fee", async () => {
+      const wrongFee = fee.sub(1);
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: wrongFee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_FEE");
+    });
 
-    // it("fail - not an ISSUER_ROLE", async () => {
-    //   await governance.connect(admin).setIssuerStatus(issuer.address, false);
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+    it("fail - not an ISSUER_ROLE", async () => {
+      await governance.connect(admin).setIssuerStatus(issuer.address, false);
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - attrKeys.length != attrValues.length", async () => {
-    //   attrKeys.push(id("wrong"));
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("MISMATCH_LENGTH");
-    // });
+    it("fail - attrKeys.length != attrValues.length", async () => {
+      attrKeys.push(id("wrong"));
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("MISMATCH_LENGTH");
+    });
 
-    // it("fail - attrKeys.length != attrTypes.length", async () => {
-    //   attrTypes.push(id("wrong"));
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("MISMATCH_LENGTH");
-    // });
+    it("fail - attrKeys.length != attrTypes.length", async () => {
+      attrTypes.push(id("wrong"));
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("MISMATCH_LENGTH");
+    });
 
-    // it("fail - invalid signature (attrKeys)", async () => {
-    //   attrKeys[0] = id("wrong");
+    it("fail - invalid signature (attrKeys)", async () => {
+      attrKeys[0] = id("wrong");
 
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - invalid signature (attrValues)", async () => {
-    //   attrValues[0] = id("wrong");
+    it("fail - invalid signature (attrValues)", async () => {
+      attrValues[0] = id("wrong");
 
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - invalid signature (chainId)", async () => {
-    //   const wrongChainId = 1;
-    //   sigIssuer = await signSetAttributes(
-    //     minterA,
-    //     issuer,
-    //     attributes,
-    //     verifiedAt,
-    //     issuedAt,
-    //     fee,
-    //     wrongChainId,
-    //     tokenId
-    //   );
+    it("fail - invalid signature (chainId)", async () => {
+      const wrongChainId = 1;
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        wrongChainId,
+        tokenId
+      );
 
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - invalid signature (issuedAt)", async () => {
-    //   const wrongIssuedAt = issuedAt - 1;
+    it("fail - invalid signature (issuedAt)", async () => {
+      const wrongIssuedAt = issuedAt - 1;
 
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           wrongIssuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              wrongIssuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - invalid signature (verifiedAt)", async () => {
-    //   const wrongVerifiedAt = verifiedAt - 1;
+    it("fail - invalid signature (verifiedAt)", async () => {
+      const wrongVerifiedAt = verifiedAt - 1;
 
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           wrongVerifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              wrongVerifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - invalid signature (tokenId)", async () => {
-    //   const wrongTokenId = 2;
-    //   await governance.connect(admin).setEligibleTokenId(wrongTokenId, true);
+    it("fail - invalid signature (tokenId)", async () => {
+      const wrongTokenId = 2;
+      await governance.connect(admin).setEligibleTokenId(wrongTokenId, true);
 
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           wrongTokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              wrongTokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
 
-    // it("fail - mismatch sigAccount and sigIssuer", async () => {
-    //   sigAccount = await signAccount(minterB);
-    //   await expect(
-    //     passport
-    //       .connect(minterA)
-    //       .setAttributes(
-    //         [
-    //           attrKeys,
-    //           attrValues,
-    //           attrTypes,
-    //           tokenId,
-    //           verifiedAt,
-    //           issuedAt,
-    //           fee,
-    //         ],
-    //         sigIssuer,
-    //         sigAccount,
-    //         {
-    //           value: fee,
-    //         }
-    //       )
-    //   ).to.be.revertedWith("INVALID_ISSUER");
-    // });
+    it("fail - mismatch sigAccount and sigIssuer", async () => {
+      sigAccount = await signAccount(minterB);
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
   });
 });

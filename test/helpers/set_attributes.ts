@@ -70,7 +70,7 @@ export const setAttributes = async (
     passport
       .connect(account)
       .setAttributes(
-        [attrKeys, attrValues, attrTypes, QUAD_DID,  tokenId, verifiedAt, issuedAt, fee],
+        [attrKeys, attrValues, attrTypes, did,  tokenId, verifiedAt, issuedAt, fee],
         sigIssuer,
         sigAccount,
         {
