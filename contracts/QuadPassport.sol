@@ -101,6 +101,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         emit SetAttributeReceipt(_account, issuer, msg.value);
     }
 
+    /// @notice Internal function that validates supplied DID on updates do not change
+    /// @param _account address of entity being attested to
+    /// @param _did new DID value
     function _validateDid(address _account, bytes32 _did) internal {
         Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
         if(dIDAttrs.length > 0){
