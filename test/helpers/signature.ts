@@ -1,4 +1,5 @@
 import { keccak256 } from "ethers/lib/utils";
+import { id } from "ethers/lib/utils";
 
 const { ethers } = require("hardhat");
 const { Signer, DataHexString } = require("ethers");
@@ -8,6 +9,7 @@ const {
   ATTRIBUTE_AML,
   TOKEN_ID,
   DIGEST_TO_SIGN,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 export const signMessage = async (
@@ -27,6 +29,7 @@ export const signAccount = async (
   return sig;
 };
 
+
 export const signSetAttributes = async (
   account: typeof Signer,
   issuer: typeof Signer,
@@ -35,7 +38,8 @@ export const signSetAttributes = async (
   issuedAt: number,
   fee: any,
   blockId: number,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
+  did: any = QUAD_DID
 ): Promise<typeof DataHexString> => {
   let attrKeys: string[] = [];
   let attrValues: string[] = [];
@@ -46,7 +50,7 @@ export const signSetAttributes = async (
       attrKey = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32"],
-          [attributes[ATTRIBUTE_DID], k]
+          [did, k]
         )
       );
     } else {
@@ -67,6 +71,7 @@ export const signSetAttributes = async (
         "address",
         "bytes32[]",
         "bytes32[]",
+        "bytes32",
         "uint256",
         "uint256",
         "uint256",
@@ -77,6 +82,7 @@ export const signSetAttributes = async (
         account.address,
         attrKeys,
         attrValues,
+        did,
         verifiedAt,
         issuedAt,
         fee,
