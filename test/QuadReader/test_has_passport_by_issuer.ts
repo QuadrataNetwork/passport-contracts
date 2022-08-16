@@ -81,9 +81,9 @@ describe("QuadReader", async () => {
       expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address)).to.equal(true);
 
       expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_DID, issuer.address)).to.equal(false);
+      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_AML, issuer.address)).to.equal(false);
       expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_COUNTRY, issuer.address)).to.equal(false);
       expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_IS_BUSINESS, issuer.address)).to.equal(false);
-      await expect(reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_AML, issuer.address)).to.revertedWith('MISSING_DID')
     });
 
     it("returns false for issuers w/ no attestations", async () => {
