@@ -419,28 +419,28 @@ describe("QuadPassport.setAttributes", async () => {
       sigAccount = await signAccount(minterA);
     });
 
-    // it("fail - signature already used", async () => {
-    //   await setAttributes(
-    //     minterA,
-    //     issuer,
-    //     passport,
-    //     attributes,
-    //     verifiedAt,
-    //     issuedAt,
-    //     MINT_PRICE
-    //   );
-    //   await expect(
-    //     setAttributes(
-    //       minterA,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       verifiedAt,
-    //       issuedAt,
-    //       MINT_PRICE
-    //     )
-    //   ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
-    // });
+    it("fail - signature already used", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+    });
 
     it("fail - same wallet but diff DID)", async () => {
       await setAttributes(
