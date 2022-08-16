@@ -11,6 +11,7 @@ import "../QuadReader.sol";
 contract DeFi {
     event GetAttributeEvent(bytes32 _value, uint256 _epoch);
     event GetAttributeEvents(bytes32[] _attributes, uint256[] _epochs);
+    event GetAttributesEvents(IQuadPassportStore.Attribute[] _attributes);
 
     IQuadPassport public passport;
     QuadReader public reader;
@@ -18,6 +19,12 @@ contract DeFi {
     constructor(address _passport, QuadReader _reader) {
        passport = IQuadPassport(_passport);
        reader = _reader;
+    }
+
+    function deposit(bytes32 _attribute) public payable {
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: msg.value}(msg.sender, _attribute);
+        console.log(attributes.length);
+        emit GetAttributesEvents(attributes);
     }
 
     // /**

@@ -27,8 +27,6 @@ const { assertSetAttribute } = require("../helpers/asserts.ts");
 describe("QuadPassport.setAttributes", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
-  let reader: Contract; // eslint-disable-line no-unused-vars
-  let defi: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -61,7 +59,7 @@ describe("QuadPassport.setAttributes", async () => {
       issuerTreasury2,
       mockReader,
     ] = await ethers.getSigners();
-    [governance, passport, reader, defi] = await deployPassportEcosystem(
+    [governance, passport] = await deployPassportEcosystem(
       admin,
       [issuer, issuer2],
       treasury,
