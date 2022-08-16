@@ -223,12 +223,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         uint256 _tokenId
     ) external override {
         require(balanceOf(_msgSender(), _tokenId) >= 1, "CANNOT_BURN_ZERO_BALANCE");
-
+        // TODO: Add test
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            delete _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
-
-            // TODO: Remove positions from _position
+            IQuadPassportStore.Attribute[] attributes = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+            for(uint256 j = 0; j < attributes.length; j++){
+                address issuer = attributes[j].issuer;
+                delete attribute;
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), issuer))] = 0;
+            }
+            // TODO: Check gas optimization against
+            // _attributes[keccak256(abi.encode(_msgSender(), attributeType))] = [];
         }
 
         _burn(_msgSender(), _tokenId, 1);
@@ -253,11 +258,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             uint256 position = _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), _msgSender()))];
             if (position > 0) {
                 Attribute[] memory attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
-                attrs[position] = attrs[attrs.length - 1];
-                // TODO: Figure out why error message
-                // attrs.pop();
 
-                // TODO: Reset positions from _position
+                attrToDelete = attrs[position-1];
+                attrToSwap = attrs[attrs.length-1];
+
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToSwap.issuer))] = position;
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), _msgSender()))] = 0;
+
+                attrs[position-1] = attrToSwap;
+                attrs[attrs.length-1] = attrToDelete;
+
+                attrs.pop();
 
                 if (attrs.length > 0) {
                     isEmpty = false;
