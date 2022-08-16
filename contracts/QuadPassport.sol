@@ -264,7 +264,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 Attribute memory attrToSwap = attrs[attrs.length-1];
 
                 _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToSwap.issuer))] = position;
-                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), _msgSender()))] = 0;
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToDelete.issuer))] = 0;
 
                 attrs[position-1] = attrToSwap;
                 attrs[attrs.length-1] = attrToDelete;
