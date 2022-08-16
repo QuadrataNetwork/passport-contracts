@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { id, parseUnits, zeroPad, hexZeroPad } from "ethers/lib/utils";
-import { assertMint } from "../utils/verify";
+import { assertMint } from "../helpers/verify";
 
 const {
   ATTRIBUTE_AML,
@@ -18,14 +18,14 @@ const {
 
 const {
   deployPassportEcosystem,
-} = require("../utils/deployment_and_init.ts");
+} = require("../helpers/deployment_and_init.ts");
 
 const {
   assertGetAttribute,
   assertGetAttributeFree,
-} = require("../utils/verify.ts");
+} = require("../helpers/verify.ts");
 
-const { signMint, signMessage } = require("../utils/signature.ts");
+const { signMint, signMessage } = require("../helpers/signature.ts");
 
 describe("QuadPassport", async () => {
   let passport: Contract;
@@ -100,7 +100,6 @@ describe("QuadPassport", async () => {
 
   describe("burnPassport", async () => {
     it("success - mint from issuerA and issuer B, burnPassport, check that all account level values are gone", async () => {
-
       const sig = await signMint(
         issuerB,
         minterA,
