@@ -1,4 +1,5 @@
 import { keccak256 } from "ethers/lib/utils";
+import { formatBytes32String, id } from "ethers/lib/utils";
 
 const { ethers } = require("hardhat");
 const { Signer, DataHexString } = require("ethers");
@@ -27,6 +28,9 @@ export const signAccount = async (
   return sig;
 };
 
+const QUAD_DID = formatBytes32String("did:quad:123456789abcdefghi");
+
+
 export const signSetAttributes = async (
   account: typeof Signer,
   issuer: typeof Signer,
@@ -46,7 +50,7 @@ export const signSetAttributes = async (
       attrKey = ethers.utils.keccak256(
         ethers.utils.defaultAbiCoder.encode(
           ["bytes32", "bytes32"],
-          [attributes[ATTRIBUTE_DID], k]
+          [QUAD_DID, k]
         )
       );
     } else {

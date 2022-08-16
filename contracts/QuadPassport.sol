@@ -74,11 +74,39 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         bytes calldata _sigIssuer
     ) internal {
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
+        bytes32 _attrKey;
+        bytes32 _attrType;
+
+        // Handle DID
+        if(_config.did != bytes32(0)){
+            _attrKey = _computeAttrKey(_account, ATTRIBUTE_DID, _config.did);
+            _attrType = ATTRIBUTE_DID;
+
+            uint256 issuerPosition = _position[keccak256(abi.encode(_attrKey, issuer))];
+            Attribute memory attr = Attribute({
+                value:  _config.did,
+                epoch: _config.verifiedAt,
+                issuer: issuer
+            });
+
+            if (issuerPosition == 0) {
+            // Means the issuer hasn't yet attested to that attribute type
+                _attributes[_attrKey].push(attr);
+                _position[keccak256(abi.encode(_attrKey, issuer))] = _attributes[_attrKey].length;
+            } else {
+                // Issuer already attested to that attribute - override
+                _attributes[_attrKey][issuerPosition] = attr;
+            }
+
+        }
+
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
             // Verify attrKeys computation
-            bytes32 _attrKey = _config.attrKeys[i];
-            bytes32 _attrType = _config.attrTypes[i];
-            _verifyAttrKey(_account, _attrType, _attrKey);
+
+            _attrKey = _config.attrKeys[i];
+            _attrType = _config.attrTypes[i];
+
+            _verifyAttrKey(_account, _attrType, _attrKey, _config.did);
 
             uint256 issuerPosition = _position[keccak256(abi.encode(_config.attrKeys[i], issuer))];
             Attribute memory attr = Attribute({
@@ -106,8 +134,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @param _account Address of the Quadrata Passport holder
     /// @param _attrType bytes32 of the attribute type
     /// @param _attrKey bytes32 of the attrKey to compare against/verify
-    function _verifyAttrKey(address _account, bytes32 _attrType, bytes32 _attrKey) internal view {
-        bytes32 expectedAttrKey = _computeAttrKey(_account, _attrType);
+    function _verifyAttrKey(address _account, bytes32 _attrType, bytes32 _attrKey, bytes32 _did) internal view {
+        bytes32 expectedAttrKey = _computeAttrKey(_account, _attrType, _did);
 
         require(_attrKey == expectedAttrKey, "MISMATCH_ATTR_KEY");
     }
@@ -160,14 +188,18 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @notice Compute the attrKey for the mapping `_attributes`
     /// @param _account address of the wallet owner
     /// @param _attribute attribute type (ex: keccak256("COUNTRY"))
-    function _computeAttrKey(address _account, bytes32 _attribute) internal view returns(bytes32) {
+    function _computeAttrKey(address _account, bytes32 _attribute, bytes32 _did) internal view returns(bytes32) {
         if (governance.eligibleAttributes(_attribute)) {
             return keccak256(abi.encode(_account, _attribute));
         }
         if (governance.eligibleAttributesByDID(_attribute)){
-            Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-            require(dIDAttrs.length > 0 && dIDAttrs[0].value != bytes32(0), "MISSING_DID");
-            return keccak256(abi.encode(dIDAttrs[0].value, _attribute));
+            if(_did == bytes32(0)){
+                Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
+                require(dIDAttrs.length > 0 && dIDAttrs[0].value != bytes32(0), "MISSING_DID");
+                _did = dIDAttrs[0].value;
+
+            }
+            return keccak256(abi.encode(_did, _attribute));
         }
 
         require(false, "ATTRIBUTE_NOT_ELIGIBLE");
@@ -235,7 +267,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) public view override returns (Attribute[] memory) {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
 
-        bytes32 attrKey = _computeAttrKey(_account, _attribute);
+        bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0));
         return _attributes[attrKey];
     }
 
