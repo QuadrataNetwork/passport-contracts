@@ -38,7 +38,6 @@ describe("QuadPassport", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract;
-  let usdc: Contract;
   let defi: Contract;
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
@@ -55,8 +54,8 @@ describe("QuadPassport", async () => {
   let aml: string;
   let isBusiness: string;
   let country: string;
-  let issuedAt: number;
-  let verifiedAt: number;
+  let verifiedAt: number = Math.floor(new Date().getTime() / 1000);
+  let issuedAt: number = Math.floor(new Date().getTime() / 1000);
   const attributes: any = {
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
@@ -69,8 +68,6 @@ describe("QuadPassport", async () => {
     aml = id("LOW");
     country = id("FRANCE");
     isBusiness = id("FALSE");
-    verifiedAt = Math.floor(new Date().getTime() / 1000);
-    issuedAt = Math.floor(new Date().getTime() / 1000);
 
     [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, dataChecker, issuerB, issuerBTreasury] =
       await ethers.getSigners();
@@ -81,7 +78,6 @@ describe("QuadPassport", async () => {
       [issuerTreasury],
       baseURI
     );
-
 
     await setAttributes(
       minterA,
@@ -94,7 +90,6 @@ describe("QuadPassport", async () => {
     )
 
     await governance.connect(admin).grantRole(id("READER_ROLE"), dataChecker.address);
-    // await governance.connect(admin).setIssuer(issuerB.address, issuerBTreasury.address)
   });
 
 
