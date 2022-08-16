@@ -22,6 +22,7 @@ contract DeFi {
     }
 
     function deposit(bytes32 _attribute) public payable {
+        console.log(msg.value);
         IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: msg.value}(msg.sender, _attribute);
         console.log(attributes.length);
         emit GetAttributesEvents(attributes);

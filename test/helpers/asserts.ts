@@ -8,6 +8,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
+  QUAD_DID,
   TOKEN_ID,
   PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
   PRICE_PER_ATTRIBUTES_ETH,
@@ -21,7 +22,8 @@ export const assertSetAttribute = async (
   verifiedAt: number[],
   fee: any[],
   mockReader: SignerWithAddress,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
+  did: string = QUAD_DID
 ) => {
   // Safety Check
   expect(issuers.length).to.equal(attributes.length);
@@ -54,6 +56,18 @@ export const assertSetAttribute = async (
         expect(attrResp.epoch).equals(verifiedAt[j]);
       }
     });
+
+    // Assert DID
+    const response = await passport
+      .connect(mockReader)
+      .attributes(account.address, ATTRIBUTE_DID);
+    expect(response.length).equals(issuers.length);
+    for (let j = 0; j < response.length; j++) {
+      const attrResp = response[j];
+      expect(attrResp.value).equals(QUAD_DID);
+      expect(attrResp.issuer).equals(issuers[j].address);
+      expect(attrResp.epoch).equals(verifiedAt[j]);
+    }
   }
 
   expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
@@ -74,7 +88,6 @@ export const assertGetAttributes = async (
   expect(issuers.length).to.equal(verifiedAt.length);
 
   const attrTypeCounter: any = {};
-  let queryFee: any = ethers.utils.parseEther("0");
 
   for (let i = 0; i < issuers.length; i++) {
     Object.keys(attributes[i]).forEach((attrType) => {
@@ -85,6 +98,7 @@ export const assertGetAttributes = async (
   for (let i = 0; i < issuers.length; i++) {
     Object.keys(attributes[i]).forEach(async (attrType) => {
       const initialBalance = await ethers.provider.getBalance(reader.address);
+      let queryFee: any;
       if (isBusiness) {
         queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType];
       } else {
@@ -111,11 +125,14 @@ export const assertGetAttributes = async (
       const expectedEpochs = [];
       const expectedIssuers = [];
 
+      const bla = await reader.queryFee(account.address, attrType);
+
       for (let j = 0; j < attrTypeCounter[attrType]; j++) {
         expectedValues.push(attributes[j][attrType]);
         expectedEpochs.push(issuers[j].address);
         expectedIssuers.push(verifiedAt[j]);
       }
+      console.log({ bla, expectedValues, expectedEpochs, expectedIssuers });
 
       await expect(await defi.deposit(attrType, { value: queryFee }))
         .to.emit(defi, "GetAttributeEvent")
