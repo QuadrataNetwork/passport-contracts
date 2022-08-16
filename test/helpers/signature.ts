@@ -1,5 +1,5 @@
 import { keccak256 } from "ethers/lib/utils";
-import { formatBytes32String, id } from "ethers/lib/utils";
+import { id } from "ethers/lib/utils";
 
 const { ethers } = require("hardhat");
 const { Signer, DataHexString } = require("ethers");
@@ -9,6 +9,7 @@ const {
   ATTRIBUTE_AML,
   TOKEN_ID,
   DIGEST_TO_SIGN,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 export const signMessage = async (
@@ -27,8 +28,6 @@ export const signAccount = async (
   const sig = await signer.signMessage(ethers.utils.arrayify(digest));
   return sig;
 };
-
-const QUAD_DID = formatBytes32String("did:quad:123456789abcdefghi");
 
 
 export const signSetAttributes = async (

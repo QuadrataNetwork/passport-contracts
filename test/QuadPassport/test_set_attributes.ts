@@ -13,6 +13,7 @@ const {
   READER_ROLE,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -272,7 +273,6 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Issuer 2
       const attributeByIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -300,7 +300,6 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Update Issuer 1
       const updatedAttributes: any = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("5"),
         [ATTRIBUTE_COUNTRY]: id("BE"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
@@ -328,7 +327,6 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Update Issuer 2
       const updatedAttrIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("7"),
         [ATTRIBUTE_COUNTRY]: id("DE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -444,6 +442,7 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
+    // TODO: HUY
     it("fail - same wallet but diff DID)", async () => {
       await setAttributes(
         minterA,

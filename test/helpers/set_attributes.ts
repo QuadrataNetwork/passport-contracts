@@ -2,18 +2,17 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { formatBytes32String, id } from "ethers/lib/utils";
+import { id } from "ethers/lib/utils";
 
 const {
   ATTRIBUTE_DID,
   ATTRIBUTE_AML,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const { signSetAttributes, signAccount } = require("./signature.ts");
-
-const QUAD_DID = formatBytes32String("did:quad:123456789abcdefghi");
 
 export const setAttributes = async (
   account: SignerWithAddress,
