@@ -17,7 +17,10 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-const { setAttributes } = require("../helpers/set_attributes.ts");
+const {
+  setAttributes,
+  assertGetAttributes,
+} = require("../helpers/set_attributes.ts");
 
 describe("QuadReader.getAttributes", async () => {
   let passport: Contract;
@@ -35,7 +38,7 @@ describe("QuadReader.getAttributes", async () => {
     issuerTreasury2: SignerWithAddress,
     mockReader: SignerWithAddress;
 
-  let issuedAt: number;
+  let issuedAt: number, verifiedAt: number;
   const attributes: any = {
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
@@ -57,12 +60,13 @@ describe("QuadReader.getAttributes", async () => {
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
-      [issuer],
+      [issuer, issuer2],
       treasury,
-      [issuerTreasury]
+      [issuerTreasury, issuerTreasury2]
     );
 
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
     await setAttributes(
       minterA,
@@ -76,452 +80,66 @@ describe("QuadReader.getAttributes", async () => {
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
 
-  // describe("getAttributeFreeExcluding", async () => {
-  //   it("success - exclude 1 issuer", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[1].address, signers[1].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[2].address, signers[2].address);
-  //     expect(await governance.getIssuersLength()).to.equal(4);
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[1],
-  //       signers[1],
-  //       passport,
-  //       id("MINTER_A_BRAVO"),
-  //       id("MEDIUM"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       12,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[2],
-  //       signers[2],
-  //       passport,
-  //       id("MINTER_A_CHARLIE"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       10,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
+  describe("QuadReader.getAttributes (SUCCESS CASES)", async () => {
+    it("success - 1 issuer", async () => {
+      await assertGetAttributes(
+        minterA,
+        [issuer],
+        reader,
+        [attributes],
+        [verifiedAt]
+      );
+    });
 
-  //     await assertGetAttributeFreeExcluding(
-  //       [issuer.address],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [id("LOW"), id("MEDIUM"), id("LOW")],
-  //       [BigNumber.from(15), BigNumber.from(12), BigNumber.from(10)]
-  //     );
-  //   });
+    it("success with 2 issuers", async () => {
+      const attrIssuers2 = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_AML]: id("10"),
+      };
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attrIssuers2,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE
+      );
 
-  //   it("success - no data available by DID (exclude 1)", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
+      await assertGetAttributes(
+        minterA,
+        [issuer, issuer2],
+        reader,
+        [attributes, attrIssuers2],
+        [verifiedAt, verifiedAt + 1]
+      );
+    });
 
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       ethers.constants.HashZero,
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
+    it("success no attributes", async () => {
+      await assertGetAttributes(minterB, [], reader, [attributes], []);
+    });
 
-  //     expect(await governance.getIssuersLength()).to.equal(2);
+    it("fail - a user without READER_ROLE may not query attributes", async () => {
+      expect(
+        await governance.connect(admin).hasRole(READER_ROLE, minterB.address)
+      ).equals(false);
 
-  //     await assertGetAttributeFreeExcluding(
-  //       [issuer.address],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [],
-  //       []
-  //     );
-  //   });
-
-  //   it("success - deactivate all issuers - exclude 1", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[1].address, signers[1].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[2].address, signers[2].address);
-  //     expect(await governance.getIssuersLength()).to.equal(4);
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[1],
-  //       signers[1],
-  //       passport,
-  //       id("MINTER_A_BRAVO"),
-  //       id("MEDIUM"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       12,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[2],
-  //       signers[2],
-  //       passport,
-  //       id("MINTER_A_CHARLIE"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       10,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuerStatus(signers[0].address, ISSUER_STATUS.DEACTIVATED);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuerStatus(signers[1].address, ISSUER_STATUS.DEACTIVATED);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuerStatus(signers[2].address, ISSUER_STATUS.DEACTIVATED);
-
-  //     await assertGetAttributeFreeExcluding(
-  //       [issuer.address],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [],
-  //       []
-  //     );
-  //   });
-
-  //   it("success - deactivate all but 1 issuer - exclude 0", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[1].address, signers[1].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[2].address, signers[2].address);
-  //     expect(await governance.getIssuersLength()).to.equal(4);
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[1],
-  //       signers[1],
-  //       passport,
-  //       id("MINTER_A_BRAVO"),
-  //       id("MEDIUM"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       12,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[2],
-  //       signers[2],
-  //       passport,
-  //       id("MINTER_A_CHARLIE"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       10,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuerStatus(signers[0].address, ISSUER_STATUS.DEACTIVATED);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuerStatus(signers[1].address, ISSUER_STATUS.DEACTIVATED);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuerStatus(signers[2].address, ISSUER_STATUS.DEACTIVATED);
-
-  //     await assertGetAttributeFreeExcluding(
-  //       [],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [aml],
-  //       [BigNumber.from(issuedAt)]
-  //     );
-  //   });
-
-  //   it("success - exclude 3 issuers", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[1].address, signers[1].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[2].address, signers[2].address);
-  //     expect(await governance.getIssuersLength()).to.equal(4);
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[1],
-  //       signers[1],
-  //       passport,
-  //       id("MINTER_A_BRAVO"),
-  //       id("MEDIUM"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       12,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[2],
-  //       signers[2],
-  //       passport,
-  //       id("MINTER_A_CHARLIE"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       10,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-
-  //     await assertGetAttributeFreeExcluding(
-  //       [issuer.address, signers[0].address, signers[2].address],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [id("MEDIUM")],
-  //       [BigNumber.from(12)]
-  //     );
-  //   });
-
-  //   it("success - exclude 0 issuers", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[1].address, signers[1].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[2].address, signers[2].address);
-  //     expect(await governance.getIssuersLength()).to.equal(4);
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[1],
-  //       signers[1],
-  //       passport,
-  //       id("MINTER_A_BRAVO"),
-  //       id("MEDIUM"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       12,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[2],
-  //       signers[2],
-  //       passport,
-  //       id("MINTER_A_CHARLIE"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       10,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-
-  //     await assertGetAttributeFreeExcluding(
-  //       [],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [aml, id("LOW"), id("MEDIUM"), id("LOW")],
-  //       [
-  //         BigNumber.from(issuedAt),
-  //         BigNumber.from(15),
-  //         BigNumber.from(12),
-  //         BigNumber.from(10),
-  //       ]
-  //     );
-  //   });
-
-  //   it("success - exclude all 4 issuers", async () => {
-  //     const signers = await ethers.getSigners();
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[0].address, signers[0].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[1].address, signers[1].address);
-  //     await governance
-  //       .connect(admin)
-  //       .setIssuer(signers[2].address, signers[2].address);
-  //     expect(await governance.getIssuersLength()).to.equal(4);
-  //     await assertMint(
-  //       minterA,
-  //       signers[0],
-  //       signers[0],
-  //       passport,
-  //       id("MINTER_A_ALPHA"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       15,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[1],
-  //       signers[1],
-  //       passport,
-  //       id("MINTER_A_BRAVO"),
-  //       id("MEDIUM"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       12,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-  //     await assertMint(
-  //       minterA,
-  //       signers[2],
-  //       signers[2],
-  //       passport,
-  //       id("MINTER_A_CHARLIE"),
-  //       id("LOW"),
-  //       id("US"),
-  //       id("FALSE"),
-  //       10,
-  //       1,
-  //       { newIssuerMint: true }
-  //     );
-
-  //     await assertGetAttributeFreeExcluding(
-  //       [
-  //         issuer.address,
-  //         signers[0].address,
-  //         signers[1].address,
-  //         signers[2].address,
-  //       ],
-  //       minterA,
-  //       defi,
-  //       passport,
-  //       reader,
-  //       ATTRIBUTE_AML,
-  //       [],
-  //       []
-  //     );
-  //   });
+      // TODO: Figure out why it's wrong exception thrown
+      await expect(
+        passport.connect(minterB).attributes(minterA.address, ATTRIBUTE_DID)
+      ).to.be.revertedWith("INVALID_READER");
+      await expect(
+        passport.connect(minterB).attributes(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.be.revertedWith("INVALID_READER");
+      await expect(
+        passport
+          .connect(minterB)
+          .attributes(minterA.address, ATTRIBUTE_IS_BUSINESS)
+      ).to.be.revertedWith("INVALID_READER");
+    });
+  });
 
   //   it("fail - getAttributesFreeExcluding(AML) - wallet not found", async () => {
   //     const wallet = ethers.Wallet.createRandom();

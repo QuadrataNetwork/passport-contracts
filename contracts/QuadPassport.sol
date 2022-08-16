@@ -94,6 +94,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 _config.attrValues[i],
                 issuer,
                 _config.verifiedAt);
+
         }
 
         if(balanceOf(_account, _config.tokenId) == 0)
@@ -135,7 +136,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             _position[keccak256(abi.encode(_attrKey, _issuer))] = _attributes[_attrKey].length;
         } else {
             // Issuer already attested to that attribute - override
-            _attributes[_attrKey][issuerPosition] = attr;
+            _attributes[_attrKey][issuerPosition-1] = attr;
         }
     }
 
