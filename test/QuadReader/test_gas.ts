@@ -40,7 +40,6 @@ describe("QuadReader", async () => {
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-    // [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
   };
 
   beforeEach(async () => {

@@ -82,22 +82,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             _attrKey = _computeAttrKey(_account, ATTRIBUTE_DID, _config.did);
             _attrType = ATTRIBUTE_DID;
 
-            uint256 issuerPosition = _position[keccak256(abi.encode(_attrKey, issuer))];
-            Attribute memory attr = Attribute({
-                value:  _config.did,
-                epoch: _config.verifiedAt,
-                issuer: issuer
-            });
-
-            if (issuerPosition == 0) {
-            // Means the issuer hasn't yet attested to that attribute type
-                _attributes[_attrKey].push(attr);
-                _position[keccak256(abi.encode(_attrKey, issuer))] = _attributes[_attrKey].length;
-            } else {
-                // Issuer already attested to that attribute - override
-                _attributes[_attrKey][issuerPosition] = attr;
-            }
-
+            _writeAttrToStorage(_attrKey, _attrType, _config.did, issuer, _config.verifiedAt);
         }
 
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
@@ -107,27 +92,36 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             _attrType = _config.attrTypes[i];
 
             _verifyAttrKey(_account, _attrType, _attrKey, _config.did);
-
-            uint256 issuerPosition = _position[keccak256(abi.encode(_config.attrKeys[i], issuer))];
-            Attribute memory attr = Attribute({
-                value: _config.attrValues[i],
-                epoch: _config.verifiedAt,
-                issuer: issuer
-            });
-
-            if (issuerPosition == 0) {
-            // Means the issuer hasn't yet attested to that attribute type
-                _attributes[_config.attrKeys[i]].push(attr);
-                _position[keccak256(abi.encode(_config.attrKeys[i], issuer))] = _attributes[_config.attrKeys[i]].length;
-            } else {
-                // Issuer already attested to that attribute - override
-                _attributes[_config.attrKeys[i]][issuerPosition] = attr;
-            }
+            _writeAttrToStorage(_attrKey, _attrType, _config.attrValues[i], issuer, _config.verifiedAt);
         }
 
         if(balanceOf(_account, _config.tokenId) == 0)
             _mint(_account, _config.tokenId, 1);
         emit SetAttributeReceipt(_account, issuer, msg.value);
+    }
+
+    function _writeAttrToStorage(
+        bytes32 _attrKey,
+        bytes32 _attrType,
+        bytes32 _attrValue,
+        address _issuer,
+        uint256 _verifiedAt
+    ) internal {
+        uint256 issuerPosition = _position[keccak256(abi.encode(_attrKey, _issuer))];
+        Attribute memory attr = Attribute({
+            value:  _attrValue,
+            epoch: _verifiedAt,
+            issuer: _issuer
+        });
+
+        if (issuerPosition == 0) {
+        // Means the issuer hasn't yet attested to that attribute type
+            _attributes[_attrKey].push(attr);
+            _position[keccak256(abi.encode(_attrKey, _issuer))] = _attributes[_attrKey].length;
+        } else {
+            // Issuer already attested to that attribute - override
+            _attributes[_attrKey][issuerPosition] = attr;
+        }
     }
 
     /// @notice Verify that the attrKey has been correctly computed based on account and attrType
