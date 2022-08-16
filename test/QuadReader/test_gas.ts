@@ -66,8 +66,6 @@ describe("QuadReader", async () => {
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
-    console.log({ attributes });
-
     await setAttributes(
       minterA,
       issuer,
