@@ -17,10 +17,9 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-const {
-  setAttributes,
-  assertGetAttributes,
-} = require("../helpers/set_attributes.ts");
+const { setAttributes } = require("../helpers/set_attributes.ts");
+
+const { assertGetAttributes } = require("../helpers/asserts.ts");
 
 describe("QuadReader.getAttributes", async () => {
   let passport: Contract;
@@ -35,8 +34,7 @@ describe("QuadReader.getAttributes", async () => {
     issuer: SignerWithAddress,
     issuer2: SignerWithAddress,
     issuerTreasury: SignerWithAddress,
-    issuerTreasury2: SignerWithAddress,
-    mockReader: SignerWithAddress;
+    issuerTreasury2: SignerWithAddress;
 
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
@@ -56,7 +54,6 @@ describe("QuadReader.getAttributes", async () => {
       treasury,
       issuerTreasury,
       issuerTreasury2,
-      mockReader,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
@@ -73,19 +70,19 @@ describe("QuadReader.getAttributes", async () => {
       issuer,
       passport,
       attributes,
+      verifiedAt,
       issuedAt,
       MINT_PRICE
     );
-
-    await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
 
   describe("QuadReader.getAttributes (SUCCESS CASES)", async () => {
     it("success - 1 issuer", async () => {
       await assertGetAttributes(
         minterA,
-        [issuer],
         reader,
+        defi,
+        [issuer],
         [attributes],
         [verifiedAt]
       );
@@ -107,7 +104,6 @@ describe("QuadReader.getAttributes", async () => {
         issuedAt + 1,
         MINT_PRICE
       );
-
       await assertGetAttributes(
         minterA,
         [issuer, issuer2],
@@ -117,28 +113,11 @@ describe("QuadReader.getAttributes", async () => {
       );
     });
 
-    it("success no attributes", async () => {
-      await assertGetAttributes(minterB, [], reader, [attributes], []);
-    });
+    // it("success no attributes", async () => {
+    //   await assertGetAttributes(minterB, [], reader, [attributes], []);
+    // });
 
-    it("fail - a user without READER_ROLE may not query attributes", async () => {
-      expect(
-        await governance.connect(admin).hasRole(READER_ROLE, minterB.address)
-      ).equals(false);
-
-      // TODO: Figure out why it's wrong exception thrown
-      await expect(
-        passport.connect(minterB).attributes(minterA.address, ATTRIBUTE_DID)
-      ).to.be.revertedWith("INVALID_READER");
-      await expect(
-        passport.connect(minterB).attributes(minterA.address, ATTRIBUTE_COUNTRY)
-      ).to.be.revertedWith("INVALID_READER");
-      await expect(
-        passport
-          .connect(minterB)
-          .attributes(minterA.address, ATTRIBUTE_IS_BUSINESS)
-      ).to.be.revertedWith("INVALID_READER");
-    });
+    // it("fail - a user without READER_ROLE may not query attributes", async () => {});
   });
 
   //   it("fail - getAttributesFreeExcluding(AML) - wallet not found", async () => {

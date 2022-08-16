@@ -62,8 +62,9 @@ export const assertSetAttribute = async (
 
 export const assertGetAttributes = async (
   account: SignerWithAddress,
-  issuers: SignerWithAddress[],
   reader: Contract,
+  defi: Contract,
+  issuers: SignerWithAddress[],
   attributes: any[],
   verifiedAt: number[],
   isBusiness: boolean = false
@@ -84,45 +85,84 @@ export const assertGetAttributes = async (
   for (let i = 0; i < issuers.length; i++) {
     Object.keys(attributes[i]).forEach(async (attrType) => {
       const initialBalance = await ethers.provider.getBalance(reader.address);
-      const response = await reader.getAttributes(account.address, attrType);
-
-      expect(response.length).equals(attrTypeCounter[attrType]);
-
-      for (let j = 0; j < response.length; j++) {
-        const attrResp = response[j];
-        expect(attrResp.value).equals(attributes[j][attrType]);
-        expect(attrResp.issuer).equals(issuers[j].address);
-        expect(attrResp.epoch).equals(verifiedAt[j]);
-      }
-
-      // Check QuadReader balance
       if (isBusiness) {
         queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType];
       } else {
         queryFee = PRICE_PER_ATTRIBUTES_ETH[attrType];
       }
+
+      console.log({ queryFee, attrType, initialBalance });
+
+      // Verify events
+      // const tx = await reader.getAttributes(account.address, attrType, {
+      //   value: queryFee,
+      // });
+
+      // // Verify return value with callStatic
+
+      // const receipt = await tx.wait();
+      // console.log(receipt);
+      // TODO: Check logs being emitted
+
+      console.log("HELLO FAB");
+
+      // Verify calling from another smart contract (ex: DeFi.sol)
+      const expectedValues = [];
+      const expectedEpochs = [];
+      const expectedIssuers = [];
+
+      for (let j = 0; j < attrTypeCounter[attrType]; j++) {
+        expectedValues.push(attributes[j][attrType]);
+        expectedEpochs.push(issuers[j].address);
+        expectedIssuers.push(verifiedAt[j]);
+      }
+
+      await expect(await defi.deposit(attrType, { value: queryFee }))
+        .to.emit(defi, "GetAttributeEvent")
+        .withArgs([expectedValues, expectedEpochs, expectedIssuers]);
+
       expect(await ethers.provider.getBalance(reader.address)).to.equal(
         initialBalance.add(queryFee)
       );
+
+      //       for (let j = 0; j < response.length; j++) {
+      //         const attrResp = response[j];
+      //         expect(attrResp.value).equals(attributes[j][attrType]);
+      //         expect(attrResp.issuer).equals(issuers[j].address);
+      //         expect(attrResp.epoch).equals(verifiedAt[j]);
+      //       }
+
+      // Check QuadReader balance
+      // expect(await ethers.provider.getBalance(reader.address)).to.equal(
+      //   initialBalance.add(queryFee)
+      // );
     });
   }
 
   // No issuers & no existing attestation for account
-  if (issuers.length === 0) {
-    Object.keys([
-      ATTRIBUTE_DID,
-      ATTRIBUTE_AML,
-      ATTRIBUTE_COUNTRY,
-      ATTRIBUTE_IS_BUSINESS,
-    ]).forEach(async (attrType) => {
-      const initialBalance = await ethers.provider.getBalance(reader.address);
-      const response = await reader.getAttributes(account.address, attrType);
+  // if (issuers.length === 0) {
+  //   Object.keys([
+  //     ATTRIBUTE_DID,
+  //     ATTRIBUTE_AML,
+  //     ATTRIBUTE_COUNTRY,
+  //     ATTRIBUTE_IS_BUSINESS,
+  //   ]).forEach(async (attrType) => {
+  //     const initialBalance = await ethers.provider.getBalance(reader.address);
+  //     let queryFee: any;
+  //     if (isBusiness) {
+  //       queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType];
+  //     } else {
+  //       queryFee = PRICE_PER_ATTRIBUTES_ETH[attrType];
+  //     }
+  //     const response = await reader.getAttributes(account.address, attrType, {
+  //       value: queryFee,
+  //     });
 
-      expect(response.length).equals(0);
+  //     expect(response.length).equals(0);
 
-      expect(await ethers.provider.getBalance(reader.address)).to.equal(
-        initialBalance
-      );
-    });
-  }
+  //     expect(await ethers.provider.getBalance(reader.address)).to.equal(
+  //       initialBalance
+  //     );
+  //   });
+  // }
 };
