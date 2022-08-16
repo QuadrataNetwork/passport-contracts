@@ -202,7 +202,7 @@ import "hardhat/console.sol";
        return passport.attributes(_account, _attribute).length;
     }
 
-    // TODO: Add a function `hasPassportByIssuer()`
+    // TODO: Add a function `hasPassportByIssuer(address _accout, bytes32 _attribute, address _issuer)`
 
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
     /// @param _to address of either an issuer's treasury or the Quadrata treasury

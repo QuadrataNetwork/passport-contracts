@@ -32,22 +32,22 @@ export const assertSetAttribute = async (
     totalFee.add(fee[i]);
   }
 
-  Object.keys(attributes[i]).forEach(async (attrType) => {
-    const response = await passport
-      .connect(mockReader)
-      .attributes(account.address, attrType);
+  for (let i = 0; i < issuers.length; i++) {
+    Object.keys(attributes[i]).forEach(async (attrType) => {
+      const response = await passport
+        .connect(mockReader)
+        .attributes(account.address, attrType);
 
-    expect(response.length).equals(attrTypeCounter[attrType]);
+      expect(response.length).equals(attrTypeCounter[attrType]);
 
-    console.log({ response });
-
-    for (let i = 0; i < response.length; i++) {
-      const attrResp = response[i];
-      expect(attrResp[i].value).equals(attributes[i][attrType]);
-      expect(attrResp[i].issuer).equals(issuers[i].address);
-      expect(attrResp[i].epoch).equals(verifiedAt[i]);
-    }
-  });
+      for (let j = 0; j < response.length; j++) {
+        const attrResp = response[j];
+        expect(attrResp.value).equals(attributes[j][attrType]);
+        expect(attrResp.issuer).equals(issuers[j].address);
+        expect(attrResp.epoch).equals(verifiedAt[j]);
+      }
+    });
+  }
 
   expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
   expect(await ethers.provider.getBalance(passport.address)).to.equal(

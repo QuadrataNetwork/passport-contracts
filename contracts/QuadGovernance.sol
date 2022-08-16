@@ -22,21 +22,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
         __AccessControl_init_unchained();
 
-        _eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
-
-        // Add DID, COUNTRY, AML as valid attributes
-        _eligibleAttributes[keccak256("DID")] = true;
-        _eligibleAttributes[keccak256("COUNTRY")] = true;
-        _eligibleAttributes[keccak256("IS_BUSINESS")] = true;
-        _eligibleAttributesByDID[keccak256("AML")] = true;
-
-        _eligibleAttributesArray.push(keccak256("DID"));
-        _eligibleAttributesArray.push(keccak256("COUNTRY"));
-        _eligibleAttributesArray.push(keccak256("IS_BUSINESS"));
-
-        // Revenue split with issuers
-        _revSplitIssuer = 50;  // 50%
-
         // Set Roles
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
@@ -95,6 +80,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         require(_eligibleTokenId[_tokenId] != _eligibleStatus, "TOKEN_ELIGIBILITY_ALREADY_SET");
 
         _eligibleTokenId[_tokenId] = _eligibleStatus;
+
         emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }
 

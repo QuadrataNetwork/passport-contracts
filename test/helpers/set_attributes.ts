@@ -20,8 +20,8 @@ export const setAttributes = async (
   verifiedAt: number,
   issuedAt: number,
   fee: any,
-  blockId: number = HARDHAT_CHAIN_ID,
-  tokenId: number = TOKEN_ID
+  tokenId: number = TOKEN_ID,
+  blockId: number = HARDHAT_CHAIN_ID
 ) => {
   const attrKeys: string[] = [];
   const attrValues: string[] = [];

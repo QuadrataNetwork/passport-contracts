@@ -35,21 +35,6 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
     }
 
     /**
-     * @dev balanceOf combining all existing tokenId
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     */
-    function balanceOfAll(address account) public view virtual override returns (uint256) {
-        require(account != address(0), "ERC1155: address zero is not a valid owner");
-        uint256 counter = 0;
-        for (uint256 i = 0; i < _idCounter; i++) {
-            counter += _balances[i][account];
-        }
-        return counter;
-    }
-    /**
      * @dev Sets a new URI for all token types, by relying on the token type ID
      * substitution mechanism
      * https://eips.ethereum.org/EIPS/eip-1155#metadata[defined in the EIP].
@@ -73,6 +58,7 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
 
         emit URI(newuri, tokenId);
     }
+
     /**
      * @dev Creates `amount` tokens of token type `id`, and assigns them to `to`.
      *
