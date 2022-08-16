@@ -20,7 +20,6 @@ export const assertSetAttribute = async (
   expect(issuers.length).to.equal(verifiedAt.length);
   expect(issuers.length).to.equal(fee.length);
 
-  const initialBalance = await ethers.provider.getBalance(passport.address);
   const attrTypeCounter: any = {};
   const totalFee: any = ethers.utils.parseEther("0");
 
@@ -50,7 +49,5 @@ export const assertSetAttribute = async (
   }
 
   expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
-  expect(await ethers.provider.getBalance(passport.address)).to.equal(
-    initialBalance.add(totalFee)
-  );
+  expect(await ethers.provider.getBalance(passport.address)).to.equal(totalFee);
 };

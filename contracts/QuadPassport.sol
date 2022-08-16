@@ -33,6 +33,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     fallback() external payable {}
 
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
+    /// @notice If passing a `DID` in _config.attrTypes, make sure that it's always first in the list
     /// @dev Only when authorized by an eligible issuer
     /// @param _config Input paramters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
