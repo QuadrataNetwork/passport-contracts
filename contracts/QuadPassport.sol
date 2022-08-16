@@ -105,7 +105,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @notice Internal function that validates supplied DID on updates do not change
     /// @param _account address of entity being attested to
     /// @param _did new DID value
-    function _validateDid(address _account, bytes32 _did) internal {
+    function _validateDid(address _account, bytes32 _did) internal view {
         Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
         if(dIDAttrs.length > 0){
             require(dIDAttrs[0].value == _did, "INVALID_DID");
@@ -226,14 +226,13 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         // TODO: Add test
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            IQuadPassportStore.Attribute[] memory attributes = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
-            for(uint256 j = 0; j < attributes.length; j++){
-                address issuer = attributes[j].issuer;
-                delete attributes[j];
-                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), issuer))] = 0;
+            IQuadPassportStore.Attribute[] memory attrs = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+            for(uint256 j = 0; j < attrs.length; j++){
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrs[j].issuer))] = 0;
+                delete attrs[j];
             }
             // TODO: Check gas optimization against
-            // _attributes[keccak256(abi.encode(_msgSender(), attributeType))] = [];
+            // attrs[keccak256(abi.encode(_msgSender(), attributeType))] = [];
         }
 
         _burn(_msgSender(), _tokenId, 1);
