@@ -208,7 +208,7 @@ import "hardhat/console.sol";
     /// @param _issuer address of issuer
     /// @return boolean
     function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) public view override returns(bool) {
-        passport.Attribute[] attributes = passport.attributes(_account, _attribute);
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
         for(uint i = 0; i < attributes.length; i++){
             if(attributes[i].issuer == _issuer){
                 return true;
