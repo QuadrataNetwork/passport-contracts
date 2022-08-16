@@ -226,10 +226,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         // TODO: Add test
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            IQuadPassportStore.Attribute[] attributes = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+            IQuadPassportStore.Attribute[] memory attributes = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
             for(uint256 j = 0; j < attributes.length; j++){
                 address issuer = attributes[j].issuer;
-                delete attribute;
+                delete attributes[j];
                 _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), issuer))] = 0;
             }
             // TODO: Check gas optimization against
@@ -257,10 +257,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             uint256 position = _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), _msgSender()))];
             if (position > 0) {
-                Attribute[] memory attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
+                Attribute[] storage attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
 
-                attrToDelete = attrs[position-1];
-                attrToSwap = attrs[attrs.length-1];
+                Attribute memory attrToDelete = attrs[position-1];
+                Attribute memory attrToSwap = attrs[attrs.length-1];
 
                 _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToSwap.issuer))] = position;
                 _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), _msgSender()))] = 0;

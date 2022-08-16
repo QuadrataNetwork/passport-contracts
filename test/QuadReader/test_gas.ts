@@ -77,53 +77,53 @@ describe("QuadReader", async () => {
     );
   });
 
-  describe("calculate Gas - 1 issuer | 4 attributes", async () => {
-    const attributeToQuery = [
-      ATTRIBUTE_DID,
-      ATTRIBUTE_COUNTRY,
-      ATTRIBUTE_IS_BUSINESS,
-      ATTRIBUTE_AML,
-    ];
+  // describe("calculate Gas - 1 issuer | 4 attributes", async () => {
+  //   const attributeToQuery = [
+  //     ATTRIBUTE_DID,
+  //     ATTRIBUTE_COUNTRY,
+  //     ATTRIBUTE_IS_BUSINESS,
+  //     ATTRIBUTE_AML,
+  //   ];
 
-    it("getAttributes", async () => {
-      const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
-      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
-        value: fee,
-      });
-    });
+  //   it("getAttributes", async () => {
+  //     const attribute = attributeToQuery[0];
+  //     const fee = await reader.queryFee(minterA.address, attribute);
+  //     await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+  //       value: fee,
+  //     });
+  //   });
 
-    it("getAttributes (Legacy)", async () => {
-      const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
-      await reader
-        .connect(minterA)
-        .getAttributesLegacy(minterA.address, attribute, {
-          value: fee,
-        });
-    });
+  //   it("getAttributes (Legacy)", async () => {
+  //     const attribute = attributeToQuery[0];
+  //     const fee = await reader.queryFee(minterA.address, attribute);
+  //     await reader
+  //       .connect(minterA)
+  //       .getAttributesLegacy(minterA.address, attribute, {
+  //         value: fee,
+  //       });
+  //   });
 
-    it("getAttributesBulk (Legacy)", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
-      await reader
-        .connect(minterA)
-        .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
-          value: fee,
-        });
-    });
+  //   it("getAttributesBulk (Legacy)", async () => {
+  //     const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+  //     await reader
+  //       .connect(minterA)
+  //       .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
+  //         value: fee,
+  //       });
+  //   });
 
-    it("getAttributes (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
+  //   it("getAttributes (DeFi)", async () => {
+  //     await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
+  //       value: ethers.utils.parseEther("1"),
+  //     });
+  //   });
 
-    it("getAttributesBulk (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
-  });
+  //   it("getAttributesBulk (DeFi)", async () => {
+  //     await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
+  //       value: ethers.utils.parseEther("1"),
+  //     });
+  //   });
+  // });
 
   describe("calculate Gas - 3 issuers | 4 attributes", async () => {
     const attributeToQuery = [
@@ -158,37 +158,39 @@ describe("QuadReader", async () => {
       await reader.connect(minterA).getAttributes(minterA.address, attribute, {
         value: fee,
       });
+      await passport.connect(minterA).burnPassport(1);
+
     });
 
-    it("getAttributes (Legacy)", async () => {
-      const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
-      await reader
-        .connect(minterA)
-        .getAttributesLegacy(minterA.address, attribute, {
-          value: fee,
-        });
-    });
+    // it("getAttributes (Legacy)", async () => {
+    //   const attribute = attributeToQuery[0];
+    //   const fee = await reader.queryFee(minterA.address, attribute);
+    //   await reader
+    //     .connect(minterA)
+    //     .getAttributesLegacy(minterA.address, attribute, {
+    //       value: fee,
+    //     });
+    // });
 
-    it("getAttributesBulk (Legacy)", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
-      await reader
-        .connect(minterA)
-        .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
-          value: fee,
-        });
-    });
+    // it("getAttributesBulk (Legacy)", async () => {
+    //   const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+    //   await reader
+    //     .connect(minterA)
+    //     .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
+    //       value: fee,
+    //     });
+    // });
 
-    it("getAttributes (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
+    // it("getAttributes (DeFi)", async () => {
+    //   await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
+    //     value: ethers.utils.parseEther("1"),
+    //   });
+    // });
 
-    it("getAttributesBulk (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
-      });
-    });
+    // it("getAttributesBulk (DeFi)", async () => {
+    //   await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
+    //     value: ethers.utils.parseEther("1"),
+    //   });
+    // });
   });
 });
