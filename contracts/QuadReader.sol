@@ -202,7 +202,24 @@ import "hardhat/console.sol";
        return passport.attributes(_account, _attribute).length;
     }
 
-    // TODO: Add a function `hasPassportByIssuer(address _accout, bytes32 _attribute, address _issuer)`
+    /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @param _issuer address of issuer
+    /// @return boolean
+    function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) public view override returns(bool) {
+        // Try/catch MISSING_DID for AML queries
+        try passport.attributes(_account, _attribute) returns (IQuadPassportStore.Attribute[] memory attributes){
+            for(uint i = 0; i < attributes.length; i++){
+                if(attributes[i].issuer == _issuer){
+                    return true;
+                }
+            }
+            return false;
+        } catch {
+            return false;
+        }
+    }
 
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
     /// @param _to address of either an issuer's treasury or the Quadrata treasury
