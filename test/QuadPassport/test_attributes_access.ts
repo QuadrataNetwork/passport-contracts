@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { id } from "ethers/lib/utils";
+import { formatBytes32String, id } from "ethers/lib/utils";
 
 const {
   MINT_PRICE,
@@ -11,6 +11,7 @@ const {
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
   READER_ROLE,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -100,7 +101,7 @@ describe("QuadPassport.attributes", async () => {
       expect(isBusinessResponse.length).equals(1);
       expect(amlResponse.length).equals(1);
 
-      expect(didResponse[0].value).equals(attributes[ATTRIBUTE_DID]);
+      expect(didResponse[0].value).equals(QUAD_DID);
       expect(countryResponse[0].value).equals(attributes[ATTRIBUTE_COUNTRY]);
       expect(isBusinessResponse[0].value).equals(
         attributes[ATTRIBUTE_IS_BUSINESS]
@@ -110,7 +111,6 @@ describe("QuadPassport.attributes", async () => {
 
     it("success with two issuers", async () => {
       const updatedAttributes = {
-        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_AML]: id("10"),
@@ -143,14 +143,14 @@ describe("QuadPassport.attributes", async () => {
       expect(isBusinessResponse.length).equals(2);
       expect(amlResponse.length).equals(2);
 
-      expect(didResponse[0].value).equals(attributes[ATTRIBUTE_DID]);
+      expect(didResponse[0].value).equals(QUAD_DID);
       expect(countryResponse[0].value).equals(attributes[ATTRIBUTE_COUNTRY]);
       expect(isBusinessResponse[0].value).equals(
         attributes[ATTRIBUTE_IS_BUSINESS]
       );
       expect(amlResponse[0].value).equals(attributes[ATTRIBUTE_AML]);
 
-      expect(didResponse[1].value).equals(updatedAttributes[ATTRIBUTE_DID]);
+      expect(didResponse[1].value).equals(QUAD_DID);
       expect(countryResponse[1].value).equals(
         updatedAttributes[ATTRIBUTE_COUNTRY]
       );
