@@ -13,6 +13,7 @@ const {
   READER_ROLE,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -42,7 +43,6 @@ describe("QuadPassport.setAttributes", async () => {
 
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
-    [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -167,7 +167,6 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const attributeByIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -235,7 +234,6 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const updatedAttributes: any = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("5"),
         [ATTRIBUTE_COUNTRY]: id("BE"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
@@ -275,7 +273,6 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Issuer 2
       const attributeByIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -303,7 +300,6 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Update Issuer 1
       const updatedAttributes: any = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("5"),
         [ATTRIBUTE_COUNTRY]: id("BE"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
@@ -331,7 +327,6 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Update Issuer 2
       const updatedAttrIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:123456789abcdefghi"),
         [ATTRIBUTE_AML]: formatBytes32String("7"),
         [ATTRIBUTE_COUNTRY]: id("DE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -390,7 +385,7 @@ describe("QuadPassport.setAttributes", async () => {
           attrKey = ethers.utils.keccak256(
             ethers.utils.defaultAbiCoder.encode(
               ["bytes32", "bytes32"],
-              [attributes[ATTRIBUTE_DID], k]
+              [QUAD_DID, k]
             )
           );
         } else {
@@ -459,7 +454,6 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const attributeByIssuer2 = {
-        [ATTRIBUTE_DID]: formatBytes32String("did:quad:newdid"),
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -473,9 +467,12 @@ describe("QuadPassport.setAttributes", async () => {
           attributeByIssuer2,
           verifiedAt + 1,
           issuedAt + 1,
-          MINT_PRICE.add(1)
+          MINT_PRICE.add(1),
+          TOKEN_ID,
+          HARDHAT_CHAIN_ID,
+          formatBytes32String("did:quad:newdid")
         )
-      ).to.revertedWith("MISMATCH_ATTR_KEY");
+      ).to.revertedWith("INVALID_DID");
     });
 
     it("fail - invalid tokenId", async () => {

@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { id, parseUnits, formatBytes32String, zeroPad, hexZeroPad } from "ethers/lib/utils";
+import { id, parseUnits, zeroPad, hexZeroPad } from "ethers/lib/utils";
 import { assertMint } from "../utils/verify";
 
 const {
@@ -12,7 +12,8 @@ const {
   TOKEN_ID,
   MINT_PRICE,
   PRICE_PER_BUSINESS_ATTRIBUTES,
-  ISSUER_STATUS
+  ISSUER_STATUS,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -51,7 +52,7 @@ describe("QuadPassport", async () => {
 
   beforeEach(async () => {
     baseURI = "https://quadrata.io";
-    did = formatBytes32String("did:quad:123456789abcdefghi");
+    did = QUAD_DID;
     aml = id("LOW");
     country = id("FRANCE");
     isBusiness = id("FALSE");

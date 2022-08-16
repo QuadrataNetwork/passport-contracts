@@ -1,4 +1,4 @@
-import { parseEther } from "ethers/lib/utils";
+import { formatBytes32String, parseEther } from "ethers/lib/utils";
 const { ethers } = require("hardhat");
 
 export const ISSUER_ROLE = ethers.utils.id("ISSUER_ROLE");
@@ -33,3 +33,5 @@ export const ISSUER_SPLIT = 50;
 export const DIGEST_TO_SIGN = ethers.utils.id("Quadrata");
 
 export const HARDHAT_CHAIN_ID = 31337;
+
+export const QUAD_DID = formatBytes32String("did:quad:123456789abcdefghi");
