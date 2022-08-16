@@ -563,6 +563,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -587,6 +588,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -611,6 +613,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -635,6 +638,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -660,6 +664,33 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - invalid signature (DID)", async () => {
+      const wrongDID = id("wrong");
+
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              wrongDID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -685,6 +716,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -720,6 +752,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -745,6 +778,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               wrongIssuedAt,
@@ -770,6 +804,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               wrongVerifiedAt,
               issuedAt,
@@ -796,6 +831,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               wrongTokenId,
               verifiedAt,
               issuedAt,
@@ -820,6 +856,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
+              QUAD_DID,
               tokenId,
               verifiedAt,
               issuedAt,
