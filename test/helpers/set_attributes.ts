@@ -24,6 +24,7 @@ export const setAttributes = async (
   blockId: number = HARDHAT_CHAIN_ID
 ) => {
   const attrKeys: string[] = [];
+  const attrTypes: string[] = [];
   const attrValues: string[] = [];
 
   Object.keys(attributes).forEach((k, i) => {
@@ -45,6 +46,7 @@ export const setAttributes = async (
     }
     attrKeys.push(attrKey);
     attrValues.push(attributes[k]);
+    attrTypes.push(k);
   });
 
   const sigIssuer = await signSetAttributes(
@@ -64,7 +66,7 @@ export const setAttributes = async (
     passport
       .connect(account)
       .setAttributes(
-        [attrKeys, attrValues, tokenId, verifiedAt, issuedAt, fee],
+        [attrKeys, attrValues, attrTypes, tokenId, verifiedAt, issuedAt, fee],
         sigIssuer,
         sigAccount,
         {

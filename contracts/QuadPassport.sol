@@ -75,6 +75,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) internal {
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
+            // Verify attrKeys computation
+            bytes32 _attrKey = _config.attrKeys[i];
+            bytes32 _attrType = _config.attrTypes[i];
+            _verifyAttrKey(_account, _attrType, _attrKey);
+
             uint256 issuerPosition = _position[keccak256(abi.encode(_config.attrKeys[i], issuer))];
             Attribute memory attr = Attribute({
                 value: _config.attrValues[i],
@@ -97,6 +102,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         emit SetAttributeReceipt(_account, issuer, msg.value);
     }
 
+    /// @notice Verify that the attrKey has been correctly computed based on account and attrType
+    /// @param _account Address of the Quadrata Passport holder
+    /// @param _attrType bytes32 of the attribute type
+    /// @param _attrKey bytes32 of the attrKey to compare against/verify
+    function _verifyAttrKey(address _account, bytes32 _attrType, bytes32 _attrKey) internal view {
+        bytes32 expectedAttrKey = _computeAttrKey(_account, _attrType);
+
+        require(_attrKey == expectedAttrKey, "MISMATCH_ATTR_KEY");
+    }
+
     /// @notice Internal helper to check setAttributes process
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
@@ -109,16 +124,15 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) internal returns(address) {
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
         require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
-
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
 
         require(_config.verifiedAt <= block.timestamp, "INVALID_VERIFIED_AT");
-
         require(block.timestamp <= _config.issuedAt + 1 days, "EXPIRED_ISSUED_AT");
-
         require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
+        require(_config.attrKeys.length == _config.attrTypes.length, "MISMATCH_LENGTH");
 
+        // Verify signature
         bytes32 extractionHash = keccak256(
             abi.encode(
                 _account,
@@ -135,12 +149,28 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
         bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
 
-        require(!_usedSigHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+        require(!_usedSigHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
 
         _usedSigHashes[issuerMintHash] = true;
 
         return issuer;
+    }
+
+    /// @notice Compute the attrKey for the mapping `_attributes`
+    /// @param _account address of the wallet owner
+    /// @param _attribute attribute type (ex: keccak256("COUNTRY"))
+    function _computeAttrKey(address _account, bytes32 _attribute) internal view returns(bytes32) {
+        if (governance.eligibleAttributes(_attribute)) {
+            return keccak256(abi.encode(_account, _attribute));
+        }
+        if (governance.eligibleAttributesByDID(_attribute)){
+            Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
+            require(dIDAttrs.length > 0 && dIDAttrs[0].value != bytes32(0), "MISSING_DID");
+            return keccak256(abi.encode(dIDAttrs[0].value, _attribute));
+        }
+
+        require(false, "ATTRIBUTE_NOT_ELIGIBLE");
     }
 
     /// @notice Burn your Quadrata passport
@@ -205,15 +235,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) public view override returns (Attribute[] memory) {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
 
-        bytes32 attrKey;
-        if (governance.eligibleAttributes(_attribute)) {
-            attrKey = keccak256(abi.encode(_account, _attribute));
-        } else {
-            Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-            if (dIDAttrs.length == 0)
-                return new Attribute[](0);
-            attrKey = keccak256(abi.encode(dIDAttrs[0].value, _attribute));
-        }
+        bytes32 attrKey = _computeAttrKey(_account, _attribute);
         return _attributes[attrKey];
     }
 
