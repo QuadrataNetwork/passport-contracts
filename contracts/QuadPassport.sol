@@ -259,6 +259,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             if (position > 0) {
                 Attribute[] storage attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
 
+                // Swap last attribute position with position of attribute to delete before calling pop()
                 Attribute memory attrToDelete = attrs[position-1];
                 Attribute memory attrToSwap = attrs[attrs.length-1];
 
