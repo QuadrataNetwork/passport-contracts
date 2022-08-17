@@ -73,11 +73,21 @@ describe("QuadPassport", async () => {
       await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
-      [issuer],
+      [issuer, issuerB],
       treasury,
-      [issuerTreasury],
+      [issuerTreasury, issuerBTreasury],
       baseURI
     );
+
+    await setAttributes(
+      minterA,
+      issuer,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    )
 
     await governance.connect(admin).grantRole(id("READER_ROLE"), dataChecker.address);
   });
@@ -88,7 +98,7 @@ describe("QuadPassport", async () => {
       await expect(
         setAttributes(
           minterA,
-          issuer,
+          issuerB,
           passport,
           attributes,
           verifiedAt,
@@ -97,23 +107,31 @@ describe("QuadPassport", async () => {
         )
       ).to.not.be.reverted;
 
-      // // did level
-      // const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
-      // const amlPreBurnB = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuerB.address);
-      // // account level
-      // const didPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuer.address);
-      // const didPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("DID"), issuerB.address);
-      // const countryPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuer.address);
-      // const countryPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"), issuerB.address);
-      // const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuer.address);
-      // const isBusinessPreBurnB = await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"), issuerB.address);
 
-      // expect(didPreBurnA.value).equals(did);
-      // expect(didPreBurnB.value).equals(did);
-      // expect(countryPreBurnA.value).equals(country);
-      // expect(countryPreBurnB.value).equals(country);
-      // expect(isBusinessPreBurnA.value).equals(isBusiness);
-      // expect(isBusinessPreBurnB.value).equals(isBusiness);
+      // did level
+      const amlAttributes =  await passport.connect(dataChecker).attributes(minterA.address, id("AML"));
+      const amlPreBurnA = amlAttributes.find((attr: any)=> attr.issuer == issuer.address);
+      const amlPreBurnB = amlAttributes.find((attr: any)=> attr.issuer == issuerB.address);
+
+      // account level
+      const didAttributes =  await passport.connect(dataChecker).attributes(minterA.address, id("DID"));
+      const didPreBurnA = didAttributes.find((attr: any)=> attr.issuer == issuer.address);
+      const didPreBurnB = didAttributes.find((attr: any)=> attr.issuer == issuerB.address);
+
+      const countryAttributes =  await passport.connect(dataChecker).attributes(minterA.address, id("COUNTRY"));
+      const countryPreBurnA = countryAttributes.find((attr: any)=> attr.issuer == issuer.address);
+      const countryPreBurnB = countryAttributes.find((attr: any)=> attr.issuer == issuerB.address);
+
+      const isBusinessAttributes =  await passport.connect(dataChecker).attributes(minterA.address, id("IS_BUSINESS"));
+      const isBusinessPreBurnA = isBusinessAttributes.find((attr: any)=> attr.issuer == issuer.address);
+      const isBusinessPreBurnB = isBusinessAttributes.find((attr: any)=> attr.issuer == issuerB.address);
+
+      expect(didPreBurnA.value).equals(did);
+      expect(didPreBurnB.value).equals(did);
+      expect(countryPreBurnA.value).equals(country);
+      expect(countryPreBurnB.value).equals(country);
+      expect(isBusinessPreBurnA.value).equals(isBusiness);
+      expect(isBusinessPreBurnB.value).equals(isBusiness);
 
       // expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       // await passport.connect(minterA).burnPassport(TOKEN_ID);

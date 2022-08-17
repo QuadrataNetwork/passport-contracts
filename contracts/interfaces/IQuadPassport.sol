@@ -38,5 +38,5 @@ interface IQuadPassport is IQuadSoulbound {
 
     function acceptGovernance() external;
 
-    function attributes(address, bytes32) external view returns (IQuadPassportStore.Attribute[] memory);
+    function attributes(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute[] memory);
 }
