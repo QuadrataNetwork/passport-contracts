@@ -78,6 +78,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
 
         // Handle DID
         if(_config.did != bytes32(0)){
+            console.log("YES!", _account);
             _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
