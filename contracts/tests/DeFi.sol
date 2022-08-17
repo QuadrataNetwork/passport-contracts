@@ -9,9 +9,7 @@ import "../storage/QuadPassportStore.sol";
 import "../QuadReader.sol";
 
 contract DeFi {
-    event GetAttributeEvent(bytes32 _value, uint256 _epoch);
-    event GetAttributeEvents(bytes32[] _attributes, uint256[] _epochs);
-    event GetAttributesEvents(IQuadPassportStore.Attribute[] _attributes);
+    event GetAttributesEvent(bytes32[] attrValues, uint256[] epochs, address[] issuers);
 
     IQuadPassport public passport;
     QuadReader public reader;
@@ -21,11 +19,19 @@ contract DeFi {
        reader = _reader;
     }
 
-    function deposit(bytes32 _attribute) public payable {
-        console.log(msg.value);
-        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: msg.value}(msg.sender, _attribute);
+    function deposit(address _account, bytes32 _attribute) public payable {
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: msg.value}(_account, _attribute);
+        bytes32[] memory attrValues = new bytes32[](attributes.length);
+        uint256[] memory epochs = new uint256[](attributes.length);
+        address[] memory issuers = new address[](attributes.length);
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            attrValues[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
+        }
         console.log(attributes.length);
-        emit GetAttributesEvents(attributes);
+        emit GetAttributesEvent(attrValues, epochs, issuers);
     }
 
     // /**
