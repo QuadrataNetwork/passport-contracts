@@ -79,42 +79,23 @@ describe("QuadPassport", async () => {
       baseURI
     );
 
-    await setAttributes(
-      minterA,
-      issuer,
-      passport,
-      attributes,
-      verifiedAt,
-      issuedAt,
-      MINT_PRICE
-    )
-
     await governance.connect(admin).grantRole(id("READER_ROLE"), dataChecker.address);
   });
 
 
   describe("burnPassport", async () => {
     it("success - mint from issuerA and issuer B, burnPassport, check that all account level values are gone", async () => {
-      // const sig = await signSetAttributes(
-      //   minterA,
-      //   issuerB,
-      //   attributes,
-      //   verifiedAt,
-      //   issuedAt,
-      //   MINT_PRICE,
-      //   HARDHAT_CHAIN_ID,
-      //   TOKEN_ID,
-      // );
-
-      // const sigAccount = await signAccount(minterA);
-
-      // await expect(
-      //   passport
-      //     .connect(minterA)
-      //     .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
-      //       value: MINT_PRICE,
-      //     })
-      // ).to.not.be.reverted;
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
       // // did level
       // const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, id("AML"), issuer.address);
