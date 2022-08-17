@@ -88,8 +88,8 @@ describe("QuadPassport", async () => {
       issuedAt,
       MINT_PRICE
     )
-
     await governance.connect(admin).grantRole(id("READER_ROLE"), dataChecker.address);
+
   });
 
 
@@ -139,9 +139,9 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       // did level
-      const amlAttributesPost =  await passport.connect(dataChecker).attributes(minterA.address, id("AML"));
-      const amlPostBurnA = amlAttributesPost.find((attr: any)=> attr.issuer == issuer.address);
-      const amlPostBurnB = amlAttributesPost.find((attr: any)=> attr.issuer == issuerB.address);
+      // const amlAttributesPost =  await passport.connect(dataChecker).attributes(minterA.address, id("AML"));
+      // const amlPostBurnA = amlAttributesPost.find((attr: any)=> attr.issuer == issuer.address);
+      // const amlPostBurnB = amlAttributesPost.find((attr: any)=> attr.issuer == issuerB.address);
 
       // account level
       const didAttributesPost =  await passport.connect(dataChecker).attributes(minterA.address, id("DID"));
@@ -157,15 +157,15 @@ describe("QuadPassport", async () => {
       const isBusinessPostBurnB = isBusinessAttributesPost.find((attr: any)=> attr.issuer == issuerB.address);
 
       // // expect did level attributes to not change
-      expect(amlPostBurnA.value).equals(amlPreBurnA.value);
-      expect(amlPreBurnB.value).equals(amlPostBurnB.value);
+      // expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+      // expect(amlPreBurnB.value).equals(amlPostBurnB.value);
 
       expect(didPostBurnA.value).equals(hexZeroPad('0x00', 32));
       expect(didPostBurnB.value).equals(hexZeroPad('0x00', 32));
-      // expect(countryPostBurnA.value).equals(hexZeroPad('0x00', 32));
-      // expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
-      // expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
-      // expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
 
       // await expect(
       //   reader.getAttributesTokenIncludingOnly(
