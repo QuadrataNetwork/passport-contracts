@@ -1,4 +1,4 @@
-import { expect } from "chai";
+// import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -10,7 +10,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
-  READER_ROLE,
+  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -77,11 +77,46 @@ describe("QuadReader.getAttributes", async () => {
   });
 
   describe("QuadReader.getAttributes (SUCCESS CASES)", async () => {
+    beforeEach(async () => {
+      attributes[ATTRIBUTE_DID] = QUAD_DID;
+    });
     it("success - 1 issuer", async () => {
       await assertGetAttributes(
         minterA,
+        ATTRIBUTE_COUNTRY,
         reader,
         defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -89,32 +124,105 @@ describe("QuadReader.getAttributes", async () => {
     });
 
     it("success with 2 issuers", async () => {
-      // const attrIssuers2 = {
-      //   [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
-      //   [ATTRIBUTE_COUNTRY]: id("US"),
-      //   [ATTRIBUTE_AML]: id("10"),
-      // };
-      // await setAttributes(
-      //   minterA,
-      //   issuer2,
-      //   passport,
-      //   attrIssuers2,
-      //   verifiedAt + 1,
-      //   issuedAt + 1,
-      //   MINT_PRICE
-      // );
-      // await assertGetAttributes(
-      //   minterA,
-      //   reader,
-      //   defi,
-      //   [issuer, issuer2],
-      //   [attributes, attrIssuers2],
-      //   [verifiedAt, verifiedAt + 1]
-      // );
+      const attrIssuers2 = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_AML]: id("10"),
+      };
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attrIssuers2,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attrIssuers2],
+        [verifiedAt, verifiedAt + 1]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attrIssuers2],
+        [verifiedAt, verifiedAt + 1]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attrIssuers2],
+        [verifiedAt, verifiedAt + 1]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attrIssuers2],
+        [verifiedAt, verifiedAt + 1]
+      );
     });
 
     it("success no attributes", async () => {
-      // await assertGetAttributes(minterB, reader, defi, [], [attributes], []);
+      // No issuers & no existing attestation for account
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
     });
 
     // it("fail - a user without READER_ROLE may not query attributes", async () => {});

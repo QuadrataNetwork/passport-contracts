@@ -30,7 +30,6 @@ contract DeFi {
             epochs[i] = attributes[i].epoch;
             issuers[i] = attributes[i].issuer;
         }
-        console.log(attributes.length);
         emit GetAttributesEvent(attrValues, epochs, issuers);
     }
 
