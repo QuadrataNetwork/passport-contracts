@@ -223,18 +223,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         uint256 _tokenId
     ) external override {
         require(balanceOf(_msgSender(), _tokenId) >= 1, "CANNOT_BURN_ZERO_BALANCE");
-        // TODO: Add test
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            IQuadPassportStore.Attribute[] memory attrs = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+            IQuadPassportStore.Attribute[] storage attrs = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
             for(uint256 j = 0; j < attrs.length; j++){
                 _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrs[j].issuer))] = 0;
                 delete attrs[j];
             }
-            // TODO: Check gas optimization against
-            // attrs[keccak256(abi.encode(_msgSender(), attributeType))] = [];
         }
-
         _burn(_msgSender(), _tokenId, 1);
     }
 
