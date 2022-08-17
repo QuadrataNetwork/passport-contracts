@@ -75,10 +75,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         bytes calldata _sigIssuer
     ) internal {
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
-
         // Handle DID
         if(_config.did != bytes32(0)){
-            console.log("YES!", _account);
             _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
@@ -242,13 +240,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @notice Issuer can burn an account's Quadrata passport when requested
     /// @dev Only issuer role
     /// @param _account address of the wallet to burn
-    /// @param _tokenId tokenId of the Passport (1 for now)
     function burnPassportsIssuer(
-        address _account,
-        uint256 _tokenId
+        address _account
     ) external override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
-        require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
         bool isEmpty = true;
 
@@ -276,8 +271,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 }
             }
         }
-        if (isEmpty)
-            _burn(_account, _tokenId, 1);
+
+        if (isEmpty){
+            for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
+                if(balanceOf(_account, currTokenId) >= 1){
+                    _burn(_account, currTokenId, 1);
+                }
+            }
+        }
     }
 
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer

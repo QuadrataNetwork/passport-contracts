@@ -32,7 +32,7 @@ interface IQuadPassport is IQuadSoulbound {
 
     function burnPassports() external;
 
-    function burnPassportsIssuer(address _account, uint256 _tokenId) external;
+    function burnPassportsIssuer(address _account) external;
 
     function setGovernance(address _governanceContract) external;
 
