@@ -228,13 +228,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 attrs.pop();
             }
         }
-        // We start with TokenId defaulted as 1
-        for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
-            if(balanceOf(_msgSender(), currTokenId) >= 1){
-                _burn(_msgSender(), currTokenId, 1);
-            }
-        }
-
+        _burnPassports(_msgSender());
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
@@ -273,10 +267,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         }
 
         if (isEmpty){
-            for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
-                if(balanceOf(_account, currTokenId) >= 1){
-                    _burn(_account, currTokenId, 1);
-                }
+            _burnPassports(_account);
+        }
+    }
+
+    /// @dev Loop through all eligible token ids and burn passports if they exist
+    /// @param _account address of user
+    function _burnPassports(address _account) internal {
+        for (uint256 currTokenId = 0; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
+            if(balanceOf(_account, currTokenId) >= 1){
+                _burn(_account, currTokenId, 1);
             }
         }
     }
