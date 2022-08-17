@@ -147,7 +147,6 @@ import "hardhat/console.sol";
         bytes32 _attribute
     ) internal view {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(passport.balanceOf(_account, 1) == 1, "PASSPORT_DOES_NOT_EXIST");
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
