@@ -30,9 +30,9 @@ interface IQuadPassport is IQuadSoulbound {
         bytes calldata _sigIssuer
     ) external payable;
 
-    function burnPassport(uint256 _tokenId) external;
+    function burnPassports() external;
 
-    function burnPassportIssuer(address _account, uint256 _tokenId) external;
+    function burnPassportsIssuer(address _account, uint256 _tokenId) external;
 
     function setGovernance(address _governanceContract) external;
 

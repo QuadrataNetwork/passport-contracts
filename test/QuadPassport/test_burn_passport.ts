@@ -135,7 +135,7 @@ describe("QuadPassport", async () => {
 
       // burn passport
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassport(TOKEN_ID);
+      await passport.connect(minterA).burnPassports();
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       // did level
@@ -248,7 +248,7 @@ describe("QuadPassport", async () => {
     //   expect(isBusinessPreBurnA.value).equals(isBusiness);
 
     //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //   await passport.connect(minterA).burnPassport(TOKEN_ID);
+    //   await passport.connect(minterA).burnPassports(TOKEN_ID);
     //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
     //   // POST BURN
@@ -298,7 +298,7 @@ describe("QuadPassport", async () => {
 
     // });
 
-    // it("success - burnPassport(IS_BUSINESS: TRUE, Smart Contract)", async () => {
+    // it("success - burnPassports(IS_BUSINESS: TRUE, Smart Contract)", async () => {
 
     //   const MockBusiness = await ethers.getContractFactory('MockBusiness')
     //   const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -437,7 +437,7 @@ describe("QuadPassport", async () => {
     //   ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
     // });
 
-    // it("success - burnPassport(IS_BUSINESS: TRUE, Smart Contract, Multi-Issuer)", async () => {
+    // it("success - burnPassports(IS_BUSINESS: TRUE, Smart Contract, Multi-Issuer)", async () => {
 
     //   const MockBusiness = await ethers.getContractFactory('MockBusiness')
     //   const mockBusiness = await MockBusiness.deploy(defi.address)
@@ -612,7 +612,7 @@ describe("QuadPassport", async () => {
     // });
 
 
-    // it("success - burnPassport(IS_BUSINESS: TRUE, EOA)", async () => {
+    // it("success - burnPassports(IS_BUSINESS: TRUE, EOA)", async () => {
 
     //   const sig = await signSetAttributes(
     //     issuer,
@@ -674,7 +674,7 @@ describe("QuadPassport", async () => {
     //     { ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID] }
     //   );
     //   expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
-    //   await passport.connect(minterB).burnPassport(TOKEN_ID);
+    //   await passport.connect(minterB).burnPassports(TOKEN_ID);
     //   expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     //   await expect(
     //     reader.getAttributesTokenIncludingOnly(
@@ -708,7 +708,7 @@ describe("QuadPassport", async () => {
     // });
 
     // it("success - can remint after burn", async () => {
-    //   await passport.connect(minterA).burnPassport(TOKEN_ID);
+    //   await passport.connect(minterA).burnPassports(TOKEN_ID);
 
     //   const newIssuedAt = issuedAt + 1;
     //   const newAML = id("HIGH");
@@ -775,7 +775,7 @@ describe("QuadPassport", async () => {
     //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
     //   const wrongTokenId = 2;
     //   await expect(
-    //     passport.connect(minterA).burnPassport(wrongTokenId)
+    //     passport.connect(minterA).burnPassports(wrongTokenId)
     //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
     //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
@@ -820,7 +820,7 @@ describe("QuadPassport", async () => {
     // it("fail - passport non-existent", async () => {
     //   expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     //   await expect(
-    //     passport.connect(minterB).burnPassport(TOKEN_ID)
+    //     passport.connect(minterB).burnPassports(TOKEN_ID)
     //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
     //   expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     // });
@@ -828,7 +828,7 @@ describe("QuadPassport", async () => {
     // it("fail - EOA passport non-existent under token id=2", async () => {
     //   expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
     //   await expect(
-    //     passport.connect(minterA).burnPassport(2)
+    //     passport.connect(minterA).burnPassports(2)
     //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
     //   expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
     // });
@@ -859,12 +859,12 @@ describe("QuadPassport", async () => {
     //     });
     //   expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
     //   await expect(
-    //     mockBusiness.burnPassport(2)
+    //     mockBusiness.burnPassports(2)
     //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
     //   expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
 
     //   expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
-    //   await mockBusiness.burnPassport(TOKEN_ID);
+    //   await mockBusiness.burnPassports(TOKEN_ID);
     //   expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
     // });
   });
@@ -946,7 +946,7 @@ describe("QuadPassport", async () => {
   //     expect(isBusinessPreBurnA.value).equals(isBusiness);
 
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-  //     await passport.connect(minterA).burnPassport(TOKEN_ID)
+  //     await passport.connect(minterA).burnPassports(TOKEN_ID)
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
   //     // POST BURN
@@ -1155,7 +1155,7 @@ describe("QuadPassport", async () => {
   //       .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
 
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-  //     await passport.connect(minterA).burnPassport(TOKEN_ID);
+  //     await passport.connect(minterA).burnPassports(TOKEN_ID);
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
   //     // enable issuer to query data
@@ -1230,7 +1230,7 @@ describe("QuadPassport", async () => {
   //       .withArgs(issuer.address);
 
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-  //     await passport.connect(minterA).burnPassport(TOKEN_ID);
+  //     await passport.connect(minterA).burnPassports(TOKEN_ID);
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
   //     // add issuer post burn (in order to access data)
@@ -1278,7 +1278,7 @@ describe("QuadPassport", async () => {
   //     expect(isBusinessPreBurnA.value).equals(isBusiness);
 
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-  //     await passport.connect(minterA).burnPassport(TOKEN_ID);
+  //     await passport.connect(minterA).burnPassports(TOKEN_ID);
   //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
   //     // set different values for next passport

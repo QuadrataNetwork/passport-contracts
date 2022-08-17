@@ -81,6 +81,10 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         _eligibleTokenId[_tokenId] = _eligibleStatus;
 
+        if(_tokenId > _maxEligibleTokenId){
+            _maxEligibleTokenId = _tokenId;
+        }
+
         emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }
 
@@ -267,10 +271,15 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     }
 
     /// @dev Get number of eligible attributes currently supported
-    /// @notice Restricted behind a TimelockController
     /// @return length of eligible attributes
     function getEligibleAttributesLength() override external view returns(uint256) {
         return _eligibleAttributesArray.length;
+    }
+
+    /// @dev Get list of eligible tokenIds currently supported
+    /// @return length of eligible attributes
+    function getMaxEligibleTokenId() override external view returns(uint256) {
+        return _maxEligibleTokenId;
     }
 
     /// @dev Get active tokenId

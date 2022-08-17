@@ -218,11 +218,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
 
     /// @notice Burn your Quadrata passport
     /// @dev Only owner of the passport
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    function burnPassport(
-        uint256 _tokenId
-    ) external override {
-        require(balanceOf(_msgSender(), _tokenId) >= 1, "CANNOT_BURN_ZERO_BALANCE");
+    function burnPassports() external override {
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
 
@@ -233,14 +229,20 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 attrs.pop();
             }
         }
-        _burn(_msgSender(), _tokenId, 1);
+        // We start with TokenId defaulted as 1
+        for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
+            if(balanceOf(_msgSender(), currTokenId) >= 1){
+                _burn(_msgSender(), currTokenId, 1);
+            }
+        }
+
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
     /// @dev Only issuer role
     /// @param _account address of the wallet to burn
     /// @param _tokenId tokenId of the Passport (1 for now)
-    function burnPassportIssuer(
+    function burnPassportsIssuer(
         address _account,
         uint256 _tokenId
     ) external override {
