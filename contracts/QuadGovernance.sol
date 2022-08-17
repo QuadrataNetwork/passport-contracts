@@ -82,7 +82,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _eligibleTokenId[_tokenId] = _eligibleStatus;
 
         if(_tokenId > _maxEligibleTokenId){
-            require(_maxEligibleTokenId + 1 == _tokenId, "INCREMENT_TOKENID_BY_1")
+            require(_maxEligibleTokenId + 1 == _tokenId, "INCREMENT_TOKENID_BY_1");
             _maxEligibleTokenId = _tokenId;
         }
 

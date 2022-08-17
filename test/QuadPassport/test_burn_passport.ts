@@ -152,9 +152,10 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       // did level
-      await expect(
-        passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_AML)
-      ).to.be.revertedWith('MISSING_DID');
+      const amlAttributesPost = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_AML);
+      expect(amlAttributesPost.length).equals(0);
+      const amlPostBurnA = amlAttributesPost.find((attr: any)=> attr.issuer == issuer.address);
+      const amlPostBurnB = amlAttributesPost.find((attr: any)=> attr.issuer == issuerB.address);
 
       // account level
       const didAttributesPost =  await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_DID);
@@ -173,6 +174,8 @@ describe("QuadPassport", async () => {
       const isBusinessPostBurnB = isBusinessAttributesPost.find((attr: any)=> attr.issuer == issuerB.address);
 
       // attributes return an empty list
+      expect(amlPostBurnA).equals(undefined);
+      expect(amlPostBurnB).equals(undefined);
       expect(didPostBurnA).equals(undefined);
       expect(didPostBurnB).equals(undefined);
       expect(countryPostBurnA).equals(undefined);
@@ -1785,9 +1788,9 @@ describe("QuadPassport", async () => {
         // POST BURN
 
         // did level
-        await expect(
-          passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_AML)
-        ).to.be.revertedWith('MISSING_DID');
+        const amlAttributesPost = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_AML);
+        expect(amlAttributesPost.length).equals(0);
+        const amlPostBurnA = amlAttributesPost.find((attr: any)=> attr.issuer == issuer.address);
 
         // account level
         const didAttributesPost =  await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_DID);
@@ -1803,7 +1806,7 @@ describe("QuadPassport", async () => {
         const isBusinessPostBurnA = isBusinessAttributesPost.find((attr: any)=> attr.issuer == issuer.address);
 
         // attributes return an empty list
-
+        expect(amlPostBurnA).equals(undefined);
         expect(didPostBurnA).equals(undefined);
         expect(countryPostBurnA).equals(undefined);
         expect(isBusinessPostBurnA).equals(undefined);
