@@ -148,7 +148,6 @@ describe("QuadPassport", async () => {
         [verifiedAt, verifiedAt]
       );
 
-      // // burn passport
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await expect(
         passport.connect(minterA).burnPassports()
@@ -157,7 +156,6 @@ describe("QuadPassport", async () => {
         .withArgs(minterA.address, minterA.address, ethers.constants.AddressZero, TOKEN_ID, 1);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-      // did level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_AML,
@@ -169,7 +167,6 @@ describe("QuadPassport", async () => {
         []
       );
 
-      // account level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,
@@ -1743,8 +1740,6 @@ describe("QuadPassport", async () => {
         )
       ).to.not.be.reverted;
 
-      // PRE BURN
-      // did level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_AML,
@@ -1756,7 +1751,6 @@ describe("QuadPassport", async () => {
         [verifiedAt]
       );
 
-      // account level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,
@@ -1801,9 +1795,6 @@ describe("QuadPassport", async () => {
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-      // POST BURN
-
-      // did level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_AML,
@@ -1815,7 +1806,6 @@ describe("QuadPassport", async () => {
         []
       );
 
-      // account level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,
@@ -1875,8 +1865,6 @@ describe("QuadPassport", async () => {
         )
       ).to.not.be.reverted;
 
-      // PRE BURN
-      // did level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_AML,
@@ -1888,7 +1876,6 @@ describe("QuadPassport", async () => {
         [verifiedAt, verifiedAt]
       );
 
-      // account level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,
