@@ -814,45 +814,44 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
 
-    it("does nothing - EOA passport non-existent under token id=2", async () => {
+    it("fails - EOA passport non-existent under token id=2", async () => {
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
       await passport.connect(minterA).burnPassports()
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE,
+          2
+        )
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
-    // it("fail - IS_BUSINESS=true passport non-existent under token id=2", async () => {
-    //   const MockBusiness = await ethers.getContractFactory('MockBusiness')
-    //   const mockBusiness = await MockBusiness.deploy(defi.address)
-    //   await mockBusiness.deployed()
+    it("fails - IS_BUSINESS=true passport non-existent under token id=2", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
 
-    //   const sig = await signSetAttributes(
-    //     issuer,
-    //     mockBusiness,
-    //     TOKEN_ID,
-    //     did,
-    //     aml,
-    //     country,
-    //     id("TRUE"),
-    //     issuedAt
-    //   );
+      await expect(
+        setAttributesIssuer(
+          mockBusiness,
+          issuer,
+          passport,
+          businessAttributes,
+          verifiedAt,
+          issuedAt,
+          2
+        )
+      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
 
-    //   const sigAccount = '0x00';
-
-    //   await passport
-    //     .connect(minterB)
-    //     .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
-    //       value: MINT_PRICE,
-    //     });
-    //   expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
-    //   await expect(
-    //     mockBusiness.burnPassports(2)
-    //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //   expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
-
-    //   expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
-    //   await mockBusiness.burnPassports(TOKEN_ID);
-    //   expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
-    // });
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
+    });
   });
 
   // describe("deactivateThenBurn", async () => {
