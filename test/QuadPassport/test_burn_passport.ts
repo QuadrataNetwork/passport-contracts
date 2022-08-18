@@ -1823,7 +1823,7 @@ describe("QuadPassport", async () => {
         passport.connect(issuer).burnPassportsIssuer(minterA.address)
       )
         .to.emit(passport, "TransferSingle")
-        .withArgs(issuer.address, minterA.address, ethers.constants.AddressZero, TOKEN_ID, 1);
+        .withArgs(issuer.address, minterA.address, ethers.constants.AddressZero, TOKEN_ID, 1)
         .to.emit(passport, "BurnPassportsIssuer")
         .withArgs(issuer.address, minterA.address);
 
