@@ -18,6 +18,7 @@ const {
 } = require("../helpers/deployment_and_init.ts");
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
+const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 const { assertGetAttributes } = require("../helpers/assert/assert_get_attributes.ts");
 
 describe("QuadPassport", async () => {
@@ -305,148 +306,125 @@ describe("QuadPassport", async () => {
         [],
         []
       );
-
-
     });
 
-    // it("success - burnPassports(IS_BUSINESS: TRUE, Smart Contract)", async () => {
+    it("success - burnPassports(IS_BUSINESS: TRUE, Smart Contract)", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
 
-    //   const MockBusiness = await ethers.getContractFactory('MockBusiness')
-    //   const mockBusiness = await MockBusiness.deploy(defi.address)
-    //   await mockBusiness.deployed()
+      await expect(
+        setAttributesIssuer(
+          mockBusiness,
+          issuer,
+          passport,
+          businessAttributes,
+          verifiedAt,
+          issuedAt
+        )
+      ).to.not.be.reverted;
 
-    //   const sig = await signSetAttributes(
-    //     minterB,
-    //     issuer,
-    //     attributes,
-    //     verifiedAt,
-    //     issuedAt,
-    //     MINT_PRICE,
-    //     HARDHAT_CHAIN_ID,
-    //     TOKEN_ID,
-    //   );
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt],
+        true
+      );
 
-    //   const sigAccount = '0x00';
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt],
+        true
+      );
 
-    //   await passport
-    //     .connect(minterB)
-    //     .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, id("TRUE"), issuedAt], sig, sigAccount, {
-    //       value: MINT_PRICE,
-    //     });
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt],
+        true
+      );
 
-    //   await assertGetAttributeFree(
-    //     [issuer.address],
-    //     mockBusiness,
-    //     defi,
-    //     passport,
-    //     reader,
-    //     ATTRIBUTE_AML,
-    //     aml,
-    //     issuedAt,
-    //     1,
-    //     {
-    //       signer: minterB,
-    //       mockBusiness: mockBusiness
-    //     }
-    //   );
-    //   await assertGetAttribute(
-    //     mockBusiness,
-    //     treasury,
-    //     issuer,
-    //     issuerTreasury,
-    //     usdc,
-    //     defi,
-    //     passport,
-    //     reader,
-    //     ATTRIBUTE_COUNTRY,
-    //     country,
-    //     issuedAt,
-    //     1,
-    //     {
-    //       ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY],
-    //       signer: minterB,
-    //       mockBusiness: mockBusiness
-    //     }
-    //   );
-    //   await assertGetAttribute(
-    //     mockBusiness,
-    //     treasury,
-    //     issuer,
-    //     issuerTreasury,
-    //     usdc,
-    //     defi,
-    //     passport,
-    //     reader,
-    //     ATTRIBUTE_DID,
-    //     did,
-    //     issuedAt,
-    //     1,
-    //     {
-    //       ATTRIBUTE_PRICE: PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID],
-    //       signer: minterB,
-    //       mockBusiness: mockBusiness
-    //     }
-    //   );
-    //   // PRE BURN
-    //   // did level
-    //   const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //   // account level
-    //   const didPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, ATTRIBUTE_DID, issuer.address);
-    //   const countryPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //   const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
-    //   expect(didPreBurnA.value).equals(did);
-    //   expect(countryPreBurnA.value).equals(country);
-    //   expect(isBusinessPreBurnA.value).equals(id("TRUE"));
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt],
+        true
+      );
 
-    //   expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
-    //   await mockBusiness.burn();
-    //   expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+      await mockBusiness.burnPassports();
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
 
-    //   // POST BURN
-    //   // did level
-    //   const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //   // account level
-    //   const didPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, ATTRIBUTE_DID, issuer.address);
-    //   const countryPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //   const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(mockBusiness.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
-    //   // expect did level attributes to not change
-    //   expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
-    //   expect(didPostBurnA.value).equals(hexZeroPad('0x00', 32));
-    //   expect(countryPostBurnA.value).equals(hexZeroPad('0x00', 32));
-    //   expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
-    //   await expect(
-    //     reader.getAttributesTokenIncludingOnly(
-    //       mockBusiness.address,
-    //       TOKEN_ID,
-    //       ATTRIBUTE_AML,
-    //       usdc.address,
-    //       [issuer.address]
-    //     )
-    //   ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
-    //   await expect(
-    //     reader.getAttributesTokenIncludingOnly(
-    //       mockBusiness.address,
-    //       TOKEN_ID,
-    //       ATTRIBUTE_COUNTRY,
-    //       usdc.address,
-    //       [issuer.address]
-    //     )
-    //   ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
-
-    //   await expect(
-    //     reader.getAttributesTokenIncludingOnly(
-    //       mockBusiness.address,
-    //       TOKEN_ID,
-    //       ATTRIBUTE_DID,
-    //       usdc.address,
-    //       [issuer.address]
-    //     )
-    //   ).to.be.revertedWith("PASSPORT_DOES_NOT_EXIST");
-    // });
+    });
 
     // it("success - burnPassports(IS_BUSINESS: TRUE, Smart Contract, Multi-Issuer)", async () => {
 
@@ -1945,7 +1923,6 @@ describe("QuadPassport", async () => {
       );
 
 
-      // MID BURN - 1 Issuer burned
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
       await expect(
@@ -1956,7 +1933,6 @@ describe("QuadPassport", async () => {
         .to.not.emit(passport, "TransferSingle");
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
-      // did level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_AML,
@@ -1968,7 +1944,6 @@ describe("QuadPassport", async () => {
         [verifiedAt, verifiedAt]
       );
 
-      // account level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,
@@ -2002,7 +1977,6 @@ describe("QuadPassport", async () => {
         [verifiedAt]
       );
 
-      // FINAL BURN
       await expect(
         passport.connect(issuerB).burnPassportsIssuer(minterA.address)
       )
@@ -2019,7 +1993,6 @@ describe("QuadPassport", async () => {
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-      // did level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_AML,
@@ -2031,7 +2004,6 @@ describe("QuadPassport", async () => {
         []
       );
 
-      // account level
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,

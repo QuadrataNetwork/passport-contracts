@@ -9,6 +9,7 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadReaderStore.sol";
+import "hardhat/console.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
@@ -43,7 +44,6 @@ import "./storage/QuadReaderStore.sol";
         require(msg.value == fee, "INVALID_QUERY_FEE");
         if (fee > 0) {
             uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
-
             for (uint256 i = 0; i < attributes.length; i++) {
                 emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
             }
