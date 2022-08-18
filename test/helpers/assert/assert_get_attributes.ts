@@ -80,12 +80,10 @@ export const assertGetAttributesStatic = async (
       }
     });
   }
-  let queryFee: any;
-  if (isBusiness) {
-    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
-  } else {
-    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
-  }
+  const queryFee = await reader.callStatic.queryFee(
+    account.address,
+    attributeToQuery
+  );
   // Verify return value with callStatic
   const staticResp = await reader.callStatic.getAttributes(
     account.address,
@@ -138,12 +136,10 @@ export const assertGetAttributesEvents = async (
     });
   }
 
-  let queryFee: any;
-  if (isBusiness) {
-    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
-  } else {
-    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
-  }
+  const queryFee = await reader.callStatic.queryFee(
+    account.address,
+    attributeToQuery
+  );
 
   const tx = await reader
     .connect(treasury)
@@ -228,12 +224,10 @@ export const assertGetAttributesThroughContract = async (
   }
   const initialBalance = await ethers.provider.getBalance(reader.address);
 
-  let queryFee: any;
-  if (isBusiness) {
-    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
-  } else {
-    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
-  }
+  const queryFee = await reader.callStatic.queryFee(
+    account.address,
+    attributeToQuery
+  );
 
   const tx = await defi.deposit(account.address, attributeToQuery, {
     value: queryFee,

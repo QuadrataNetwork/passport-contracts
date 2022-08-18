@@ -252,8 +252,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 Attribute memory attrToDelete = attrs[position-1];
                 Attribute memory attrToSwap = attrs[attrs.length-1];
 
-                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToSwap.issuer))] = position;
-                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToDelete.issuer))] = 0;
+                _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), attrToSwap.issuer))] = position;
+                _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), attrToDelete.issuer))] = 0;
 
                 attrs[position-1] = attrToSwap;
                 attrs[attrs.length-1] = attrToDelete;
@@ -269,6 +269,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         if (isEmpty){
             _burnPassports(_account);
         }
+        emit BurnPassportsIssuer(_msgSender(), _account);
     }
 
     /// @dev Loop through all eligible token ids and burn passports if they exist

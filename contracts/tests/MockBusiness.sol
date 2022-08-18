@@ -38,11 +38,7 @@ contract MockBusiness {
         emit GetAttributesEventBusiness(attrValues, epochs, issuers);
     }
 
-    // function burn() public {
-    //     burnPassport(1);
-    // }
-
-    // function burnPassport(uint256 _tokenId) public {
-    //     IQuadPassport(defi.passport()).burnPassport(_tokenId);
-    // }
+    function burnPassports() public {
+        IQuadPassport(defi.passport()).burnPassports();
+    }
 }
