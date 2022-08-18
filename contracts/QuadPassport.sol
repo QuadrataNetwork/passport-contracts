@@ -75,7 +75,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         bytes calldata _sigIssuer
     ) internal {
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
-
         // Handle DID
         if(_config.did != bytes32(0)){
             _validateDid(_account, _config.did);
@@ -105,7 +104,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @notice Internal function that validates supplied DID on updates do not change
     /// @param _account address of entity being attested to
     /// @param _did new DID value
-    function _validateDid(address _account, bytes32 _did) internal {
+    function _validateDid(address _account, bytes32 _did) internal view {
         Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
         if(dIDAttrs.length > 0){
             require(dIDAttrs[0].value == _did, "INVALID_DID");
@@ -218,32 +217,27 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
 
     /// @notice Burn your Quadrata passport
     /// @dev Only owner of the passport
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    function burnPassport(
-        uint256 _tokenId
-    ) external override {
-        require(balanceOf(_msgSender(), _tokenId) >= 1, "CANNOT_BURN_ZERO_BALANCE");
-
+    function burnPassports() external override {
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            delete _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
 
-            // TODO: Remove positions from _position
+            IQuadPassportStore.Attribute[] storage attrs = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+
+            for(uint256 j = attrs.length; j > 0; j--){
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrs[j-1].issuer))] = 0;
+                attrs.pop();
+            }
         }
-
-        _burn(_msgSender(), _tokenId, 1);
+        _burnPassports(_msgSender());
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
     /// @dev Only issuer role
     /// @param _account address of the wallet to burn
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    function burnPassportIssuer(
-        address _account,
-        uint256 _tokenId
+    function burnPassportsIssuer(
+        address _account
     ) external override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
-        require(balanceOf(_account, _tokenId) == 1, "CANNOT_BURN_ZERO_BALANCE");
 
         bool isEmpty = true;
 
@@ -252,20 +246,39 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             uint256 position = _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), _msgSender()))];
             if (position > 0) {
-                Attribute[] memory attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
-                attrs[position] = attrs[attrs.length - 1];
-                // TODO: Figure out why error message
-                // attrs.pop();
+                Attribute[] storage attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
 
-                // TODO: Reset positions from _position
+                // Swap last attribute position with position of attribute to delete before calling pop()
+                Attribute memory attrToDelete = attrs[position-1];
+                Attribute memory attrToSwap = attrs[attrs.length-1];
+
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToSwap.issuer))] = position;
+                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrToDelete.issuer))] = 0;
+
+                attrs[position-1] = attrToSwap;
+                attrs[attrs.length-1] = attrToDelete;
+
+                attrs.pop();
 
                 if (attrs.length > 0) {
                     isEmpty = false;
                 }
             }
         }
-        if (isEmpty)
-            _burn(_account, _tokenId, 1);
+
+        if (isEmpty){
+            _burnPassports(_account);
+        }
+    }
+
+    /// @dev Loop through all eligible token ids and burn passports if they exist
+    /// @param _account address of user
+    function _burnPassports(address _account) internal {
+        for (uint256 currTokenId = 0; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
+            if(balanceOf(_account, currTokenId) >= 1){
+                _burn(_account, currTokenId, 1);
+            }
+        }
     }
 
     /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer

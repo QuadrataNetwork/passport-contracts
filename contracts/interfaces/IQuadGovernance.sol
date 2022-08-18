@@ -40,6 +40,8 @@ interface IQuadGovernance {
 
     function getEligibleAttributesLength() external view returns(uint256);
 
+    function getMaxEligibleTokenId() external view returns(uint256);
+
     function eligibleTokenId(uint256) external view returns(bool);
 
     function issuersTreasury(address) external view returns (address);

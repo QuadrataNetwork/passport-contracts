@@ -45,6 +45,8 @@ export const deployPassportEcosystem = async (
   await governance
     .connect(admin)
     .setEligibleAttribute(ATTRIBUTE_IS_BUSINESS, true);
+
+  // Set Eligible Attributes by DID
   await governance
     .connect(admin)
     .setEligibleAttributeByDID(ATTRIBUTE_AML, true);

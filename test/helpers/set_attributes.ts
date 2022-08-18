@@ -72,7 +72,6 @@ export const setAttributes = async (
   );
 
   const sigAccount = await signAccount(account);
-
   await expect(
     passport
       .connect(account)
