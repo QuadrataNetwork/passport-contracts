@@ -47,7 +47,8 @@ export const assertGetAttributes = async (
     reader,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt
+    expectedVerifiedAt,
+    isBusiness
   );
 };
 

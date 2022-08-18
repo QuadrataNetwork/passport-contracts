@@ -2,7 +2,6 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { formatBytes32String } from "ethers/lib/utils";
 
 const {
   ATTRIBUTE_DID,
@@ -33,7 +32,7 @@ export const setAttributes = async (
   const did =
     ATTRIBUTE_DID in attributes
       ? attributes[ATTRIBUTE_DID]
-      : formatBytes32String("0");
+      : ethers.constants.HashZero;
 
   Object.keys(attributes).forEach((k, i) => {
     let attrKey;
