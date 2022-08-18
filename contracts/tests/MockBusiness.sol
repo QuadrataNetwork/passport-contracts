@@ -28,6 +28,16 @@ contract MockBusiness {
         emit GetAttributesEventBusiness(attrValues, epochs, issuers);
     }
 
+    function depositLegacy(bytes32 _attribute) public payable {
+        (
+            bytes32[] memory attrValues,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = defi.depositLegacy{value: msg.value}(address(this), _attribute);
+
+        emit GetAttributesEventBusiness(attrValues, epochs, issuers);
+    }
+
     // function burn() public {
     //     burnPassport(1);
     // }
