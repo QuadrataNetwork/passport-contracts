@@ -1764,7 +1764,7 @@ describe("QuadPassport", async () => {
 
     //     });
 
-    it("success - burnPassportsIssuer for individual", async () => {
+    it("success - burnPassportsIssuer for individual with single issuer", async () => {
       await expect(
         setAttributes(
           minterA,
@@ -1883,39 +1883,63 @@ describe("QuadPassport", async () => {
         )
       ).to.not.be.reverted;
 
+      await expect(
+        setAttributes(
+          minterA,
+          issuerB,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
+
       // PRE BURN
       // did level
       const amlAttributesPre = await passport
         .connect(dataChecker)
         .attributes(minterA.address, ATTRIBUTE_AML);
-      expect(amlAttributesPre.length).equals(1);
+      expect(amlAttributesPre.length).equals(2);
       const amlPreBurnA = amlAttributesPre.find(
         (attr: any) => attr.issuer == issuer.address
+      );
+      const amlPreBurnB = amlAttributesPre.find(
+        (attr: any) => attr.issuer == issuerB.address
       );
 
       // account level
       const didAttributesPre = await passport
         .connect(dataChecker)
         .attributes(minterA.address, ATTRIBUTE_DID);
-      expect(didAttributesPre.length).equals(1);
+      expect(didAttributesPre.length).equals(2);
       const didPreBurnA = didAttributesPre.find(
         (attr: any) => attr.issuer == issuer.address
+      );
+      const didPreBurnB = didAttributesPre.find(
+        (attr: any) => attr.issuer == issuerB.address
       );
 
       const countryAttributesPre = await passport
         .connect(dataChecker)
         .attributes(minterA.address, ATTRIBUTE_COUNTRY);
-      expect(countryAttributesPre.length).equals(1);
+      expect(countryAttributesPre.length).equals(2);
       const countryPreBurnA = countryAttributesPre.find(
         (attr: any) => attr.issuer == issuer.address
+      );
+      const countryPreBurnB = countryAttributesPre.find(
+        (attr: any) => attr.issuer == issuerB.address
       );
 
       const isBusinessAttributesPre = await passport
         .connect(dataChecker)
         .attributes(minterA.address, ATTRIBUTE_IS_BUSINESS);
-      expect(isBusinessAttributesPre.length).equals(1);
+      expect(isBusinessAttributesPre.length).equals(2);
       const isBusinessPreBurnA = isBusinessAttributesPre.find(
         (attr: any) => attr.issuer == issuer.address
+      );
+      const isBusinessPreBurnB = isBusinessAttributesPre.find(
+        (attr: any) => attr.issuer == issuerB.address
       );
 
       expect(didPreBurnA.value).equals(attributes[ATTRIBUTE_DID]);
@@ -1924,7 +1948,17 @@ describe("QuadPassport", async () => {
         attributes[ATTRIBUTE_IS_BUSINESS]
       );
 
+      expect(didPreBurnB.value).equals(attributes[ATTRIBUTE_DID]);
+      expect(countryPreBurnB.value).equals(attributes[ATTRIBUTE_COUNTRY]);
+      expect(isBusinessPreBurnB.value).equals(
+        attributes[ATTRIBUTE_IS_BUSINESS]
+      );
+
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+       await expect(
+        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+      ).to.not.emit(passport, "TransferSingle");
+
       await expect(
         passport.connect(issuer).burnPassportsIssuer(minterA.address)
       )
@@ -1942,6 +1976,9 @@ describe("QuadPassport", async () => {
       const amlPostBurnA = amlAttributesPost.find(
         (attr: any) => attr.issuer == issuer.address
       );
+      const amlPostBurnB = amlAttributesPost.find(
+        (attr: any) => attr.issuer == issuerB.address
+      );
 
       // account level
       const didAttributesPost = await passport
@@ -1951,6 +1988,9 @@ describe("QuadPassport", async () => {
       const didPostBurnA = didAttributesPost.find(
         (attr: any) => attr.issuer == issuer.address
       );
+      const didPostBurnB = didAttributesPost.find(
+        (attr: any) => attr.issuer == issuerB.address
+      );
 
       const countryAttributesPost = await passport
         .connect(dataChecker)
@@ -1958,6 +1998,9 @@ describe("QuadPassport", async () => {
       expect(countryAttributesPost.length).equals(0);
       const countryPostBurnA = countryAttributesPost.find(
         (attr: any) => attr.issuer == issuer.address
+      );
+      const countryPostBurnB = countryAttributesPost.find(
+        (attr: any) => attr.issuer == issuerB.address
       );
 
       const isBusinessAttributesPost = await passport
@@ -1967,12 +2010,19 @@ describe("QuadPassport", async () => {
       const isBusinessPostBurnA = isBusinessAttributesPost.find(
         (attr: any) => attr.issuer == issuer.address
       );
+      const isBusinessPostBurnB = isBusinessAttributesPost.find(
+        (attr: any) => attr.issuer == issuerB.address
+      );
 
       // attributes return an empty list
       expect(amlPostBurnA).equals(undefined);
       expect(didPostBurnA).equals(undefined);
       expect(countryPostBurnA).equals(undefined);
       expect(isBusinessPostBurnA).equals(undefined);
+      expect(amlPostBurnB).equals(undefined);
+      expect(didPostBurnB).equals(undefined);
+      expect(countryPostBurnB).equals(undefined);
+      expect(isBusinessPostBurnB).equals(undefined);
     });
 
     //     it("success - mint 2 business passports, deactivate issuerA, burnIssuerA, then assert only account level attributes remain on issuerB", async () => {
