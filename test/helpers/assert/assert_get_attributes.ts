@@ -80,7 +80,7 @@ export const assertGetAttributesStatic = async (
       }
     });
   }
-  let queryFee = await reader.callStatic.queryFee(
+  const queryFee = await reader.callStatic.queryFee(
     account.address,
     attributeToQuery
   );
@@ -136,7 +136,7 @@ export const assertGetAttributesEvents = async (
     });
   }
 
-  let queryFee = await reader.callStatic.queryFee(
+  const queryFee = await reader.callStatic.queryFee(
     account.address,
     attributeToQuery
   );
@@ -224,7 +224,7 @@ export const assertGetAttributesThroughContract = async (
   }
   const initialBalance = await ethers.provider.getBalance(reader.address);
 
-  let queryFee = await reader.callStatic.queryFee(
+  const queryFee = await reader.callStatic.queryFee(
     account.address,
     attributeToQuery
   );
