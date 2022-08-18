@@ -10,6 +10,7 @@ import "../QuadReader.sol";
 
 contract DeFi {
     event GetAttributesEvent(bytes32[] attrValues, uint256[] epochs, address[] issuers);
+    event GetAttributesBulkEvent(bytes32[] attrValues, uint256[] epochs, address[] issuers);
 
     IQuadPassport public passport;
     QuadReader public reader;
@@ -47,27 +48,31 @@ contract DeFi {
         return (attrValues, epochs, issuers);
     }
 
-    function queryMultipleAttributes(
-        bytes32[] calldata _attributes
-    ) public payable {
-        uint256 paymentAmount;
-        for (uint256 i = 0; i < _attributes.length; i++) {
-            paymentAmount = reader.queryFee(msg.sender, _attributes[i]);
-
-            QuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: paymentAmount}(
-                msg.sender, _attributes[i]
-            );
-        }
-    }
-
-    function queryMultipleBulk(
-        bytes32[] calldata _attributes
-    ) public payable {
+    function depositBulk(address _account, bytes32[] calldata _attributes) public payable returns(IQuadPassportStore.Attribute[] memory) {
         uint256 paymentAmount = reader.queryFeeBulk(msg.sender, _attributes);
-        QuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: paymentAmount}(
-            msg.sender, _attributes
-        );
-        console.log(attributes[0].epoch);
-        console.log(attributes[0].issuer);
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: paymentAmount}(_account, _attributes);
+        bytes32[] memory attrValues = new bytes32[](attributes.length);
+        uint256[] memory epochs = new uint256[](attributes.length);
+        address[] memory issuers = new address[](attributes.length);
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            attrValues[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
+        }
+        emit GetAttributesBulkEvent(attrValues, epochs, issuers);
+
+        return attributes;
     }
+
+    // function queryMultipleBulk(
+    //     bytes32[] calldata _attributes
+    // ) public payable {
+    //     uint256 paymentAmount = reader.queryFeeBulk(msg.sender, _attributes);
+    //     QuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: paymentAmount}(
+    //         msg.sender, _attributes
+    //     );
+    //     console.log(attributes[0].epoch);
+    //     console.log(attributes[0].issuer);
+    // }
 }

@@ -81,7 +81,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
     );
   });
 
-  describe("QuadReader.getAttributes (SUCCESS CASES)", async () => {
+  describe("QuadReader.getAttributesLegacy (SUCCESS CASES)", async () => {
     it("success - 1 issuer", async () => {
       await assertGetAttributesLegacy(
         minterA,
@@ -697,13 +697,17 @@ describe("QuadReader.getAttributesLegacy", async () => {
   // ******************************************************************************* //
   //
 
-  describe("QuadReader.getAttributes (ERROR CASES)", async () => {
+  describe("QuadReader.getAttributesLegacy (ERROR CASES)", async () => {
     it("fail - account address zero", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
-        reader.getAttributes(ethers.constants.AddressZero, ATTRIBUTE_COUNTRY, {
-          value: queryFee,
-        })
+        reader.getAttributesLegacy(
+          ethers.constants.AddressZero,
+          ATTRIBUTE_COUNTRY,
+          {
+            value: queryFee,
+          }
+        )
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
@@ -713,7 +717,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
-        reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
+        reader.getAttributesLegacy(minterA.address, ATTRIBUTE_COUNTRY, {
           value: queryFee,
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -722,7 +726,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
     it("fail - wrong query Fee", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
-        reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
+        reader.getAttributesLegacy(minterA.address, ATTRIBUTE_COUNTRY, {
           value: queryFee.sub(1),
         })
       ).to.revertedWith("INVALID_QUERY_FEE");

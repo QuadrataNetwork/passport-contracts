@@ -91,19 +91,24 @@ import "./storage/QuadReaderStore.sol";
 
         uint256 totalFee;
         uint256 totalFeeIssuer;
+        uint256 attrFee;
 
         for (uint256 i = 0; i < _attributes.length; i++) {
-            uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeFixed(_attributes[i]) : governance.pricePerAttributeFixed(_attributes[i]);
+            attrFee = isBusiness
+                ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
+                : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             _getAttributesVerify(_account, _attributes[i]);
-            IQuadPassportStore.Attribute memory attr = passport.attributes(_account, _attributes[i])[0];
-            attributes[i] = attr;
+            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 
-            uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-            totalFeeIssuer += feeIssuer;
-            emit QueryFeeReceipt(governance.issuersTreasury(attr.issuer), feeIssuer);
+            if (attrs.length > 0) {
+                attributes[i] = attrs[0];
+                uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                totalFeeIssuer += feeIssuer;
+                emit QueryFeeReceipt(governance.issuersTreasury(attrs[0].issuer), feeIssuer);
+            }
         }
-        require(msg.value == totalFee," INVALID_QUERY_FEE");
+        require(msg.value == totalFee, " INVALID_QUERY_FEE");
         emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
         emit QueryBulkEvent(_account, msg.sender, _attributes);
 
@@ -127,14 +132,17 @@ import "./storage/QuadReaderStore.sol";
             uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeFixed(_attributes[i]) : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             _getAttributesVerify(_account, _attributes[i]);
-            IQuadPassportStore.Attribute memory attr = passport.attributes(_account, _attributes[i])[0];
-            values[i] = attr.value;
-            epochs[i] = attr.epoch;
-            issuers[i] = attr.issuer;
+            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 
-            uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-            totalFeeIssuer += feeIssuer;
-            emit QueryFeeReceipt(governance.issuersTreasury(attr.issuer), feeIssuer);
+            if (attrs.length > 0) {
+                values[i] = attrs[0].value;
+                epochs[i] = attrs[0].epoch;
+                issuers[i] = attrs[0].issuer;
+
+                uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                totalFeeIssuer += feeIssuer;
+                emit QueryFeeReceipt(governance.issuersTreasury(attrs[0].issuer), feeIssuer);
+            }
         }
         require(msg.value == totalFee," INVALID_QUERY_FEE");
         emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
