@@ -43,9 +43,12 @@ import "hardhat/console.sol";
         uint256 fee = queryFee(_account, _attribute);
         require(msg.value == fee, "INVALID_QUERY_FEE");
         if (fee > 0) {
+            console.log(attributes.length);
             uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
 
             for (uint256 i = 0; i < attributes.length; i++) {
+                console.log(attributes[i].issuer);
+                console.log(attributes[i].epoch);
                 emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
             }
             emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);

@@ -13,7 +13,6 @@ const {
   READER_ROLE,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
-  QUAD_DID,
 } = require("../../utils/constant.ts");
 
 const {
@@ -23,7 +22,9 @@ const {
 const { signSetAttributes, signAccount } = require("../helpers/signature.ts");
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
-const { assertSetAttribute } = require("../helpers/asserts.ts");
+const {
+  assertSetAttribute,
+} = require("../helpers/assert/assert_set_attributes.ts");
 
 describe("QuadPassport.setAttributes", async () => {
   let passport: Contract;
@@ -41,6 +42,7 @@ describe("QuadPassport.setAttributes", async () => {
 
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
+    [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -165,6 +167,7 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const attributeByIssuer2 = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -232,6 +235,7 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const updatedAttributes: any = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_AML]: formatBytes32String("5"),
         [ATTRIBUTE_COUNTRY]: id("BE"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
@@ -271,6 +275,7 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Issuer 2
       const attributeByIssuer2 = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -298,6 +303,7 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Update Issuer 1
       const updatedAttributes: any = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_AML]: formatBytes32String("5"),
         [ATTRIBUTE_COUNTRY]: id("BE"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
@@ -325,6 +331,7 @@ describe("QuadPassport.setAttributes", async () => {
 
       // Update Issuer 2
       const updatedAttrIssuer2 = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
         [ATTRIBUTE_AML]: formatBytes32String("7"),
         [ATTRIBUTE_COUNTRY]: id("DE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -377,13 +384,19 @@ describe("QuadPassport.setAttributes", async () => {
       attrValues = [];
       attrTypes = [];
 
-      Object.keys(attributes).forEach((k, i) => {
+      let did = formatBytes32String("0");
+
+      // Deep Copy to avoid mutating the object
+      const attributesCopy = Object.assign({}, attributes);
+      Object.keys(attributesCopy).forEach((k, i) => {
         let attrKey;
         if (k === ATTRIBUTE_AML) {
+          expect(ATTRIBUTE_DID in attributesCopy).to.equal(true);
+          did = attributes[ATTRIBUTE_DID];
           attrKey = ethers.utils.keccak256(
             ethers.utils.defaultAbiCoder.encode(
               ["bytes32", "bytes32"],
-              [QUAD_DID, k]
+              [did, k]
             )
           );
         } else {
@@ -394,10 +407,14 @@ describe("QuadPassport.setAttributes", async () => {
             )
           );
         }
-        attrKeys.push(attrKey);
-        attrValues.push(attributes[k]);
-        attrTypes.push(k);
+        if (k !== ATTRIBUTE_DID) {
+          attrKeys.push(attrKey);
+          attrValues.push(attributesCopy[k]);
+          attrTypes.push(k);
+        }
       });
+
+      delete attributesCopy[ATTRIBUTE_DID];
 
       fee = MINT_PRICE;
       tokenId = TOKEN_ID;
@@ -406,12 +423,13 @@ describe("QuadPassport.setAttributes", async () => {
       sigIssuer = await signSetAttributes(
         minterA,
         issuer,
-        attributes,
+        attributesCopy,
         verifiedAt,
         issuedAt,
         fee,
         blockId,
-        tokenId
+        tokenId,
+        did
       );
 
       sigAccount = await signAccount(minterA);
@@ -452,6 +470,7 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       const attributeByIssuer2 = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:newwrongdid"),
         [ATTRIBUTE_AML]: formatBytes32String("9"),
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -465,10 +484,7 @@ describe("QuadPassport.setAttributes", async () => {
           attributeByIssuer2,
           verifiedAt + 1,
           issuedAt + 1,
-          MINT_PRICE.add(1),
-          TOKEN_ID,
-          HARDHAT_CHAIN_ID,
-          formatBytes32String("did:quad:newdid")
+          MINT_PRICE.add(1)
         )
       ).to.revertedWith("INVALID_DID");
     });
@@ -563,7 +579,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -588,7 +604,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -613,7 +629,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -638,7 +654,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -664,7 +680,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -716,7 +732,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -752,7 +768,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,
@@ -778,7 +794,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               wrongIssuedAt,
@@ -804,7 +820,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               wrongVerifiedAt,
               issuedAt,
@@ -831,7 +847,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               wrongTokenId,
               verifiedAt,
               issuedAt,
@@ -856,7 +872,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              QUAD_DID,
+              attributes[ATTRIBUTE_DID],
               tokenId,
               verifiedAt,
               issuedAt,

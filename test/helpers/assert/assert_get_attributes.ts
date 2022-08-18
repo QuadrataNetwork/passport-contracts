@@ -5,73 +5,10 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { parseEther } from "ethers/lib/utils";
 
 const {
-  ATTRIBUTE_DID,
   ISSUER_SPLIT,
-  QUAD_DID,
-  TOKEN_ID,
   PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
   PRICE_PER_ATTRIBUTES_ETH,
-} = require("../../utils/constant.ts");
-
-export const assertSetAttribute = async (
-  account: SignerWithAddress,
-  issuers: SignerWithAddress[],
-  passport: Contract,
-  attributes: any[],
-  verifiedAt: number[],
-  fee: any[],
-  mockReader: SignerWithAddress,
-  tokenId: number = TOKEN_ID,
-  did: string = QUAD_DID
-) => {
-  // Safety Check
-  expect(issuers.length).to.equal(attributes.length);
-  expect(issuers.length).to.equal(verifiedAt.length);
-  expect(issuers.length).to.equal(fee.length);
-
-  const attrTypeCounter: any = {};
-  let totalFee: any = parseEther("0");
-
-  for (let i = 0; i < issuers.length; i++) {
-    Object.keys(attributes[i]).forEach((attrType) => {
-      attrTypeCounter[attrType] = ++attrTypeCounter[attrType] || 1;
-    });
-
-    totalFee = totalFee.add(fee[i]);
-  }
-
-  for (let i = 0; i < issuers.length; i++) {
-    Object.keys(attributes[i]).forEach(async (attrType) => {
-      const response = await passport
-        .connect(mockReader)
-        .attributes(account.address, attrType);
-
-      expect(response.length).equals(attrTypeCounter[attrType]);
-
-      for (let j = 0; j < response.length; j++) {
-        const attrResp = response[j];
-        expect(attrResp.value).equals(attributes[j][attrType]);
-        expect(attrResp.issuer).equals(issuers[j].address);
-        expect(attrResp.epoch).equals(verifiedAt[j]);
-      }
-    });
-
-    // Assert DID
-    const response = await passport
-      .connect(mockReader)
-      .attributes(account.address, ATTRIBUTE_DID);
-    expect(response.length).equals(issuers.length);
-    for (let j = 0; j < response.length; j++) {
-      const attrResp = response[j];
-      expect(attrResp.value).equals(QUAD_DID);
-      expect(attrResp.issuer).equals(issuers[j].address);
-      expect(attrResp.epoch).equals(verifiedAt[j]);
-    }
-  }
-
-  expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
-  expect(await ethers.provider.getBalance(passport.address)).to.equal(totalFee);
-};
+} = require("../../../utils/constant.ts");
 
 export const assertGetAttributes = async (
   account: SignerWithAddress,
@@ -221,6 +158,7 @@ export const assertGetAttributesEvents = async (
     if (numberOfAttrs !== 0) {
       feeIssuer = queryFee.mul(ISSUER_SPLIT).div(100).div(numberOfAttrs);
     }
+    console.log(receipt.events);
     expect(receipt.events.length).to.equal(numberOfAttrs + 2);
     for (let i = 0; i < numberOfAttrs; i++) {
       const event = receipt.events[i];

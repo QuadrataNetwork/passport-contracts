@@ -38,6 +38,7 @@ describe("QuadReader.getAttributes", async () => {
 
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
+    [ATTRIBUTE_DID]: QUAD_DID,
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -78,60 +79,161 @@ describe("QuadReader.getAttributes", async () => {
 
   describe("QuadReader.getAttributes (SUCCESS CASES)", async () => {
     beforeEach(async () => {
-      attributes[ATTRIBUTE_DID] = QUAD_DID;
-    });
-    it("success - 1 issuer", async () => {
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_COUNTRY,
-        reader,
-        defi,
-        treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
-      );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_AML,
-        reader,
-        defi,
-        treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
-      );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_DID,
-        reader,
-        defi,
-        treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
-      );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_IS_BUSINESS,
-        reader,
-        defi,
-        treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
-      );
+      // Adding this so we can query DID in assertGetAttributes helper functions
     });
 
-    it("success with 2 issuers", async () => {
+    // it("success - 1 issuer", async () => {
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_COUNTRY,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer],
+    //     [attributes],
+    //     [verifiedAt]
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_AML,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer],
+    //     [attributes],
+    //     [verifiedAt]
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_DID,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer],
+    //     [attributes],
+    //     [verifiedAt]
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_IS_BUSINESS,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer],
+    //     [attributes],
+    //     [verifiedAt]
+    //   );
+    // });
+
+    // it("success with 2 issuers", async () => {
+    //   const attrIssuers2 = {
+    //     [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+    //     [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
+    //     [ATTRIBUTE_COUNTRY]: id("US"),
+    //     [ATTRIBUTE_AML]: id("10"),
+    //   };
+    //   await setAttributes(
+    //     minterA,
+    //     issuer2,
+    //     passport,
+    //     attrIssuers2,
+    //     verifiedAt + 1,
+    //     issuedAt + 1,
+    //     MINT_PRICE
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_COUNTRY,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer, issuer2],
+    //     [attributes, attrIssuers2],
+    //     [verifiedAt, verifiedAt + 1]
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_AML,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer, issuer2],
+    //     [attributes, attrIssuers2],
+    //     [verifiedAt, verifiedAt + 1]
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_COUNTRY,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer, issuer2],
+    //     [attributes, attrIssuers2],
+    //     [verifiedAt, verifiedAt + 1]
+    //   );
+    //   await assertGetAttributes(
+    //     minterA,
+    //     ATTRIBUTE_IS_BUSINESS,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [issuer, issuer2],
+    //     [attributes, attrIssuers2],
+    //     [verifiedAt, verifiedAt + 1]
+    //   );
+    // });
+
+    // it("success no attributes", async () => {
+    //   // No issuers & no existing attestation for account
+    //   await assertGetAttributes(
+    //     minterB,
+    //     ATTRIBUTE_IS_BUSINESS,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [],
+    //     [],
+    //     []
+    //   );
+    //   await assertGetAttributes(
+    //     minterB,
+    //     ATTRIBUTE_AML,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [],
+    //     [],
+    //     []
+    //   );
+    //   await assertGetAttributes(
+    //     minterB,
+    //     ATTRIBUTE_COUNTRY,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [],
+    //     [],
+    //     []
+    //   );
+    //   await assertGetAttributes(
+    //     minterB,
+    //     ATTRIBUTE_DID,
+    //     reader,
+    //     defi,
+    //     treasury,
+    //     [],
+    //     [],
+    //     []
+    //   );
+    // });
+
+    it("success - existing AML and DID, but no IS_BUSINESS or COUNTRY for a new wallet", async () => {
       const attrIssuers2 = {
-        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
-        [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
-        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_DID]: formatBytes32String("did:quad:newid2"),
         [ATTRIBUTE_AML]: id("10"),
       };
       await setAttributes(
-        minterA,
+        minterB,
         issuer2,
         passport,
         attrIssuers2,
@@ -139,79 +241,37 @@ describe("QuadReader.getAttributes", async () => {
         issuedAt + 1,
         MINT_PRICE
       );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_COUNTRY,
-        reader,
-        defi,
-        treasury,
-        [issuer, issuer2],
-        [attributes, attrIssuers2],
-        [verifiedAt, verifiedAt + 1]
-      );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_AML,
-        reader,
-        defi,
-        treasury,
-        [issuer, issuer2],
-        [attributes, attrIssuers2],
-        [verifiedAt, verifiedAt + 1]
-      );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_COUNTRY,
-        reader,
-        defi,
-        treasury,
-        [issuer, issuer2],
-        [attributes, attrIssuers2],
-        [verifiedAt, verifiedAt + 1]
-      );
-      await assertGetAttributes(
-        minterA,
-        ATTRIBUTE_IS_BUSINESS,
-        reader,
-        defi,
-        treasury,
-        [issuer, issuer2],
-        [attributes, attrIssuers2],
-        [verifiedAt, verifiedAt + 1]
-      );
-    });
-
-    it("success no attributes", async () => {
-      // No issuers & no existing attestation for account
-      await assertGetAttributes(
-        minterB,
-        ATTRIBUTE_IS_BUSINESS,
-        reader,
-        defi,
-        treasury,
-        [],
-        [],
-        []
-      );
+      // DOES NOT EXIST
+      // await assertGetAttributes(
+      //   minterB,
+      //   ATTRIBUTE_COUNTRY,
+      //   reader,
+      //   defi,
+      //   treasury,
+      //   [],
+      //   [],
+      //   []
+      // );
+      // await assertGetAttributes(
+      //   minterB,
+      //   ATTRIBUTE_IS_BUSINESS,
+      //   reader,
+      //   defi,
+      //   treasury,
+      //   [],
+      //   [],
+      //   []
+      // );
+      // EXIST
       await assertGetAttributes(
         minterB,
         ATTRIBUTE_AML,
         reader,
         defi,
         treasury,
-        [],
-        [],
-        []
-      );
-      await assertGetAttributes(
-        minterB,
-        ATTRIBUTE_COUNTRY,
-        reader,
-        defi,
-        treasury,
-        [],
-        [],
-        []
+        [issuer2],
+        [attrIssuers2],
+        [verifiedAt + 1]
       );
       await assertGetAttributes(
         minterB,
@@ -219,9 +279,9 @@ describe("QuadReader.getAttributes", async () => {
         reader,
         defi,
         treasury,
-        [],
-        [],
-        []
+        [issuer2],
+        [attrIssuers2],
+        [verifiedAt + 1]
       );
     });
 
