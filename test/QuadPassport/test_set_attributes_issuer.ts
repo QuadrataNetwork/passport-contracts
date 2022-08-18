@@ -884,5 +884,55 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           )
       ).to.be.revertedWith("INVALID_ISSUER");
     });
+
+    it("fail - account address(0)", async () => {
+      const wrongAccount = ethers.constants.AddressZero;
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributesIssuer(
+            wrongAccount,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("ACCOUNT_CANNOT_BE_ZERO");
+    });
+
+    it("fail - account address(0)", async () => {
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
   });
 });
