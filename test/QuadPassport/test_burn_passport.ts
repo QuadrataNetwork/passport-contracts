@@ -808,67 +808,17 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
     });
 
-    // it("fail - invalid tokenId", async () => {
-    //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //   const wrongTokenId = 2;
-    //   await expect(
-    //     passport.connect(minterA).burnPassports(wrongTokenId)
-    //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+    it("does nothing - passport non-existent", async () => {
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+      await passport.connect(minterB).burnPassports();
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+    });
 
-    //   await assertGetAttributeFree(
-    //     [issuer.address],
-    //     minterA,
-    //     defi,
-    //     passport,
-    //     reader,
-    //     ATTRIBUTE_AML,
-    //     aml,
-    //     issuedAt
-    //   );
-    //   await assertGetAttribute(
-    //     minterA,
-    //     treasury,
-    //     issuer,
-    //     issuerTreasury,
-    //     usdc,
-    //     defi,
-    //     passport,
-    //     reader,
-    //     ATTRIBUTE_COUNTRY,
-    //     country,
-    //     issuedAt
-    //   );
-    //   await assertGetAttribute(
-    //     minterA,
-    //     treasury,
-    //     issuer,
-    //     issuerTreasury,
-    //     usdc,
-    //     defi,
-    //     passport,
-    //     reader,
-    //     ATTRIBUTE_DID,
-    //     did,
-    //     issuedAt
-    //   );
-    // });
-
-    // it("fail - passport non-existent", async () => {
-    //   expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
-    //   await expect(
-    //     passport.connect(minterB).burnPassports(TOKEN_ID)
-    //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //   expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
-    // });
-
-    // it("fail - EOA passport non-existent under token id=2", async () => {
-    //   expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-    //   await expect(
-    //     passport.connect(minterA).burnPassports(2)
-    //   ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //   expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-    // });
+    it("does nothing - EOA passport non-existent under token id=2", async () => {
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+      await passport.connect(minterA).burnPassports()
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+    });
 
     // it("fail - IS_BUSINESS=true passport non-existent under token id=2", async () => {
     //   const MockBusiness = await ethers.getContractFactory('MockBusiness')
