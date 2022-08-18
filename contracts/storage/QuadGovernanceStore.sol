@@ -25,7 +25,7 @@ contract QuadGovernanceStore is QuadConstant {
 
     // Others
     uint256 internal _revSplitIssuer; // 50 means 50%;
-    uint256 internal _maxEligibleTokenId;
+    uint256 public _maxEligibleTokenId;
     IQuadPassport internal _passport;
     address internal _treasury;
 }
