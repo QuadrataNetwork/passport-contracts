@@ -4,11 +4,7 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { parseEther } from "ethers/lib/utils";
 
-const {
-  ISSUER_SPLIT,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
-  PRICE_PER_ATTRIBUTES_ETH,
-} = require("../../../utils/constant.ts");
+const { ISSUER_SPLIT } = require("../../../utils/constant.ts");
 
 export const assertGetAttributesLegacy = async (
   account: SignerWithAddress,
@@ -18,8 +14,7 @@ export const assertGetAttributesLegacy = async (
   treasury: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   await assertGetAttributesEventsLegacy(
     account,
@@ -28,8 +23,7 @@ export const assertGetAttributesLegacy = async (
     treasury,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
   await assertGetAttributesLegacyThroughContract(
     account,
@@ -38,8 +32,7 @@ export const assertGetAttributesLegacy = async (
     defi,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
   await assertGetAttributesLegacyStatic(
     account,
@@ -47,8 +40,7 @@ export const assertGetAttributesLegacy = async (
     reader,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
 };
 
@@ -58,8 +50,7 @@ export const assertGetAttributesLegacyStatic = async (
   reader: Contract,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
@@ -80,12 +71,11 @@ export const assertGetAttributesLegacyStatic = async (
       }
     });
   }
-  let queryFee: any;
-  if (isBusiness) {
-    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
-  } else {
-    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
-  }
+
+  const queryFee = await reader.callStatic.queryFee(
+    account.address,
+    attributeToQuery
+  );
   // Verify return value with callStatic
   const staticResp = await reader.callStatic.getAttributesLegacy(
     account.address,
@@ -112,8 +102,7 @@ export const assertGetAttributesEventsLegacy = async (
   treasury: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedIssuers.length);
@@ -137,12 +126,10 @@ export const assertGetAttributesEventsLegacy = async (
     });
   }
 
-  let queryFee: any;
-  if (isBusiness) {
-    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
-  } else {
-    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
-  }
+  const queryFee = await reader.callStatic.queryFee(
+    account.address,
+    attributeToQuery
+  );
 
   const tx = await reader
     .connect(treasury)
@@ -203,8 +190,7 @@ export const assertGetAttributesLegacyThroughContract = async (
   defi: Contract,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
@@ -227,13 +213,10 @@ export const assertGetAttributesLegacyThroughContract = async (
   }
   const initialBalance = await ethers.provider.getBalance(reader.address);
 
-  let queryFee: any;
-  if (isBusiness) {
-    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
-  } else {
-    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
-  }
-
+  const queryFee = await reader.callStatic.queryFee(
+    account.address,
+    attributeToQuery
+  );
   const tx = await defi.depositLegacy(account.address, attributeToQuery, {
     value: queryFee,
   });

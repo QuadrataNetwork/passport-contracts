@@ -4,11 +4,7 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { parseEther } from "ethers/lib/utils";
 
-const {
-  ISSUER_SPLIT,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
-  PRICE_PER_ATTRIBUTES_ETH,
-} = require("../../../utils/constant.ts");
+const { ISSUER_SPLIT } = require("../../../utils/constant.ts");
 
 export const assertGetAttributes = async (
   account: SignerWithAddress,
@@ -18,8 +14,7 @@ export const assertGetAttributes = async (
   treasury: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   await assertGetAttributesEvents(
     account,
@@ -28,8 +23,7 @@ export const assertGetAttributes = async (
     treasury,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
   await assertGetAttributesThroughContract(
     account,
@@ -38,8 +32,7 @@ export const assertGetAttributes = async (
     defi,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
   await assertGetAttributesStatic(
     account,
@@ -47,8 +40,7 @@ export const assertGetAttributes = async (
     reader,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
 };
 
@@ -58,8 +50,7 @@ export const assertGetAttributesStatic = async (
   reader: Contract,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
@@ -111,8 +102,7 @@ export const assertGetAttributesEvents = async (
   treasury: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedIssuers.length);
@@ -200,8 +190,7 @@ export const assertGetAttributesThroughContract = async (
   defi: Contract,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);

@@ -28,7 +28,6 @@ export const assertGetAttributesBulk = async (
   //   expectedIssuers,
   //   expectedAttributes,
   //   expectedVerifiedAt,
-  //   isBusiness
   // );
   // await assertGetAttributesBulkThroughContract(
   //   account,
@@ -38,7 +37,6 @@ export const assertGetAttributesBulk = async (
   //   expectedIssuers,
   //   expectedAttributes,
   //   expectedVerifiedAt,
-  //   isBusiness
   // );
   await assertGetAttributesBulkStatic(
     account,
@@ -46,8 +44,7 @@ export const assertGetAttributesBulk = async (
     reader,
     expectedIssuers,
     expectedAttributes,
-    expectedVerifiedAt,
-    isBusiness
+    expectedVerifiedAt
   );
 };
 
@@ -57,8 +54,7 @@ export const assertGetAttributesBulkStatic = async (
   reader: Contract,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
-  expectedVerifiedAt: number[],
-  isBusiness: boolean = false
+  expectedVerifiedAt: number[]
 ) => {
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
@@ -116,7 +112,6 @@ export const assertGetAttributesBulkStatic = async (
 //   expectedIssuers: SignerWithAddress[],
 //   expectedAttributes: any[],
 //   expectedVerifiedAt: number[],
-//   isBusiness: boolean = false
 // ) => {
 //   // Safety Check
 //   expect(expectedIssuers.length).to.equal(expectedIssuers.length);

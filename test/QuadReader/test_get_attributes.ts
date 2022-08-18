@@ -565,8 +565,7 @@ describe("QuadReader.getAttributes", async () => {
         treasury,
         [issuer],
         [updatedAttributes],
-        [verifiedAt + 1],
-        true // IS_BUSINESS IS TRUE
+        [verifiedAt + 1]
       );
       await assertGetAttributes(
         minterA,
@@ -576,8 +575,7 @@ describe("QuadReader.getAttributes", async () => {
         treasury,
         [issuer],
         [updatedAttributes],
-        [verifiedAt + 1],
-        true // IS_BUSINESS IS TRUE
+        [verifiedAt + 1]
       );
     });
 
@@ -601,8 +599,7 @@ describe("QuadReader.getAttributes", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
       await assertGetAttributes(
         businessPassport,
@@ -612,8 +609,7 @@ describe("QuadReader.getAttributes", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
       await assertGetAttributes(
         businessPassport,
@@ -623,8 +619,7 @@ describe("QuadReader.getAttributes", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
       await assertGetAttributes(
         businessPassport,
@@ -634,8 +629,7 @@ describe("QuadReader.getAttributes", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
     });
 

@@ -565,8 +565,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         treasury,
         [issuer],
         [updatedAttributes],
-        [verifiedAt + 1],
-        true // IS_BUSINESS IS TRUE
+        [verifiedAt + 1]
       );
       await assertGetAttributesLegacy(
         minterA,
@@ -576,8 +575,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         treasury,
         [issuer],
         [updatedAttributes],
-        [verifiedAt + 1],
-        true // IS_BUSINESS IS TRUE
+        [verifiedAt + 1]
       );
     });
 
@@ -601,8 +599,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
       await assertGetAttributesLegacy(
         businessPassport,
@@ -612,8 +609,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
       await assertGetAttributesLegacy(
         businessPassport,
@@ -623,8 +619,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
       await assertGetAttributesLegacy(
         businessPassport,
@@ -634,8 +629,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         treasury,
         [issuer],
         [attributesCopy],
-        [verifiedAt],
-        true
+        [verifiedAt]
       );
     });
 

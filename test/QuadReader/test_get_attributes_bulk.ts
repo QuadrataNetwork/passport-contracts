@@ -378,9 +378,9 @@ describe("QuadReader.getAttributesBulkBulk", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [updatedAttributes],
-        [verifiedAt + 1]
+        [issuer, issuer],
+        [updatedAttributes, attributes],
+        [verifiedAt + 1, verifiedAt]
       );
     });
 
