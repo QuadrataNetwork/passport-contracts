@@ -385,7 +385,7 @@ describe("QuadPassport", async () => {
         [],
         [],
         [],
-        true
+        false // dont use business query fee
       );
 
       await assertGetAttributes(
@@ -397,7 +397,7 @@ describe("QuadPassport", async () => {
         [],
         [],
         [],
-        true
+        false // dont use business query fee
       );
 
       await assertGetAttributes(
@@ -409,7 +409,7 @@ describe("QuadPassport", async () => {
         [],
         [],
         [],
-        true
+        false // dont use business query fee
       );
 
       await assertGetAttributes(
@@ -421,7 +421,7 @@ describe("QuadPassport", async () => {
         [],
         [],
         [],
-        true
+        false // dont use business query fee
       );
 
     });
