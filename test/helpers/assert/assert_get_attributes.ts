@@ -43,6 +43,7 @@ export const assertGetAttributes = async (
   );
   await assertGetAttributesStatic(
     account,
+    attributeToQuery,
     reader,
     expectedIssuers,
     expectedAttributes,
@@ -52,6 +53,7 @@ export const assertGetAttributes = async (
 
 export const assertGetAttributesStatic = async (
   account: SignerWithAddress,
+  attributeToQuery: string,
   reader: Contract,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
@@ -62,37 +64,44 @@ export const assertGetAttributesStatic = async (
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
   expect(expectedIssuers.length).to.equal(expectedVerifiedAt.length);
 
-  const attrTypeCounter: any = {};
+  const availableAttributesByTypes: any = {};
 
-  for (let i = 0; i < expectedIssuers.length; i++) {
+  for (let i = 0; i < expectedAttributes.length; i++) {
     Object.keys(expectedAttributes[i]).forEach((attrType) => {
-      attrTypeCounter[attrType] = ++attrTypeCounter[attrType] || 1;
+      if (availableAttributesByTypes[attrType]) {
+        availableAttributesByTypes[attrType].push(
+          expectedAttributes[i][attrType]
+        );
+      } else {
+        availableAttributesByTypes[attrType] = [
+          expectedAttributes[i][attrType],
+        ];
+      }
     });
   }
+  let queryFee: any;
+  if (isBusiness) {
+    queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attributeToQuery];
+  } else {
+    queryFee = PRICE_PER_ATTRIBUTES_ETH[attributeToQuery];
+  }
+  // Verify return value with callStatic
+  const staticResp = await reader.callStatic.getAttributes(
+    account.address,
+    attributeToQuery,
+    { value: queryFee }
+  );
+  const matchingAttributes =
+    attributeToQuery in availableAttributesByTypes
+      ? availableAttributesByTypes[attributeToQuery]
+      : [];
 
-  for (let i = 0; i < expectedIssuers.length; i++) {
-    Object.keys(expectedAttributes[i]).forEach(async (attrType) => {
-      let queryFee: any;
-      if (isBusiness) {
-        queryFee = PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType];
-      } else {
-        queryFee = PRICE_PER_ATTRIBUTES_ETH[attrType];
-      }
-
-      // Verify return value with callStatic
-      const staticResp = await reader.callStatic.getAttributes(
-        account.address,
-        attrType,
-        { value: queryFee }
-      );
-      expect(staticResp.length).equals(expectedIssuers.length);
-      for (let j = 0; j < staticResp.length; j++) {
-        const attrResp = staticResp[j];
-        expect(attrResp.value).equals(expectedAttributes[j][attrType]);
-        expect(attrResp.issuer).equals(expectedIssuers[j].address);
-        expect(attrResp.epoch).equals(expectedVerifiedAt[j]);
-      }
-    });
+  expect(staticResp.length).equals(matchingAttributes.length);
+  for (let j = 0; j < staticResp.length; j++) {
+    const attrResp = staticResp[j];
+    expect(attrResp.value).equals(matchingAttributes[j]);
+    expect(attrResp.issuer).equals(expectedIssuers[j].address);
+    expect(attrResp.epoch).equals(expectedVerifiedAt[j]);
   }
 };
 
@@ -158,7 +167,6 @@ export const assertGetAttributesEvents = async (
     if (numberOfAttrs !== 0) {
       feeIssuer = queryFee.mul(ISSUER_SPLIT).div(100).div(numberOfAttrs);
     }
-    console.log(receipt.events);
     expect(receipt.events.length).to.equal(numberOfAttrs + 2);
     for (let i = 0; i < numberOfAttrs; i++) {
       const event = receipt.events[i];
