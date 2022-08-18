@@ -22,7 +22,7 @@ describe("QuadReader", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
-  let defi: Contract;
+  let defi: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -31,10 +31,11 @@ describe("QuadReader", async () => {
     issuer: SignerWithAddress,
     issuerB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuerTreasury: SignerWithAddress,
-    issuerBTreasury: SignerWithAddress // eslint-disable-line no-unused-vars
+    issuerBTreasury: SignerWithAddress; // eslint-disable-line no-unused-vars
 
   let issuedAt: number, verifiedAt: number;
   const attributes: Object = {
+    [ATTRIBUTE_DID]: formatBytes32String("did:quad:helloworld"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
@@ -75,29 +76,125 @@ describe("QuadReader", async () => {
 
   describe("QuadReader.hasPassportByIssuer", async () => {
     it("returns true for valid issuers", async () => {
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_DID, issuer.address)).to.equal(true);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_AML, issuer.address)).to.equal(true);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_COUNTRY, issuer.address)).to.equal(true);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address)).to.equal(true);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_DID,
+          issuer.address
+        )
+      ).to.equal(true);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_AML,
+          issuer.address
+        )
+      ).to.equal(true);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_COUNTRY,
+          issuer.address
+        )
+      ).to.equal(true);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_IS_BUSINESS,
+          issuer.address
+        )
+      ).to.equal(true);
 
-      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_DID, issuer.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_AML, issuer.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_COUNTRY, issuer.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterB.address, ATTRIBUTE_IS_BUSINESS, issuer.address)).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterB.address,
+          ATTRIBUTE_DID,
+          issuer.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterB.address,
+          ATTRIBUTE_AML,
+          issuer.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterB.address,
+          ATTRIBUTE_COUNTRY,
+          issuer.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterB.address,
+          ATTRIBUTE_IS_BUSINESS,
+          issuer.address
+        )
+      ).to.equal(false);
     });
 
     it("returns false for issuers w/ no attestations", async () => {
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_DID, issuerB.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_AML, issuerB.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_COUNTRY, issuerB.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, issuerB.address)).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_DID,
+          issuerB.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_AML,
+          issuerB.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_COUNTRY,
+          issuerB.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_IS_BUSINESS,
+          issuerB.address
+        )
+      ).to.equal(false);
     });
 
     it("returns false for non-issuers", async () => {
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_DID, minterA.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_AML, minterA.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_COUNTRY, minterA.address)).to.equal(false);
-      expect(await reader.hasPassportByIssuer(minterA.address, ATTRIBUTE_IS_BUSINESS, minterA.address)).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_DID,
+          minterA.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_AML,
+          minterA.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_COUNTRY,
+          minterA.address
+        )
+      ).to.equal(false);
+      expect(
+        await reader.hasPassportByIssuer(
+          minterA.address,
+          ATTRIBUTE_IS_BUSINESS,
+          minterA.address
+        )
+      ).to.equal(false);
     });
   });
 });

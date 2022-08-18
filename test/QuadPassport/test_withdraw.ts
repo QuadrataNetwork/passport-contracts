@@ -2,11 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import {
-  parseEther,
-  parseUnits,
-  id,
-} from "ethers/lib/utils";
+import { parseEther, parseUnits, id } from "ethers/lib/utils";
 import { ucs2 } from "punycode";
 
 const {
@@ -18,12 +14,9 @@ const {
   PRICE_PER_ATTRIBUTES,
   PRICE_SET_ATTRIBUTE,
   ISSUER_STATUS,
-  QUAD_DID
 } = require("../../utils/constant.ts");
 
-const {
-  deployPassportEcosystem,
-} = require("../utils/deployment_and_init.ts");
+const { deployPassportEcosystem } = require("../utils/deployment_and_init.ts");
 
 const { signMint } = require("../utils/signature.ts");
 const { assertMint, assertSetAttribute } = require("../utils/verify.ts");
@@ -52,13 +45,23 @@ describe("QuadPassport", async () => {
 
   beforeEach(async () => {
     baseURI = "https://quadrata.io";
-    did = QUAD_DID;
+    did = id("helloworld");
     aml = id("LOW");
     country = id("FRANCE");
     isBusiness = id("FALSE");
     issuedAt = Math.floor(new Date().getTime() / 1000);
 
-    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury, issuerB, issuerBTreasury] = await ethers.getSigners();
+    [
+      deployer,
+      admin,
+      minterA,
+      minterB,
+      issuer,
+      treasury,
+      issuerTreasury,
+      issuerB,
+      issuerBTreasury,
+    ] = await ethers.getSigners();
 
     [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
       admin,
@@ -68,7 +71,9 @@ describe("QuadPassport", async () => {
       baseURI
     );
 
-    await governance.connect(admin).setIssuer(issuerB.address, issuerBTreasury.address);
+    await governance
+      .connect(admin)
+      .setIssuer(issuerB.address, issuerBTreasury.address);
 
     await usdc.transfer(minterA.address, parseUnits("1000", 6));
     await usdc.transfer(minterB.address, parseUnits("1000", 6));
@@ -199,9 +204,9 @@ describe("QuadPassport", async () => {
       await expect(passport.withdraw(treasury.address)).to.revertedWith(
         "NOT_ENOUGH_BALANCE"
       );
-      await expect(
-        passport.withdraw(issuerTreasury.address)
-      ).to.revertedWith("NOT_ENOUGH_BALANCE");
+      await expect(passport.withdraw(issuerTreasury.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
     });
 
     it("success - after deactivated issuer withdraw", async () => {
@@ -225,12 +230,19 @@ describe("QuadPassport", async () => {
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(
+        ATTRIBUTE_DID,
+        minterA.address
+      );
 
-      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
+      await defi
+        .connect(minterA)
+        .doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
       // deactivate the issuer
-      await governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
+      await governance
+        .connect(admin)
+        .setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED);
 
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       // Withdraw for Protocol Treasury
@@ -277,13 +289,20 @@ describe("QuadPassport", async () => {
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(
+        ATTRIBUTE_DID,
+        minterA.address
+      );
 
-      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
+      await defi
+        .connect(minterA)
+        .doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
       // update the issuer treaz
       const newIssuerTreasury = ethers.Wallet.createRandom();
-      await governance.connect(admin).setIssuer(issuer.address, newIssuerTreasury.address);
+      await governance
+        .connect(admin)
+        .setIssuer(issuer.address, newIssuerTreasury.address);
 
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       // Withdraw for Protocol Treasury
@@ -307,7 +326,9 @@ describe("QuadPassport", async () => {
         initialBalanceTreasuryIssuer.add(expectedWithdrawAmount)
       );
       expect(await ethers.provider.getBalance(passport.address)).to.equal(0);
-      expect(await ethers.provider.getBalance(newIssuerTreasury.address)).to.equal(0);
+      expect(
+        await ethers.provider.getBalance(newIssuerTreasury.address)
+      ).to.equal(0);
     });
 
     it("success - after getAttribute(Payable)", async () => {
@@ -331,9 +352,14 @@ describe("QuadPassport", async () => {
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
+      const priceAttribute = await reader.calculatePayment(
+        ATTRIBUTE_DID,
+        minterA.address
+      );
 
-      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
+      await defi
+        .connect(minterA)
+        .doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       // Withdraw for Protocol Treasury
@@ -382,7 +408,7 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt,
         TOKEN_ID,
-        {newIssuerMint: true}
+        { newIssuerMint: true }
       );
       await passport.withdraw(issuerTreasury.address);
       await passport.withdraw(issuerBTreasury.address);
@@ -398,11 +424,15 @@ describe("QuadPassport", async () => {
         passport.address
       );
 
-      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
-      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
+      const priceAttribute = await reader.calculatePayment(
+        ATTRIBUTE_DID,
+        minterA.address
+      );
+      await defi
+        .connect(minterA)
+        .doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       const expectedAmountPerIssuer = expectedWithdrawAmount.div(2);
-
 
       // Withdraw for Protocol Treasury
       await passport.withdraw(treasury.address);
@@ -426,7 +456,9 @@ describe("QuadPassport", async () => {
       );
 
       // we expect to have enough eth left in the passport to account for issuerB as they did not withdraw
-      expect(await ethers.provider.getBalance(passport.address)).to.equal(expectedAmountPerIssuer);
+      expect(await ethers.provider.getBalance(passport.address)).to.equal(
+        expectedAmountPerIssuer
+      );
     });
 
     it("fail - withdraw to address(0)", async () => {
@@ -474,13 +506,13 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      await expect(passport.connect(issuerTreasury).withdraw(admin.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
-      );
+      await expect(
+        passport.connect(issuerTreasury).withdraw(admin.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
 
-      await expect(passport.connect(treasury).withdraw(admin.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
-      );
+      await expect(
+        passport.connect(treasury).withdraw(admin.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
     it("fail - withdraw to non valid issuer or treasury as issuerTreasury after COUNTRY query", async () => {
@@ -495,16 +527,21 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
-      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
-
-      await expect(passport.connect(issuerTreasury).withdraw(admin.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
+      const priceAttribute = await reader.calculatePayment(
+        ATTRIBUTE_DID,
+        minterA.address
       );
+      await defi
+        .connect(minterA)
+        .doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
-      await expect(passport.connect(treasury).withdraw(admin.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
-      );
+      await expect(
+        passport.connect(issuerTreasury).withdraw(admin.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
+
+      await expect(
+        passport.connect(treasury).withdraw(admin.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
     it("fail - withdraw balance 0", async () => {
@@ -520,9 +557,9 @@ describe("QuadPassport", async () => {
         issuedAt
       );
       await passport.withdraw(issuerTreasury.address);
-      await expect(
-        passport.withdraw(issuerTreasury.address)
-      ).to.revertedWith("NOT_ENOUGH_BALANCE");
+      await expect(passport.withdraw(issuerTreasury.address)).to.revertedWith(
+        "NOT_ENOUGH_BALANCE"
+      );
     });
   });
 
@@ -608,14 +645,16 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const initialBalanceTreasury = await usdc.balanceOf(
-        treasury.address
-      );
+      const initialBalanceTreasury = await usdc.balanceOf(treasury.address);
       const initialBalanceTreasuryIssuer = await usdc.balanceOf(
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address);
+      const priceAttribute = await reader.calculatePaymentToken(
+        ATTRIBUTE_DID,
+        usdc.address,
+        minterA.address
+      );
 
       await usdc.connect(minterA).approve(defi.address, priceAttribute);
       await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
@@ -660,21 +699,25 @@ describe("QuadPassport", async () => {
         issuedAt
       );
 
-      const initialBalanceTreasury = await usdc.balanceOf(
-        treasury.address
-      );
+      const initialBalanceTreasury = await usdc.balanceOf(treasury.address);
       const initialBalanceTreasuryIssuer = await usdc.balanceOf(
         issuerTreasury.address
       );
 
-      const priceAttribute = await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address);
+      const priceAttribute = await reader.calculatePaymentToken(
+        ATTRIBUTE_DID,
+        usdc.address,
+        minterA.address
+      );
 
       await usdc.connect(minterA).approve(defi.address, priceAttribute);
       await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
 
       // update the issuer treaz
       const newIssuerTreasury = ethers.Wallet.createRandom();
-      await governance.connect(admin).setIssuer(issuer.address, newIssuerTreasury.address);
+      await governance
+        .connect(admin)
+        .setIssuer(issuer.address, newIssuerTreasury.address);
 
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       // Withdraw for Protocol Treasury
@@ -724,26 +767,25 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt,
         TOKEN_ID,
-        {newIssuerMint: true}
+        { newIssuerMint: true }
       );
 
-      const initialBalanceTreasury = await usdc.balanceOf(
-        treasury.address
-      );
+      const initialBalanceTreasury = await usdc.balanceOf(treasury.address);
       const initialBalanceTreasuryIssuer = await usdc.balanceOf(
         issuerTreasury.address
       );
 
-      const initialBalancePassport = await usdc.balanceOf(
-        passport.address
-      );
+      const initialBalancePassport = await usdc.balanceOf(passport.address);
 
-      const priceAttribute = await reader.calculatePaymentToken(ATTRIBUTE_DID, usdc.address, minterA.address);
+      const priceAttribute = await reader.calculatePaymentToken(
+        ATTRIBUTE_DID,
+        usdc.address,
+        minterA.address
+      );
       await usdc.connect(minterA).approve(defi.address, priceAttribute);
       await defi.connect(minterA).doSomething(ATTRIBUTE_DID, usdc.address);
       const expectedWithdrawAmount = priceAttribute.mul(ISSUER_SPLIT).div(100);
       const expectedAmountPerIssuer = expectedWithdrawAmount.div(2);
-
 
       // Withdraw for Protocol Treasury
       await passport.withdrawToken(treasury.address, usdc.address);
@@ -767,7 +809,9 @@ describe("QuadPassport", async () => {
       );
 
       // we expect to have enough eth left in the passport to account for issuerB as they did not withdraw
-      expect(await usdc.balanceOf(passport.address)).to.equal(expectedAmountPerIssuer);
+      expect(await usdc.balanceOf(passport.address)).to.equal(
+        expectedAmountPerIssuer
+      );
     });
 
     it("fail - withdraw to address(0)", async () => {
@@ -818,16 +862,23 @@ describe("QuadPassport", async () => {
         isBusiness,
         issuedAt
       );
-      const priceAttribute = await reader.calculatePayment(ATTRIBUTE_DID, minterA.address);
-      await defi.connect(minterA).doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
-
-      await expect(passport.connect(issuerTreasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
+      const priceAttribute = await reader.calculatePayment(
+        ATTRIBUTE_DID,
+        minterA.address
       );
+      await defi
+        .connect(minterA)
+        .doSomethingETH(ATTRIBUTE_DID, { value: priceAttribute });
 
-      await expect(passport.connect(treasury).withdrawToken(admin.address, usdc.address)).to.revertedWith(
-        "NOT_ENOUGH_BALANCE"
-      );
+      await expect(
+        passport
+          .connect(issuerTreasury)
+          .withdrawToken(admin.address, usdc.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
+
+      await expect(
+        passport.connect(treasury).withdrawToken(admin.address, usdc.address)
+      ).to.revertedWith("NOT_ENOUGH_BALANCE");
     });
 
     it("fail - withdraw balance 0", async () => {
