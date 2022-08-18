@@ -146,7 +146,7 @@ export const assertGetAttributesEvents = async (
   }
 
   const tx = await reader
-    .connect(account)
+    .connect(treasury)
     .getAttributes(account.address, attributeToQuery, {
       value: queryFee,
     });
@@ -157,7 +157,7 @@ export const assertGetAttributesEvents = async (
     expect(receipt.events.length).to.equal(1);
     expect(receipt.events[0].event).to.equal("QueryEvent");
     expect(receipt.events[0].args[0]).to.equal(account.address);
-    expect(receipt.events[0].args[1]).to.equal(account.address);
+    expect(receipt.events[0].args[1]).to.equal(treasury.address);
     expect(receipt.events[0].args[2]).to.equal(attributeToQuery);
   } else {
     let feeIssuer = parseEther("0");
@@ -184,7 +184,9 @@ export const assertGetAttributesEvents = async (
 
     expect(receipt.events[numberOfAttrs + 1].event).to.equal("QueryEvent");
     expect(receipt.events[numberOfAttrs + 1].args[0]).to.equal(account.address);
-    expect(receipt.events[numberOfAttrs + 1].args[1]).to.equal(account.address);
+    expect(receipt.events[numberOfAttrs + 1].args[1]).to.equal(
+      treasury.address
+    );
     expect(receipt.events[numberOfAttrs + 1].args[2]).to.equal(
       attributeToQuery
     );

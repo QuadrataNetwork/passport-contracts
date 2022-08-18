@@ -23,7 +23,9 @@ export const deployPassportEcosystem = async (
   issuers: SignerWithAddress[],
   treasury: SignerWithAddress,
   issuerTreasuries: SignerWithAddress[]
-): Promise<[Promise<Contract>, Promise<Contract>, Promise<Contract>, any]> => {
+): Promise<
+  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any]
+> => {
   // Deploy Governance
   const governance = await deployGovernance(admin);
   for (let i = 0; i < issuers.length; i++) {
@@ -82,5 +84,10 @@ export const deployPassportEcosystem = async (
   const defi = await DeFi.deploy(passport.address, reader.address);
   await defi.deployed();
 
-  return [governance, passport, reader, defi];
+  // Deploy MockBusiness
+  const MockBusiness = await ethers.getContractFactory("MockBusiness");
+  const mockbusiness = await MockBusiness.deploy(defi.address);
+  await mockbusiness.deployed();
+
+  return [governance, passport, reader, defi, mockbusiness];
 };

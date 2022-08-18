@@ -19,7 +19,7 @@ contract DeFi {
        reader = _reader;
     }
 
-    function deposit(address _account, bytes32 _attribute) public payable {
+    function deposit(address _account, bytes32 _attribute) public payable returns(IQuadPassportStore.Attribute[] memory) {
         IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: msg.value}(_account, _attribute);
         bytes32[] memory attrValues = new bytes32[](attributes.length);
         uint256[] memory epochs = new uint256[](attributes.length);
@@ -31,6 +31,8 @@ contract DeFi {
             issuers[i] = attributes[i].issuer;
         }
         emit GetAttributesEvent(attrValues, epochs, issuers);
+
+        return attributes;
     }
 
     // /**

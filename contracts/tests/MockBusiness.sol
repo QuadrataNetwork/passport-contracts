@@ -5,6 +5,7 @@ import "./DeFi.sol";
 import "../interfaces/IQuadPassport.sol";
 
 contract MockBusiness {
+    event GetAttributesEventBusiness(bytes32[] attrValues, uint256[] epochs, address[] issuers);
 
     DeFi public defi;
 
@@ -12,9 +13,20 @@ contract MockBusiness {
         defi = DeFi(_defi);
     }
 
-    // function doSomethingAsBusiness(bytes32 _attribute) public payable returns(bytes32,uint256) {
-    //     return defi.doSomethingETH{value: msg.value}(_attribute);
-    // }
+    function deposit(bytes32 _attribute) public payable {
+        IQuadPassportStore.Attribute[] memory attributes = defi.deposit{value: msg.value}(address(this), _attribute);
+
+        bytes32[] memory attrValues = new bytes32[](attributes.length);
+        uint256[] memory epochs = new uint256[](attributes.length);
+        address[] memory issuers = new address[](attributes.length);
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            attrValues[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
+        }
+        emit GetAttributesEventBusiness(attrValues, epochs, issuers);
+    }
 
     // function burn() public {
     //     burnPassport(1);

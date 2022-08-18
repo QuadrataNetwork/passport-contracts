@@ -1,4 +1,4 @@
-// import { expect } from "chai";
+import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -10,6 +10,8 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
+  PRICE_PER_ATTRIBUTES_ETH,
+  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
 const {
@@ -17,6 +19,7 @@ const {
 } = require("../helpers/deployment_and_init.ts");
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
+const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 
 const {
   assertGetAttributes,
@@ -27,6 +30,7 @@ describe("QuadReader.getAttributes", async () => {
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract; // eslint-disable-line no-unused-vars
+  let businessPassport: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -57,12 +61,11 @@ describe("QuadReader.getAttributes", async () => {
       issuerTreasury,
       issuerTreasury2,
     ] = await ethers.getSigners();
-    [governance, passport, reader, defi] = await deployPassportEcosystem(
-      admin,
-      [issuer, issuer2],
-      treasury,
-      [issuerTreasury, issuerTreasury2]
-    );
+    [governance, passport, reader, defi, businessPassport] =
+      await deployPassportEcosystem(admin, [issuer, issuer2], treasury, [
+        issuerTreasury,
+        issuerTreasury2,
+      ]);
 
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
@@ -577,6 +580,110 @@ describe("QuadReader.getAttributes", async () => {
         true // IS_BUSINESS IS TRUE
       );
     });
+
+    it("can query for business passport", async () => {
+      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
+      attributesCopy[ATTRIBUTE_DID] = formatBytes32String("quad:did:business");
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributesCopy,
+        verifiedAt,
+        issuedAt
+      );
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt],
+        true
+      );
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt],
+        true
+      );
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt],
+        true
+      );
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt],
+        true
+      );
+    });
+
+    it("business passport can query DeFi", async () => {
+      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
+      attributesCopy[ATTRIBUTE_DID] = formatBytes32String("quad:did:business");
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributesCopy,
+        verifiedAt,
+        issuedAt
+      );
+
+      await expect(
+        businessPassport.deposit(ATTRIBUTE_IS_BUSINESS, {
+          value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_IS_BUSINESS],
+        })
+      )
+        .to.emit(businessPassport, "GetAttributesEventBusiness")
+        .withArgs([id("TRUE")], [verifiedAt], [issuer.address]);
+
+      await expect(
+        businessPassport.deposit(ATTRIBUTE_AML, {
+          value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_AML],
+        })
+      )
+        .to.emit(businessPassport, "GetAttributesEventBusiness")
+        .withArgs(
+          [attributesCopy[ATTRIBUTE_AML]],
+          [verifiedAt],
+          [issuer.address]
+        );
+
+      await expect(
+        businessPassport.deposit(ATTRIBUTE_DID, {
+          value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],
+        })
+      )
+        .to.emit(businessPassport, "GetAttributesEventBusiness")
+        .withArgs(
+          [attributesCopy[ATTRIBUTE_DID]],
+          [verifiedAt],
+          [issuer.address]
+        );
+    });
   });
 
   // ******************************************************************************* //
@@ -588,4 +695,37 @@ describe("QuadReader.getAttributes", async () => {
   // ******************************************************************************* //
   // ******************************************************************************* //
   // ******************************************************************************* //
+  //
+
+  describe("QuadReader.getAttributes (ERROR CASES)", async () => {
+    it("fail - account address zero", async () => {
+      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+      await expect(
+        reader.getAttributes(ethers.constants.AddressZero, ATTRIBUTE_COUNTRY, {
+          value: queryFee,
+        })
+      ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
+    });
+
+    it("fail - not eligible attributes", async () => {
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+      await expect(
+        reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
+          value: queryFee,
+        })
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
+
+    it("fail - wrong query Fee", async () => {
+      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+      await expect(
+        reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
+          value: queryFee.sub(1),
+        })
+      ).to.revertedWith("INVALID_QUERY_FEE");
+    });
+  });
 });

@@ -6,7 +6,7 @@ import "../storage/QuadPassportStore.sol";
 interface IQuadReader {
     event QueryEvent(address indexed _account, address indexed _caller, bytes32 _attribute);
     event QueryBulkEvent(address indexed _account, address indexed _caller, bytes32[] _attributes);
-    event QueryFeeReceipt(address indexed _issuer, uint256 _fee);
+    event QueryFeeReceipt(address indexed _receiver, uint256 _fee);
 
     function queryFee(
         address _account,
