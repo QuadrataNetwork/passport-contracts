@@ -39,7 +39,7 @@ contract MockBusiness {
         emit GetAttributesEventBusiness(attrValues, epochs, issuers);
     }
 
-    function deposit(bytes32[] calldata _attributes) public payable {
+    function depositBulk(bytes32[] calldata _attributes) public payable {
         IQuadPassportStore.Attribute[] memory attributes = defi.depositBulk{value: msg.value}(address(this), _attributes);
 
         bytes32[] memory attrValues = new bytes32[](attributes.length);
@@ -55,11 +55,7 @@ contract MockBusiness {
     }
 
 
-    // function burn() public {
-    //     burnPassport(1);
-    // }
-
-    // function burnPassport(uint256 _tokenId) public {
-    //     IQuadPassport(defi.passport()).burnPassport(_tokenId);
-    // }
+    function burnPassports() public {
+        IQuadPassport(defi.passport()).burnPassports();
+    }
 }

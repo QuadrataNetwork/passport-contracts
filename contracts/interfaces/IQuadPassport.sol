@@ -8,6 +8,7 @@ interface IQuadPassport is IQuadSoulbound {
     event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
     event SetPendingGovernance(address indexed _pendingGovernance);
     event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
+    event BurnPassportsIssuer(address indexed _issuer, address indexed _account);
 
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
     /// @dev Only when authorized by an eligible issuer
