@@ -49,12 +49,7 @@ contract DeFi {
     }
 
     function depositBulk(address _account, bytes32[] calldata _attributes) public payable returns(IQuadPassportStore.Attribute[] memory) {
-        bytes32[] memory data = new bytes32[](_attributes.length);
-        data[0] = _attributes[0];
-        data[1] = _attributes[1];
-        data[2] = _attributes[2];
-        data[3] = _attributes[3];
-        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: msg.value}(_account, data);
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: msg.value}(_account, _attributes);
         bytes32[] memory attrValues = new bytes32[](attributes.length);
         uint256[] memory epochs = new uint256[](attributes.length);
         address[] memory issuers = new address[](attributes.length);
