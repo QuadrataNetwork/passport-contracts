@@ -3373,15 +3373,28 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
 
-    //       it("fail - passport non-existent (indiviual account currently has attested data)", async () => {
-    //         expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
-    //         expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-    //         await expect(
-    //           passport.connect(issuer).burnPassportsIssuer(minterA.address, 2)
-    //         ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //         expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
-    //         expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-    //       });
+    it("fail - passport non-existent (indiviual account currently has attested data)", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
+      expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+
+      await expect(
+        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+      ).to.not.be.reverted;
+
+      expect(await passport.balanceOf(minterA.address, 1)).to.equal(0);
+      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
+    });
 
     //       it("fail - passport non-existent (business account currently has attested data)", async () => {
     //         isBusiness = id("TRUE");
