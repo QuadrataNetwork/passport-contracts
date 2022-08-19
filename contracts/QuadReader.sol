@@ -33,6 +33,10 @@ import "./storage/QuadReaderStore.sol";
         passport = IQuadPassport(_passport);
     }
 
+    /// @notice Retrieve all attestations for a specific attribute being issued about a wallet
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return array of Attributes
     function getAttributes(
         address _account, bytes32 _attribute
     ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
@@ -51,6 +55,11 @@ import "./storage/QuadReaderStore.sol";
         emit QueryEvent(_account, msg.sender, _attribute);
     }
 
+    /// @notice Retrieve all attestations for a specific attribute being issued about a wallet (Legacy verson)
+    /// @dev For support for older version of solidity
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return array of Attributes
     function getAttributesLegacy(
         address _account, bytes32 _attribute
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
@@ -81,6 +90,11 @@ import "./storage/QuadReaderStore.sol";
         emit QueryEvent(_account, msg.sender, _attribute);
     }
 
+    /// @notice Retrieve all attestations for a batch of attributes being issued about a wallet
+    /// @notice This will only retrieve the first available value for each attribute
+    /// @param _account address of user
+    /// @param _attributes List of attributes to get respective value from
+    /// @return array of Attributes
     function getAttributesBulk(
         address _account, bytes32[] calldata _attributes
     ) external payable override returns(IQuadPassportStore.Attribute[] memory) {
@@ -115,6 +129,12 @@ import "./storage/QuadReaderStore.sol";
     }
 
 
+    /// @notice Retrieve all attestations for a batch of attributes being issued about a wallet
+    /// @notice This will only retrieve the first available value for each attribute
+    /// @dev For support for older version of solidity
+    /// @param _account address of user
+    /// @param _attributes List of attributes to get respective value from
+    /// @return array of Attributes
     function getAttributesBulkLegacy(
         address _account, bytes32[] calldata _attributes
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
@@ -238,15 +258,18 @@ import "./storage/QuadReaderStore.sol";
             "INVALID_ADMIN"
         );
         bool isValid = false;
+        address issuerOrProtocol;
 
         if (_to == governance.treasury()) {
             isValid = true;
+            issuerOrProtocol = address(this);
         }
 
         address[] memory issuers = governance.getIssuers();
         for (uint256 i = 0; i < issuers.length; i++) {
             if (_to == governance.issuersTreasury(issuers[i])) {
                 isValid = true;
+                issuerOrProtocol = issuers[i];
                 break;
             }
         }
@@ -256,6 +279,8 @@ import "./storage/QuadReaderStore.sol";
         require(_amount <= address(this).balance, "INSUFFICIENT_BALANCE");
         (bool sent,) = _to.call{value: _amount}("");
         require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
+
+        emit WithdrawEvent(issuerOrProtocol, _to, _amount);
     }
 
 
