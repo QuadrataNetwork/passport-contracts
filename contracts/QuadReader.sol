@@ -104,7 +104,7 @@ import "./storage/QuadReaderStore.sol";
                 attributes[i] = attrs[0];
                 uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
                 totalFeeIssuer += feeIssuer;
-                emit QueryFeeReceipt(governance.issuersTreasury(attrs[0].issuer), feeIssuer);
+                emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
             }
         }
         require(msg.value == totalFee, " INVALID_QUERY_FEE");
@@ -140,7 +140,7 @@ import "./storage/QuadReaderStore.sol";
 
                 uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
                 totalFeeIssuer += feeIssuer;
-                emit QueryFeeReceipt(governance.issuersTreasury(attrs[0].issuer), feeIssuer);
+                emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
             }
         }
         require(msg.value == totalFee," INVALID_QUERY_FEE");

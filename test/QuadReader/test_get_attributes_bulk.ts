@@ -11,7 +11,6 @@ const {
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
   PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
 const {
@@ -413,115 +412,93 @@ describe("QuadReader.getAttributesBulkBulk", async () => {
       );
     });
 
-    //it("business passport can query DeFi", async () => {
-    //  const attributesCopy = Object.assign({}, attributes);
-    //  attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
-    //  attributesCopy[ATTRIBUTE_DID] = formatBytes32String("quad:did:business");
-    //  await setAttributesIssuer(
-    //    businessPassport,
-    //    issuer,
-    //    passport,
-    //    attributesCopy,
-    //    verifiedAt,
-    //    issuedAt
-    //  );
+    it("business passport can query DeFi", async () => {
+      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
+      attributesCopy[ATTRIBUTE_DID] = formatBytes32String("quad:did:business");
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributesCopy,
+        verifiedAt,
+        issuedAt
+      );
 
-    //  await expect(
-    //    businessPassport.depositBulk([ATTRIBUTE_IS_BUSINESS], {
-    //      value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_IS_BUSINESS],
-    //    })
-    //  )
-    //    .to.emit(businessPassport, "GetAttributesBulkEventBusiness")
-    //    .withArgs(
-    //      [attributesCopy[ATTRIBUTE_IS_BUSINESS]],
-    //      [verifiedAt],
-    //      [issuer.address]
-    //    );
+      const attributesToQuery = [
+        ATTRIBUTE_IS_BUSINESS,
+        ATTRIBUTE_DID,
+        ATTRIBUTE_COUNTRY,
+        ATTRIBUTE_AML,
+      ];
+      const queryFee = await reader.queryFeeBulk(
+        businessPassport.address,
+        attributesToQuery
+      );
 
-    //  await expect(
-    //    businessPassport.depositBulk([ATTRIBUTE_AML], {
-    //      value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_AML],
-    //    })
-    //  )
-    //    .to.emit(businessPassport, "GetAttributesBulkEventBusiness")
-    //    .withArgs(
-    //      [attributesCopy[ATTRIBUTE_AML]],
-    //      [verifiedAt],
-    //      [issuer.address]
-    //    );
+      await expect(
+        businessPassport.depositBulk(attributesToQuery, {
+          value: queryFee,
+        })
+      )
+        .to.emit(businessPassport, "GetAttributesBulkEventBusiness")
+        .withArgs(
+          [
+            attributesCopy[ATTRIBUTE_IS_BUSINESS],
+            attributesCopy[ATTRIBUTE_DID],
+            attributesCopy[ATTRIBUTE_COUNTRY],
+            attributesCopy[ATTRIBUTE_AML],
+          ],
+          [verifiedAt, verifiedAt, verifiedAt, verifiedAt],
+          [issuer.address, issuer.address, issuer.address, issuer.address]
+        );
+    });
+  });
 
-    //  await expect(
-    //    businessPassport.depositBulk([ATTRIBUTE_DID], {
-    //      value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],
-    //    })
-    //  )
-    //    .to.emit(businessPassport, "GetAttributesBulkEventBusiness")
-    //    .withArgs(
-    //      [attributesCopy[ATTRIBUTE_DID]],
-    //      [verifiedAt],
-    //      [issuer.address]
-    //    );
+  // ******************************************************************************* //
+  // ******************************************************************************* //
+  // ******************************************************************************* //
+  // ******************************************************************************* //
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>      ERROR TESTS   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
+  // ******************************************************************************* //
+  // ******************************************************************************* //
+  // ******************************************************************************* //
+  // ******************************************************************************* //
+  //
 
-    //  await expect(
-    //    businessPassport.depositBulk([ATTRIBUTE_AML, ATTRIBUTE_COUNTRY], {
-    //      value: PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID].add(
-    //        PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY]
-    //      ),
-    //    })
-    //  )
-    //    .to.emit(businessPassport, "GetAttributesBulkEventBusiness")
-    //    .withArgs(
-    //      [attributesCopy[ATTRIBUTE_AML], attributesCopy[ATTRIBUTE_COUNTRY]],
-    //      [verifiedAt, verifiedAt],
-    //      [issuer.address, issuer.address]
-    //    );
-    //});
-    //});
+  describe("QuadReader.getAttributesBulk (ERROR CASES)", async () => {
+    it("fail - account address zero", async () => {
+      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+      await expect(
+        reader.getAttributesBulk(
+          ethers.constants.AddressZero,
+          [ATTRIBUTE_COUNTRY],
+          {
+            value: queryFee,
+          }
+        )
+      ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
+    });
 
-    //// ******************************************************************************* //
-    //// ******************************************************************************* //
-    //// ******************************************************************************* //
-    //// ******************************************************************************* //
-    //// >>>>>>>>>>>>>>>>>>>>>>>>>>>      ERROR TESTS   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
-    //// ******************************************************************************* //
-    //// ******************************************************************************* //
-    //// ******************************************************************************* //
-    //// ******************************************************************************* //
-    ////
+    it("fail - not eligible attributes", async () => {
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+      await expect(
+        reader.getAttributesBulk(minterA.address, [ATTRIBUTE_COUNTRY], {
+          value: queryFee,
+        })
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
 
-    //describe("QuadReader.getAttributesBulk (ERROR CASES)", async () => {
-    //it("fail - account address zero", async () => {
-    //  const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-    //  await expect(
-    //    reader.getAttributesBulk(
-    //      ethers.constants.AddressZero,
-    //      ATTRIBUTE_COUNTRY,
-    //      {
-    //        value: queryFee,
-    //      }
-    //    )
-    //  ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
-    //});
-
-    //it("fail - not eligible attributes", async () => {
-    //  await governance
-    //    .connect(admin)
-    //    .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
-    //  const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-    //  await expect(
-    //    reader.getAttributesBulk(minterA.address, ATTRIBUTE_COUNTRY, {
-    //      value: queryFee,
-    //    })
-    //  ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
-    //});
-
-    //it("fail - wrong query Fee", async () => {
-    //  const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-    //  await expect(
-    //    reader.getAttributesBulk(minterA.address, ATTRIBUTE_COUNTRY, {
-    //      value: queryFee.sub(1),
-    //    })
-    //  ).to.revertedWith("INVALID_QUERY_FEE");
-    //});
+    it("fail - wrong query Fee", async () => {
+      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+      await expect(
+        reader.getAttributesBulk(minterA.address, [ATTRIBUTE_COUNTRY], {
+          value: queryFee.sub(1),
+        })
+      ).to.revertedWith("INVALID_QUERY_FEE");
+    });
   });
 });

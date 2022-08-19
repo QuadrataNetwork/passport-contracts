@@ -49,8 +49,7 @@ contract DeFi {
     }
 
     function depositBulk(address _account, bytes32[] calldata _attributes) public payable returns(IQuadPassportStore.Attribute[] memory) {
-        uint256 paymentAmount = reader.queryFeeBulk(msg.sender, _attributes);
-        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: paymentAmount}(_account, _attributes);
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: msg.value}(_account, _attributes);
         bytes32[] memory attrValues = new bytes32[](attributes.length);
         uint256[] memory epochs = new uint256[](attributes.length);
         address[] memory issuers = new address[](attributes.length);
@@ -64,15 +63,4 @@ contract DeFi {
 
         return attributes;
     }
-
-    // function queryMultipleBulk(
-    //     bytes32[] calldata _attributes
-    // ) public payable {
-    //     uint256 paymentAmount = reader.queryFeeBulk(msg.sender, _attributes);
-    //     QuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: paymentAmount}(
-    //         msg.sender, _attributes
-    //     );
-    //     console.log(attributes[0].epoch);
-    //     console.log(attributes[0].issuer);
-    // }
 }

@@ -94,7 +94,7 @@ describe("QuadReader", async () => {
       });
     });
 
-    it("getAttributes (Legacy)", async () => {
+    it("getAttributesLegacy", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader.queryFee(minterA.address, attribute);
       await reader
@@ -104,7 +104,7 @@ describe("QuadReader", async () => {
         });
     });
 
-    it("getAttributesBulk (Legacy)", async () => {
+    it("getAttributesBulkLegacy", async () => {
       const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
         .connect(minterA)
@@ -113,15 +113,29 @@ describe("QuadReader", async () => {
         });
     });
 
-    it("getAttributes (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
-      });
+    it("getAttributesBulk", async () => {
+      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+      await reader
+        .connect(minterA)
+        .getAttributesBulk(minterA.address, attributeToQuery, {
+          value: fee,
+        });
     });
 
     it("getAttributesBulk (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
+      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+      await defi
+        .connect(minterA)
+        .depositBulk(minterA.address, attributeToQuery, {
+          value: fee,
+        });
+    });
+
+    it("getAttributes (DeFi)", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader.queryFee(minterA.address, attribute);
+      await defi.connect(minterA).deposit(minterA.address, attribute, {
+        value: fee,
       });
     });
   });
@@ -161,7 +175,7 @@ describe("QuadReader", async () => {
       });
     });
 
-    it("getAttributes (Legacy)", async () => {
+    it("getAttributesLegacy", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader.queryFee(minterA.address, attribute);
       await reader
@@ -171,7 +185,7 @@ describe("QuadReader", async () => {
         });
     });
 
-    it("getAttributesBulk (Legacy)", async () => {
+    it("getAttributesBulkLegacy", async () => {
       const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
         .connect(minterA)
@@ -180,15 +194,29 @@ describe("QuadReader", async () => {
         });
     });
 
-    it("getAttributes (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleAttributes(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
-      });
+    it("getAttributesBulk", async () => {
+      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+      await reader
+        .connect(minterA)
+        .getAttributesBulk(minterA.address, attributeToQuery, {
+          value: fee,
+        });
     });
 
     it("getAttributesBulk (DeFi)", async () => {
-      await defi.connect(minterA).queryMultipleBulk(attributeToQuery, {
-        value: ethers.utils.parseEther("1"),
+      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+      await defi
+        .connect(minterA)
+        .depositBulk(minterA.address, attributeToQuery, {
+          value: fee,
+        });
+    });
+
+    it("getAttributes (DeFi)", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader.queryFee(minterA.address, attribute);
+      await defi.connect(minterA).deposit(minterA.address, attribute, {
+        value: fee,
       });
     });
   });
