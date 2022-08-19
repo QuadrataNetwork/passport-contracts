@@ -1781,80 +1781,175 @@ describe("QuadPassport", async () => {
         [attributes, attributes],
         [verifiedAt, verifiedAt]
       );
-
-
-    //   // expect did level attributes to not change
-    //   expect(amlPostBurnA.value).equals(amlPreBurnA.value);
-    //   expect(amlPreBurnB.value).equals(amlPostBurnB.value);
-
-    //   expect(didPostBurnA.value).equals(didPreBurnA.value);
-    //   expect(didPostBurnB.value).equals(hexZeroPad('0x00', 32));
-    //   expect(countryPostBurnA.value).equals(countryPreBurnA.value);
-    //   expect(countryPostBurnB.value).equals(hexZeroPad('0x00', 32));
-    //   expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
-    //   expect(isBusinessPostBurnB.value).equals(hexZeroPad('0x00', 32));
-
     });
 
-    //   it("success - mint passport for individual, burn, mint new passport, assert old data was overwritten", async () => {
+    it.only("success - mint passport for individual, burn, mint new passport, assert old data was overwritten", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //     // PRE BURN
-    //     // did level
-    //     const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //     // account level
-    //     const didPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_DID, issuer.address);
-    //     const countryPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //     const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //     expect(didPreBurnA.value).equals(did);
-    //     expect(countryPreBurnA.value).equals(country);
-    //     expect(isBusinessPreBurnA.value).equals(isBusiness);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //     await passport.connect(minterA).burnPassports(TOKEN_ID);
-    //     expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //     // set different values for next passport
-    //     did = id("Prof. Lambo");
-    //     aml = id("HIGH");
-    //     country = id("UR");
-    //     isBusiness = id("TRUE");
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //     const sig = await signSetAttributes(
-    //       issuer,
-    //       minterA,
-    //       TOKEN_ID,
-    //       did,
-    //       aml,
-    //       country,
-    //       isBusiness,
-    //       issuedAt
-    //     );
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(minterA).burnPassports();
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-    //     const sigAccount = await signAccount(minterA);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
 
-    //     await expect(
-    //       passport
-    //         .connect(minterA)
-    //         .mintPassport([minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sig, sigAccount, {
-    //           value: MINT_PRICE,
-    //         })
-    //     ).to.not.be.reverted;
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
 
-    //     // POST BURN
-    //     // did level
-    //     const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //     // account level
-    //     const didPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_DID, issuer.address);
-    //     const countryPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //     const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
 
-    //     expect(amlPostBurnA.value).equals(aml);
-    //     expect(didPostBurnA.value).equals(did);
-    //     expect(countryPostBurnA.value).equals(country);
-    //     expect(isBusinessPostBurnA.value).equals(isBusiness);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
 
-    //   });
+      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy[ATTRIBUTE_DID] = id("prof. lambo");
+      attributesCopy[ATTRIBUTE_AML] = id("10");
+      attributesCopy[ATTRIBUTE_COUNTRY] = id("UR");
+      attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
+
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributesCopy,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+     });
   });
 
   describe("burnPassportsIssuer", async () => {
