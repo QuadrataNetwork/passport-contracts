@@ -981,41 +981,120 @@ describe("QuadPassport", async () => {
       );
     });
 
-    // it("success - mint for individual, disable country, burn, assert country still exists while only account level attributes get deleted", async () => {
+    it("success - mint for individual, disable country, burn, assert country still exists while only account level attributes get deleted", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //   await governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+      await governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
 
-    //   // PRE BURN
-    //   // did level
-    //   const amlPreBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //   // account level
-    //   const didPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_DID, issuer.address);
-    //   const countryPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //   const isBusinessPreBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
-    //   expect(didPreBurnA.value).equals(did);
-    //   expect(countryPreBurnA.value).equals(country);
-    //   expect(isBusinessPreBurnA.value).equals(isBusiness);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //   await passport.connect(minterA).burnPassports(TOKEN_ID)
-    //   expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //   // POST BURN
-    //   // did level
-    //   const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //   // account level
-    //   const didPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_DID, issuer.address);
-    //   const countryPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //   const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterA.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
+      await expect(
+        assertGetAttributes(
+          minterA,
+          ATTRIBUTE_COUNTRY,
+          reader,
+          defi,
+          treasury,
+          [issuer],
+          [attributes],
+          [verifiedAt]
+        )
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
 
-    //   // expect did level attributes to not change
-    //   expect(amlPostBurnA.value).equals(amlPreBurnA.value);
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
 
-    //   expect(didPostBurnA.value).equals(hexZeroPad('0x00', 32));
-    //   expect(countryPostBurnA.value).equals(country); // not deleted
-    //   expect(isBusinessPostBurnA.value).equals(hexZeroPad('0x00', 32));
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport.connect(minterA).burnPassports()
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-    // });
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, true);
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        []
+      );
+
+    });
 
     // it("success - mint for business, disable issuer, burn, assert only account level items were deleted", async () => {
 
