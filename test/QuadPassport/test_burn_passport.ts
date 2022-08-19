@@ -1096,7 +1096,7 @@ describe("QuadPassport", async () => {
 
     });
 
-    it.only("success - mint for business, disable issuer, burn, assert only account level items were deleted", async () => {
+    it("success - mint for business, disable issuer, burn, assert only account level items were deleted", async () => {
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
       await mockBusiness.deployed()
@@ -1233,7 +1233,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it.only("success - mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted from issuerB", async () => {
+    it("success - mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted", async () => {
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
       await mockBusiness.deployed()
@@ -1321,41 +1321,41 @@ describe("QuadPassport", async () => {
         .withArgs(issuer.address, issuerTreasury.address);
 
 
-      // await assertGetAttributes(
-      //   mockBusiness,
-      //   ATTRIBUTE_COUNTRY,
-      //   reader,
-      //   defi,
-      //   treasury,
-      //   [issuer],
-      //   [businessAttributes],
-      //   [verifiedAt],
-      //   true
-      // );
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
-      // await assertGetAttributes(
-      //   mockBusiness,
-      //   ATTRIBUTE_DID,
-      //   reader,
-      //   defi,
-      //   treasury,
-      //   [issuer],
-      //   [businessAttributes],
-      //   [verifiedAt],
-      //   true
-      // );
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
-      // await assertGetAttributes(
-      //   mockBusiness,
-      //   ATTRIBUTE_IS_BUSINESS,
-      //   reader,
-      //   defi,
-      //   treasury,
-      //   [issuer],
-      //   [businessAttributes],
-      //   [verifiedAt],
-      //   true
-      // );
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [],
+        [],
+        [],
+        true
+      );
 
       // Re-attest DID
       await expect(
@@ -1363,7 +1363,7 @@ describe("QuadPassport", async () => {
           mockBusiness,
           issuer,
           passport,
-          {[ATTRIBUTE_DID]:  formatBytes32String("did:quad:businessworld")},
+          {[ATTRIBUTE_DID]: formatBytes32String("did:quad:businessworld")},
           verifiedAt,
           issuedAt
         )
