@@ -61,8 +61,8 @@ contract MockBusiness {
             address[] memory issuers
         ) = defi.depositBulkLegacy{value: msg.value}(address(this), _attributes);
 
-    //     emit GetAttributesBulkEventBusiness(attrValues, epochs, issuers);
-    // }
+        emit GetAttributesBulkEventBusiness(attrValues, epochs, issuers);
+    }
 
     function burnPassports() public {
         IQuadPassport(defi.passport()).burnPassports();
