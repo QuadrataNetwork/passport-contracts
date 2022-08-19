@@ -224,8 +224,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
             IQuadPassportStore.Attribute[] storage attrs = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
 
             for(uint256 j = attrs.length; j > 0; j--){
-                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrs[j-1].issuer))] = 0;
-                attrs.pop();
+                if(governance.getIssuerStatus( attrs[j-1].issuer)){
+                    _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrs[j-1].issuer))] = 0;
+                    attrs.pop();
+                }
             }
         }
         _burnPassports(_msgSender());
