@@ -55,13 +55,11 @@ contract MockBusiness {
     }
 
     function depositBulkLegacy(bytes32[] calldata _attributes) public payable {
-        IQuadPassportStore.Attribute[] memory attributes = ;
-
         (
             bytes32[] memory attrValues,
             uint256[] memory epochs,
             address[] memory issuers
-        ) = defi.depositBulk{value: msg.value}(address(this), _attributes);
+        ) = defi.depositBulkLegacy{value: msg.value}(address(this), _attributes);
 
         emit GetAttributesBulkEventBusiness(attrValues, epochs, issuers);
     }

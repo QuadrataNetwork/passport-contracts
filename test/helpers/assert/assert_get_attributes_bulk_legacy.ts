@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import { Contract, BigNumber } from "ethers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { parseEther } from "ethers/lib/utils";
@@ -91,13 +91,14 @@ export const assertGetAttributesBulkLegacyStatic = async (
     { value: queryFee }
   );
 
-  expect(staticResp.length).equals(attributesToQuery.length);
-  for (let j = 0; j < staticResp.length; j++) {
-    const attrResp = staticResp[j];
-    expect(attrResp.value).equals(matchingAttributes[j]);
-    expect(attrResp.issuer).equals(matchingIssuers[j]);
-    expect(attrResp.epoch).equals(matchingEpochs[j]);
-  }
+  expect(staticResp.length).equals(3);
+  expect(staticResp[0].length).equals(attributesToQuery.length);
+  expect(staticResp[1].length).equals(attributesToQuery.length);
+  expect(staticResp[2].length).equals(attributesToQuery.length);
+
+  expect(staticResp[0]).to.eql(matchingAttributes);
+  expect(staticResp[1]).to.eql(matchingEpochs.map((i) => BigNumber.from(i)));
+  expect(staticResp[2]).to.eql(matchingIssuers);
 };
 
 export const assertGetAttributesBulkLegacyEvents = async (
