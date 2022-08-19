@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { formatBytes32String, id } from "ethers/lib/utils";
+import { formatBytes32String, hexZeroPad, id } from "ethers/lib/utils";
 
 const {
   ATTRIBUTE_AML,
@@ -756,7 +756,7 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       const attributesCopy = Object.assign({}, attributes);
-      attributesCopy[ATTRIBUTE_AML] = id("10");
+      attributesCopy[ATTRIBUTE_AML] = hexZeroPad("0x0a", 32);
 
       const newVerifiedAt = verifiedAt + 1;
 
@@ -1657,7 +1657,7 @@ describe("QuadPassport", async () => {
         )
       ).to.not.be.reverted;
 
-       await expect(
+      await expect(
         setAttributes(
           minterA,
           issuerB,
@@ -1714,17 +1714,20 @@ describe("QuadPassport", async () => {
       );
 
       await expect(governance.connect(admin).deleteIssuer(issuer.address))
-        .to.emit(governance, 'IssuerDeleted')
+        .to.emit(governance, "IssuerDeleted")
         .withArgs(issuer.address);
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await passport.connect(minterA).burnPassports();
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-      await expect(governance.connect(admin).addIssuer(issuer.address, issuerTreasury.address))
-        .to.emit(governance, 'IssuerAdded')
+      await expect(
+        governance
+          .connect(admin)
+          .addIssuer(issuer.address, issuerTreasury.address)
+      )
+        .to.emit(governance, "IssuerAdded")
         .withArgs(issuer.address, issuerTreasury.address);
-
 
       await assertGetAttributes(
         minterA,
@@ -1890,7 +1893,7 @@ describe("QuadPassport", async () => {
 
       const attributesCopy = Object.assign({}, attributes);
       attributesCopy[ATTRIBUTE_DID] = id("prof. lambo");
-      attributesCopy[ATTRIBUTE_AML] = id("10");
+      attributesCopy[ATTRIBUTE_AML] = hexZeroPad("0x0a", 32);
       attributesCopy[ATTRIBUTE_COUNTRY] = id("UR");
       attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
 
@@ -1949,14 +1952,14 @@ describe("QuadPassport", async () => {
         [attributesCopy],
         [verifiedAt]
       );
-     });
+    });
   });
 
   describe("burnPassportsIssuer", async () => {
     it("success - burnPassportsIssuer for business contract", async () => {
-      const MockBusiness = await ethers.getContractFactory('MockBusiness')
-      const mockBusiness = await MockBusiness.deploy(defi.address)
-      await mockBusiness.deployed()
+      const MockBusiness = await ethers.getContractFactory("MockBusiness");
+      const mockBusiness = await MockBusiness.deploy(defi.address);
+      await mockBusiness.deployed();
 
       await expect(
         setAttributesIssuer(
@@ -2013,13 +2016,13 @@ describe("QuadPassport", async () => {
         [verifiedAt]
       );
 
-      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
-      await passport
-        .connect(issuer)
-        .burnPassportsIssuer(mockBusiness.address);
-      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(0);
-
-
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
+        1
+      );
+      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
+        0
+      );
 
       await assertGetAttributes(
         mockBusiness,
@@ -2078,65 +2081,130 @@ describe("QuadPassport", async () => {
       );
     });
 
-    // it("success - mint individual, update AML to 10, deactivate, reactivate, assert AML is still 10", async () => {
-    //   // this is AML 10 as a bytes32 encoded hex
-    //   attributes[ATTRIBUTE_AML] = hexZeroPad('0x0a', 32);
+    it("success - mint individual, update AML to 10, deactivate, reactivate, assert AML is still 10", async () => {
+      await expect(
+        setAttributes(
+          minterB,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //   await expect(
-    //     setAttributes(
-    //       minterB,
-    //       issuer,
-    //       passport,
-    //       attributes,
-    //       verifiedAt,
-    //       issuedAt,
-    //       MINT_PRICE
-    //     )
-    //   ).to.not.be.reverted;
+      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy[ATTRIBUTE_AML] = hexZeroPad("0x0a", 32);
 
-    //   // PRE BURN
-    //   // account level
-    //   const didAttributesPre =  await passport.connect(dataChecker).attributes(minterB.address, ATTRIBUTE_DID);
-    //   expect(didAttributesPre.length).equals(1);
-    //   const didPreBurnA = didAttributesPre[0];
+      await expect(
+        setAttributes(
+          minterB,
+          issuer,
+          passport,
+          attributesCopy,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //   const countryAttributesPre =  await passport.connect(dataChecker).attributes(minterB.address, ATTRIBUTE_COUNTRY);
-    //   expect(countryAttributesPre.length).equals(1);
-    //   const countryPreBurnA = countryAttributesPre[0];
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
 
-    //   const isBusinessAttributesPre =  await passport.connect(dataChecker).attributes(minterB.address, ATTRIBUTE_IS_BUSINESS);
-    //   expect(isBusinessAttributesPre.length).equals(1);
-    //   const isBusinessPreBurnA = isBusinessAttributesPre[0];
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
 
-    //   expect(didPreBurnA.value).equals(did);
-    //   expect(countryPreBurnA.value).equals(country);
-    //   expect(isBusinessPreBurnA.value).equals(isBusiness);
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
 
-    //   // // disable issuer for burn
-    //   await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.DEACTIVATED))
-    //     .to.emit(governance, 'IssuerStatusChanged')
-    //     .withArgs(issuer.address, ISSUER_STATUS.ACTIVE, ISSUER_STATUS.DEACTIVATED);
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
 
-    //   // // enable issuer
-    //   // await expect(governance.connect(admin).setIssuerStatus(issuer.address, ISSUER_STATUS.ACTIVE))
-    //   //   .to.emit(governance, 'IssuerStatusChanged')
-    //   //   .withArgs(issuer.address, ISSUER_STATUS.DEACTIVATED, ISSUER_STATUS.ACTIVE);
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address, false))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, false);
 
-    //   // // POST BURN
-    //   // // did level
-    //   // const amlPostBurnA = await passport.connect(dataChecker).attributesByDID(did, ATTRIBUTE_AML, issuer.address);
-    //   // // account level
-    //   // const didPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, ATTRIBUTE_DID, issuer.address);
-    //   // const countryPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, ATTRIBUTE_COUNTRY, issuer.address);
-    //   // const isBusinessPostBurnA = await passport.connect(dataChecker).attributes(minterB.address, ATTRIBUTE_IS_BUSINESS, issuer.address);
+      await expect(governance.connect(admin).setIssuerStatus(issuer.address,true))
+        .to.emit(governance, 'IssuerStatusChanged')
+        .withArgs(issuer.address, true);
 
-    //   // // expect did level attributes to not change
-    //   // expect(amlPostBurnA.value).equals(hexZeroPad('0x0a', 32)); // check aml is still 10
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
 
-    //   // expect(didPostBurnA.value).equals(didPreBurnA.value);
-    //   // expect(countryPostBurnA.value).equals(countryPreBurnA.value);
-    //   // expect(isBusinessPostBurnA.value).equals(isBusinessPreBurnA.value);
-    // })
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterB,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [verifiedAt]
+      );
+    });
 
     //   it("success - mint individual, update AML to 10, deactivate, reactivate, burn, assert AML is still 10", async () => {
     //     aml = hexZeroPad('0x0a', 32); // this is AML 10 as a bytes32 encoded hex
