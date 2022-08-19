@@ -1,264 +1,115 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { constants, Contract } from "ethers";
+import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { parseEther, parseUnits, id, hexZeroPad } from "ethers/lib/utils";
-import exp from "constants";
+import { formatBytes32String, id } from "ethers/lib/utils";
 
 const {
-  ATTRIBUTE_AML,
-  ATTRIBUTE_COUNTRY,
-  ATTRIBUTE_DID,
-  TOKEN_ID,
   MINT_PRICE,
-  PRICE_PER_ATTRIBUTES,
-  PRICE_PER_BUSINESS_ATTRIBUTES,
-  READER_ROLE,
+  ATTRIBUTE_DID,
+  ATTRIBUTE_AML,
+  ATTRIBUTE_IS_BUSINESS,
+  ATTRIBUTE_COUNTRY,
   PRICE_PER_ATTRIBUTES_ETH,
   PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
-const { deployPassportEcosystem } = require("../utils/deployment_and_init.ts");
+const {
+  deployPassportEcosystem,
+} = require("../helpers/deployment_and_init.ts");
 
 const { deployGovernance } = require("../../utils/deployment.ts");
 
-const { signMint, signMessage } = require("../utils/signature.ts");
+const { setAttributes } = require("../helpers/set_attributes.ts");
+const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 
-describe("QuadReader", async () => {
+describe("QuadReader.queryFee", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
-  let reader: Contract;
-  let usdc: Contract;
+  let reader: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract; // eslint-disable-line no-unused-vars
-  let mockBusiness: Contract;
+  let businessPassport: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
     minterA: SignerWithAddress,
-    minterB: SignerWithAddress,
+    minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
-    issuerTreasury: SignerWithAddress;
+    issuer2: SignerWithAddress,
+    issuerTreasury: SignerWithAddress,
+    issuerTreasury2: SignerWithAddress;
 
-  let baseURI: string;
-  let did: string;
-  let aml: string;
-  let country: string;
-  let isBusiness: string;
-  let issuedAt: number;
+  let issuedAt: number, verifiedAt: number;
+  const attributes: any = {
+    [ATTRIBUTE_DID]: formatBytes32String("did:quad:helloworld"),
+    [ATTRIBUTE_AML]: formatBytes32String("1"),
+    [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+    [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+  };
 
   beforeEach(async () => {
-    baseURI = "https://quadrata.io";
-    did = id("helloworlds");
-    aml = id("LOW");
-    country = id("FRANCE");
-    isBusiness = id("FALSE");
-
-    issuedAt = Math.floor(new Date().getTime() / 1000);
-
-    [deployer, admin, minterA, minterB, issuer, treasury, issuerTreasury] =
-      await ethers.getSigners();
-    [governance, passport, reader, usdc, defi] = await deployPassportEcosystem(
+    [
+      deployer,
       admin,
-      [issuer],
-      treasury,
-      [issuerTreasury],
-      baseURI
-    );
-
-    const MockBusiness = await ethers.getContractFactory("MockBusiness");
-    mockBusiness = await MockBusiness.deploy(defi.address);
-    await mockBusiness.deployed();
-
-    const sig = await signMint(
-      issuer,
       minterA,
-      TOKEN_ID,
-      did,
-      aml,
-      country,
-      isBusiness,
-      issuedAt
-    );
-
-    const sigAccount = await signMessage(minterA, minterA.address);
-
-    await passport.mintPassport(
-      [minterA.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt],
-      sig,
-      sigAccount,
-      {
-        value: MINT_PRICE,
-      }
-    );
-
-    const sigBusiness = await signMint(
+      minterB,
       issuer,
-      mockBusiness,
-      TOKEN_ID,
-      did,
-      aml,
-      country,
-      id("TRUE"),
+      issuer2,
+      treasury,
+      issuerTreasury,
+      issuerTreasury2,
+    ] = await ethers.getSigners();
+    [governance, passport, reader, defi, businessPassport] =
+      await deployPassportEcosystem(admin, [issuer, issuer2], treasury, [
+        issuerTreasury,
+        issuerTreasury2,
+      ]);
+
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+
+    await setAttributes(
+      minterA,
+      issuer,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    );
+
+    const attributesCopy = Object.assign({}, attributes);
+    attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
+    attributesCopy[ATTRIBUTE_DID] = formatBytes32String("quad:did:business");
+    await setAttributesIssuer(
+      businessPassport,
+      issuer,
+      passport,
+      attributesCopy,
+      verifiedAt,
       issuedAt
     );
-
-    await passport
-      .connect(minterA)
-      .mintPassport(
-        [
-          mockBusiness.address,
-          TOKEN_ID,
-          did,
-          aml,
-          country,
-          id("TRUE"),
-          issuedAt,
-        ],
-        sigBusiness,
-        "0x00",
-        {
-          value: MINT_PRICE,
-        }
-      );
-
-    await usdc.transfer(minterA.address, parseUnits("1000", 6));
-    await usdc.transfer(minterB.address, parseUnits("1000", 6));
-
-    expect(await governance.hasRole(READER_ROLE, deployer.address)).equals(
-      false
-    );
   });
 
-  describe("calculatePaymentToken", async () => {
-    it("success (AML)", async () => {
-      expect(
-        await reader.calculatePaymentToken(
-          ATTRIBUTE_AML,
-          usdc.address,
-          minterA.address
-        )
-      ).to.equal(0);
-
-      expect(
-        await reader.calculatePaymentToken(
-          ATTRIBUTE_AML,
-          usdc.address,
-          mockBusiness.address
-        )
-      ).to.equal(0);
-    });
-
-    it("success (COUNTRY)", async () => {
-      expect(
-        await reader.calculatePaymentToken(
-          ATTRIBUTE_COUNTRY,
-          usdc.address,
-          minterA.address
-        )
-      ).to.equal(
-        parseUnits(
-          PRICE_PER_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
-          await usdc.decimals()
-        )
-      );
-
-      expect(
-        await reader.calculatePaymentToken(
-          ATTRIBUTE_COUNTRY,
-          usdc.address,
-          mockBusiness.address
-        )
-      ).to.equal(
-        parseUnits(
-          PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_COUNTRY].toString(),
-          await usdc.decimals()
-        )
-      );
-    });
-
-    it("success (DID)", async () => {
-      expect(
-        await reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          usdc.address,
-          minterA.address
-        )
-      ).to.equal(
-        parseUnits(
-          PRICE_PER_ATTRIBUTES[ATTRIBUTE_DID].toString(),
-          await usdc.decimals()
-        )
-      );
-
-      expect(
-        await reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          usdc.address,
-          mockBusiness.address
-        )
-      ).to.equal(
-        parseUnits(
-          PRICE_PER_BUSINESS_ATTRIBUTES[ATTRIBUTE_DID].toString(),
-          await usdc.decimals()
-        )
-      );
-    });
-
-    it("fail - ineligible payment token", async () => {
-      const ERC20 = await ethers.getContractFactory("USDC");
-      const wbtc = await ERC20.deploy();
-      await wbtc.deployed();
-      await expect(
-        reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          wbtc.address,
-          minterA.address
-        )
-      ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
-    });
-
-    it("fail - wrong erc20", async () => {
-      await expect(
-        reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          admin.address,
-          minterA.address
-        )
-      ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
-    });
-
-    it("fail - address(0)", async () => {
-      await expect(
-        reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          constants.AddressZero,
-          minterA.address
-        )
-      ).to.revertedWith("TOKEN_PAYMENT_NOT_ALLOWED");
-    });
-
-    it("fail - oracle zero", async () => {
-      [governance, passport, reader, usdc, defi] =
-        await deployPassportEcosystem(
-          admin,
-          [issuer],
-          treasury,
-          [issuerTreasury],
-          baseURI,
-          { skipOracle: true }
+  describe("queryFee", async () => {
+    it("success (EOA)", async () => {
+      Object.keys(attributes).forEach(async (attrType) => {
+        expect(await reader.queryFee(minterA.address, attrType)).to.equal(
+          PRICE_PER_ATTRIBUTES_ETH[attrType]
         );
-      await expect(
-        reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          usdc.address,
-          minterA.address
-        )
-      ).to.revertedWith("ORACLE_ADDRESS_ZERO");
+      });
+    });
+
+    it("success (Business SC)", async () => {
+      Object.keys(attributes).forEach(async (attrType) => {
+        expect(
+          await reader.queryFee(businessPassport.address, attrType)
+        ).to.equal(PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType]);
+      });
     });
 
     it("fail - governance incorrectly set", async () => {
       const newGovernance = await deployGovernance(admin);
-
       await governance
         .connect(admin)
         .updateGovernanceInPassport(newGovernance.address);
@@ -268,65 +119,20 @@ describe("QuadReader", async () => {
         .setPassportContractAddress(passport.address);
       await newGovernance.connect(admin).acceptGovernanceInPassport();
 
-      await expect(
-        reader.calculatePaymentToken(
-          ATTRIBUTE_DID,
-          usdc.address,
-          minterA.address
-        )
-      ).to.reverted;
-    });
-  });
-
-  describe("calculatePaymentETH", async () => {
-    it("success (AML)", async () => {
-      expect(
-        await reader.calculatePayment(ATTRIBUTE_AML, minterA.address)
-      ).to.equal(0);
+      await expect(reader.queryFee(minterA.address, ATTRIBUTE_DID)).to.reverted;
     });
 
-    it("success (COUNTRY)", async () => {
-      const priceAttribute = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-      expect(
-        await reader.calculatePayment(ATTRIBUTE_COUNTRY, minterA.address)
-      ).to.equal(priceAttribute);
-
-      const priceBusinessAttribute =
-        PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-      expect(
-        await reader.calculatePayment(ATTRIBUTE_COUNTRY, mockBusiness.address)
-      ).to.equal(priceBusinessAttribute);
-    });
-
-    it("success (DID)", async () => {
-      const priceAttribute = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID];
-
-      expect(
-        await reader.calculatePayment(ATTRIBUTE_DID, minterA.address)
-      ).to.equal(priceAttribute);
-
-      const priceBusniessAttribute =
-        PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID];
-
-      expect(
-        await reader.calculatePayment(ATTRIBUTE_DID, mockBusiness.address)
-      ).to.equal(priceBusniessAttribute);
-    });
-
-    it("fail - governance incorrectly set", async () => {
-      const newGovernance = await deployGovernance(admin);
-
+    it.only("fail - invalid attributes", async () => {
       await governance
         .connect(admin)
-        .updateGovernanceInPassport(newGovernance.address);
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
 
-      await newGovernance
-        .connect(admin)
-        .setPassportContractAddress(passport.address);
-      await newGovernance.connect(admin).acceptGovernanceInPassport();
-
-      await expect(reader.calculatePayment(ATTRIBUTE_DID, minterA.address)).to
-        .reverted;
+      expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
+        false
+      );
+      await expect(
+        reader.queryFee(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
   });
 });

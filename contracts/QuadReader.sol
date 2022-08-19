@@ -10,6 +10,8 @@ import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadReaderStore.sol";
 
+import "hardhat/console.sol";
+
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -40,7 +42,7 @@ import "./storage/QuadReaderStore.sol";
     function getAttributes(
         address _account, bytes32 _attribute
     ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
-        _getAttributesVerify(_account, _attribute);
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
 
         attributes = passport.attributes(_account, _attribute);
         uint256 fee = queryFee(_account, _attribute);
@@ -65,7 +67,7 @@ import "./storage/QuadReaderStore.sol";
     function getAttributesLegacy(
         address _account, bytes32 _attribute
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
-        _getAttributesVerify(_account, _attribute);
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
 
         IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
         values = new bytes32[](attributes.length);
@@ -100,6 +102,8 @@ import "./storage/QuadReaderStore.sol";
     function getAttributesBulk(
         address _account, bytes32[] calldata _attributes
     ) external payable override returns(IQuadPassportStore.Attribute[] memory) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
         IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
         bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
@@ -113,7 +117,6 @@ import "./storage/QuadReaderStore.sol";
                 ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
                 : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
-            _getAttributesVerify(_account, _attributes[i]);
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 
             if (attrs.length > 0) {
@@ -142,6 +145,8 @@ import "./storage/QuadReaderStore.sol";
     function getAttributesBulkLegacy(
         address _account, bytes32[] calldata _attributes
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+
         values = new bytes32[](_attributes.length);
         epochs = new uint256[](_attributes.length);
         issuers = new address[](_attributes.length);
@@ -154,7 +159,6 @@ import "./storage/QuadReaderStore.sol";
         for (uint256 i = 0; i < _attributes.length; i++) {
             uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeFixed(_attributes[i]) : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
-            _getAttributesVerify(_account, _attributes[i]);
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 
             if (attrs.length > 0) {
@@ -172,20 +176,6 @@ import "./storage/QuadReaderStore.sol";
         emit QueryBulkEvent(_account, msg.sender, _attributes);
     }
 
-    /// @notice safty checks for all getAttribute functions
-    /// @param _account address of the passport holder to query
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    function _getAttributesVerify(
-        address _account,
-        bytes32 _attribute
-    ) internal view {
-        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
-    }
-
 
     /// @dev Calculate the amount of $ETH required to call `getAttributes`
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
@@ -195,7 +185,17 @@ import "./storage/QuadReaderStore.sol";
         address _account,
         bytes32 _attribute
     ) public override view returns(uint256) {
+        // bool y = governance.eligibleAttributes(_attribute);
+        // bool y2 = governance.eligibleAttributesByDID(_attribute);
+        // console.log(y);
+        // console.log(y2);
+        require(governance.eligibleAttributes(_attribute)
+            || governance.eligibleAttributesByDID(_attribute),
+            "ATTRIBUTE_NOT_ELIGIBLE"
+        );
+
         IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+
         uint256 fee = (attrs.length > 0 && attrs[0].value == keccak256("TRUE"))
             ? governance.pricePerBusinessAttributeFixed(_attribute)
             : governance.pricePerAttributeFixed(_attribute);
@@ -217,6 +217,10 @@ import "./storage/QuadReaderStore.sol";
         bool isBusiness = (attrs.length > 0 && attrs[0].value == keccak256("TRUE")) ? true : false;
 
         for (uint256 i = 0; i < _attributes.length; i++) {
+            require(governance.eligibleAttributes(_attributes[i])
+                || governance.eligibleAttributesByDID(_attributes[i]),
+                "ATTRIBUTE_NOT_ELIGIBLE"
+            );
             fee += isBusiness
                 ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
                 : governance.pricePerAttributeFixed(_attributes[i]);

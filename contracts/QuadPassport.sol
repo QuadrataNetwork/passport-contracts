@@ -292,6 +292,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     ) public view override returns (Attribute[] memory) {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
 
+        require(governance.eligibleAttributes(_attribute)
+            || governance.eligibleAttributesByDID(_attribute),
+            "ATTRIBUTE_NOT_ELIGIBLE"
+        );
         bytes32 attrKey;
         if (governance.eligibleAttributes(_attribute)) {
             attrKey = keccak256(abi.encode(_account, _attribute));

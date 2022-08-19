@@ -218,5 +218,18 @@ describe("QuadPassport.attributes", async () => {
           .attributes(minterA.address, ATTRIBUTE_IS_BUSINESS)
       ).to.be.revertedWith("INVALID_READER");
     });
+
+    it("fail - ineligible attributes", async () => {
+      await governance
+        .connect(admin)
+        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
+
+      // TODO: Figure out why it's wrong exception thrown
+      await expect(
+        passport
+          .connect(mockReader)
+          .attributes(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.be.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    });
   });
 });
