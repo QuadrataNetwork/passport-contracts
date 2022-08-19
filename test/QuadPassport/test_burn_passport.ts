@@ -3396,84 +3396,96 @@ describe("QuadPassport", async () => {
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
     });
 
-    //       it("fail - passport non-existent (business account currently has attested data)", async () => {
-    //         isBusiness = id("TRUE");
+    it("fail - passport non-existent (business account currently has attested data)", async () => {
+      const MockBusiness = await ethers.getContractFactory('MockBusiness')
+      const mockBusiness = await MockBusiness.deploy(defi.address)
+      await mockBusiness.deployed()
 
-    //         const MockBusiness = await ethers.getContractFactory('MockBusiness')
-    //         const mockBusiness = await MockBusiness.deploy(defi.address)
-    //         await mockBusiness.deployed()
+      await expect(
+        setAttributesIssuer(
+          mockBusiness,
+          issuer,
+          passport,
+          businessAttributes,
+          verifiedAt,
+          issuedAt
+        )
+      ).to.not.be.reverted;
 
-    //         const sigA = await signSetAttributes(
-    //           issuer,
-    //           mockBusiness,
-    //           TOKEN_ID,
-    //           did,
-    //           aml,
-    //           country,
-    //           isBusiness,
-    //           issuedAt
-    //         );
+      expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
 
-    //         const sigAccount = '0x00'
+      await expect(
+        passport.connect(issuer).burnPassportsIssuer(mockBusiness.address)
+      ).to.not.be.reverted;
 
-    //         await passport
-    //           .connect(minterB)
-    //           .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigA, sigAccount, {
-    //             value: MINT_PRICE,
-    //           });
+      expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(0);
+      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
+    });
 
-    //         expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(1);
-    //         expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
-    //         await expect(
-    //           passport.connect(issuer).burnPassportsIssuer(minterA.address, 2)
-    //         ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //         expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(1);
-    //         expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
-    //       });
+    it("fail - trying to burn indiviual account as a non issuer role", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //       it("fail - trying to burn indiviual account as a non issuer role", async () => {
-    //         await expect(
-    //           passport.connect(admin).burnPassportsIssuer(minterB.address, TOKEN_ID)
-    //         ).to.revertedWith("INVALID_ISSUER");
+      await expect(
+        passport.connect(admin).burnPassportsIssuer(minterA.address)
+      ).to.revertedWith("INVALID_ISSUER");
 
-    //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //         await assertGetAttributeFree(
-    //           [issuer.address],
-    //           minterA,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_AML,
-    //           aml,
-    //           issuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_COUNTRY,
-    //           country,
-    //           issuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_DID,
-    //           did,
-    //           issuedAt
-    //         );
-    //       });
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+    });
 
     //       it("fail - trying to burn business account as a non issuer role", async () => {
     //         isBusiness = id("TRUE");
