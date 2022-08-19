@@ -3348,60 +3348,30 @@ describe("QuadPassport", async () => {
       );
     });
 
-    //       it("fail - invalid tokenId", async () => {
-    //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //         const wrongTokenId = 2;
-    //         await expect(
-    //           passport
-    //             .connect(issuer)
-    //             .burnPassportsIssuer(minterA.address, wrongTokenId)
-    //         ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //         await assertGetAttributeFree(
-    //           [issuer.address],
-    //           minterA,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_AML,
-    //           aml,
-    //           issuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_COUNTRY,
-    //           country,
-    //           issuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_DID,
-    //           did,
-    //           issuedAt
-    //         );
-    //       });
+    it("fail - invalid tokenId", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //       it("fail - passport non-existent (account never had attested data)", async () => {
-    //         expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
-    //         await expect(
-    //           passport.connect(issuer).burnPassportsIssuer(minterB.address, TOKEN_ID)
-    //         ).to.revertedWith("CANNOT_BURN_ZERO_BALANCE");
-    //         expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
-    //       });
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, 1337)).to.equal(0);
+    });
+
+    it("fail - passport non-existent (account never had attested data)", async () => {
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+      await expect(
+        passport.connect(issuer).burnPassportsIssuer(minterB.address)
+      ).to.not.be.reverted;
+      expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
+    });
 
     //       it("fail - passport non-existent (indiviual account currently has attested data)", async () => {
     //         expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
