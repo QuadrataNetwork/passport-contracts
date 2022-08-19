@@ -3117,7 +3117,7 @@ describe("QuadPassport", async () => {
       );
     });
 
-    it.only("success - mint 2 business passports, delete issuerA, burnIssuerA, then assert only account level attributes remain for A, issuerB all exists", async () => {
+    it("success - mint 2 business passports, delete issuerA, burnIssuerA, then assert only account level attributes remain for A, issuerB all exists", async () => {
       const MockBusiness = await ethers.getContractFactory('MockBusiness')
       const mockBusiness = await MockBusiness.deploy(defi.address)
       await mockBusiness.deployed()
@@ -3240,6 +3240,7 @@ describe("QuadPassport", async () => {
         [verifiedAt]
       );
 
+      //re-attest DID
       await expect(
         setAttributesIssuer(
           mockBusiness,
@@ -3263,72 +3264,89 @@ describe("QuadPassport", async () => {
       );
     });
 
-    //       it("success - can remint after burn", async () => {
-    //         await passport
-    //           .connect(issuer)
-    //           .burnPassportsIssuer(minterA.address, TOKEN_ID);
-    //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
+    it("success - can remint after burn", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //         const newIssuedAt = issuedAt + 1;
-    //         const newAML = id("HIGH");
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+      await passport
+        .connect(issuer)
+        .burnPassportsIssuer(minterA.address);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
-    //         const sig = await signSetAttributes(
-    //           issuer,
-    //           minterA,
-    //           TOKEN_ID,
-    //           did,
-    //           newAML,
-    //           country,
-    //           isBusiness,
-    //           newIssuedAt
-    //         );
+      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy[ATTRIBUTE_AML] = hexZeroPad("0x0a", 32);
 
-    //         const sigAccount = await signAccount(minterA);
+      const newIssuedAt = issuedAt + 1;
+      const newVerifiedAt = verifiedAt + 1;
 
-    //         await passport
-    //           .connect(admin)
-    //           .mintPassport([minterA.address, TOKEN_ID, did, newAML, country, isBusiness, newIssuedAt], sig, sigAccount, {
-    //             value: MINT_PRICE,
-    //           });
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributesCopy,
+          newVerifiedAt,
+          newIssuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
 
-    //         await assertGetAttributeFree(
-    //           [issuer.address],
-    //           minterA,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_AML,
-    //           newAML,
-    //           newIssuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_COUNTRY,
-    //           country,
-    //           newIssuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_DID,
-    //           did,
-    //           newIssuedAt
-    //         );
-    //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //       });
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [newVerifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [newVerifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [newVerifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesCopy],
+        [newVerifiedAt]
+      );
+    });
 
     //       it("fail - invalid tokenId", async () => {
     //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
