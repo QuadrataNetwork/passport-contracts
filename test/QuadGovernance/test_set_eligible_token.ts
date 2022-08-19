@@ -61,5 +61,11 @@ describe("QuadGovernance.setEligibleTokenId", async () => {
         governance.connect(admin).setEligibleTokenId(TOKEN_ID, true)
       ).to.be.revertedWith("TOKEN_ELIGIBILITY_ALREADY_SET");
     });
+
+    it("fail (incremented by more than one)", async () => {
+      await expect(
+        governance.connect(admin).setEligibleTokenId(1337, true)
+      ).to.be.revertedWith("INCREMENT_TOKENID_BY_1");
+    });
   });
 });
