@@ -36,7 +36,12 @@ contract DeFi {
         return attributes;
     }
 
-    function depositLegacy(address _account, bytes32 _attribute) public payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+    function depositLegacy(address _account, bytes32 _attribute) 
+    public payable returns(
+        bytes32[] memory, 
+        uint256[] memory, 
+        address[] memory
+    ) {
         (
             bytes32[] memory attrValues,
             uint256[] memory epochs,
@@ -62,5 +67,23 @@ contract DeFi {
         emit GetAttributesBulkEvent(attrValues, epochs, issuers);
 
         return attributes;
+    }
+
+    function depositBulkLegacy(address _account, bytes32[] calldata _attributes) 
+        public payable returns
+    (
+        bytes32[] memory, 
+        uint256[] memory, 
+        address[] memory
+    ) {
+        (
+            bytes32[] memory attrValues,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = reader.getAttributesBulkLegacy{value: msg.value}(_account, _attributes);
+
+        emit GetAttributesBulkEvent(attrValues, epochs, issuers);
+
+        return (attrValues, epochs, issuers);
     }
 }

@@ -21,10 +21,10 @@ const { setAttributes } = require("../helpers/set_attributes.ts");
 const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 
 const {
-  assertGetAttributesBulk,
-} = require("../helpers/assert/assert_get_attributes_bulk.ts");
+  assertGetAttributesBulkLegacy,
+} = require("../helpers/assert/assert_get_attributes_bulk_legacy.ts");
 
-describe("QuadReader.getAttributesBulk", async () => {
+describe("QuadReader.getAttributesBulkLegacy", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
@@ -80,9 +80,9 @@ describe("QuadReader.getAttributesBulk", async () => {
     );
   });
 
-  describe("QuadReader.getAttributesBulk (SUCCESS CASES)", async () => {
+  describe("QuadReader.getAttributesBulkLegacy (SUCCESS CASES)", async () => {
     it("success - 1 issuer 1 attribute", async () => {
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [ATTRIBUTE_COUNTRY],
         reader,
@@ -95,7 +95,7 @@ describe("QuadReader.getAttributesBulk", async () => {
     });
 
     it("success - 1 issuer multiple attributes", async () => {
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -128,7 +128,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         issuedAt + 1,
         MINT_PRICE
       );
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -147,7 +147,7 @@ describe("QuadReader.getAttributesBulk", async () => {
 
     it("success no passport", async () => {
       // No issuers & no existing attestation for account
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterB,
         [
           ATTRIBUTE_AML,
@@ -178,7 +178,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         issuedAt + 1,
         MINT_PRICE
       );
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterB,
         [
           ATTRIBUTE_AML,
@@ -210,7 +210,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         MINT_PRICE
       );
       // Has Both attributes
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -245,7 +245,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         MINT_PRICE
       );
 
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -299,7 +299,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         MINT_PRICE
       );
 
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -333,7 +333,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         MINT_PRICE
       );
 
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -366,7 +366,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         MINT_PRICE
       );
 
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         minterA,
         [
           ATTRIBUTE_AML,
@@ -395,7 +395,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         verifiedAt,
         issuedAt
       );
-      await assertGetAttributesBulk(
+      await assertGetAttributesBulkLegacy(
         businessPassport,
         [
           ATTRIBUTE_AML,
@@ -437,7 +437,7 @@ describe("QuadReader.getAttributesBulk", async () => {
       );
 
       await expect(
-        businessPassport.depositBulk(attributesToQuery, {
+        businessPassport.depositBulkLegacy(attributesToQuery, {
           value: queryFee,
         })
       )
@@ -466,11 +466,11 @@ describe("QuadReader.getAttributesBulk", async () => {
   // ******************************************************************************* //
   //
 
-  describe("QuadReader.getAttributesBulk (ERROR CASES)", async () => {
+  describe("QuadReader.getAttributesBulkLegacy (ERROR CASES)", async () => {
     it("fail - account address zero", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
-        reader.getAttributesBulk(
+        reader.getAttributesBulkLegacy(
           ethers.constants.AddressZero,
           [ATTRIBUTE_COUNTRY],
           {
@@ -486,7 +486,7 @@ describe("QuadReader.getAttributesBulk", async () => {
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
-        reader.getAttributesBulk(minterA.address, [ATTRIBUTE_COUNTRY], {
+        reader.getAttributesBulkLegacy(minterA.address, [ATTRIBUTE_COUNTRY], {
           value: queryFee,
         })
       ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
@@ -495,7 +495,7 @@ describe("QuadReader.getAttributesBulk", async () => {
     it("fail - wrong query Fee", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
-        reader.getAttributesBulk(minterA.address, [ATTRIBUTE_COUNTRY], {
+        reader.getAttributesBulkLegacy(minterA.address, [ATTRIBUTE_COUNTRY], {
           value: queryFee.sub(1),
         })
       ).to.revertedWith("INVALID_QUERY_FEE");
