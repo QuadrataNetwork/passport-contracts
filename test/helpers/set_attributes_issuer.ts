@@ -66,9 +66,9 @@ export const setAttributesIssuer = async (
     verifiedAt,
     issuedAt,
     fee,
+    did,
     blockId,
-    tokenId,
-    did
+    tokenId
   );
 
   await expect(

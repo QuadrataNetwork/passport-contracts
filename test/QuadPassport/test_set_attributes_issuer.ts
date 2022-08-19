@@ -366,6 +366,59 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         mockReader
       );
     });
+
+    it("setAttributesIssuer (overwrite with diff tokenId)", async () => {
+      const attributes: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+      const newTokenId = 2;
+      await governance.connect(admin).setEligibleTokenId(newTokenId, true);
+
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt
+      );
+
+      const attributes2: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
+      };
+
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributes2,
+        verifiedAt + 1,
+        issuedAt + 1
+      );
+
+      await assertSetAttribute(
+        businessPassport,
+        [issuer],
+        passport,
+        [attributes2],
+        [verifiedAt + 1],
+        [zeroFee],
+        mockReader,
+        newTokenId
+      );
+
+      // Check that old tokenId still exists
+      await assertSetAttribute(
+        businessPassport,
+        [issuer],
+        passport,
+        [attributes2],
+        [verifiedAt + 1],
+        [zeroFee],
+        mockReader,
+        1
+      );
+    });
   });
 
   // ******************************************************************************* //
@@ -435,9 +488,9 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         verifiedAt,
         issuedAt,
         fee,
+        did,
         blockId,
-        tokenId,
-        did
+        tokenId
       );
     });
 
@@ -753,6 +806,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         verifiedAt,
         issuedAt,
         fee,
+        attributes[ATTRIBUTE_DID],
         wrongChainId,
         tokenId
       );

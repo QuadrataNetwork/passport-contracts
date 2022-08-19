@@ -357,6 +357,59 @@ describe("QuadPassport.setAttributes", async () => {
         mockReader
       );
     });
+
+    it("setAttributes (overwrite with diff tokenId)", async () => {
+      const attributes: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+      const newTokenId = 2;
+      await governance.connect(admin).setEligibleTokenId(newTokenId, true);
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+
+      const attributes2: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
+      };
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes2,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE,
+        newTokenId
+      );
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributes2],
+        [verifiedAt + 1],
+        [MINT_PRICE.mul(2)],
+        mockReader,
+        newTokenId
+      );
+
+      // Check that old tokenId exist too
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributes2],
+        [verifiedAt + 1],
+        [MINT_PRICE.mul(2)],
+        mockReader,
+        1
+      );
+    });
   });
 
   // ******************************************************************************* //
@@ -427,9 +480,9 @@ describe("QuadPassport.setAttributes", async () => {
         verifiedAt,
         issuedAt,
         fee,
+        did,
         blockId,
-        tokenId,
-        did
+        tokenId
       );
 
       sigAccount = await signAccount(minterA);
@@ -756,6 +809,7 @@ describe("QuadPassport.setAttributes", async () => {
         verifiedAt,
         issuedAt,
         fee,
+        attributes[ATTRIBUTE_DID],
         wrongChainId,
         tokenId
       );

@@ -7,6 +7,7 @@ const {
   ATTRIBUTE_AML,
   TOKEN_ID,
   DIGEST_TO_SIGN,
+  HARDHAT_CHAIN_ID,
 } = require("../../utils/constant.ts");
 
 export const signMessage = async (
@@ -33,9 +34,9 @@ export const signSetAttributes = async (
   verifiedAt: number,
   issuedAt: number,
   fee: any,
-  blockId: number,
-  tokenId: number = TOKEN_ID,
-  did: string
+  did: string,
+  blockId: number = HARDHAT_CHAIN_ID,
+  tokenId: number = TOKEN_ID
 ): Promise<typeof DataHexString> => {
   const attrKeys: string[] = [];
   const attrValues: string[] = [];

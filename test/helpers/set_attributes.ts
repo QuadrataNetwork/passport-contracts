@@ -65,9 +65,9 @@ export const setAttributes = async (
     verifiedAt,
     issuedAt,
     fee,
+    did,
     blockId,
-    tokenId,
-    did
+    tokenId
   );
 
   const sigAccount = await signAccount(account);

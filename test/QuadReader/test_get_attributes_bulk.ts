@@ -412,7 +412,7 @@ describe("QuadReader.getAttributesBulkBulk", async () => {
       );
     });
 
-    it("business passport can query DeFi", async () => {
+    it.only("business passport can query DeFi", async () => {
       const attributesCopy = Object.assign({}, attributes);
       attributesCopy[ATTRIBUTE_IS_BUSINESS] = id("TRUE");
       attributesCopy[ATTRIBUTE_DID] = formatBytes32String("quad:did:business");
