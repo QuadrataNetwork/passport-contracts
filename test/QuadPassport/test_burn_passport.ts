@@ -3118,9 +3118,9 @@ describe("QuadPassport", async () => {
     });
 
     it("success - mint 2 business passports, delete issuerA, burnIssuerA, then assert only account level attributes remain for A, issuerB all exists", async () => {
-      const MockBusiness = await ethers.getContractFactory('MockBusiness')
-      const mockBusiness = await MockBusiness.deploy(defi.address)
-      await mockBusiness.deployed()
+      const MockBusiness = await ethers.getContractFactory("MockBusiness");
+      const mockBusiness = await MockBusiness.deploy(defi.address);
+      await mockBusiness.deployed();
 
       await expect(
         setAttributesIssuer(
@@ -3192,20 +3192,25 @@ describe("QuadPassport", async () => {
         true
       );
 
-      await expect(governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false))
-        .to.emit(governance, 'EligibleAttributeUpdated')
+      await expect(
+        governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false)
+      )
+        .to.emit(governance, "EligibleAttributeUpdated")
         .withArgs(ATTRIBUTE_COUNTRY, false);
 
-      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
-      await passport
-        .connect(issuer)
-        .burnPassportsIssuer(mockBusiness.address);
-      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(1);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
+        1
+      );
+      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address);
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
+        1
+      );
 
-      await expect(governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, true))
-        .to.emit(governance, 'EligibleAttributeUpdated')
+      await expect(
+        governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, true)
+      )
+        .to.emit(governance, "EligibleAttributeUpdated")
         .withArgs(ATTRIBUTE_COUNTRY, true);
-
 
       await assertGetAttributes(
         mockBusiness,
@@ -3278,9 +3283,7 @@ describe("QuadPassport", async () => {
       ).to.not.be.reverted;
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport
-        .connect(issuer)
-        .burnPassportsIssuer(minterA.address);
+      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       const attributesCopy = Object.assign({}, attributes);
@@ -3397,9 +3400,9 @@ describe("QuadPassport", async () => {
     });
 
     it("fail - passport non-existent (business account currently has attested data)", async () => {
-      const MockBusiness = await ethers.getContractFactory('MockBusiness')
-      const mockBusiness = await MockBusiness.deploy(defi.address)
-      await mockBusiness.deployed()
+      const MockBusiness = await ethers.getContractFactory("MockBusiness");
+      const mockBusiness = await MockBusiness.deploy(defi.address);
+      await mockBusiness.deployed();
 
       await expect(
         setAttributesIssuer(
@@ -3487,75 +3490,73 @@ describe("QuadPassport", async () => {
       );
     });
 
-    //       it("fail - trying to burn business account as a non issuer role", async () => {
-    //         isBusiness = id("TRUE");
+    it("fail - trying to burn business account as a non issuer role", async () => {
+      const MockBusiness = await ethers.getContractFactory("MockBusiness");
+      const mockBusiness = await MockBusiness.deploy(defi.address);
+      await mockBusiness.deployed();
 
-    //         const MockBusiness = await ethers.getContractFactory('MockBusiness')
-    //         const mockBusiness = await MockBusiness.deploy(defi.address)
-    //         await mockBusiness.deployed()
+      await expect(
+        setAttributesIssuer(
+          mockBusiness,
+          issuer,
+          passport,
+          businessAttributes,
+          verifiedAt,
+          issuedAt
+        )
+      ).to.not.be.reverted;
 
-    //         const sigA = await signSetAttributes(
-    //           issuer,
-    //           mockBusiness,
-    //           TOKEN_ID,
-    //           did,
-    //           aml,
-    //           country,
-    //           isBusiness,
-    //           issuedAt
-    //         );
+      await expect(
+        passport.connect(admin).burnPassportsIssuer(mockBusiness.address)
+      ).to.revertedWith("INVALID_ISSUER");
 
-    //         const sigAccount = '0x00'
+      expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
+        1
+      );
 
-    //         await passport
-    //           .connect(minterB)
-    //           .mintPassport([mockBusiness.address, TOKEN_ID, did, aml, country, isBusiness, issuedAt], sigA, sigAccount, {
-    //             value: MINT_PRICE,
-    //           });
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt]
+      );
 
-    //         await expect(
-    //           passport.connect(admin).burnPassportsIssuer(minterB.address, TOKEN_ID)
-    //         ).to.revertedWith("INVALID_ISSUER");
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt]
+      );
 
-    //         expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-    //         await assertGetAttributeFree(
-    //           [issuer.address],
-    //           minterA,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_AML,
-    //           aml,
-    //           issuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_COUNTRY,
-    //           country,
-    //           issuedAt
-    //         );
-    //         await assertGetAttribute(
-    //           minterA,
-    //           treasury,
-    //           issuer,
-    //           issuerTreasury,
-    //           usdc,
-    //           defi,
-    //           passport,
-    //           reader,
-    //           ATTRIBUTE_DID,
-    //           did,
-    //           issuedAt
-    //         );
-    //       });
-    //     })
-    // });
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt]
+      );
+    });
   });
 });
