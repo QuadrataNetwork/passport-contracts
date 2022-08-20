@@ -119,10 +119,12 @@ describe("QuadReader.queryFee", async () => {
         .setPassportContractAddress(passport.address);
       await newGovernance.connect(admin).acceptGovernanceInPassport();
 
-      await expect(reader.queryFee(minterA.address, ATTRIBUTE_DID)).to.reverted;
+      await expect(
+        reader.queryFee(minterA.address, ATTRIBUTE_DID)
+      ).to.revertedWith("INVALID_READER");
     });
 
-    it.only("fail - invalid attributes", async () => {
+    it("fail - invalid attributes", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);

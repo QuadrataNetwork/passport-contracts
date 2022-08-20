@@ -185,10 +185,6 @@ import "hardhat/console.sol";
         address _account,
         bytes32 _attribute
     ) public override view returns(uint256) {
-        // bool y = governance.eligibleAttributes(_attribute);
-        // bool y2 = governance.eligibleAttributesByDID(_attribute);
-        // console.log(y);
-        // console.log(y2);
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
