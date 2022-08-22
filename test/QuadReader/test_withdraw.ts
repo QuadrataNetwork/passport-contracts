@@ -10,6 +10,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
+  PRICE_PER_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
 const {
@@ -18,9 +19,10 @@ const {
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
 
-describe("QuadPassport.withdraw", async () => {
+describe("QuadReader.withdraw", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -39,6 +41,8 @@ describe("QuadPassport.withdraw", async () => {
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
   };
 
+  const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
+
   beforeEach(async () => {
     [
       deployer,
@@ -51,7 +55,7 @@ describe("QuadPassport.withdraw", async () => {
       issuerTreasury,
       issuerTreasury2,
     ] = await ethers.getSigners();
-    [governance, passport] = await deployPassportEcosystem(
+    [governance, passport, reader] = await deployPassportEcosystem(
       admin,
       [issuer, issuer2],
       treasury,
@@ -70,12 +74,16 @@ describe("QuadPassport.withdraw", async () => {
       issuedAt,
       MINT_PRICE
     );
+
+    await reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
+      value: queryFee,
+    });
   });
 
-  describe("QuadPassport.withdraw", async () => {
+  describe("QuadReader.withdraw", async () => {
     it("success", async () => {
-      const initialBalancePassport = await ethers.provider.getBalance(
-        passport.address
+      const initialBalanceReader = await ethers.provider.getBalance(
+        reader.address
       );
 
       const initialBalanceIssuer = await ethers.provider.getBalance(
@@ -83,23 +91,19 @@ describe("QuadPassport.withdraw", async () => {
       );
 
       await expect(
-        passport.connect(admin).withdraw(issuerTreasury.address, MINT_PRICE)
+        reader.connect(admin).withdraw(issuerTreasury.address, queryFee)
       )
-        .to.emit(passport, "WithdrawEvent")
-        .withArgs(issuer.address, issuerTreasury.address, MINT_PRICE);
+        .to.emit(reader, "WithdrawEvent")
+        .withArgs(issuer.address, issuerTreasury.address, queryFee);
 
-      const newBalancePassport = await ethers.provider.getBalance(
-        passport.address
-      );
+      const newBalanceReader = await ethers.provider.getBalance(reader.address);
 
       const newBalanceIssuer = await ethers.provider.getBalance(
         issuerTreasury.address
       );
 
-      expect(newBalancePassport).to.equal(
-        initialBalancePassport.sub(MINT_PRICE)
-      );
-      expect(newBalanceIssuer).to.equal(initialBalanceIssuer.add(MINT_PRICE));
+      expect(newBalanceReader).to.equal(initialBalanceReader.sub(queryFee));
+      expect(newBalanceIssuer).to.equal(initialBalanceIssuer.add(queryFee));
     });
 
     it("success - after updated issuerTreasury", async () => {
@@ -107,77 +111,80 @@ describe("QuadPassport.withdraw", async () => {
         .connect(admin)
         .addIssuer(issuer.address, issuerTreasury2.address);
 
-      const initialBalancePassport = await ethers.provider.getBalance(
-        passport.address
+      const initialBalanceReader = await ethers.provider.getBalance(
+        reader.address
       );
 
       const initialBalanceIssuer = await ethers.provider.getBalance(
         issuerTreasury2.address
       );
 
-      await passport
-        .connect(admin)
-        .withdraw(issuerTreasury2.address, MINT_PRICE);
+      await reader.connect(admin).withdraw(issuerTreasury2.address, queryFee);
 
-      const newBalancePassport = await ethers.provider.getBalance(
-        passport.address
-      );
+      const newBalanceReader = await ethers.provider.getBalance(reader.address);
 
       const newBalanceIssuer = await ethers.provider.getBalance(
         issuerTreasury2.address
       );
 
-      expect(newBalancePassport).to.equal(
-        initialBalancePassport.sub(MINT_PRICE)
-      );
-      expect(newBalanceIssuer).to.equal(initialBalanceIssuer.add(MINT_PRICE));
+      expect(newBalanceReader).to.equal(initialBalanceReader.sub(queryFee));
+      expect(newBalanceIssuer).to.equal(initialBalanceIssuer.add(queryFee));
     });
 
-    it("fail - to protocol treasury", async () => {
-      await expect(
-        passport.connect(admin).withdraw(treasury.address, MINT_PRICE)
-      ).to.be.revertedWith("WITHDRAWAL_ADDRESS_INVALID");
+    it("success - to protocol treasury", async () => {
+      const initialBalanceReader = await ethers.provider.getBalance(
+        reader.address
+      );
+
+      const initialBalanceTreasury = await ethers.provider.getBalance(
+        treasury.address
+      );
+
+      await expect(reader.connect(admin).withdraw(treasury.address, queryFee))
+        .to.emit(reader, "WithdrawEvent")
+        .withArgs(reader.address, treasury.address, queryFee);
+
+      const newBalanceReader = await ethers.provider.getBalance(reader.address);
+
+      const newBalanceTreasury = await ethers.provider.getBalance(
+        treasury.address
+      );
+
+      expect(newBalanceReader).to.equal(initialBalanceReader.sub(queryFee));
+      expect(newBalanceTreasury).to.equal(initialBalanceTreasury.add(queryFee));
     });
 
     it("fail - not governance", async () => {
       await expect(
-        passport.connect(issuer).withdraw(issuerTreasury2.address, MINT_PRICE)
+        reader.connect(issuer).withdraw(issuerTreasury2.address, queryFee)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
     it("fail - not a issuer treasury", async () => {
       await expect(
-        passport.connect(admin).withdraw(issuer.address, MINT_PRICE)
+        reader.connect(admin).withdraw(issuer.address, queryFee)
       ).to.be.revertedWith("WITHDRAWAL_ADDRESS_INVALID");
     });
 
     it("fail - withdraw to address(0)", async () => {
       await expect(
-        passport
-          .connect(admin)
-          .withdraw(ethers.constants.AddressZero, MINT_PRICE)
+        reader.connect(admin).withdraw(ethers.constants.AddressZero, queryFee)
       ).to.revertedWith("WITHDRAW_ADDRESS_ZERO");
     });
 
     it("fail - withdraw balance 0", async () => {
-      await passport
-        .connect(admin)
-        .withdraw(issuerTreasury2.address, MINT_PRICE);
-      const newBalancePassport = await ethers.provider.getBalance(
-        passport.address
-      );
+      await reader.connect(admin).withdraw(issuerTreasury2.address, queryFee);
+      const newBalanceReader = await ethers.provider.getBalance(reader.address);
 
-      expect(newBalancePassport).to.equal(0);
+      expect(newBalanceReader).to.equal(0);
       await expect(
-        passport.connect(admin).withdraw(issuerTreasury.address, MINT_PRICE)
+        reader.connect(admin).withdraw(issuerTreasury.address, queryFee)
       ).to.revertedWith("INSUFFICIENT_BALANCE");
     });
 
     it("fail - withdraw higher amount than balance", async () => {
       await expect(
-        passport
-          .connect(admin)
-          .withdraw(issuerTreasury.address, MINT_PRICE.add(1))
+        reader.connect(admin).withdraw(issuerTreasury.address, queryFee.add(1))
       ).to.revertedWith("INSUFFICIENT_BALANCE");
     });
   });

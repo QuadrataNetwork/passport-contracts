@@ -310,6 +310,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     }
 
     /// @dev Admin function to set the new pending Governance address
+    /// @notice Restricted behind a TimelockController
     /// @param _governanceContract contract address of IQuadGovernance
     function setGovernance(address _governanceContract) external override {
         require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
@@ -320,6 +321,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     }
 
     /// @dev Withdraw to an issuer's treasury
+    /// @notice Restricted behind a TimelockController
     /// @param _to address an issuer's treasury
     /// @param _amount amount to withdraw
     function withdraw(address payable _to, uint256 _amount) external override {
@@ -345,11 +347,12 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         (bool sent,) = _to.call{value: _amount}("");
         require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
 
-        emit WithdrawEvent(issuer, _to, _amount, block.timestamp);
+        emit WithdrawEvent(issuer, _to, _amount);
     }
 
 
     /// @dev Admin function to accept and set the governance contract address
+    /// @notice Restricted behind a TimelockController
     function acceptGovernance() external override {
         require(_msgSender() == pendingGovernance, "ONLY_PENDING_GOVERNANCE_CONTRACT");
 

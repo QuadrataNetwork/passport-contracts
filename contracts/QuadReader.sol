@@ -254,6 +254,7 @@ import "hardhat/console.sol";
     }
 
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
+    /// @notice Restricted behind a TimelockController
     /// @param _to address of either an issuer's treasury or the Quadrata treasury
     /// @param _amount amount to withdraw
     function withdraw(address payable _to, uint256 _amount) external override {
@@ -284,7 +285,7 @@ import "hardhat/console.sol";
         (bool sent,) = _to.call{value: _amount}("");
         require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
 
-        emit WithdrawEvent(issuerOrProtocol, _to, _amount, block.timestamp);
+        emit WithdrawEvent(issuerOrProtocol, _to, _amount);
     }
 
 
