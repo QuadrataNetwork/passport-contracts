@@ -284,7 +284,7 @@ import "hardhat/console.sol";
         (bool sent,) = _to.call{value: _amount}("");
         require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
 
-        emit WithdrawEvent(issuerOrProtocol, _to, _amount);
+        emit WithdrawEvent(issuerOrProtocol, _to, _amount, block.timestamp);
     }
 
 

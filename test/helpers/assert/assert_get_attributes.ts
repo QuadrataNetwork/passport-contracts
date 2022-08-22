@@ -188,7 +188,7 @@ export const assertGetAttributesEvents = async (
       : [];
 
   expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
-    matchingAttributes[attributeToQuery].length
+    matchingAttributes.length
   );
 };
 

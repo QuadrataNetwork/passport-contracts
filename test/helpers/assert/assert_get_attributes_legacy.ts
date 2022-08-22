@@ -248,6 +248,6 @@ export const assertGetAttributesLegacyThroughContract = async (
   );
 
   expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
-    matchingAttributes[attributeToQuery].length
+    matchingAttributes.length
   );
 };

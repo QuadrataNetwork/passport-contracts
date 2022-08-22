@@ -319,6 +319,36 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         emit SetPendingGovernance(pendingGovernance);
     }
 
+    /// @dev Withdraw to an issuer's treasury
+    /// @param _to address an issuer's treasury
+    /// @param _amount amount to withdraw
+    function withdraw(address payable _to, uint256 _amount) external override {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
+            "INVALID_ADMIN"
+        );
+        bool isValid = false;
+        address issuer;
+
+        address[] memory issuers = governance.getIssuers();
+        for (uint256 i = 0; i < issuers.length; i++) {
+            if (_to == governance.issuersTreasury(issuers[i])) {
+                isValid = true;
+                issuer = issuers[i];
+                break;
+            }
+        }
+
+        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
+        require(isValid, "WITHDRAWAL_ADDRESS_INVALID");
+        require(_amount <= address(this).balance, "INSUFFICIENT_BALANCE");
+        (bool sent,) = _to.call{value: _amount}("");
+        require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
+
+        emit WithdrawEvent(issuer, _to, _amount, block.timestamp);
+    }
+
+
     /// @dev Admin function to accept and set the governance contract address
     function acceptGovernance() external override {
         require(_msgSender() == pendingGovernance, "ONLY_PENDING_GOVERNANCE_CONTRACT");

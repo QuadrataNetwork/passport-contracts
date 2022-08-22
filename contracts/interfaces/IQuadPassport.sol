@@ -9,22 +9,14 @@ interface IQuadPassport is IQuadSoulbound {
     event SetPendingGovernance(address indexed _pendingGovernance);
     event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
     event BurnPassportsIssuer(address indexed _issuer, address indexed _account);
+    event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee, uint256 _epoch);
 
-    /// @notice Set attributes for a Quadrata Passport (Only Individuals)
-    /// @dev Only when authorized by an eligible issuer
-    /// @param _config Input paramters required to set attributes
-    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
-    /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
     function setAttributes(
         IQuadPassportStore.AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable;
 
-    /// @notice Set attributes for a Quadrata Passport (only by Issuers)
-    /// @param _account Address of the Quadrata Passport holder
-    /// @param _config Input paramters required to set attributes
-    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
     function setAttributesIssuer(
         address _account,
         IQuadPassportStore.AttributeSetterConfig memory _config,
@@ -40,4 +32,6 @@ interface IQuadPassport is IQuadSoulbound {
     function acceptGovernance() external;
 
     function attributes(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute[] memory);
+
+    function withdraw(address payable _to, uint256 _amount) external;
 }
