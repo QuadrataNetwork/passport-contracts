@@ -181,6 +181,15 @@ export const assertGetAttributesEvents = async (
   expect(await ethers.provider.getBalance(reader.address)).to.equal(
     initialBalance.add(queryFee)
   );
+
+  const matchingAttributes =
+    attributeToQuery in availableAttributesByTypes
+      ? availableAttributesByTypes[attributeToQuery]
+      : [];
+
+  expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
+    matchingAttributes[attributeToQuery].length
+  );
 };
 
 export const assertGetAttributesThroughContract = async (
@@ -237,5 +246,8 @@ export const assertGetAttributesThroughContract = async (
 
   expect(await ethers.provider.getBalance(reader.address)).to.equal(
     initialBalance.add(queryFee)
+  );
+  expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
+    matchingAttributes.length
   );
 };

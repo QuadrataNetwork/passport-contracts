@@ -178,6 +178,15 @@ export const assertGetAttributesEventsLegacy = async (
     );
   }
 
+  const matchingAttributes =
+    attributeToQuery in availableAttributesByTypes
+      ? availableAttributesByTypes[attributeToQuery]
+      : [];
+
+  expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
+    matchingAttributes[attributeToQuery].length
+  );
+
   expect(await ethers.provider.getBalance(reader.address)).to.equal(
     initialBalance.add(queryFee)
   );
@@ -236,5 +245,9 @@ export const assertGetAttributesLegacyThroughContract = async (
 
   expect(await ethers.provider.getBalance(reader.address)).to.equal(
     initialBalance.add(queryFee)
+  );
+
+  expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
+    matchingAttributes[attributeToQuery].length
   );
 };
