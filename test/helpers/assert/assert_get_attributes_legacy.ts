@@ -184,7 +184,7 @@ export const assertGetAttributesEventsLegacy = async (
       : [];
 
   expect(await reader.balanceOf(account.address, attributeToQuery)).to.equal(
-    matchingAttributes[attributeToQuery].length
+    matchingAttributes.length
   );
 
   expect(await ethers.provider.getBalance(reader.address)).to.equal(
