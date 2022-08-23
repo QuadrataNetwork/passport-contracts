@@ -151,10 +151,10 @@ export const assertGetAttributesBulkLegacyEvents = async (
 
   if (queryFee.eq(0)) {
     expect(receipt.events.length).to.equal(1);
-    expect(receipt.events[0].event).to.equal("QueryEvent");
+    expect(receipt.events[0].event).to.equal("QueryBulkEvent");
     expect(receipt.events[0].args[0]).to.equal(account.address);
     expect(receipt.events[0].args[1]).to.equal(treasury.address);
-    expect(receipt.events[0].args[2]).to.equal(attributesToQuery);
+    expect(receipt.events[0].args[2]).to.eql(attributesToQuery);
   } else {
     expect(receipt.events.length).to.equal(counterResponse + 2);
 

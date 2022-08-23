@@ -92,6 +92,39 @@ describe("QuadReader.getAttributesBulk", async () => {
         [attributes],
         [verifiedAt]
       );
+
+      await assertGetAttributesBulk(
+        minterA,
+        [ATTRIBUTE_AML],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributesBulk(
+        minterA,
+        [ATTRIBUTE_DID],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributesBulk(
+        minterA,
+        [ATTRIBUTE_IS_BUSINESS],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
     });
 
     it("success - 1 issuer multiple attributes", async () => {

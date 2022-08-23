@@ -2,7 +2,7 @@
 pragma solidity 0.8.4;
 
 import "../ERC1155/IERC1155Upgradeable.sol";
-import "../storage/QuadPassportStore.sol";
+import "../storage/QuadPassportStoreOld.sol";
 
 interface IQuadPassportOld is IERC1155Upgradeable {
 

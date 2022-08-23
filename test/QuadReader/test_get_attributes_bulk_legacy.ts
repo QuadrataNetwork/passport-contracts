@@ -92,6 +92,39 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [attributes],
         [verifiedAt]
       );
+
+      await assertGetAttributesBulkLegacy(
+        minterA,
+        [ATTRIBUTE_IS_BUSINESS],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributesBulkLegacy(
+        minterA,
+        [ATTRIBUTE_DID],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributesBulkLegacy(
+        minterA,
+        [ATTRIBUTE_AML],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
     });
 
     it("success - 1 issuer multiple attributes", async () => {

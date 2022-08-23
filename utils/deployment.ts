@@ -1,9 +1,9 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { Contract } from "ethers";
 const { ethers, upgrades } = require("hardhat");
-import { BigNumber, Contract } from "ethers";
 
 export const deployPassport = async (
-  governance: SignerWithAddress
+  governance: Contract
 ): Promise<Contract> => {
   const QuadPassport = await ethers.getContractFactory("QuadPassport");
   const passport = await upgrades.deployProxy(
@@ -29,8 +29,8 @@ export const deployGovernance = async (
 };
 
 export const deployReader = async (
-  governance: SignerWithAddress,
-  passport: SignerWithAddress
+  governance: Contract,
+  passport: Contract
 ): Promise<Contract> => {
   const QuadReader = await ethers.getContractFactory("QuadReader");
   const reader = await upgrades.deployProxy(

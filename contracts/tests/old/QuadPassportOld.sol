@@ -8,10 +8,10 @@ import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol
 
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "./ERC1155/ERC1155Upgradeable.sol";
-import "./interfaces/IQuadPassport.sol";
-import "./interfaces/IQuadGovernance.sol";
-import "./storage/QuadGovernanceStore.sol";
-import "./storage/QuadPassportStore.sol";
+import "./interfaces/IQuadPassportOld.sol";
+import "./interfaces/IQuadGovernanceOld.sol";
+import "./storage/QuadGovernanceStoreOld.sol";
+import "./storage/QuadPassportStoreOld.sol";
 
 /// @title Quadrata Web3 Identity Passport
 /// @author Fabrice Cheng, Theodore Clapp

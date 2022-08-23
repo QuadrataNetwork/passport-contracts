@@ -7,12 +7,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
-import "./interfaces/IQuadPassport.sol";
-import "./interfaces/IQuadGovernance.sol";
-import "./interfaces/IQuadReader.sol";
-import "./storage/QuadReaderStore.sol";
-import "./storage/QuadPassportStore.sol";
-import "./storage/QuadGovernanceStore.sol";
+import "./interfaces/IQuadPassportOld.sol";
+import "./interfaces/IQuadGovernanceOld.sol";
+import "./interfaces/IQuadReaderOld.sol";
+import "./storage/QuadReaderStoreOld.sol";
+import "./storage/QuadPassportStoreOld.sol";
+import "./storage/QuadGovernanceStoreOld.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp

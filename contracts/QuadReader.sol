@@ -121,13 +121,17 @@ import "hardhat/console.sol";
 
             if (attrs.length > 0) {
                 attributes[i] = attrs[0];
-                uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-                totalFeeIssuer += feeIssuer;
-                emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
+                if (attrFee > 0) {
+                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                    totalFeeIssuer += feeIssuer;
+                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
+                }
             }
         }
         require(msg.value == totalFee, " INVALID_QUERY_FEE");
-        emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        if (totalFee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        }
         emit QueryBulkEvent(_account, msg.sender, _attributes);
 
         return attributes;
@@ -166,13 +170,17 @@ import "hardhat/console.sol";
                 epochs[i] = attrs[0].epoch;
                 issuers[i] = attrs[0].issuer;
 
-                uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-                totalFeeIssuer += feeIssuer;
-                emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
+                if (attrFee > 0) {
+                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                    totalFeeIssuer += feeIssuer;
+                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
+                }
             }
         }
         require(msg.value == totalFee," INVALID_QUERY_FEE");
-        emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        if (totalFee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        }
         emit QueryBulkEvent(_account, msg.sender, _attributes);
     }
 

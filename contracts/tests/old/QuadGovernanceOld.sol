@@ -4,10 +4,10 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "./interfaces/IQuadPassport.sol";
-import "./interfaces/IQuadGovernance.sol";
+import "./interfaces/IQuadPassportOld.sol";
+import "./interfaces/IQuadGovernanceOld.sol";
 import "./interfaces/IUniswapAnchoredView.sol";
-import "./storage/QuadGovernanceStore.sol";
+import "./storage/QuadGovernanceStoreOld.sol";
 
 /// @title Governance Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
