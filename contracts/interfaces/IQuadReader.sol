@@ -40,4 +40,18 @@ interface IQuadReader {
     function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) external view returns(bool);
 
     function withdraw(address payable _to, uint256 _amount) external;
+
+    // @dev DEPRECATED - use `queryFee` instead
+    function calculatePaymentETH(
+        bytes32 _attribute,
+        address _account
+    ) external view returns(uint256);
+
+
+    // @dev DEPRECATED - use `getAttributesLegacy` instead
+    function getAttributesETH(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute
+    ) external payable returns(bytes32[] memory, uint256[] memory, address[] memory);
 }

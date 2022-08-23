@@ -66,7 +66,7 @@ import "hardhat/console.sol";
     /// @return issuers Array of Attribute's issuers
     function getAttributesLegacy(
         address _account, bytes32 _attribute
-    ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+    ) public payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
 
         IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
@@ -291,5 +291,22 @@ import "hardhat/console.sol";
 
     function _authorizeUpgrade(address) internal view override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+    }
+
+    // @dev DEPRECATED - use `queryFee` instead
+    function calculatePaymentETH(
+        bytes32 _attribute,
+        address _account
+    ) public override view returns(uint256) {
+        return queryFee(_account, _attribute);
+    }
+
+    // @dev DEPRECATED - use `getAttributesLegacy` instead
+    function getAttributesETH(
+        address _account,
+        uint256 _tokenId,
+        bytes32 _attribute
+    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        return getAttributesLegacy(_account, _attribute);
     }
  }
