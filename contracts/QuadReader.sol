@@ -10,8 +10,6 @@ import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadReaderStore.sol";
 
-import "hardhat/console.sol";
-
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -159,9 +157,12 @@ import "hardhat/console.sol";
 
         uint256 totalFee;
         uint256 totalFeeIssuer;
+        uint256 attrFee;
 
         for (uint256 i = 0; i < _attributes.length; i++) {
-            uint256 attrFee = isBusiness ? governance.pricePerBusinessAttributeFixed(_attributes[i]) : governance.pricePerAttributeFixed(_attributes[i]);
+            attrFee = isBusiness
+                ? governance.pricePerBusinessAttributeFixed(_attributes[i])
+                : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 

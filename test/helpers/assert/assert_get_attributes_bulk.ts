@@ -128,10 +128,13 @@ export const assertGetAttributesBulkEvents = async (
 
   let counterResponse = 0;
 
-  attributesToQuery.forEach((attrType) => {
+  attributesToQuery.forEach(async (attrType) => {
     for (let i = 0; i < expectedAttributes.length; i++) {
       if (attrType in expectedAttributes[i]) {
-        counterResponse += 1;
+        const attrQueryFee = await reader.queryFee(account.address, attrType);
+        if (attrQueryFee > 0) {
+          counterResponse += 1;
+        }
         matchingAttributeTypes.push(attrType);
         matchingIssuers.push(expectedIssuers[i].address);
         break;
@@ -157,18 +160,24 @@ export const assertGetAttributesBulkEvents = async (
   } else {
     expect(receipt.events.length).to.equal(counterResponse + 2);
 
-    for (let i = 0; i < counterResponse; i++) {
+    let counter = 0;
+
+    for (let i = 0; i < matchingAttributeTypes.length; i++) {
       const singleAttrFee = await reader.queryFee(
         account.address,
         matchingAttributeTypes[i]
       );
-      const feeIssuer = singleAttrFee.mul(ISSUER_SPLIT).div(100);
-      totalFeeIssuer = totalFeeIssuer.add(feeIssuer);
 
-      const event = receipt.events[i];
-      expect(event.event).to.equal("QueryFeeReceipt");
-      expect(event.args[0]).to.equal(matchingIssuers[i]);
-      expect(event.args[1]).to.equal(feeIssuer);
+      if (singleAttrFee > 0) {
+        const feeIssuer = singleAttrFee.mul(ISSUER_SPLIT).div(100);
+        totalFeeIssuer = totalFeeIssuer.add(feeIssuer);
+
+        const event = receipt.events[counter];
+        expect(event.event).to.equal("QueryFeeReceipt");
+        expect(event.args[0]).to.equal(matchingIssuers[i]);
+        expect(event.args[1]).to.equal(feeIssuer);
+        counter += 1;
+      }
     }
 
     expect(receipt.events[counterResponse].event).to.equal("QueryFeeReceipt");
