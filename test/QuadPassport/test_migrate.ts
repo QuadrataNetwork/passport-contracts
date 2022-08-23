@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
@@ -20,6 +21,7 @@ const {
 // const { signSetAttributes, signAccount } = require("../helpers/signature.ts");
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
+const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 
 const {
   assertGetAttributes,
@@ -432,7 +434,7 @@ describe("QuadPassport.migrate", async () => {
       );
     });
 
-    it("successfully overwrite 1 passport", async () => {
+    it("successfully overwrite 1 passport (setAttributes)", async () => {
       await passport
         .connect(admin)
         .migrate([minterA.address], issuer.address, oldPassport.address);
@@ -494,7 +496,7 @@ describe("QuadPassport.migrate", async () => {
       );
     });
 
-    it("successfully add a 2nd issuers", async () => {
+    it("successfully add a 2nd issuers (setAttributes)", async () => {
       await passport
         .connect(admin)
         .migrate([minterA.address], issuer.address, oldPassport.address);
@@ -555,6 +557,264 @@ describe("QuadPassport.migrate", async () => {
         [attributes],
         [verifiedAt]
       );
+    });
+
+    it("successfully add a 2nd issuers with different tokenId (setAttributes)", async () => {
+      await passport
+        .connect(admin)
+        .migrate([minterA.address], issuer.address, oldPassport.address);
+
+      await governance.connect(admin).setEligibleTokenId(2, true);
+
+      const attributesToUpdate = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_AML]: hexZeroPad("0x05", 32),
+        [ATTRIBUTE_COUNTRY]: id("CA"),
+      };
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attributesToUpdate,
+        verifiedAt + 10,
+        issuedAt,
+        MINT_PRICE,
+        2
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      expect(await passport.balanceOf(minterA.address, 1)).equals(1);
+      expect(await passport.balanceOf(minterA.address, 2)).equals(1);
+    });
+
+    it("successfully overwrite 1 passport (setAttributesIssuer)", async () => {
+      await passport
+        .connect(admin)
+        .migrate([minterA.address], issuer.address, oldPassport.address);
+      const attributesToUpdate = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_AML]: hexZeroPad("0x05", 32),
+        [ATTRIBUTE_COUNTRY]: id("CA"),
+      };
+      await setAttributesIssuer(
+        minterA,
+        issuer,
+        passport,
+        attributesToUpdate,
+        verifiedAt + 10,
+        issuedAt,
+        1
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesToUpdate],
+        [verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesToUpdate],
+        [verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributesToUpdate],
+        [verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+    });
+
+    it("successfully add a 2nd issuers (setAttributesIssuer)", async () => {
+      await passport
+        .connect(admin)
+        .migrate([minterA.address], issuer.address, oldPassport.address);
+
+      const attributesToUpdate = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_AML]: hexZeroPad("0x05", 32),
+        [ATTRIBUTE_COUNTRY]: id("CA"),
+      };
+      await setAttributesIssuer(
+        minterA,
+        issuer2,
+        passport,
+        attributesToUpdate,
+        verifiedAt + 10,
+        issuedAt,
+        1
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+    });
+
+    it("successfully add a 2nd issuers with different tokenId (setAttributesIssuer)", async () => {
+      await passport
+        .connect(admin)
+        .migrate([minterA.address], issuer.address, oldPassport.address);
+
+      await governance.connect(admin).setEligibleTokenId(2, true);
+
+      const attributesToUpdate = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_AML]: hexZeroPad("0x05", 32),
+        [ATTRIBUTE_COUNTRY]: id("CA"),
+      };
+      await setAttributesIssuer(
+        minterA,
+        issuer2,
+        passport,
+        attributesToUpdate,
+        verifiedAt + 10,
+        issuedAt,
+        2
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer, issuer2],
+        [attributes, attributesToUpdate],
+        [verifiedAt, verifiedAt + 10]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      expect(await passport.balanceOf(minterA.address, 1)).equals(1);
+      expect(await passport.balanceOf(minterA.address, 2)).equals(1);
     });
   });
 });

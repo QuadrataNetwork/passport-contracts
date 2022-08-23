@@ -30,6 +30,8 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
 export const MINT_PRICE = parseEther("0.003");
 export const ISSUER_SPLIT = 50;
 
-export const DIGEST_TO_SIGN = ethers.utils.id("Quadrata");
+export const DIGEST_TO_SIGN = ethers.utils.id(
+  "Welcome to Quadrata! By signing, you agree to the Terms of Service."
+);
 
 export const HARDHAT_CHAIN_ID = 31337;
