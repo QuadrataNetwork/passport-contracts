@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.4;
+pragma solidity 0.8.16;
 
 import "../interfaces/IQuadPassport.sol";
 
 import "./QuadConstant.sol";
 
 contract QuadGovernanceStore is QuadConstant {
-    // Attributes 
+    // Attributes
     bytes32[] internal _eligibleAttributesArray;
     mapping(bytes32 => bool) internal _eligibleAttributes;
     mapping(bytes32 => bool) internal _eligibleAttributesByDID;
