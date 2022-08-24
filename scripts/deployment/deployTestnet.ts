@@ -1,12 +1,12 @@
-const { ethers } = require("hardhat");
+import { ethers } from "hardhat";
 
 const { deployQuadrata } = require("../../utils/deployment.ts");
 
-const QUADRATA_TREASURY = "";
+const QUADRATA_TREASURY = "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1";
 
-const TIMELOCK = "";
+const TIMELOCK = "0x484ea071fB248B63Cbf4bf10BeAf01D6e65Ba4CD"; // Goerli
 
-const MULTISIG = "";
+const MULTISIG = "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"; // Goerli
 
 const TOKEN_IDS = [1, 2, 3];
 
@@ -52,18 +52,18 @@ const ISSUERS = [
 ];
 
 (async () => {
-  if (QUADRATA_TREASURY === "") {
+  if (!QUADRATA_TREASURY) {
     throw new Error("QUADRATA_TREASURY not set");
   }
   if (ISSUERS.length === 0) {
     throw new Error("ISSUERS not set");
   }
 
-  if (TIMELOCK === "") {
+  if (!TIMELOCK) {
     throw new Error("TIMELOCK not set");
   }
 
-  if (MULTISIG === "") {
+  if (!MULTISIG) {
     throw new Error("MULTISIG not set");
   }
 

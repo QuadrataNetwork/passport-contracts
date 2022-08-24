@@ -29,33 +29,28 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.2",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1000,
-          },
-        }
-      },
-      {
         version: "0.8.4",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 10000,
           },
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   networks: {
     mumbai: {
       url: process.env.MUMBAI_URI || "",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     goerli: {
       url: process.env.GOERLI_URI || "",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.GOERLI_PRIVATE_KEY !== undefined
+          ? [process.env.GOERLI_PRIVATE_KEY]
+          : [],
     },
   },
   gasReporter: {
