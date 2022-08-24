@@ -187,5 +187,12 @@ describe("QuadReader.withdraw", async () => {
         reader.connect(admin).withdraw(issuerTreasury.address, queryFee.add(1))
       ).to.revertedWith("INSUFFICIENT_BALANCE");
     });
+
+    it("fail - contract paused", async () => {
+      await passport.connect(admin).pause();
+      await expect(
+        reader.connect(admin).withdraw(issuerTreasury.address, queryFee)
+      ).to.revertedWith("Pausable: paused");
+    });
   });
 });

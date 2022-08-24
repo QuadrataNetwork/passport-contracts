@@ -14,16 +14,16 @@ export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
 export const TOKEN_ID = 1;
 
 export const PRICE_PER_ATTRIBUTES_ETH = {
-  [ATTRIBUTE_AML]: parseEther("0.001"),
-  [ATTRIBUTE_COUNTRY]: parseEther("0.002"),
-  [ATTRIBUTE_DID]: parseEther("0.003"),
+  [ATTRIBUTE_AML]: parseEther("0.0012"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0.0012"),
+  [ATTRIBUTE_DID]: parseEther("0.0012"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
-  [ATTRIBUTE_AML]: parseEther("0.01"),
-  [ATTRIBUTE_COUNTRY]: parseEther("0.02"),
-  [ATTRIBUTE_DID]: parseEther("0.03"),
+  [ATTRIBUTE_AML]: parseEther("0.015"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0.015"),
+  [ATTRIBUTE_DID]: parseEther("0.015"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
 };
 

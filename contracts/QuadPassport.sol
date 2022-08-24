@@ -4,6 +4,8 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportMigration.sol";
@@ -13,7 +15,7 @@ import "./QuadSoulbound.sol";
 /// @title Quadrata Web3 Identity Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice This represents a Quadrata NFT Passport
-contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPassportStore {
+contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStore {
 
     constructor() initializer {
         // used to prevent logic contract self destruct take over
@@ -42,7 +44,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
-    ) external override payable {
+    ) external payable override whenNotPaused {
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(DIGEST_TO_SIGN);
         address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
@@ -58,7 +60,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
         address _account,
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
-    ) external payable override {
+    ) external payable override whenNotPaused {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
 
@@ -217,7 +219,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
 
     /// @notice Burn your Quadrata passport
     /// @dev Only owner of the passport
-    function burnPassports() external override {
+    function burnPassports() external override whenNotPaused {
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
 
@@ -236,7 +238,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @param _account address of the wallet to burn
     function burnPassportsIssuer(
         address _account
-    ) external override {
+    ) external override whenNotPaused {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
 
         bool isEmpty = true;
@@ -324,7 +326,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @notice Restricted behind a TimelockController
     /// @param _to address an issuer's treasury
     /// @param _amount amount to withdraw
-    function withdraw(address payable _to, uint256 _amount) external override {
+    function withdraw(address payable _to, uint256 _amount) external override whenNotPaused {
         require(
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
             "INVALID_ADMIN"
@@ -368,7 +370,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
     /// @param _accounts List of passport holder addresses to migrate
     /// @param _issuer Address of the issuer who issued the attestation
     /// @param _oldPassport contract address of the old passport contract
-    function migrate(address[] calldata _accounts, address _issuer, address _oldPassport) external {
+    function migrate(address[] calldata _accounts, address _issuer, address _oldPassport) external whenNotPaused {
         IQuadPassportMigration _passportToMigrate = IQuadPassportMigration(_oldPassport);
         require(
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
@@ -434,6 +436,26 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, QuadSoulbound, QuadPass
                 _mint(account, 1, 1);
 
         }
+    }
+
+    function pause() external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(PAUSER_ROLE, _msgSender()),
+            "INVALID_PAUSER"
+        );
+        _pause();
+    }
+
+    function unpause() external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(PAUSER_ROLE, _msgSender()),
+            "INVALID_PAUSER"
+        );
+        _unpause();
+    }
+
+    function passportPaused() external view override returns(bool) {
+        return paused();
     }
 
     function _authorizeUpgrade(address) internal view override {

@@ -940,5 +940,30 @@ describe("QuadPassport.setAttributes", async () => {
           )
       ).to.be.revertedWith("INVALID_ISSUER");
     });
+
+    it("fail - contract paused", async () => {
+      await passport.connect(admin).pause();
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributes(
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            sigAccount,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("Pausable: paused");
+    });
   });
 });

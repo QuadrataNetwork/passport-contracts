@@ -180,5 +180,12 @@ describe("QuadPassport.withdraw", async () => {
           .withdraw(issuerTreasury.address, MINT_PRICE.add(1))
       ).to.revertedWith("INSUFFICIENT_BALANCE");
     });
+
+    it("fail - contract paused", async () => {
+      await passport.connect(admin).pause();
+      await expect(
+        passport.connect(admin).withdraw(issuerTreasury.address, MINT_PRICE)
+      ).to.revertedWith("Pausable: paused");
+    });
   });
 });

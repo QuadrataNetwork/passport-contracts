@@ -445,7 +445,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       attrValues = [];
       attrTypes = [];
 
-      let did = formatBytes32String("0");
+      let did = attributes[ATTRIBUTE_DID];
 
       // Deep Copy to avoid mutating the object
       const attributesCopy = Object.assign({}, attributes);
@@ -492,6 +492,28 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         blockId,
         tokenId
       );
+    });
+
+    it("success - make sure all parameters work", async () => {
+      await passport
+        .connect(issuer)
+        .setAttributesIssuer(
+          businessPassport.address,
+          [
+            attrKeys,
+            attrValues,
+            attrTypes,
+            attributes[ATTRIBUTE_DID],
+            tokenId,
+            verifiedAt,
+            issuedAt,
+            fee,
+          ],
+          sigIssuer,
+          {
+            value: fee,
+          }
+        );
     });
 
     it("fail - signature already used", async () => {
@@ -965,7 +987,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("ACCOUNT_CANNOT_BE_ZERO");
     });
 
-    it("fail - account address(0)", async () => {
+    it("fail - invalid (signature) - wrong issuer sender", async () => {
       await expect(
         passport
           .connect(minterA)
@@ -987,6 +1009,31 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             }
           )
       ).to.be.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - contract paused", async () => {
+      await passport.connect(admin).pause();
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("Pausable: paused");
     });
   });
 });

@@ -12,6 +12,8 @@ const {
   ATTRIBUTE_COUNTRY,
   PRICE_PER_ATTRIBUTES_ETH,
   PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
+  GOVERNANCE_ROLE,
+  DEFAULT_ADMIN_ROLE,
 } = require("../../utils/constant.ts");
 
 const {
@@ -118,7 +120,12 @@ describe("QuadReader.queryFeeBulk", async () => {
     });
 
     it("fail - governance incorrectly set", async () => {
-      const newGovernance = await deployGovernance(admin);
+      const newGovernance = await deployGovernance();
+      await newGovernance.grantRole(GOVERNANCE_ROLE, admin.address);
+      await newGovernance.grantRole(DEFAULT_ADMIN_ROLE, admin.address);
+      await newGovernance.revokeRole(GOVERNANCE_ROLE, deployer.address);
+      await newGovernance.revokeRole(DEFAULT_ADMIN_ROLE, deployer.address);
+
       await governance
         .connect(admin)
         .updateGovernanceInPassport(newGovernance.address);

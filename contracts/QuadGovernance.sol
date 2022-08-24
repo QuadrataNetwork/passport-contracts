@@ -17,16 +17,15 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     }
 
     /// @dev Initializer (constructor)
-    /// @param _admin address of the admin account
-    function initialize(address _admin) public initializer {
-        require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
+    function initialize() public initializer {
         __AccessControl_init_unchained();
 
         // Set Roles
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
-        _setupRole(GOVERNANCE_ROLE, _admin);
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+        _setRoleAdmin(READER_ROLE, GOVERNANCE_ROLE);
+        _setupRole(GOVERNANCE_ROLE, _msgSender());
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
     /// @dev Set QuadPassport treasury wallet to withdraw the protocol fees

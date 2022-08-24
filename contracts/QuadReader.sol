@@ -249,17 +249,13 @@ import "./storage/QuadReaderStore.sol";
     /// @param _issuer address of issuer
     /// @return boolean
     function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) public view override returns(bool) {
-        // Try/catch MISSING_DID for AML queries
-        try passport.attributes(_account, _attribute) returns (IQuadPassportStore.Attribute[] memory attributes){
-            for(uint i = 0; i < attributes.length; i++){
-                if(attributes[i].issuer == _issuer){
-                    return true;
-                }
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            if (attributes[i].issuer == _issuer){
+                return true;
             }
-            return false;
-        } catch {
-            return false;
         }
+        return false;
     }
 
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
@@ -271,6 +267,7 @@ import "./storage/QuadReaderStore.sol";
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender),
             "INVALID_ADMIN"
         );
+        require(passport.passportPaused() == false, "Pausable: paused");
         bool isValid = false;
         address issuerOrProtocol;
 
@@ -313,7 +310,7 @@ import "./storage/QuadReaderStore.sol";
     // @dev DEPRECATED - use `getAttributesLegacy` instead
     function getAttributesETH(
         address _account,
-        uint256 _tokenId,
+        uint256 _tokenId,  // Unused parameter to be compatible with older version
         bytes32 _attribute
     ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
         return getAttributesLegacy(_account, _attribute);

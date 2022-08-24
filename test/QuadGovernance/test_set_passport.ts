@@ -9,6 +9,11 @@ const {
 
 const { deployGovernance } = require("../../utils/deployment.ts");
 
+const {
+  GOVERNANCE_ROLE,
+  DEFAULT_ADMIN_ROLE,
+} = require("../../utils/constant.ts");
+
 describe("QuadGovernance.setPassportContractAddress + updateGovernanceInPassport", async () => {
   let passport: Contract; // eslint-disable-line no-unused-vars
   let governance: Contract; // eslint-disable-line no-unused-vars
@@ -34,7 +39,11 @@ describe("QuadGovernance.setPassportContractAddress + updateGovernanceInPassport
   describe("updateGovernanceInPassport", async () => {
     it("success", async () => {
       expect(await passport.governance()).to.equal(governance.address);
-      const newGovernance = await deployGovernance(admin);
+      const newGovernance = await deployGovernance();
+      await newGovernance.grantRole(GOVERNANCE_ROLE, admin.address);
+      await newGovernance.grantRole(DEFAULT_ADMIN_ROLE, admin.address);
+      await newGovernance.revokeRole(GOVERNANCE_ROLE, deployer.address);
+      await newGovernance.revokeRole(DEFAULT_ADMIN_ROLE, deployer.address);
       await governance
         .connect(admin)
         .updateGovernanceInPassport(newGovernance.address);
@@ -68,9 +77,16 @@ describe("QuadGovernance.setPassportContractAddress + updateGovernanceInPassport
     });
 
     it("fail (passport not set)", async () => {
-      const oGov = await deployGovernance(admin);
+      const newGovernance = await deployGovernance();
+      await newGovernance.grantRole(GOVERNANCE_ROLE, admin.address);
+      await newGovernance.grantRole(DEFAULT_ADMIN_ROLE, admin.address);
+      await newGovernance.revokeRole(GOVERNANCE_ROLE, deployer.address);
+      await newGovernance.revokeRole(DEFAULT_ADMIN_ROLE, deployer.address);
+
       await expect(
-        oGov.connect(admin).updateGovernanceInPassport(deployer.address)
+        newGovernance
+          .connect(admin)
+          .updateGovernanceInPassport(deployer.address)
       ).to.be.revertedWith("PASSPORT_NOT_SET");
     });
   });

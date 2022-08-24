@@ -1,21 +1,12 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
-import { id } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-const {
-  deployPassport,
-  deployGovernance,
-  deployReader,
-} = require("../../utils/deployment.ts");
+const { deployQuadrata } = require("../../utils/deployment.ts");
 
 const {
-  ATTRIBUTE_DID,
-  ATTRIBUTE_COUNTRY,
-  ATTRIBUTE_AML,
-  ATTRIBUTE_IS_BUSINESS,
-  PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
+  GOVERNANCE_ROLE,
+  DEFAULT_ADMIN_ROLE,
 } = require("../../utils/constant.ts");
 
 export const deployPassportEcosystem = async (
@@ -26,58 +17,29 @@ export const deployPassportEcosystem = async (
 ): Promise<
   [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any]
 > => {
-  // Deploy Governance
-  const governance = await deployGovernance(admin);
+  const issuersToAdd: any[] = [];
   for (let i = 0; i < issuers.length; i++) {
-    await governance
-      .connect(admin)
-      .addIssuer(issuers[i].address, issuerTreasuries[i].address);
+    issuersToAdd.push({
+      wallet: issuers[i].address,
+      treasury: issuerTreasuries[i].address,
+    });
   }
+  const tokenIds = [1];
+  const [governance, passport, reader] = await deployQuadrata(
+    admin.address,
+    issuersToAdd,
+    treasury.address,
+    admin.address,
+    tokenIds
+  );
 
-  // Deploy Passport
-  const passport = await deployPassport(governance);
-  await governance.connect(admin).setPassportContractAddress(passport.address);
-
-  // Set Eligible Token
-  await governance.connect(admin).setEligibleTokenId(1, true);
-
-  // Set Eligible Attributes
-  await governance.connect(admin).setEligibleAttribute(ATTRIBUTE_DID, true);
-  await governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, true);
+  // Revoke Deployer Role
+  const signers = await ethers.getSigners();
+  const deployer = signers[0];
+  await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address);
   await governance
     .connect(admin)
-    .setEligibleAttribute(ATTRIBUTE_IS_BUSINESS, true);
-
-  // Set Eligible Attributes by DID
-  await governance
-    .connect(admin)
-    .setEligibleAttributeByDID(ATTRIBUTE_AML, true);
-
-  // Set Rev Split
-  await governance.connect(admin).setRevSplitIssuer(50);
-
-  // Set Query Price
-  const attributeTypes = [ATTRIBUTE_DID, ATTRIBUTE_AML, ATTRIBUTE_COUNTRY];
-
-  for (const attr of attributeTypes) {
-    await governance
-      .connect(admin)
-      .setAttributePriceFixed(attr, PRICE_PER_ATTRIBUTES_ETH[attr]);
-
-    await governance
-      .connect(admin)
-      .setBusinessAttributePriceFixed(
-        attr,
-        PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attr]
-      );
-  }
-
-  // Deploy Reader
-  const reader = await deployReader(governance, passport);
-
-  // Deploy QuadGovernance
-  await governance.connect(admin).setTreasury(treasury.address);
-  await governance.connect(admin).grantRole(id("READER_ROLE"), reader.address);
+    .revokeRole(DEFAULT_ADMIN_ROLE, deployer.address);
 
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");
