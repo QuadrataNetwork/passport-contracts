@@ -10,8 +10,6 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
-  PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
 const {
@@ -19,11 +17,6 @@ const {
 } = require("../helpers/deployment_and_init.ts");
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
-const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
-
-const {
-  assertGetAttributes,
-} = require("../helpers/assert/assert_get_attributes.ts");
 
 describe("QuadSoulbound.balanceOf", async () => {
   let passport: Contract;
@@ -85,48 +78,49 @@ describe("QuadSoulbound.balanceOf", async () => {
     it("success - 1 passport", async () => {
       expect(await passport.balanceOf(minterA.address, 1)).equals(1);
     });
-  });
 
-  // ******************************************************************************* //
-  // ******************************************************************************* //
-  // ******************************************************************************* //
-  // ******************************************************************************* //
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>      ERROR TESTS   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
-  // ******************************************************************************* //
-  // ******************************************************************************* //
-  // ******************************************************************************* //
-  // ******************************************************************************* //
-  //
-
-  describe("QuadReader.getAttributes (ERROR CASES)", async () => {
-    it("fail - account address zero", async () => {
-      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-      await expect(
-        reader.getAttributes(ethers.constants.AddressZero, ATTRIBUTE_COUNTRY, {
-          value: queryFee,
-        })
-      ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
+    it("override - 1 passports", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt + 1,
+        issuedAt + 1,
+        MINT_PRICE
+      );
+      expect(await passport.balanceOf(minterA.address, 1)).equals(1);
     });
 
-    it("fail - not eligible attributes", async () => {
-      await governance
-        .connect(admin)
-        .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
-      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-      await expect(
-        reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
-          value: queryFee,
-        })
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+    it("2 tokenIds", async () => {
+      await setAttributes(
+        minterB,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+      expect(await passport.balanceOf(minterA.address, 1)).equals(1);
+      expect(await passport.balanceOf(minterB.address, 1)).equals(1);
     });
 
-    it("fail - wrong query Fee", async () => {
-      const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
-      await expect(
-        reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
-          value: queryFee.sub(1),
-        })
-      ).to.revertedWith("INVALID_QUERY_FEE");
+    it("no account found", async () => {
+      expect(await passport.balanceOf(minterB.address, 1)).equals(0);
+    });
+
+    it("no tokenId found", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt + 3,
+        issuedAt + 3,
+        MINT_PRICE
+      );
+      expect(await passport.balanceOf(minterA.address, 2)).equals(0);
     });
   });
 });
