@@ -36,4 +36,6 @@ interface IQuadPassport is IQuadSoulbound {
     function withdraw(address payable _to, uint256 _amount) external;
 
     function passportPaused() external view returns(bool);
+
+    function setTokenURI(uint256 _tokenId, string memory _uri) external;
 }

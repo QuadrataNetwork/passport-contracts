@@ -564,7 +564,7 @@ describe("QuadPassport.migrate", async () => {
         .connect(admin)
         .migrate([minterA.address], issuer.address, oldPassport.address);
 
-      await governance.connect(admin).setEligibleTokenId(2, true);
+      await governance.connect(admin).setEligibleTokenId(2, true, "");
 
       const attributesToUpdate = {
         [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
@@ -755,7 +755,7 @@ describe("QuadPassport.migrate", async () => {
         .connect(admin)
         .migrate([minterA.address], issuer.address, oldPassport.address);
 
-      await governance.connect(admin).setEligibleTokenId(2, true);
+      await governance.connect(admin).setEligibleTokenId(2, true, "");
 
       const attributesToUpdate = {
         [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],

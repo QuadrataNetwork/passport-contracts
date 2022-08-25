@@ -22,7 +22,7 @@ interface IQuadGovernance {
 
     function updateGovernanceInPassport(address _newGovernance) external;
 
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external;
+    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external;
 
     function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) external;
 

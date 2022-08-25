@@ -25,9 +25,15 @@ const {
   assertSetAttribute,
 } = require("../helpers/assert/assert_set_attributes.ts");
 
+const {
+  assertGetAttributes,
+} = require("../helpers/assert/assert_get_attributes.ts");
+
 describe("QuadPassport.setAttributesIssuer", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let defi: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract; // eslint-disable-line no-unused-vars
   let businessPassport: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
@@ -60,12 +66,11 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       issuerTreasury2,
       mockReader,
     ] = await ethers.getSigners();
-    [governance, passport, , businessPassport] = await deployPassportEcosystem(
-      admin,
-      [issuer, issuer2],
-      treasury,
-      [issuerTreasury, issuerTreasury2]
-    );
+    [governance, passport, reader, defi, businessPassport] =
+      await deployPassportEcosystem(admin, [issuer, issuer2], treasury, [
+        issuerTreasury,
+        issuerTreasury2,
+      ]);
 
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
@@ -190,7 +195,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance.connect(admin).setEligibleTokenId(2, true);
+      await governance.connect(admin).setEligibleTokenId(2, true, "");
 
       await setAttributesIssuer(
         businessPassport,
@@ -372,7 +377,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true);
+      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
 
       await setAttributesIssuer(
         businessPassport,
@@ -908,31 +913,91 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - invalid signature (tokenId)", async () => {
+    it("success - tokenId not included in signature", async () => {
       const wrongTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(wrongTokenId, true);
+      await governance
+        .connect(admin)
+        .setEligibleTokenId(wrongTokenId, true, "");
 
-      await expect(
-        passport
-          .connect(issuer)
-          .setAttributesIssuer(
-            businessPassport.address,
-            [
-              attrKeys,
-              attrValues,
-              attrTypes,
-              attributes[ATTRIBUTE_DID],
-              wrongTokenId,
-              verifiedAt,
-              issuedAt,
-              fee,
-            ],
-            sigIssuer,
-            {
-              value: fee,
-            }
-          )
-      ).to.be.revertedWith("INVALID_ISSUER");
+      await passport
+        .connect(issuer)
+        .setAttributesIssuer(
+          businessPassport.address,
+          [
+            attrKeys,
+            attrValues,
+            attrTypes,
+            attributes[ATTRIBUTE_DID],
+            wrongTokenId,
+            verifiedAt,
+            issuedAt,
+            fee,
+          ],
+          sigIssuer,
+          {
+            value: fee,
+          }
+        );
+    });
+
+    it("success - with no mint with tokenId = 0", async () => {
+      const noMint = 0;
+      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
+
+      await passport
+        .connect(issuer)
+        .setAttributesIssuer(
+          businessPassport.address,
+          [
+            attrKeys,
+            attrValues,
+            attrTypes,
+            attributes[ATTRIBUTE_DID],
+            noMint,
+            verifiedAt,
+            issuedAt,
+            fee,
+          ],
+          sigIssuer,
+          {
+            value: fee,
+          }
+        );
+
+      expect(await passport.balanceOf(businessPassport.address, 0)).equals(0);
+      expect(await passport.balanceOf(businessPassport.address, 1)).equals(0);
+      expect(await passport.balanceOf(businessPassport.address, 2)).equals(0);
+
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        businessPassport,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
     });
 
     it("fail - invalid signature (account)", async () => {

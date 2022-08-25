@@ -26,9 +26,15 @@ const {
   assertSetAttribute,
 } = require("../helpers/assert/assert_set_attributes.ts");
 
+const {
+  assertGetAttributes,
+} = require("../helpers/assert/assert_get_attributes.ts");
+
 describe("QuadPassport.setAttributes", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
+  let defi: Contract; // eslint-disable-line no-unused-vars
+  let reader: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
     treasury: SignerWithAddress,
@@ -61,7 +67,7 @@ describe("QuadPassport.setAttributes", async () => {
       issuerTreasury2,
       mockReader,
     ] = await ethers.getSigners();
-    [governance, passport] = await deployPassportEcosystem(
+    [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
       [issuer, issuer2],
       treasury,
@@ -173,7 +179,7 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance.connect(admin).setEligibleTokenId(2, true);
+      await governance.connect(admin).setEligibleTokenId(2, true, "");
 
       await setAttributes(
         minterA,
@@ -363,7 +369,7 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true);
+      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
       await setAttributes(
         minterA,
         issuer,
@@ -430,7 +436,8 @@ describe("QuadPassport.setAttributes", async () => {
       tokenId: any,
       blockId: any,
       sigIssuer: any,
-      sigAccount: any;
+      sigAccount: any,
+      attributesCopy: any;
 
     beforeEach(async () => {
       attrKeys = [];
@@ -440,7 +447,7 @@ describe("QuadPassport.setAttributes", async () => {
       let did = formatBytes32String("0");
 
       // Deep Copy to avoid mutating the object
-      const attributesCopy = Object.assign({}, attributes);
+      attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {
         let attrKey;
         if (k === ATTRIBUTE_AML) {
@@ -486,6 +493,93 @@ describe("QuadPassport.setAttributes", async () => {
       );
 
       sigAccount = await signAccount(minterA);
+    });
+
+    it("success - tokenId not included in signature", async () => {
+      const wrongTokenId = 2;
+      await governance
+        .connect(admin)
+        .setEligibleTokenId(wrongTokenId, true, "");
+
+      await passport
+        .connect(minterA)
+        .setAttributes(
+          [
+            attrKeys,
+            attrValues,
+            attrTypes,
+            attributes[ATTRIBUTE_DID],
+            wrongTokenId,
+            verifiedAt,
+            issuedAt,
+            fee,
+          ],
+          sigIssuer,
+          sigAccount,
+          {
+            value: fee,
+          }
+        );
+    });
+
+    it("success - with no mint with tokenId = 0", async () => {
+      const noMint = 0;
+      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
+
+      await passport
+        .connect(minterA)
+        .setAttributes(
+          [
+            attrKeys,
+            attrValues,
+            attrTypes,
+            attributes[ATTRIBUTE_DID],
+            noMint,
+            verifiedAt,
+            issuedAt,
+            fee,
+          ],
+          sigIssuer,
+          sigAccount,
+          {
+            value: fee,
+          }
+        );
+
+      expect(await passport.balanceOf(minterA.address, 0)).equals(0);
+      expect(await passport.balanceOf(minterA.address, 1)).equals(0);
+      expect(await passport.balanceOf(minterA.address, 2)).equals(0);
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
     });
 
     it("fail - signature already used", async () => {
@@ -877,33 +971,6 @@ describe("QuadPassport.setAttributes", async () => {
               attributes[ATTRIBUTE_DID],
               tokenId,
               wrongVerifiedAt,
-              issuedAt,
-              fee,
-            ],
-            sigIssuer,
-            sigAccount,
-            {
-              value: fee,
-            }
-          )
-      ).to.be.revertedWith("INVALID_ISSUER");
-    });
-
-    it("fail - invalid signature (tokenId)", async () => {
-      const wrongTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(wrongTokenId, true);
-
-      await expect(
-        passport
-          .connect(minterA)
-          .setAttributes(
-            [
-              attrKeys,
-              attrValues,
-              attrTypes,
-              attributes[ATTRIBUTE_DID],
-              wrongTokenId,
-              verifiedAt,
               issuedAt,
               fee,
             ],

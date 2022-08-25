@@ -16,9 +16,10 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
     // Mapping from tokenId to uris
     mapping(uint256 => string) private _uris;
 
-    uint256 private _idCounter;
-
     function uri(uint256 _tokenId) public view virtual override returns (string memory) {
+        if (bytes(_uris[_tokenId]).length == 0) {
+            return _uris[1];
+        }
         return _uris[_tokenId];
     }
 
@@ -32,6 +33,31 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
     function balanceOf(address account, uint256 id) public view virtual override returns (uint256) {
         require(account != address(0), "ERC1155: address zero is not a valid owner");
         return _balances[id][account];
+    }
+
+    /**
+     * @dev See {IERC1155-balanceOfBatch}.
+     *
+     * Requirements:
+     *
+     * - `accounts` and `ids` must have the same length.
+     */
+    function balanceOfBatch(address[] memory accounts, uint256[] memory ids)
+        public
+        view
+        virtual
+        override
+        returns (uint256[] memory)
+    {
+        require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
+
+        uint256[] memory batchBalances = new uint256[](accounts.length);
+
+        for (uint256 i = 0; i < accounts.length; ++i) {
+            batchBalances[i] = balanceOf(accounts[i], ids[i]);
+        }
+
+        return batchBalances;
     }
 
     /**
@@ -106,5 +132,7 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
 
         emit TransferSingle(_msgSender(), from, address(0), id, amount);
     }
+
+    uint256[47] private __gap;
 }
 

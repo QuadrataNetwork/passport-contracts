@@ -8,7 +8,16 @@ const TIMELOCK = "0x484ea071fB248B63Cbf4bf10BeAf01D6e65Ba4CD"; // Goerli
 
 const MULTISIG = "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"; // Goerli
 
-const TOKEN_IDS = [1, 2, 3];
+const TOKEN_IDS = [
+  {
+    id: 0,
+    uri: "",
+  },
+  {
+    id: 1,
+    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+  },
+];
 
 const ISSUERS = [
   {

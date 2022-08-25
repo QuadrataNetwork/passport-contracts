@@ -19,6 +19,8 @@ describe("QuadGovernance.setEligibleTokenId", async () => {
     issuer1: SignerWithAddress,
     issuerTreasury1: SignerWithAddress;
 
+  const uri = "https://quadrata.com";
+
   beforeEach(async () => {
     [deployer, admin, issuer1, treasury, issuerTreasury1] =
       await ethers.getSigners();
@@ -37,34 +39,37 @@ describe("QuadGovernance.setEligibleTokenId", async () => {
       expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
       expect(await governance.eligibleTokenId(newTokenID)).to.equal(false);
       await expect(
-        governance.connect(admin).setEligibleTokenId(newTokenID, true)
+        governance.connect(admin).setEligibleTokenId(newTokenID, true, uri)
       )
         .to.emit(governance, "EligibleTokenUpdated")
         .withArgs(newTokenID, true);
+      expect(await passport.uri(newTokenID)).equals(uri);
       expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
       expect(await governance.eligibleTokenId(newTokenID)).to.equal(true);
       await expect(
-        governance.connect(admin).setEligibleTokenId(newTokenID, false)
+        governance.connect(admin).setEligibleTokenId(newTokenID, false, uri)
       )
         .to.emit(governance, "EligibleTokenUpdated")
         .withArgs(newTokenID, false);
+      expect(await passport.uri(newTokenID)).equals(uri);
+    });
+
+    it("success update uri", async () => {
+      const newUri = "Hello";
+      await governance
+        .connect(admin)
+        .setEligibleTokenId(TOKEN_ID, true, newUri);
+      expect(await passport.uri(TOKEN_ID)).equals(newUri);
     });
 
     it("fail (not admin)", async () => {
-      await expect(governance.setEligibleTokenId(2, true)).to.be.revertedWith(
-        "INVALID_ADMIN"
-      );
-    });
-
-    it("fail (token status already set)", async () => {
       await expect(
-        governance.connect(admin).setEligibleTokenId(TOKEN_ID, true)
-      ).to.be.revertedWith("TOKEN_ELIGIBILITY_ALREADY_SET");
+        governance.setEligibleTokenId(2, true, uri)
+      ).to.be.revertedWith("INVALID_ADMIN");
     });
-
     it("fail (incremented by more than one)", async () => {
       await expect(
-        governance.connect(admin).setEligibleTokenId(1337, true)
+        governance.connect(admin).setEligibleTokenId(1337, true, uri)
       ).to.be.revertedWith("INCREMENT_TOKENID_BY_1");
     });
   });

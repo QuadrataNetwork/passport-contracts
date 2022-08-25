@@ -8,7 +8,12 @@ const TIMELOCK = "";
 
 const MULTISIG = "";
 
-const TOKEN_IDS = [1, 2, 3];
+const TOKEN_IDS = [
+  {
+    id: 1,
+    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+  },
+];
 
 const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x....."}
 

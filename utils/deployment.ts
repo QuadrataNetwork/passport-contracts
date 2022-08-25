@@ -19,7 +19,7 @@ export const deployQuadrata = async (
   issuers: any[],
   treasury: string,
   multisig: string,
-  tokenIds: number[],
+  tokenIds: any[],
   verbose: boolean = false
 ) => {
   const governance = await deployGovernance();
@@ -60,11 +60,17 @@ export const deployQuadrata = async (
 
   // Set Eligible TokenId
   for (let i = 0; i < tokenIds.length; i++) {
-    tx = await governance.setEligibleTokenId(tokenIds[i], true);
+    tx = await governance.setEligibleTokenId(
+      tokenIds[i].id,
+      true,
+      tokenIds[i].uri
+    );
     await tx.wait();
+    if (verbose)
+      console.log(
+        `[QuadGovernance] setEligibleTokenId for ${tokenIds[i].id} with URI (${tokenIds[i].uri})`
+      );
   }
-  if (verbose)
-    console.log(`[QuadGovernance] setEligibleTokenId for ${tokenIds}`);
 
   // Set Eligible Attributes
   tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true);

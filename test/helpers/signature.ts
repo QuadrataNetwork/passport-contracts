@@ -35,8 +35,7 @@ export const signSetAttributes = async (
   issuedAt: number,
   fee: any,
   did: string,
-  blockId: number = HARDHAT_CHAIN_ID,
-  tokenId: number = TOKEN_ID
+  chainId: number = HARDHAT_CHAIN_ID
 ): Promise<typeof DataHexString> => {
   const attrKeys: string[] = [];
   const attrValues: string[] = [];
@@ -70,7 +69,6 @@ export const signSetAttributes = async (
         "uint256",
         "uint256",
         "uint256",
-        "uint256",
       ],
       [
         account.address,
@@ -80,8 +78,7 @@ export const signSetAttributes = async (
         verifiedAt,
         issuedAt,
         fee,
-        tokenId,
-        blockId,
+        chainId,
       ]
     )
   );

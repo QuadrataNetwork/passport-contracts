@@ -75,16 +75,16 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @notice Restricted behind a TimelockController
     /// @param _tokenId tokenId of the passport
     /// @param _eligibleStatus eligiblity boolean for the tokenId
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external override {
+    /// @param _uri URI of the IPFS link
+    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external override {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_eligibleTokenId[_tokenId] != _eligibleStatus, "TOKEN_ELIGIBILITY_ALREADY_SET");
-
-        _eligibleTokenId[_tokenId] = _eligibleStatus;
 
         if(_tokenId > _maxEligibleTokenId){
             require(_maxEligibleTokenId + 1 == _tokenId, "INCREMENT_TOKENID_BY_1");
             _maxEligibleTokenId = _tokenId;
         }
+        _eligibleTokenId[_tokenId] = _eligibleStatus;
+        _passport.setTokenURI(_tokenId, _uri);
 
         emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }

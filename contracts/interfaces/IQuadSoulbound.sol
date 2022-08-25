@@ -27,4 +27,15 @@ interface IQuadSoulbound  {
      */
     function balanceOf(address account, uint256 id) external view returns (uint256);
 
+    /**
+     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {balanceOf}.
+     *
+     * Requirements:
+     *
+     * - `accounts` and `ids` must have the same length.
+     */
+    function balanceOfBatch(address[] calldata accounts, uint256[] calldata ids)
+        external
+        view
+        returns (uint256[] memory);
 }

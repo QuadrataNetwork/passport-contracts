@@ -32,8 +32,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         symbol = "QP";
     }
 
-    fallback() external payable {}
-
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
     /// @notice If passing a `DID` in _config.attrTypes, make sure that it's always first in the list
     /// @dev Only when authorized by an eligible issuer
@@ -98,7 +96,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         }
 
-        if (balanceOf(_account, _config.tokenId) == 0)
+        if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0)
             _mint(_account, _config.tokenId, 1);
         emit SetAttributeReceipt(_account, issuer, msg.value);
     }
@@ -181,7 +179,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
-                _config.tokenId,
                 block.chainid
             )
         );
@@ -352,7 +349,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         emit WithdrawEvent(issuer, _to, _amount);
     }
 
-
     /// @dev Admin function to accept and set the governance contract address
     /// @notice Restricted behind a TimelockController
     function acceptGovernance() external override {
@@ -365,6 +361,43 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         emit GovernanceUpdated(oldGov, address(governance));
     }
 
+    /// @dev Admin function to set Metadata URI to associate with a tokenId
+    /// @param _tokenId Token Id
+    /// @param _uri URI pointing to IPFS
+    function setTokenURI(uint256 _tokenId, string memory _uri) external override {
+        require(_msgSender() == address(governance), "ONLY_GOVERNANCE_CONTRACT");
+        _setURI(_uri, _tokenId);
+    }
+
+    /// @dev Admin function to pause critical operations (emergency)
+    function pause() external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(PAUSER_ROLE, _msgSender()),
+            "INVALID_PAUSER"
+        );
+        _pause();
+    }
+
+    /// @dev Admin function to unpause critical operations (emergency)
+    function unpause() external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(PAUSER_ROLE, _msgSender()),
+            "INVALID_PAUSER"
+        );
+        _unpause();
+    }
+
+    /// @dev Retrieve the pause status of the contract
+    function passportPaused() external view override returns(bool) {
+        return paused();
+    }
+
+    function _authorizeUpgrade(address) internal view override {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
+            "INVALID_ADMIN"
+        );
+    }
 
     /// @dev Admin function to migrate passports from older contract
     /// @param _accounts List of passport holder addresses to migrate
@@ -438,30 +471,4 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
     }
 
-    function pause() external {
-        require(
-            IAccessControlUpgradeable(address(governance)).hasRole(PAUSER_ROLE, _msgSender()),
-            "INVALID_PAUSER"
-        );
-        _pause();
-    }
-
-    function unpause() external {
-        require(
-            IAccessControlUpgradeable(address(governance)).hasRole(PAUSER_ROLE, _msgSender()),
-            "INVALID_PAUSER"
-        );
-        _unpause();
-    }
-
-    function passportPaused() external view override returns(bool) {
-        return paused();
-    }
-
-    function _authorizeUpgrade(address) internal view override {
-        require(
-            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
-            "INVALID_ADMIN"
-        );
-    }
 }
