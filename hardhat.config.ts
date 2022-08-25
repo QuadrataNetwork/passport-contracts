@@ -52,7 +52,9 @@ const config: HardhatUserConfig = {
     mumbai: {
       url: process.env.MUMBAI_URI || "",
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+        process.env.MUMBAI_PRIVATE_KEY !== undefined
+          ? [process.env.MUMBAI_PRIVATE_KEY]
+          : [],
     },
     goerli: {
       url: process.env.GOERLI_URI || "",
@@ -66,7 +68,17 @@ const config: HardhatUserConfig = {
     enabled: true,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      // ethereum
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+
+      goerli: process.env.ETHERSCAN_API_KEY || "",
+      rinkeby: process.env.ETHERSCAN_API_KEY || "",
+
+      // polygon
+      polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+      polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+    },
   },
   typechain: {
     outDir: "types",

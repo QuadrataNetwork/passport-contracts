@@ -49,6 +49,11 @@ const ISSUERS = [
     wallet: "0x19c6525E6927554e311Cd83491d34623fF04605a", // Quadrata Sandbox
     treasury: "0x19c6525E6927554e311Cd83491d34623fF04605a",
   },
+
+  {
+    wallet: "0x175DB8512CF71c3848F2bB90E5021Fc60A877ADf", // Quadrata Sandbox 2
+    treasury: "0x175DB8512CF71c3848F2bB90E5021Fc60A877ADf",
+  },
 ];
 
 (async () => {

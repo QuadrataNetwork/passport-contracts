@@ -39,7 +39,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @dev Only when authorized by an eligible issuer
     /// @param _config Input paramters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
-    /// @param _sigAccount (Optional) ECDSA signature computed by an eligible EOA to authorize the mint
+    /// @param _sigAccount ECDSA signature computed by an eligible EOA to prove ownership
     function setAttributes(
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer,
