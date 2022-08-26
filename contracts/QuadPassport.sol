@@ -35,7 +35,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
     /// @notice If passing a `DID` in _config.attrTypes, make sure that it's always first in the list
     /// @dev Only when authorized by an eligible issuer
-    /// @param _config Input paramters required to set attributes
+    /// @param _config Input paramters required to authorize attributes to be set
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount ECDSA signature computed by an eligible EOA to prove ownership
     function setAttributes(
