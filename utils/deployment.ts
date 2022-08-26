@@ -143,6 +143,19 @@ export const deployQuadrata = async (
   await tx.wait();
   if (verbose) console.log(`[QuadGovernance] grant PAUSER_ROLE to ${multisig}`);
 
+  // Deploy TestQuadrata contracts
+  const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
+  const testQuadrata = await TestQuadrata.deploy();
+  await testQuadrata.deployed();
+
+  if (verbose)
+    console.log(`[TestQuadrata] deployed at address ${testQuadrata.address}`);
+  await testQuadrata.setReader(reader.address);
+  if (verbose)
+    console.log(
+      `[TestQuadrata] setting QuadReader address with ${reader.address}`
+    );
+
   return [governance, passport, reader];
 };
 
