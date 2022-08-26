@@ -2,6 +2,8 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/IERC1155MetadataURIUpgradeable.sol";
 
 import "./interfaces/IQuadSoulbound.sol";
 
@@ -58,6 +60,15 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
         }
 
         return batchBalances;
+    }
+
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+        return
+            interfaceId == type(IERC1155Upgradeable).interfaceId ||
+            interfaceId == type(IERC1155MetadataURIUpgradeable).interfaceId;
     }
 
     /**

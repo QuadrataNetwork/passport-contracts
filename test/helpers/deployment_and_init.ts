@@ -24,10 +24,7 @@ export const deployPassportEcosystem = async (
       treasury: issuerTreasuries[i].address,
     });
   }
-  const tokenIds = [
-    { id: 0, uri: "" },
-    { id: 1, uri: "https://wwww.quadrata.com/ipfs" },
-  ];
+  const tokenIds = [{ id: 1, uri: "https://wwww.quadrata.com/ipfs" }];
   const [governance, passport, reader] = await deployQuadrata(
     admin.address,
     issuersToAdd,

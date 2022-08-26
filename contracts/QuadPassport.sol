@@ -160,7 +160,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer
     ) internal returns(address) {
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
-        require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
+        require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
 
