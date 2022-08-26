@@ -211,7 +211,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             return keccak256(abi.encode(_did, _attribute));
         }
 
-        require(false, "ATTRIBUTE_NOT_ELIGIBLE");
+        revert("ATTRIBUTE_NOT_ELIGIBLE");
     }
 
     /// @notice Burn your Quadrata passport
