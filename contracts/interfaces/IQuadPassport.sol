@@ -1,55 +1,41 @@
 //SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.4;
+pragma solidity 0.8.16;
 
-import "../ERC1155/IERC1155Upgradeable.sol";
-import "../storage/QuadPassportStore.sol";
+import "./IQuadPassportStore.sol";
+import "./IQuadSoulbound.sol";
 
-interface IQuadPassport is IERC1155Upgradeable {
+interface IQuadPassport is IQuadSoulbound {
+    event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
+    event SetPendingGovernance(address indexed _pendingGovernance);
+    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
+    event BurnPassportsIssuer(address indexed _issuer, address indexed _account);
+    event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee);
 
-    function mintPassport(
-        QuadPassportStore.MintConfig calldata config,
+    function setAttributes(
+        IQuadPassportStore.AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable;
 
-    function setAttribute(
+    function setAttributesIssuer(
         address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        bytes32 _value,
-        uint256 _issuedAt,
-        bytes calldata _sig
+        IQuadPassportStore.AttributeSetterConfig memory _config,
+        bytes calldata _sigIssuer
     ) external payable;
 
-    function setAttributeIssuer(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        bytes32 _value,
-        uint256 _issuedAt
-    ) external ;
+    function burnPassports() external;
 
-    function burnPassport(uint256 _tokenId) external;
-
-    function burnPassportIssuer(address _account, uint256 _tokenId) external;
+    function burnPassportsIssuer(address _account) external;
 
     function setGovernance(address _governanceContract) external;
 
-    function withdraw(address payable _to) external returns (uint256);
-
-    function withdrawToken(address payable _to, address _token)
-        external
-        returns (uint256);
-
-
-    function attributes(address, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
-
-    function attributesByDID(bytes32, bytes32, address) external view returns (QuadPassportStore.Attribute memory);
-
-    function increaseAccountBalanceETH(address, uint256) external;
-
-    function increaseAccountBalance(address, address, uint256) external;
-
     function acceptGovernance() external;
 
+    function attributes(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute[] memory);
+
+    function withdraw(address payable _to, uint256 _amount) external;
+
+    function passportPaused() external view returns(bool);
+
+    function setTokenURI(uint256 _tokenId, string memory _uri) external;
 }

@@ -1,20 +1,12 @@
 //SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.4;
+pragma solidity 0.8.16;
 
 import "../interfaces/IQuadPassport.sol";
 import "../interfaces/IQuadGovernance.sol";
 
-contract QuadReaderStore {
+import "./QuadConstant.sol";
 
-    bytes32 public constant GOVERNANCE_ROLE = keccak256("GOVERNANCE_ROLE");
-
+contract QuadReaderStore is QuadConstant{
     IQuadGovernance public governance;
     IQuadPassport public passport;
-
-    struct ApplyFilterVars {
-        uint256 gaps;
-        uint256 delta;
-        uint256 filteredIndex;
-    }
-
 }

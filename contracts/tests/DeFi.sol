@@ -2,13 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "hardhat/console.sol";
 
 import "../interfaces/IQuadPassport.sol";
+import "../storage/QuadPassportStore.sol";
 import "../QuadReader.sol";
 
 contract DeFi {
-    event GetAttributeEvent(bytes32 _value, uint256 _epoch);
-    event GetAttributeEvents(bytes32[] _attributes, uint256[] _epochs);
+    event GetAttributesEvent(bytes32[] attrValues, uint256[] epochs, address[] issuers);
+    event GetAttributesBulkEvent(bytes32[] attrValues, uint256[] epochs, address[] issuers);
 
     IQuadPassport public passport;
     QuadReader public reader;
@@ -18,141 +20,70 @@ contract DeFi {
        reader = _reader;
     }
 
-    /**
-        Legacy Do Somethings: still useful for many tests where there's only 1 issuer
-     */
-    function doSomething(
-        bytes32 _attribute,
-        address _tokenPayment
-    ) public returns(bytes32,uint256) {
-        uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
-        IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
-        IERC20(_tokenPayment).approve(address(reader), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesTokenExcluding(msg.sender, 1, _attribute, _tokenPayment, new address[](0));
-        emit GetAttributeEvent(attrValue[0], epoch[0]);
-        return (attrValue[0], epoch[0]);
+    function deposit(address _account, bytes32 _attribute) public payable returns(IQuadPassportStore.Attribute[] memory) {
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: msg.value}(_account, _attribute);
+        bytes32[] memory attrValues = new bytes32[](attributes.length);
+        uint256[] memory epochs = new uint256[](attributes.length);
+        address[] memory issuers = new address[](attributes.length);
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            attrValues[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
+        }
+        emit GetAttributesEvent(attrValues, epochs, issuers);
+
+        return attributes;
     }
 
-    function doSomethingFree(
-        bytes32 _attribute
-    ) public returns(bytes32,uint256) {
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeExcluding(msg.sender, 1, _attribute, new address[](0));
-        emit GetAttributeEvent(attrValue[0], epoch[0]);
-        return (attrValue[0], epoch[0]);
+    function depositLegacy(address _account, bytes32 _attribute) 
+    public payable returns(
+        bytes32[] memory, 
+        uint256[] memory, 
+        address[] memory
+    ) {
+        (
+            bytes32[] memory attrValues,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = reader.getAttributesLegacy{value: msg.value}(_account, _attribute);
+
+        emit GetAttributesEvent(attrValues, epochs, issuers);
+
+        return (attrValues, epochs, issuers);
     }
 
-    function doSomethingETH(bytes32 _attribute) public payable returns(bytes32, uint256) {
-        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
-        require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding{value: paymentAmount}(msg.sender, 1, _attribute, new address[](0));
-        emit GetAttributeEvent(attrValue[0], epoch[0]);
-        return (attrValue[0], epoch[0]);
+    function depositBulk(address _account, bytes32[] calldata _attributes) public payable returns(IQuadPassportStore.Attribute[] memory) {
+        IQuadPassportStore.Attribute[] memory attributes = reader.getAttributesBulk{value: msg.value}(_account, _attributes);
+        bytes32[] memory attrValues = new bytes32[](attributes.length);
+        uint256[] memory epochs = new uint256[](attributes.length);
+        address[] memory issuers = new address[](attributes.length);
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            attrValues[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
+        }
+        emit GetAttributesBulkEvent(attrValues, epochs, issuers);
+
+        return attributes;
     }
 
+    function depositBulkLegacy(address _account, bytes32[] calldata _attributes) 
+        public payable returns
+    (
+        bytes32[] memory, 
+        uint256[] memory, 
+        address[] memory
+    ) {
+        (
+            bytes32[] memory attrValues,
+            uint256[] memory epochs,
+            address[] memory issuers
+        ) = reader.getAttributesBulkLegacy{value: msg.value}(_account, _attributes);
 
-    /**
-        Do Something (Excluding)
-    */
-    function doSomethingExcluding(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address[] calldata _excludedIssuers
-    ) public returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
-        IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
-        IERC20(_tokenPayment).approve(address(reader), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesTokenExcluding(msg.sender, 1, _attribute, _tokenPayment, _excludedIssuers);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
+        emit GetAttributesBulkEvent(attrValues, epochs, issuers);
 
-
-    function doSomethingFreeExcluding(
-        bytes32 _attribute,
-        address[] calldata _excludedIssuers
-    ) public returns(bytes32[] memory, uint256[] memory) {
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeExcluding(msg.sender, 1, _attribute, _excludedIssuers);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-
-    function doSomethingETHExcluding(
-        bytes32 _attribute,
-        address[] calldata _excludedIssuers
-    ) public payable returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
-        require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesExcluding{value: paymentAmount}(msg.sender, 1, _attribute, _excludedIssuers);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-    /**
-        Do Something (Excluding-Wrappers)
-    */
-    function doSomethingWrapper(
-        bytes32 _attribute,
-        address _tokenPayment
-    ) public returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePaymentToken(_attribute, _tokenPayment, msg.sender);
-        IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
-        IERC20(_tokenPayment).approve(address(reader), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesToken(msg.sender, 1, _attribute, _tokenPayment);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-
-    function doSomethingFreeWrapper(
-        bytes32 _attribute
-    ) public returns(bytes32[] memory, uint256[] memory)  {
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFree(msg.sender, 1, _attribute);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-
-    function doSomethingETHWrapper(
-        bytes32 _attribute
-    ) public payable returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
-        require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributes{value: paymentAmount}(msg.sender, 1, _attribute);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-
-    /**
-        Do Something (Including)
-    */
-    function doSomethingIncluding(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address[] calldata _includedIssuers,
-        uint256 paymentAmount
-    ) public returns(bytes32[] memory, uint256[] memory) {
-        IERC20(_tokenPayment).transferFrom(msg.sender, address(this), paymentAmount);
-        IERC20(_tokenPayment).approve(address(reader), paymentAmount);
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesTokenIncludingOnly(msg.sender, 1, _attribute, _tokenPayment, _includedIssuers);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-
-
-    function doSomethingFreeIncluding(
-        bytes32 _attribute,
-        address[] calldata _includedIssuers
-    ) public returns(bytes32[] memory, uint256[] memory) {
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesFreeIncludingOnly(msg.sender, 1, _attribute, _includedIssuers);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
-    }
-
-    function doSomethingETHIncluding(
-        bytes32 _attribute,
-        address[] calldata _includedIssuers
-    ) public payable returns(bytes32[] memory, uint256[] memory) {
-        uint256 paymentAmount = reader.calculatePayment(_attribute, msg.sender);
-        require(msg.value >= paymentAmount, "INSUFFICIENT_ETH");
-        (bytes32[] memory attrValue, uint256[] memory epoch,) = reader.getAttributesIncludingOnly{value: paymentAmount}(msg.sender, 1, _attribute, _includedIssuers);
-        emit GetAttributeEvents(attrValue, epoch);
-        return (attrValue, epoch);
+        return (attrValues, epochs, issuers);
     }
 }

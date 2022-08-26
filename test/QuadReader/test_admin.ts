@@ -7,10 +7,7 @@ const { GOVERNANCE_ROLE } = require("../../utils/constant.ts");
 
 const {
   deployPassportEcosystem,
-} = require("../utils/deployment_and_init.ts");
-
-const { deployGovernance } = require("../../utils/deployment.ts");
-
+} = require("../helpers/deployment_and_init.ts");
 
 describe("QuadReader", async () => {
   let passport: Contract;
@@ -23,34 +20,41 @@ describe("QuadReader", async () => {
     issuerTreasury: SignerWithAddress;
   const baseURI = "https://quadrata.io";
 
-    beforeEach(async () => {
-      [deployer, admin, issuer, treasury, issuerTreasury] =
-        await ethers.getSigners();
-      [governance, passport, reader] = await deployPassportEcosystem(
-        admin,
-        [issuer],
-        treasury,
-        [issuerTreasury],
-        baseURI
-      );
-    });
+  beforeEach(async () => {
+    [deployer, admin, issuer, treasury, issuerTreasury] =
+      await ethers.getSigners();
+    [governance, passport, reader] = await deployPassportEcosystem(
+      admin,
+      [issuer],
+      treasury,
+      [issuerTreasury],
+      baseURI
+    );
+  });
 
   describe("upgrade", async () => {
     it("fail (not admin)", async () => {
-      const QuadReaderV2 = await ethers.getContractFactory("QuadReaderV2");
+      const QuadReaderUpgrade = await ethers.getContractFactory(
+        "QuadReaderUpgrade"
+      );
       await expect(
-        upgrades.upgradeProxy(reader.address, QuadReaderV2, {unsafeAllow: ['constructor']})
+        upgrades.upgradeProxy(reader.address, QuadReaderUpgrade, {
+          unsafeAllow: ["constructor"],
+        })
       ).to.revertedWith("INVALID_ADMIN");
     });
+
     it("succeed", async () => {
-      const QuadReaderV2 = await ethers.getContractFactory("QuadReaderV2");
+      const QuadReaderUpgrade = await ethers.getContractFactory(
+        "QuadReaderUpgrade"
+      );
       await governance
         .connect(admin)
         .grantRole(GOVERNANCE_ROLE, deployer.address);
       const readerv2 = await upgrades.upgradeProxy(
         reader.address,
-        QuadReaderV2,
-        {unsafeAllow: ['constructor']}
+        QuadReaderUpgrade,
+        { unsafeAllow: ["constructor"] }
       );
       expect(await readerv2.foo()).to.equal(1337);
       expect(reader.address).to.equal(readerv2.address);

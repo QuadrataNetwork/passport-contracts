@@ -29,13 +29,13 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.2",
+        version: "0.8.16",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 10000,
           },
-        }
+        },
       },
       {
         version: "0.8.4",
@@ -44,25 +44,41 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 1000,
           },
-        }
-      }
-    ]
+        },
+      },
+    ],
   },
   networks: {
     mumbai: {
       url: process.env.MUMBAI_URI || "",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.MUMBAI_PRIVATE_KEY !== undefined
+          ? [process.env.MUMBAI_PRIVATE_KEY]
+          : [],
     },
     goerli: {
       url: process.env.GOERLI_URI || "",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.GOERLI_PRIVATE_KEY !== undefined
+          ? [process.env.GOERLI_PRIVATE_KEY]
+          : [],
     },
   },
   gasReporter: {
     enabled: true,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      // ethereum
+      mainnet: process.env.ETHERSCAN_API_KEY || "",
+
+      goerli: process.env.ETHERSCAN_API_KEY || "",
+      rinkeby: process.env.ETHERSCAN_API_KEY || "",
+
+      // polygon
+      polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+      polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+    },
   },
   typechain: {
     outDir: "types",

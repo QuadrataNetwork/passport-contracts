@@ -13,44 +13,25 @@ export const ATTRIBUTE_DID = ethers.utils.id("DID");
 export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
 export const TOKEN_ID = 1;
 
-export const PRICE_PER_ATTRIBUTES = {
-  [ATTRIBUTE_AML]: 0,
-  [ATTRIBUTE_COUNTRY]: 1,
-  [ATTRIBUTE_DID]: 2,
-  [ATTRIBUTE_IS_BUSINESS]: 0
-};
-
-export const PRICE_PER_BUSINESS_ATTRIBUTES = {
-  [ATTRIBUTE_AML]: 0,
-  [ATTRIBUTE_COUNTRY]: 5,
-  [ATTRIBUTE_DID]: 10,
-  [ATTRIBUTE_IS_BUSINESS]: 0
-};
-
 export const PRICE_PER_ATTRIBUTES_ETH = {
-  [ATTRIBUTE_AML]: 0,
-  [ATTRIBUTE_COUNTRY]: parseEther("0.001"),
-  [ATTRIBUTE_DID]: parseEther("0.002"),
-  [ATTRIBUTE_IS_BUSINESS]: 0
+  [ATTRIBUTE_AML]: parseEther("0.0012"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0.0012"),
+  [ATTRIBUTE_DID]: parseEther("0.0012"),
+  [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
-  [ATTRIBUTE_AML]: 0,
-  [ATTRIBUTE_COUNTRY]: parseEther("0.005"),
-  [ATTRIBUTE_DID]: parseEther("0.01"),
-  [ATTRIBUTE_IS_BUSINESS]: 0
-};
-
-export const PRICE_SET_ATTRIBUTE = {
-  [ATTRIBUTE_AML]: parseEther("0.01"),
-  [ATTRIBUTE_COUNTRY]: parseEther("0.01"),
-  [ATTRIBUTE_IS_BUSINESS]: parseEther("0.00"),
-};
-
-export const ISSUER_STATUS = {
-  DEACTIVATED: 0,
-  ACTIVE: 1,
+  [ATTRIBUTE_AML]: parseEther("0.015"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0.015"),
+  [ATTRIBUTE_DID]: parseEther("0.015"),
+  [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
 };
 
 export const MINT_PRICE = parseEther("0.003");
 export const ISSUER_SPLIT = 50;
+
+export const DIGEST_TO_SIGN = ethers.utils.id(
+  "Welcome to Quadrata! By signing, you agree to the Terms of Service."
+);
+
+export const HARDHAT_CHAIN_ID = 31337;
