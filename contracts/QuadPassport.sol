@@ -220,10 +220,12 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
 
-            IQuadPassportStore.Attribute[] storage attrs = _attributes[keccak256(abi.encode(_msgSender(), attributeType))];
+            bytes32 attrKey = keccak256(abi.encode(_msgSender(), attributeType));
+
+            IQuadPassportStore.Attribute[] storage attrs = _attributes[attrKey];
 
             for(uint256 j = attrs.length; j > 0; j--){
-                _position[keccak256(abi.encode(keccak256(abi.encode(_msgSender(), attributeType)), attrs[j-1].issuer))] = 0;
+                _position[keccak256(abi.encode(attrKey, attrs[j-1].issuer))] = 0;
                 attrs.pop();
             }
         }
@@ -243,16 +245,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         // only delete attributes from issuer
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            uint256 position = _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), _msgSender()))];
+            bytes32 attrKey = keccak256(abi.encode(_account, attributeType));
+            uint256 position = _position[keccak256(abi.encode(attrKey, _msgSender()))];
             if (position > 0) {
-                Attribute[] storage attrs = _attributes[keccak256(abi.encode(_account, attributeType))];
+                Attribute[] storage attrs = _attributes[attrKey];
 
                 // Swap last attribute position with position of attribute to delete before calling pop()
                 Attribute memory attrToDelete = attrs[position-1];
                 Attribute memory attrToSwap = attrs[attrs.length-1];
 
-                _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), attrToSwap.issuer))] = position;
-                _position[keccak256(abi.encode(keccak256(abi.encode(_account, attributeType)), attrToDelete.issuer))] = 0;
+                _position[keccak256(abi.encode(attrKey, attrToSwap.issuer))] = position;
+                _position[keccak256(abi.encode(attrKey, attrToDelete.issuer))] = 0;
 
                 attrs[position-1] = attrToSwap;
                 attrs[attrs.length-1] = attrToDelete;
@@ -274,9 +277,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @dev Loop through all eligible token ids and burn passports if they exist
     /// @param _account address of user
     function _burnPassports(address _account) internal {
-        for (uint256 currTokenId = 0; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
-            if(balanceOf(_account, currTokenId) >= 1){
-                _burn(_account, currTokenId, 1);
+        for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
+            uint256 number = balanceOf(_account, currTokenId);
+            if (number > 0){
+                _burn(_account, currTokenId, number);
             }
         }
     }
