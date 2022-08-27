@@ -24,16 +24,11 @@ export const deployQuadrata = async (
   verbose: boolean = false,
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
 ) => {
-  const governance = await deployGovernance(deployer, maxFeePerGas);
+  const governance = await deployGovernance(deployer);
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
-  const passport = await deployPassport(governance, deployer, maxFeePerGas);
+  const passport = await deployPassport(governance, deployer);
   if (verbose) console.log(`QuadPassport is deployed: ${passport.address}`);
-  const reader = await deployReader(
-    governance,
-    passport,
-    deployer,
-    maxFeePerGas
-  );
+  const reader = await deployReader(governance, passport, deployer);
   if (verbose) console.log("QuadReader is deployed: ", reader.address);
 
   // Add all Issuers & their respective treasury
@@ -189,8 +184,7 @@ export const deployQuadrata = async (
 
 export const deployPassport = async (
   governance: Contract,
-  deployer: any,
-  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
+  deployer: any
 ): Promise<Contract> => {
   const QuadPassport = await ethers.getContractFactory(
     "QuadPassport",
@@ -205,10 +199,7 @@ export const deployPassport = async (
   return passport;
 };
 
-export const deployGovernance = async (
-  deployer: any,
-  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
-): Promise<Contract> => {
+export const deployGovernance = async (deployer: any): Promise<Contract> => {
   const QuadGovernance = await ethers.getContractFactory(
     "QuadGovernance",
     deployer
@@ -225,8 +216,7 @@ export const deployGovernance = async (
 export const deployReader = async (
   governance: Contract,
   passport: Contract,
-  deployer: any,
-  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
+  deployer: any
 ): Promise<Contract> => {
   const QuadReader = await ethers.getContractFactory("QuadReader", deployer);
   const reader = await upgrades.deployProxy(

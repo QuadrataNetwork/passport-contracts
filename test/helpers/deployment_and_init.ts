@@ -24,6 +24,9 @@ export const deployPassportEcosystem = async (
       treasury: issuerTreasuries[i].address,
     });
   }
+
+  const signers = await ethers.getSigners();
+  const deployer = signers[0];
   const tokenIds = [{ id: 1, uri: "https://wwww.quadrata.com/ipfs" }];
   const [governance, passport, reader] = await deployQuadrata(
     admin.address,
@@ -31,12 +34,10 @@ export const deployPassportEcosystem = async (
     treasury.address,
     admin.address,
     tokenIds,
-    admin
+    deployer
   );
 
   // Revoke Deployer Role
-  const signers = await ethers.getSigners();
-  const deployer = signers[0];
   await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address);
   await governance
     .connect(admin)
