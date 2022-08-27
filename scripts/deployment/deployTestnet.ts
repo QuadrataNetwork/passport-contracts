@@ -15,6 +15,8 @@ const TOKEN_IDS = [
   },
 ];
 
+const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
+
 const ISSUERS = [
   {
     wallet: "0x1135F3b9f2895Fb1B688B354Aea3C31114B49a38", // SpringLabs L/E issuers
@@ -80,8 +82,18 @@ const ISSUERS = [
   if (TOKEN_IDS.length === 0) {
     throw new Error("TOKEN_IDS not set");
   }
+  if (!MAX_GAS_FEE) {
+    throw new Error("MAX_GAS_FEE not set");
+  }
+  console.log(`Set maxFeePerGas to ${MAX_GAS_FEE} Gwei`);
+
   const signers = await ethers.getSigners();
   const deployer = signers[0];
+  const provider: any = deployer.provider;
+  provider.getFeeData = async () => ({
+    maxFeePerGas: MAX_GAS_FEE,
+    maxPriorityFeePerGas: MAX_GAS_FEE,
+  });
   console.log(`Deployer address: ${deployer.address}`);
 
   await deployQuadrata(
@@ -90,6 +102,8 @@ const ISSUERS = [
     QUADRATA_TREASURY,
     MULTISIG,
     TOKEN_IDS,
-    true // Verbose = true
+    deployer,
+    true, // Verbose = true,
+    MAX_GAS_FEE
   );
 })();

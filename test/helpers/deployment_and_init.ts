@@ -30,7 +30,8 @@ export const deployPassportEcosystem = async (
     issuersToAdd,
     treasury.address,
     admin.address,
-    tokenIds
+    tokenIds,
+    admin
   );
 
   // Revoke Deployer Role

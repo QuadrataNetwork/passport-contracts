@@ -20,20 +20,28 @@ export const deployQuadrata = async (
   treasury: string,
   multisig: string,
   tokenIds: any[],
-  verbose: boolean = false
+  deployer: any,
+  verbose: boolean = false,
+  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
 ) => {
-  const governance = await deployGovernance();
+  const governance = await deployGovernance(deployer, maxFeePerGas);
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
-  const passport = await deployPassport(governance);
+  const passport = await deployPassport(governance, deployer, maxFeePerGas);
   if (verbose) console.log(`QuadPassport is deployed: ${passport.address}`);
-  const reader = await deployReader(governance, passport);
+  const reader = await deployReader(
+    governance,
+    passport,
+    deployer,
+    maxFeePerGas
+  );
   if (verbose) console.log("QuadReader is deployed: ", reader.address);
 
   // Add all Issuers & their respective treasury
   for (let i = 0; i < issuers.length; i++) {
     const tx = await governance.addIssuer(
       issuers[i].wallet,
-      issuers[i].treasury
+      issuers[i].treasury,
+      { maxFeePerGas }
     );
     await tx.wait();
     if (verbose)
@@ -43,7 +51,7 @@ export const deployQuadrata = async (
   }
 
   // Set Protocol Treasury
-  let tx = await governance.setTreasury(treasury);
+  let tx = await governance.setTreasury(treasury, { maxFeePerGas });
   await tx.wait();
   if (verbose)
     console.log(
@@ -51,7 +59,9 @@ export const deployQuadrata = async (
     );
 
   // Link Governance & Passport contracts
-  tx = await governance.setPassportContractAddress(passport.address);
+  tx = await governance.setPassportContractAddress(passport.address, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(
@@ -63,7 +73,8 @@ export const deployQuadrata = async (
     tx = await governance.setEligibleTokenId(
       tokenIds[i].id,
       true,
-      tokenIds[i].uri
+      tokenIds[i].uri,
+      { maxFeePerGas }
     );
     await tx.wait();
     if (verbose)
@@ -73,15 +84,21 @@ export const deployQuadrata = async (
   }
 
   // Set Eligible Attributes
-  tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true);
+  tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_DID`);
-  tx = await governance.setEligibleAttribute(ATTRIBUTE_COUNTRY, true);
+  tx = await governance.setEligibleAttribute(ATTRIBUTE_COUNTRY, true, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_COUNTRY`);
-  tx = await governance.setEligibleAttribute(ATTRIBUTE_IS_BUSINESS, true);
+  tx = await governance.setEligibleAttribute(ATTRIBUTE_IS_BUSINESS, true, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(
@@ -89,13 +106,15 @@ export const deployQuadrata = async (
     );
 
   // Set Eligible Attributes by DID
-  tx = await governance.setEligibleAttributeByDID(ATTRIBUTE_AML, true);
+  tx = await governance.setEligibleAttributeByDID(ATTRIBUTE_AML, true, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_AML`);
 
   // Set Rev Split
-  tx = await governance.setRevSplitIssuer(50);
+  tx = await governance.setRevSplitIssuer(50, { maxFeePerGas });
   await tx.wait();
   if (verbose) console.log(`[QuadGovernance] setRevSplitIssuer with 50`);
 
@@ -105,13 +124,15 @@ export const deployQuadrata = async (
   for (const attr of attributeTypes) {
     tx = await governance.setAttributePriceFixed(
       attr,
-      PRICE_PER_ATTRIBUTES_ETH[attr]
+      PRICE_PER_ATTRIBUTES_ETH[attr],
+      { maxFeePerGas }
     );
     await tx.wait();
 
     tx = await governance.setBusinessAttributePriceFixed(
       attr,
-      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attr]
+      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attr],
+      { maxFeePerGas }
     );
     await tx.wait();
   }
@@ -123,34 +144,41 @@ export const deployQuadrata = async (
     );
 
   // Set QuadReader as READER_ROLE
-  tx = await governance.grantRole(READER_ROLE, reader.address);
+  tx = await governance.grantRole(READER_ROLE, reader.address, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] grant READER_ROLE to ${reader.address}`);
 
   // Grant `GOVERNANCE_ROLE` and `DEFAULT_ADMIN_ROLE` to Timelock
-  tx = await governance.grantRole(GOVERNANCE_ROLE, timelock);
+  tx = await governance.grantRole(GOVERNANCE_ROLE, timelock, { maxFeePerGas });
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] grant GOVERNANCE_ROLE to ${timelock}`);
-  tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock);
+  tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock, {
+    maxFeePerGas,
+  });
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] grant DEFAULT_ADMIN_ROLE to ${timelock}`);
 
   // GRANT `PAUSER_ROLE` to MULTISIG
-  tx = await governance.grantRole(PAUSER_ROLE, multisig);
+  tx = await governance.grantRole(PAUSER_ROLE, multisig, { maxFeePerGas });
   await tx.wait();
   if (verbose) console.log(`[QuadGovernance] grant PAUSER_ROLE to ${multisig}`);
 
   // Deploy TestQuadrata contracts
-  const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
+  const TestQuadrata = await ethers.getContractFactory(
+    "TestQuadrata",
+    deployer
+  );
   const testQuadrata = await TestQuadrata.deploy();
   await testQuadrata.deployed();
 
   if (verbose)
     console.log(`[TestQuadrata] deployed at address ${testQuadrata.address}`);
-  await testQuadrata.setReader(reader.address);
+  await testQuadrata.setReader(reader.address, { maxFeePerGas });
   if (verbose)
     console.log(
       `[TestQuadrata] setting QuadReader address with ${reader.address}`
@@ -160,9 +188,14 @@ export const deployQuadrata = async (
 };
 
 export const deployPassport = async (
-  governance: Contract
+  governance: Contract,
+  deployer: any,
+  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
 ): Promise<Contract> => {
-  const QuadPassport = await ethers.getContractFactory("QuadPassport");
+  const QuadPassport = await ethers.getContractFactory(
+    "QuadPassport",
+    deployer
+  );
   const passport = await upgrades.deployProxy(
     QuadPassport,
     [governance.address],
@@ -172,8 +205,14 @@ export const deployPassport = async (
   return passport;
 };
 
-export const deployGovernance = async (): Promise<Contract> => {
-  const QuadGovernance = await ethers.getContractFactory("QuadGovernance");
+export const deployGovernance = async (
+  deployer: any,
+  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
+): Promise<Contract> => {
+  const QuadGovernance = await ethers.getContractFactory(
+    "QuadGovernance",
+    deployer
+  );
   const governance = await upgrades.deployProxy(QuadGovernance, [], {
     initializer: "initialize",
     kind: "uups",
@@ -185,9 +224,11 @@ export const deployGovernance = async (): Promise<Contract> => {
 
 export const deployReader = async (
   governance: Contract,
-  passport: Contract
+  passport: Contract,
+  deployer: any,
+  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei")
 ): Promise<Contract> => {
-  const QuadReader = await ethers.getContractFactory("QuadReader");
+  const QuadReader = await ethers.getContractFactory("QuadReader", deployer);
   const reader = await upgrades.deployProxy(
     QuadReader,
     [governance.address, passport.address],
