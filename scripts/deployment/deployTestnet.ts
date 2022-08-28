@@ -85,7 +85,9 @@ const ISSUERS = [
   if (!MAX_GAS_FEE) {
     throw new Error("MAX_GAS_FEE not set");
   }
-  console.log(`Set maxFeePerGas to ${MAX_GAS_FEE} Gwei`);
+  console.log(
+    `Set maxFeePerGas to ${ethers.utils.formatUnits(MAX_GAS_FEE, "gwei")} Gwei`
+  );
 
   const signers = await ethers.getSigners();
   const deployer = signers[0];
