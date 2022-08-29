@@ -1,9 +1,6 @@
 //SPDX-License-Identifier: BUSL-1.1
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "hardhat/console.sol";
-
 import "../interfaces/IQuadPassport.sol";
 import "../storage/QuadPassportStore.sol";
 import "../QuadReader.sol";
@@ -36,10 +33,10 @@ contract DeFi {
         return attributes;
     }
 
-    function depositLegacy(address _account, bytes32 _attribute) 
+    function depositLegacy(address _account, bytes32 _attribute)
     public payable returns(
-        bytes32[] memory, 
-        uint256[] memory, 
+        bytes32[] memory,
+        uint256[] memory,
         address[] memory
     ) {
         (
@@ -69,11 +66,11 @@ contract DeFi {
         return attributes;
     }
 
-    function depositBulkLegacy(address _account, bytes32[] calldata _attributes) 
+    function depositBulkLegacy(address _account, bytes32[] calldata _attributes)
         public payable returns
     (
-        bytes32[] memory, 
-        uint256[] memory, 
+        bytes32[] memory,
+        uint256[] memory,
         address[] memory
     ) {
         (

@@ -15,6 +15,8 @@ const TOKEN_IDS = [
   },
 ];
 
+const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
+
 const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x....."}
 
 (async () => {
@@ -36,8 +38,21 @@ const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x....."}
   if (TOKEN_IDS.length === 0) {
     throw new Error("TOKEN_IDS not set");
   }
+
+  if (!MAX_GAS_FEE) {
+    throw new Error("MAX_GAS_FEE not set");
+  }
+  console.log(
+    `Set maxFeePerGas to ${ethers.utils.formatUnits(MAX_GAS_FEE, "gwei")} Gwei`
+  );
+
   const signers = await ethers.getSigners();
   const deployer = signers[0];
+  const provider: any = deployer.provider;
+  provider.getFeeData = async () => ({
+    maxFeePerGas: MAX_GAS_FEE,
+    maxPriorityFeePerGas: MAX_GAS_FEE,
+  });
   console.log(`Deployer address: ${deployer.address}`);
 
   await deployQuadrata(
@@ -46,6 +61,8 @@ const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x....."}
     QUADRATA_TREASURY,
     MULTISIG,
     TOKEN_IDS,
-    true // Verbose = true
+    deployer,
+    true, // Verbose = true,
+    MAX_GAS_FEE
   );
 })();
