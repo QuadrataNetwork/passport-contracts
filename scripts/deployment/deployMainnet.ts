@@ -17,7 +17,7 @@ const TOKEN_IDS = [
 
 const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
 
-const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x....."}
+const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x.....", "attributesPermission": ["kecak256("AML")"]}
 
 (async () => {
   if (!QUADRATA_TREASURY) {
