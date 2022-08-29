@@ -12,6 +12,7 @@ interface IQuadGovernance {
     event IssuerAdded(address indexed _issuer, address indexed _newTreasury);
     event IssuerDeleted(address indexed _issuer);
     event IssuerStatusChanged(address indexed issuer, bool newStatus);
+    event IssuerAttributePermission(address indexed issuer, bytes32 _attribute,  bool _permission);
     event PassportAddressUpdated(address indexed _oldAddress, address indexed _address);
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdated(address indexed _oldAddress, address indexed _address);
@@ -37,6 +38,10 @@ interface IQuadGovernance {
     function addIssuer(address _issuer, address _treasury) external;
 
     function deleteIssuer(address _issuer) external;
+
+    function setIssuerStatus(address _issuer, bool _status) external;
+
+    function setIssuerAttributePermission(address _issuer, bytes32 _attribute, bool _permission) external;
 
     function getEligibleAttributesLength() external view returns(uint256);
 
@@ -67,4 +72,6 @@ interface IQuadGovernance {
     function issuers(uint256) external view returns(address);
 
     function getIssuerStatus(address _issuer) external view returns(bool);
+
+    function getIssuerAttributePermission(address _issuer, bytes32 _attribute) external view returns(bool);
 }

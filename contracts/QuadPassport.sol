@@ -17,9 +17,8 @@ import "./QuadSoulbound.sol";
 /// @notice This represents a Quadrata NFT Passport
 contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStore {
 
-    constructor() initializer {
-        // used to prevent logic contract self destruct take over
-    }
+    // used to prevent logic contract self destruct take over
+    constructor() initializer {}
 
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
@@ -86,6 +85,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
 
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
+            require(governance.getIssuerAttributePermission(issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
             // Verify attrKeys computation
             _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
             _writeAttrToStorage(
