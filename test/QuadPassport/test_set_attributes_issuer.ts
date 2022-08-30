@@ -1080,7 +1080,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       await passport.connect(admin).pause();
       await expect(
         passport
-          .connect(minterA)
+          .connect(issuer)
           .setAttributesIssuer(
             businessPassport.address,
             [
@@ -1107,7 +1107,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_DID, false);
       await expect(
         passport
-          .connect(minterA)
+          .connect(issuer)
           .setAttributesIssuer(
             businessPassport.address,
             [
@@ -1134,7 +1134,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_AML, false);
       await expect(
         passport
-          .connect(minterA)
+          .connect(issuer)
           .setAttributesIssuer(
             businessPassport.address,
             [
