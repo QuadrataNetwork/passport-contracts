@@ -21,7 +21,8 @@ const TOKEN_IDS = [
   },
 ];
 
-const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
+// Careful - this doesn't work for Contract Deployment today
+const MAX_GAS_FEE = ethers.utils.parseUnits("4.1337", "gwei");
 
 const ISSUERS = [
   {
@@ -148,7 +149,7 @@ const ISSUERS = [
   if (deployer && deployer.provider) {
     deployer.provider.getFeeData = async () => ({
       maxFeePerGas: MAX_GAS_FEE,
-      maxPriorityFeePerGas: MAX_GAS_FEE,
+      maxPriorityFeePerGas: MAX_GAS_FEE.sub(1),
       gasPrice: MAX_GAS_FEE,
     });
 
