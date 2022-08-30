@@ -2,20 +2,24 @@ import { ethers } from "hardhat";
 import { id } from "ethers/lib/utils";
 
 const {
-  assertGetAttributesBulkStatic,
-} = require("../../test/helpers/assert/assert_get_attributes_bulk.ts");
-
-const {
   ATTRIBUTE_DID,
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
 } = require("../../utils/constant.ts");
 
-const OLD_PASSPORT = "0x911757E425dBc4D5f9E522E87Ab01C8a096AD0D6";
+const {
+  assertGetAttributesBulkStatic,
+} = require("../../test/helpers/assert/assert_get_attributes_bulk.ts");
 
-const OLD_READER = "0x2B212B47Faf2040cA4782e812048F5aE8ad5Fa2f";
-const NEW_READER = "0xdeB66c6744097d7172539BB7c7FC1e255d1135cD";
+const {
+  assertGetAttributesStatic,
+} = require("../../test/helpers/assert/assert_get_attributes.ts");
+
+const OLD_PASSPORT = "0x32791980a332F1283c69660eC8e426de3aD66E7f"; // Mainnet oldQuadPassport.sol
+
+const OLD_READER = "0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9"; // Mainnet oldQuadReader.sol
+const NEW_READER = "0x1D8D70AD07C8E7E442AD78E4AC0A16f958Eba7F0"; // Mainnet QuadReader.ol
 
 (async () => {
   const passportOld = await ethers.getContractAt(
@@ -66,13 +70,13 @@ const NEW_READER = "0xdeB66c6744097d7172539BB7c7FC1e255d1135cD";
       id("DID"),
       { value: feeForDID }
     );
-    console.log(did);
     const aml = await readerOld.callStatic.getAttributesETH(
       account,
       1,
       id("AML"),
       { value: feeForAML }
     );
+
     const country = await readerOld.callStatic.getAttributesETH(
       account,
       1,
@@ -99,11 +103,19 @@ const NEW_READER = "0xdeB66c6744097d7172539BB7c7FC1e255d1135cD";
     const accSigner = new ethers.VoidSigner(account);
     await assertGetAttributesBulkStatic(
       accSigner,
-      [ATTRIBUTE_DID, ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_IS_BUSINESS],
+      [ATTRIBUTE_IS_BUSINESS, ATTRIBUTE_COUNTRY, ATTRIBUTE_DID],
       reader,
       expectedIssuers,
       expectedAttributes,
       expectedVerifiedAt
+    );
+    await assertGetAttributesStatic(
+      accSigner,
+      ATTRIBUTE_AML,
+      reader,
+      expectedIssuers,
+      expectedAttributes,
+      [aml[1][0]]
     );
 
     console.log(
