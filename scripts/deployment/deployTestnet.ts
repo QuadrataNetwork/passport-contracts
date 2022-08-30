@@ -118,6 +118,11 @@ const ISSUERS = [
   },
 ];
 
+// // LEAVE EMPTY STRING IF NEW DEPLOYMENT
+const GOVERNANCE_ADDRESS = "0xfa78CF488DE274e1163BBB9D8268Cf653063C51d";
+const PASSPORT_ADDRESS = "0xdeB66c6744097d7172539BB7c7FC1e255d1135cD";
+const READER_ADDRESS = "0x10dDd014Bd7294eaE28801aF0f5eEc967C1fc30D";
+
 (async () => {
   if (!QUADRATA_TREASURY) {
     throw new Error("QUADRATA_TREASURY not set");
@@ -163,7 +168,10 @@ const ISSUERS = [
       TOKEN_IDS,
       deployer,
       true, // Verbose = true,
-      MAX_GAS_FEE
+      MAX_GAS_FEE,
+      GOVERNANCE_ADDRESS,
+      PASSPORT_ADDRESS,
+      READER_ADDRESS
     );
   } else {
     throw new Error("No Provider");

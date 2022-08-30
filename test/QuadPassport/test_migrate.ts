@@ -816,6 +816,12 @@ describe("QuadPassport.migrate", async () => {
       expect(await passport.balanceOf(minterA.address, 1)).equals(1);
       expect(await passport.balanceOf(minterA.address, 2)).equals(1);
     });
+
+    it("fail - not admin", async () => {
+      await expect(
+        passport.migrate([minterA.address], issuer.address, oldPassport.address)
+      ).to.be.revertedWith("INVALID_ADMIN");
+    });
   });
 });
 

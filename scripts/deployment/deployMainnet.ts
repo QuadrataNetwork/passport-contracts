@@ -15,6 +15,7 @@ const TOKEN_IDS = [
   },
 ];
 
+// Careful - this doesn't work for Contract Deployment today
 const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
 
 const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x.....", "attributesPermission": ["kecak256("AML")"]}
@@ -48,21 +49,26 @@ const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x.....", "attribute
 
   const signers = await ethers.getSigners();
   const deployer = signers[0];
-  const provider: any = deployer.provider;
-  provider.getFeeData = async () => ({
-    maxFeePerGas: MAX_GAS_FEE,
-    maxPriorityFeePerGas: MAX_GAS_FEE,
-  });
-  console.log(`Deployer address: ${deployer.address}`);
+  if (deployer && deployer.provider) {
+    deployer.provider.getFeeData = async () => ({
+      maxFeePerGas: MAX_GAS_FEE,
+      maxPriorityFeePerGas: MAX_GAS_FEE.sub(1),
+      gasPrice: MAX_GAS_FEE,
+    });
 
-  await deployQuadrata(
-    TIMELOCK,
-    ISSUERS,
-    QUADRATA_TREASURY,
-    MULTISIG,
-    TOKEN_IDS,
-    deployer,
-    true, // Verbose = true,
-    MAX_GAS_FEE
-  );
+    console.log(`Deployer address: ${deployer.address}`);
+
+    await deployQuadrata(
+      TIMELOCK,
+      ISSUERS,
+      QUADRATA_TREASURY,
+      MULTISIG,
+      TOKEN_IDS,
+      deployer,
+      true, // Verbose = true,
+      MAX_GAS_FEE
+    );
+  } else {
+    throw new Error("No Provider");
+  }
 })();
