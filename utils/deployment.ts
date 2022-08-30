@@ -107,10 +107,10 @@ export const deployQuadrata = async (
         `[QuadGovernance] addIssuer ${issuers[i].wallet} with treasury ${issuers[i].treasury}`
       );
 
-    for (let j = 0; j < issuers[i].attributePermission.length; j++) {
+    for (let j = 0; j < issuers[i].attributesPermission.length; j++) {
       const txPermission = await governance.setIssuerAttributePermission(
         issuers[i].wallet,
-        issuers[i].attributePermission[j],
+        issuers[i].attributesPermission[j],
         true,
         { maxFeePerGas }
       );
@@ -118,7 +118,7 @@ export const deployQuadrata = async (
 
       if (verbose)
         console.log(
-          `[QuadGovernance] setIssuerAttributePermission ${issuers[i].wallet} for attribute ${issuers[i].attributePermission[j]}`
+          `[QuadGovernance] setIssuerAttributePermission ${issuers[i].wallet} for attribute ${issuers[i].attributesPermission[j]}`
         );
     }
   }

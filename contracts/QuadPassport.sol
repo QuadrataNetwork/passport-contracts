@@ -76,6 +76,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
         // Handle DID
         if(_config.did != bytes32(0)){
+            require(governance.getIssuerAttributePermission(issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
             _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),

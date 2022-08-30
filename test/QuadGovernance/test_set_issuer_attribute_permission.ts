@@ -49,7 +49,7 @@ describe("QuadGovernance.setIssuerAttributePermission", async () => {
   describe("setIssuerAttributePermission / getIssuerAttributePermission", async () => {
     it("succeed - authorize an attribute", async () => {
       const newAttribute = id("NEW_ATTRIBUTE_SCORE");
-      await governance.setEligibleAttribute(newAttribute);
+      await governance.connect(admin).setEligibleAttribute(newAttribute, true);
       expect(
         await governance.getIssuerAttributePermission(
           issuer1.address,
