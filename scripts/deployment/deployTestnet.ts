@@ -149,7 +149,9 @@ const ISSUERS = [
     deployer.provider.getFeeData = async () => ({
       maxFeePerGas: MAX_GAS_FEE,
       maxPriorityFeePerGas: MAX_GAS_FEE,
+      gasPrice: MAX_GAS_FEE,
     });
+
     console.log(`Deployer address: ${deployer.address}`);
 
     await deployQuadrata(
@@ -163,6 +165,6 @@ const ISSUERS = [
       MAX_GAS_FEE
     );
   } else {
-    throw Error("deployer or provider not set");
+    throw new Error("No Provider");
   }
 })();
