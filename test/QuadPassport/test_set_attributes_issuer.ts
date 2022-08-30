@@ -1080,7 +1080,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       await passport.connect(admin).pause();
       await expect(
         passport
-          .connect(minterA)
+          .connect(issuer)
           .setAttributesIssuer(
             businessPassport.address,
             [
@@ -1099,6 +1099,60 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             }
           )
       ).to.be.revertedWith("Pausable: paused");
+    });
+
+    it("fail - issuer with no permission to issue attribute DID", async () => {
+      await governance
+        .connect(admin)
+        .setIssuerAttributePermission(issuer.address, ATTRIBUTE_DID, false);
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("ISSUER_ATTR_PERMISSION_INVALID");
+    });
+
+    it("fail - issuer with no permission to issue attribute AML", async () => {
+      await governance
+        .connect(admin)
+        .setIssuerAttributePermission(issuer.address, ATTRIBUTE_AML, false);
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("ISSUER_ATTR_PERMISSION_INVALID");
     });
   });
 });

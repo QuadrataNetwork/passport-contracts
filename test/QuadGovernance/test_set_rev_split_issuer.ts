@@ -67,7 +67,7 @@ describe("QuadGovernance.setRevSplitIssuer", async () => {
     it("fail (rev split > 100)", async () => {
       await expect(
         governance.connect(admin).setRevSplitIssuer(101)
-      ).to.be.revertedWith("SPLIT_MUST_BE_LESS_THAN_EQUAL_TO_100");
+      ).to.be.revertedWith("SPLIT_TOO_HIGH");
     });
   });
 });

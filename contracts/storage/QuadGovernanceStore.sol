@@ -21,6 +21,7 @@ contract QuadGovernanceStore is QuadConstant {
     // Issuers
     mapping(address => address) internal _issuerTreasury;
     mapping(address => bool) internal _issuerStatus;
+    mapping(bytes32 => bool) internal _issuerAttributePermission;
     address[] internal _issuers;
 
     // Others

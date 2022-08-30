@@ -154,6 +154,19 @@ describe("QuadReader", async () => {
       await governance
         .connect(admin)
         .addIssuer(issuerC.address, issuerCTreasury.address);
+
+      attributeToQuery.forEach(async (attrType) => {
+        let txPermission = await governance
+          .connect(admin)
+          .setIssuerAttributePermission(issuerB.address, attrType, true);
+        await txPermission.wait();
+
+        txPermission = await governance
+          .connect(admin)
+          .setIssuerAttributePermission(issuerC.address, attrType, true);
+        await txPermission.wait();
+      });
+
       for (const iss of [issuerB, issuerC]) {
         await setAttributes(
           minterA,

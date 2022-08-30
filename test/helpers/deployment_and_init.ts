@@ -5,6 +5,10 @@ import { ethers } from "hardhat";
 const { deployQuadrata } = require("../../utils/deployment.ts");
 
 const {
+  ATTRIBUTE_DID,
+  ATTRIBUTE_AML,
+  ATTRIBUTE_COUNTRY,
+  ATTRIBUTE_IS_BUSINESS,
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
 } = require("../../utils/constant.ts");
@@ -22,6 +26,12 @@ export const deployPassportEcosystem = async (
     issuersToAdd.push({
       wallet: issuers[i].address,
       treasury: issuerTreasuries[i].address,
+      attributesPermission: [
+        ATTRIBUTE_DID,
+        ATTRIBUTE_AML,
+        ATTRIBUTE_COUNTRY,
+        ATTRIBUTE_IS_BUSINESS,
+      ],
     });
   }
 
@@ -34,7 +44,8 @@ export const deployPassportEcosystem = async (
     treasury.address,
     admin.address,
     tokenIds,
-    deployer
+    deployer,
+    false
   );
 
   // Revoke Deployer Role

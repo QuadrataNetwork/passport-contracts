@@ -13,9 +13,8 @@ import "./storage/QuadGovernanceStore.sol";
 /// @notice All admin functions to govern the QuadPassport contract
 contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
 
-    constructor() initializer {
-        // used to prevent logic contract self destruct take over
-    }
+    // used to prevent logic contract self destruct take over
+    constructor() initializer {}
 
     /// @dev Initializer (constructor)
     function initialize() public initializer {
@@ -157,7 +156,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     function setRevSplitIssuer(uint256 _split) override external {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         require(_revSplitIssuer != _split, "REV_SPLIT_ALREADY_SET");
-        require(_split <= 100, "SPLIT_MUST_BE_LESS_THAN_EQUAL_TO_100");
+        require(_split <= 100, "SPLIT_TOO_HIGH");
 
         uint256 oldSplit = _revSplitIssuer;
         _revSplitIssuer = _split;
@@ -232,6 +231,22 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
             revokeRole(ISSUER_ROLE, _issuer);
         }
         emit IssuerStatusChanged(_issuer, _status);
+    }
+
+    /// @dev Set which attributes an issuer can attest to
+    /// @notice Restricted behind a TimelockController
+    /// @param _issuer address to change status
+    /// @param _attribute attribute to authorize (ex: keccak256("AML"))
+    /// @param _permission bool for authorizing an issuer to attest
+    function setIssuerAttributePermission(address _issuer, bytes32 _attribute, bool _permission) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_issuer != address(0), "ISSUER_ADDRESS_ZERO");
+        require(hasRole(ISSUER_ROLE, _issuer), "INVALID_ISSUER");
+        require(eligibleAttributes(_attribute) || eligibleAttributesByDID(_attribute), "ATTRIBUTE_NOT_ELIGIBLE");
+
+        _issuerAttributePermission[keccak256(abi.encode(_issuer, _attribute))] = _permission;
+
+        emit IssuerAttributePermission(_issuer, _attribute, _permission);
     }
 
     function _authorizeUpgrade(address) override internal view {
@@ -323,6 +338,14 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         return _issuerStatus[_issuer];
     }
 
+    /// @dev Get the authorization status for an issuer to attest to a specific attribute
+    /// @param _issuer address of issuer
+    /// @param _attribute attribute type
+    /// @return authorization status
+    function getIssuerAttributePermission(address _issuer, bytes32 _attribute) override public view returns(bool) {
+        return _issuerAttributePermission[keccak256(abi.encode(_issuer, _attribute))];
+    }
+
     /// @dev Get the revenue split between protocol and _issuers
     /// @return ratio of revenue distribution
     function revSplitIssuer() override public view returns(uint256) {
@@ -330,12 +353,14 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     }
 
     /// @dev Get an issuer at a certain index
+    /// @param _index Array index
     /// @return issuer element
     function issuers(uint256 _index) override public view returns(address) {
         return _issuers[_index];
     }
 
     /// @dev Get an issuer's treasury
+    /// @param _issuer address of the issuer
     /// @return issuer treasury
     function issuersTreasury(address _issuer) override public view returns (address) {
         return _issuerTreasury[_issuer];

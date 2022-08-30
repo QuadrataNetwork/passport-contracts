@@ -31,20 +31,6 @@ export const deployQuadrata = async (
   const reader = await deployReader(governance, passport, deployer);
   if (verbose) console.log("QuadReader is deployed: ", reader.address);
 
-  // Add all Issuers & their respective treasury
-  for (let i = 0; i < issuers.length; i++) {
-    const tx = await governance.addIssuer(
-      issuers[i].wallet,
-      issuers[i].treasury,
-      { maxFeePerGas }
-    );
-    await tx.wait();
-    if (verbose)
-      console.log(
-        `[QuadGovernance] addIssuer ${issuers[i].wallet} with treasury ${issuers[i].treasury}`
-      );
-  }
-
   // Set Protocol Treasury
   let tx = await governance.setTreasury(treasury, { maxFeePerGas });
   await tx.wait();
@@ -107,6 +93,35 @@ export const deployQuadrata = async (
   await tx.wait();
   if (verbose)
     console.log(`[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_AML`);
+
+  // Add all Issuers & their respective treasury
+  for (let i = 0; i < issuers.length; i++) {
+    const tx = await governance.addIssuer(
+      issuers[i].wallet,
+      issuers[i].treasury,
+      { maxFeePerGas }
+    );
+    await tx.wait();
+    if (verbose)
+      console.log(
+        `[QuadGovernance] addIssuer ${issuers[i].wallet} with treasury ${issuers[i].treasury}`
+      );
+
+    for (let j = 0; j < issuers[i].attributesPermission.length; j++) {
+      const txPermission = await governance.setIssuerAttributePermission(
+        issuers[i].wallet,
+        issuers[i].attributesPermission[j],
+        true,
+        { maxFeePerGas }
+      );
+      await txPermission.wait();
+
+      if (verbose)
+        console.log(
+          `[QuadGovernance] setIssuerAttributePermission ${issuers[i].wallet} for attribute ${issuers[i].attributesPermission[j]}`
+        );
+    }
+  }
 
   // Set Rev Split
   tx = await governance.setRevSplitIssuer(50, { maxFeePerGas });
