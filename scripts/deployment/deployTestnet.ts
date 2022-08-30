@@ -8,6 +8,11 @@ const {
   ATTRIBUTE_IS_BUSINESS,
 } = require("../../utils/constant.ts");
 
+// // LEAVE EMPTY STRING IF NEW DEPLOYMENT
+const GOVERNANCE_ADDRESS = "";
+const PASSPORT_ADDRESS = "";
+const READER_ADDRESS = "";
+
 const QUADRATA_TREASURY = "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1";
 
 const TIMELOCK = "0x484ea071fB248B63Cbf4bf10BeAf01D6e65Ba4CD"; // Goerli
@@ -21,7 +26,8 @@ const TOKEN_IDS = [
   },
 ];
 
-const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
+// Careful - this doesn't work for Contract Deployment today
+const MAX_GAS_FEE = ethers.utils.parseUnits("4.1337", "gwei");
 
 const ISSUERS = [
   {
@@ -148,7 +154,7 @@ const ISSUERS = [
   if (deployer && deployer.provider) {
     deployer.provider.getFeeData = async () => ({
       maxFeePerGas: MAX_GAS_FEE,
-      maxPriorityFeePerGas: MAX_GAS_FEE,
+      maxPriorityFeePerGas: MAX_GAS_FEE.sub(1),
       gasPrice: MAX_GAS_FEE,
     });
 
@@ -162,7 +168,10 @@ const ISSUERS = [
       TOKEN_IDS,
       deployer,
       true, // Verbose = true,
-      MAX_GAS_FEE
+      MAX_GAS_FEE,
+      GOVERNANCE_ADDRESS,
+      PASSPORT_ADDRESS,
+      READER_ADDRESS
     );
   } else {
     throw new Error("No Provider");
