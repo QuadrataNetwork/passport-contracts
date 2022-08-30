@@ -10,7 +10,6 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
-  PRICE_PER_ATTRIBUTES_ETH,
 } = require("../../utils/constant.ts");
 
 const {
@@ -20,7 +19,7 @@ const {
 const { setAttributes } = require("../helpers/set_attributes.ts");
 const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 
-describe("QuadReader.balanceOf", async () => {
+describe("QuadReader.latestEpoch", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
@@ -71,24 +70,24 @@ describe("QuadReader.balanceOf", async () => {
       passport,
       attributes,
       verifiedAt,
-      issuedAt,
+      issuedAt + 1,
       MINT_PRICE
     );
   });
 
-  describe("QuadReader.balanceOf (SUCCESS CASES)", async () => {
+  describe("QuadReader.latestEpoch (SUCCESS CASES)", async () => {
     it("success - 1 issuer", async () => {
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
-        1
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
+        verifiedAt
       );
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_IS_BUSINESS)
-      ).to.equal(1);
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
+      ).to.equal(verifiedAt);
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_COUNTRY)
-      ).to.equal(1);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_AML)).to.equal(
-        1
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.equal(verifiedAt);
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
+        verifiedAt
       );
     });
 
@@ -104,36 +103,67 @@ describe("QuadReader.balanceOf", async () => {
         issuer2,
         passport,
         attrIssuers2,
-        verifiedAt + 1,
-        issuedAt + 1,
+        verifiedAt + 10,
+        issuedAt + 11,
         MINT_PRICE
       );
 
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
-        2
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
+        verifiedAt + 10
       );
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_IS_BUSINESS)
-      ).to.equal(2);
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
+      ).to.equal(verifiedAt + 10);
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_COUNTRY)
-      ).to.equal(2);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_AML)).to.equal(
-        2
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.equal(verifiedAt + 10);
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
+        verifiedAt + 10
+      );
+    });
+
+    it("success with 2 issuers prior date", async () => {
+      const attrIssuers2 = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_IS_BUSINESS]: attributes[ATTRIBUTE_IS_BUSINESS],
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_AML]: id("10"),
+      };
+      await setAttributes(
+        minterA,
+        issuer2,
+        passport,
+        attrIssuers2,
+        verifiedAt - 10,
+        issuedAt - 11,
+        MINT_PRICE
+      );
+
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
+        verifiedAt
+      );
+      expect(
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
+      ).to.equal(verifiedAt);
+      expect(
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.equal(verifiedAt);
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
+        verifiedAt
       );
     });
 
     it("success no passport", async () => {
-      expect(await reader.balanceOf(minterB.address, ATTRIBUTE_DID)).to.equal(
+      expect(await reader.latestEpoch(minterB.address, ATTRIBUTE_DID)).to.equal(
         0
       );
       expect(
-        await reader.balanceOf(minterB.address, ATTRIBUTE_IS_BUSINESS)
+        await reader.latestEpoch(minterB.address, ATTRIBUTE_IS_BUSINESS)
       ).to.equal(0);
       expect(
-        await reader.balanceOf(minterB.address, ATTRIBUTE_COUNTRY)
+        await reader.latestEpoch(minterB.address, ATTRIBUTE_COUNTRY)
       ).to.equal(0);
-      expect(await reader.balanceOf(minterB.address, ATTRIBUTE_AML)).to.equal(
+      expect(await reader.latestEpoch(minterB.address, ATTRIBUTE_AML)).to.equal(
         0
       );
     });
@@ -152,17 +182,17 @@ describe("QuadReader.balanceOf", async () => {
         issuedAt + 1,
         MINT_PRICE
       );
-      expect(await reader.balanceOf(minterB.address, ATTRIBUTE_DID)).to.equal(
-        1
+      expect(await reader.latestEpoch(minterB.address, ATTRIBUTE_DID)).to.equal(
+        verifiedAt + 1
       );
       expect(
-        await reader.balanceOf(minterB.address, ATTRIBUTE_IS_BUSINESS)
+        await reader.latestEpoch(minterB.address, ATTRIBUTE_IS_BUSINESS)
       ).to.equal(0);
       expect(
-        await reader.balanceOf(minterB.address, ATTRIBUTE_COUNTRY)
+        await reader.latestEpoch(minterB.address, ATTRIBUTE_COUNTRY)
       ).to.equal(0);
-      expect(await reader.balanceOf(minterB.address, ATTRIBUTE_AML)).to.equal(
-        1
+      expect(await reader.latestEpoch(minterB.address, ATTRIBUTE_AML)).to.equal(
+        verifiedAt + 1
       );
     });
 
@@ -182,17 +212,17 @@ describe("QuadReader.balanceOf", async () => {
         MINT_PRICE
       );
 
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
-        2
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
+        verifiedAt + 1
       );
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_IS_BUSINESS)
-      ).to.equal(1);
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
+      ).to.equal(verifiedAt);
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_COUNTRY)
-      ).to.equal(1);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_AML)).to.equal(
-        2
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.equal(verifiedAt);
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
+        verifiedAt + 1
       );
     });
 
@@ -214,17 +244,17 @@ describe("QuadReader.balanceOf", async () => {
         MINT_PRICE
       );
 
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
-        1
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
+        verifiedAt + 1
       );
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_IS_BUSINESS)
-      ).to.equal(1);
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
+      ).to.equal(verifiedAt + 1);
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_COUNTRY)
-      ).to.equal(1);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_AML)).to.equal(
-        1
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
+      ).to.equal(verifiedAt + 1);
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
+        verifiedAt + 1
       );
     });
 
@@ -242,47 +272,50 @@ describe("QuadReader.balanceOf", async () => {
       );
 
       expect(
-        await reader.balanceOf(businessPassport.address, ATTRIBUTE_DID)
-      ).to.equal(1);
+        await reader.latestEpoch(businessPassport.address, ATTRIBUTE_DID)
+      ).to.equal(verifiedAt);
       expect(
-        await reader.balanceOf(businessPassport.address, ATTRIBUTE_IS_BUSINESS)
-      ).to.equal(1);
+        await reader.latestEpoch(
+          businessPassport.address,
+          ATTRIBUTE_IS_BUSINESS
+        )
+      ).to.equal(verifiedAt);
       expect(
-        await reader.balanceOf(businessPassport.address, ATTRIBUTE_COUNTRY)
-      ).to.equal(1);
+        await reader.latestEpoch(businessPassport.address, ATTRIBUTE_COUNTRY)
+      ).to.equal(verifiedAt);
       expect(
-        await reader.balanceOf(businessPassport.address, ATTRIBUTE_AML)
-      ).to.equal(1);
+        await reader.latestEpoch(businessPassport.address, ATTRIBUTE_AML)
+      ).to.equal(verifiedAt);
     });
 
     it("success - after burning (themselves)", async () => {
       await passport.connect(minterA).burnPassports();
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
         0
       );
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_IS_BUSINESS)
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
       ).to.equal(0);
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_COUNTRY)
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
       ).to.equal(0);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_AML)).to.equal(
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
         0
       );
     });
 
     it("success - after burning (issuer)", async () => {
       await passport.connect(issuer).burnPassportsIssuer(minterA.address);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_DID)).to.equal(
         0
       );
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_IS_BUSINESS)
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_IS_BUSINESS)
       ).to.equal(0);
       expect(
-        await reader.balanceOf(minterA.address, ATTRIBUTE_COUNTRY)
+        await reader.latestEpoch(minterA.address, ATTRIBUTE_COUNTRY)
       ).to.equal(0);
-      expect(await reader.balanceOf(minterA.address, ATTRIBUTE_AML)).to.equal(
+      expect(await reader.latestEpoch(minterA.address, ATTRIBUTE_AML)).to.equal(
         0
       );
     });

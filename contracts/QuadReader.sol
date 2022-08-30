@@ -258,6 +258,20 @@ import "./storage/QuadReaderStore.sol";
         return false;
     }
 
+    /// @dev Returns the latest epoch about an attribute attested
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @return the latest epoch about an attribute attested
+    function latestEpoch(address _account, bytes32 _attribute) public view override returns(uint256) {
+        uint256 latest;
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            if (attributes[i].epoch > latest)
+                latest = attributes[i].epoch;
+        }
+        return latest;
+    }
+
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
     /// @notice Restricted behind a TimelockController
     /// @param _to address of either an issuer's treasury or the Quadrata treasury
