@@ -59,11 +59,6 @@ const NEW_READER = ""; // Mainnet QuadReader.ol
       id("COUNTRY"),
       account
     );
-    const feeForIsBusiness = await readerOld.calculatePaymentETH(
-      id("IS_BUSINESS"),
-      account
-    );
-
     const did = await readerOld.callStatic.getAttributesETH(
       account,
       1,
@@ -83,19 +78,12 @@ const NEW_READER = ""; // Mainnet QuadReader.ol
       id("COUNTRY"),
       { value: feeForCountry }
     );
-    const isBusiness = await readerOld.callStatic.getAttributesETH(
-      account,
-      1,
-      id("IS_BUSINESS"),
-      { value: feeForIsBusiness }
-    );
 
     const expectedAttributes = [
       {
         [ATTRIBUTE_DID]: did[0][0],
         [ATTRIBUTE_AML]: aml[0][0],
         [ATTRIBUTE_COUNTRY]: country[0][0],
-        [ATTRIBUTE_IS_BUSINESS]: isBusiness[0][0],
       },
     ];
     const expectedIssuers = [new ethers.VoidSigner(did[2][0])];
