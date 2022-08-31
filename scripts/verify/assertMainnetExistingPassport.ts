@@ -12,20 +12,23 @@ const {
   ATTRIBUTE_DID,
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
+
   ATTRIBUTE_IS_BUSINESS,
 } = require("../../utils/constant.ts");
+
+// ------------ BEGIN - TO MODIFY --------------- //
+const QUAD_READER = "";
 
 const TEDDY = "0xffE462ed723275eF8E7655C4883e8cD428826669";
 const DANIEL = "0x5501CC22Be0F12381489D0980f20f872e1E6bfb9";
 const TRAVIS = "0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E";
 
-const QUAD_READER = "0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9";
-
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad("0x01", 32);
-const EXPECTED_COUNTRY_SCORE_TEDDY = id("US");
-
 const EXPECTED_AML_SCORE_DANIEL = hexZeroPad("0x03", 32);
 const EXPECTED_AML_SCORE_TRAVIS = hexZeroPad("0x03", 32);
+
+const EXPECTED_COUNTRY_SCORE_TEDDY = id("US");
+// ------------ END - TO MODIFY --------------- //
 
 const getCountry = async (
   user: any,
