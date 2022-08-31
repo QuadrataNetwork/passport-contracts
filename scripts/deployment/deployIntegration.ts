@@ -9,12 +9,12 @@ const {
 
 const {
   QUADRATA_TREASURY,
-  ISSUERS,
   TIMELOCK,
   MULTISIG,
   TOKEN_IDS,
+  ISSUERS,
   MAX_GAS_FEE,
-} = require("../data/mainnet.ts");
+} = require("../data/integration.ts");
 
 (async () => {
   if (!QUADRATA_TREASURY) {
@@ -35,7 +35,6 @@ const {
   if (TOKEN_IDS.length === 0) {
     throw new Error("TOKEN_IDS not set");
   }
-
   if (!MAX_GAS_FEE) {
     throw new Error("MAX_GAS_FEE not set");
   }
