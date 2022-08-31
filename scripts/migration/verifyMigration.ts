@@ -19,7 +19,7 @@ const {
 const OLD_PASSPORT = "0x32791980a332F1283c69660eC8e426de3aD66E7f"; // Mainnet oldQuadPassport.sol
 
 const OLD_READER = "0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9"; // Mainnet oldQuadReader.sol
-const NEW_READER = "0x1D8D70AD07C8E7E442AD78E4AC0A16f958Eba7F0"; // Mainnet QuadReader.ol
+const NEW_READER = ""; // Mainnet QuadReader.ol
 
 (async () => {
   const passportOld = await ethers.getContractAt(
