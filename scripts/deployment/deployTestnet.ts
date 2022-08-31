@@ -3,6 +3,11 @@ import { ethers } from "hardhat";
 const { deployQuadrata } = require("../../utils/deployment.ts");
 
 const {
+  GOVERNANCE_ROLE,
+  DEFAULT_ADMIN_ROLE,
+} = require("../../utils/constant.ts");
+
+const {
   QUADRATA_TREASURY,
   TIMELOCK,
   MULTISIG,
@@ -48,7 +53,7 @@ const {
 
     console.log(`Deployer address: ${deployer.address}`);
 
-    await deployQuadrata(
+    const [governance] = await deployQuadrata(
       TIMELOCK,
       ISSUERS,
       QUADRATA_TREASURY,
@@ -58,6 +63,17 @@ const {
       true, // Verbose = true,
       MAX_GAS_FEE
     );
+
+    let tx = await governance
+      .connect(deployer)
+      .renounceRole(GOVERNANCE_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
+    tx = await governance
+      .connect(deployer)
+      .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
   } else {
     throw new Error("No Provider");
   }

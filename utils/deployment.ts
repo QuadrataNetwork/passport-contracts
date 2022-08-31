@@ -40,68 +40,68 @@ export const deployQuadrata = async (
   if (verbose) console.log("QuadReader is deployed: ", reader.address);
   let tx;
 
-  // Set Protocol Treasury
-  tx = await governance.setTreasury(treasury, { maxFeePerGas });
-  await tx.wait();
-  if (verbose)
-    console.log(
-      `[QuadGovernance] Protocol Treasury has been set to ${treasury}`
-    );
+  // // Set Protocol Treasury
+  // tx = await governance.setTreasury(treasury, { maxFeePerGas });
+  // await tx.wait();
+  // if (verbose)
+  //   console.log(
+  //     `[QuadGovernance] Protocol Treasury has been set to ${treasury}`
+  //   );
 
-  // Link Governance & Passport contracts
-  tx = await governance.setPassportContractAddress(passport.address, {
-    maxFeePerGas,
-  });
-  await tx.wait();
-  if (verbose)
-    console.log(
-      `[QuadGovernance] setPassportContractAddress with ${passport.address}`
-    );
+  // // Link Governance & Passport contracts
+  // tx = await governance.setPassportContractAddress(passport.address, {
+  //   maxFeePerGas,
+  // });
+  // await tx.wait();
+  // if (verbose)
+  //   console.log(
+  //     `[QuadGovernance] setPassportContractAddress with ${passport.address}`
+  //   );
 
-  // Set Eligible TokenId
-  for (let i = 0; i < tokenIds.length; i++) {
-    tx = await governance.setEligibleTokenId(
-      tokenIds[i].id,
-      true,
-      tokenIds[i].uri,
-      { maxFeePerGas }
-    );
-    await tx.wait();
-    if (verbose)
-      console.log(
-        `[QuadGovernance] setEligibleTokenId for ${tokenIds[i].id} with URI (${tokenIds[i].uri})`
-      );
-  }
+  // // Set Eligible TokenId
+  // for (let i = 0; i < tokenIds.length; i++) {
+  //   tx = await governance.setEligibleTokenId(
+  //     tokenIds[i].id,
+  //     true,
+  //     tokenIds[i].uri,
+  //     { maxFeePerGas }
+  //   );
+  //   await tx.wait();
+  //   if (verbose)
+  //     console.log(
+  //       `[QuadGovernance] setEligibleTokenId for ${tokenIds[i].id} with URI (${tokenIds[i].uri})`
+  //     );
+  // }
 
-  // Set Eligible Attributes
-  tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true, {
-    maxFeePerGas,
-  });
-  await tx.wait();
-  if (verbose)
-    console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_DID`);
-  tx = await governance.setEligibleAttribute(ATTRIBUTE_COUNTRY, true, {
-    maxFeePerGas,
-  });
-  await tx.wait();
-  if (verbose)
-    console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_COUNTRY`);
-  tx = await governance.setEligibleAttribute(ATTRIBUTE_IS_BUSINESS, true, {
-    maxFeePerGas,
-  });
-  await tx.wait();
-  if (verbose)
-    console.log(
-      `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_IS_BUSINESS`
-    );
+  // // Set Eligible Attributes
+  // tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true, {
+  //   maxFeePerGas,
+  // });
+  // await tx.wait();
+  // if (verbose)
+  //   console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_DID`);
+  // tx = await governance.setEligibleAttribute(ATTRIBUTE_COUNTRY, true, {
+  //   maxFeePerGas,
+  // });
+  // await tx.wait();
+  // if (verbose)
+  //   console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_COUNTRY`);
+  // tx = await governance.setEligibleAttribute(ATTRIBUTE_IS_BUSINESS, true, {
+  //   maxFeePerGas,
+  // });
+  // await tx.wait();
+  // if (verbose)
+  //   console.log(
+  //     `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_IS_BUSINESS`
+  //   );
 
-  // Set Eligible Attributes by DID
-  tx = await governance.setEligibleAttributeByDID(ATTRIBUTE_AML, true, {
-    maxFeePerGas,
-  });
-  await tx.wait();
-  if (verbose)
-    console.log(`[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_AML`);
+  // // Set Eligible Attributes by DID
+  // tx = await governance.setEligibleAttributeByDID(ATTRIBUTE_AML, true, {
+  //   maxFeePerGas,
+  // });
+  // await tx.wait();
+  // if (verbose)
+  //   console.log(`[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_AML`);
 
   // Add all Issuers & their respective treasury
   for (let i = 0; i < issuers.length; i++) {
