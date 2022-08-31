@@ -1,5 +1,6 @@
 import { network } from "hardhat";
 import * as dotenv from "dotenv";
+import { getAddress } from "ethers/lib/utils";
 dotenv.config();
 
 const { expect } = require("chai");
@@ -17,11 +18,11 @@ const {
 } = require("../../utils/constant.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_READER = "";
+const QUAD_READER = getAddress("");
 
-const TEDDY = "0xffE462ed723275eF8E7655C4883e8cD428826669";
-const DANIEL = "0x5501CC22Be0F12381489D0980f20f872e1E6bfb9";
-const TRAVIS = "0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E";
+const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
+const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
+const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad("0x01", 32);
 const EXPECTED_AML_SCORE_DANIEL = hexZeroPad("0x03", 32);

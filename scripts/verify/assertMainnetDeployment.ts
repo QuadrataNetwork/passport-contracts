@@ -1,5 +1,6 @@
 import { network } from "hardhat";
 import * as dotenv from "dotenv";
+import { getAddress } from "ethers/lib/utils";
 dotenv.config();
 
 const { expect } = require("chai");
@@ -34,21 +35,23 @@ const {
 } = require("../data/mainnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = "";
-const QUAD_PASSPORT = "";
-const QUAD_READER = "";
+const QUAD_GOV = getAddress("");
+const QUAD_PASSPORT = getAddress("");
+const QUAD_READER = getAddress("");
 
-const DEPLOYER = "";
+const DEPLOYER = getAddress("");
 
-const TEDDY = "0xffE462ed723275eF8E7655C4883e8cD428826669";
-const DANIEL = "0x5501CC22Be0F12381489D0980f20f872e1E6bfb9";
-const TRAVIS = "0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E";
+const FAB = getAddress("");
+const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
+const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
+const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 // ------------ END - TO MODIFY --------------- //
 
 const EXPECTED_USER_ROLES_PASSPORT = [
   { USER: TEDDY, ROLES: [] },
   { USER: DANIEL, ROLES: [] },
   { USER: TRAVIS, ROLES: [] },
+  { USER: FAB, ROLES: [] },
   { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
   { USER: QUADRATA_TREASURY, ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
   { USER: ISSUERS[0].treasury, ROLES: [] },
@@ -61,9 +64,10 @@ const EXPECTED_USER_ROLES_PASSPORT = [
 ];
 
 const EXPECTED_USER_ROLES_TIMELOCK = [
-  { USER: TEDDY, ROLES: [EXECUTOR_ROLE] },
+  { USER: TEDDY, ROLES: [] },
   { USER: DANIEL, ROLES: [] },
   { USER: TRAVIS, ROLES: [] },
+  { USER: FAB, ROLES: [EXECUTOR_ROLE] },
   { USER: ISSUERS[0].wallet, ROLES: [] },
   { USER: QUADRATA_TREASURY, ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
   { USER: ISSUERS[0].treasury, ROLES: [] },
@@ -74,6 +78,8 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
   { USER: QUAD_GOV, ROLES: [] },
   { USER: QUAD_PASSPORT, ROLES: [] },
 ];
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // MAINNET CHECKS
 (async () => {
@@ -126,12 +132,13 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
   expect(issuers.length).equals(ISSUERS.length);
 
   ISSUERS.forEach(async (issuer: any) => {
+    await delay(1000);
     expect(await governance.issuersTreasury(issuer.wallet)).equals(
       issuer.treasury
     );
     expect(await governance.getIssuerStatus(issuer.wallet)).equals(true);
     ALL_ATTRIBUTES.forEach(async (attrType: string) => {
-      if (attrType in issuer.attributesPermission) {
+      if (issuer.attributesPermission.includes(attrType)) {
         expect(
           await governance.getIssuerAttributePermission(issuer.wallet, attrType)
         ).equals(true);
@@ -150,6 +157,7 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   // Check that Price have been correctly set
   ALL_ATTRIBUTES.forEach(async (attrType: string) => {
+    await delay(1000);
     expect(await governance.pricePerAttributeFixed(attrType)).equals(
       PRICE_PER_ATTRIBUTES_ETH[attrType]
     );
@@ -161,9 +169,10 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   // Check that tokenId have been correctly set
   TOKEN_IDS.forEach(async (tokenId: any) => {
+    await delay(1000);
     expect(await governance.eligibleTokenId(tokenId.id)).equals(true); // Default Quadrata Passport
 
-    expect(await passport.uri(tokenId)).equals(tokenId.uri);
+    expect(await passport.uri(tokenId.id)).equals(tokenId.uri);
   });
   expect(
     await governance.eligibleTokenId(TOKEN_IDS[TOKEN_IDS.length - 1].id + 1)
@@ -173,6 +182,7 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   // Check attribute eligibility
   for (const attribute of ALL_ATTRIBUTES) {
+    await delay(1000);
     expect(await governance.eligibleAttributesByDID(attribute)).equals(
       ALL_ATTRIBUTES_BY_DID.includes(attribute)
     );
@@ -181,11 +191,12 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     "[QuadGovernance] attribute by DID eligibility correctly set: OK"
   );
   for (const attribute of ALL_ATTRIBUTES) {
+    await delay(1000);
     expect(await governance.eligibleAttributes(attribute)).equals(
       ALL_ACCOUNT_LEVEL_ATTRIBUTES.includes(attribute)
     );
   }
-  console.log("[QuadGovernance] attribute  eligibility correctly set: OK");
+  console.log("[QuadGovernance] attribute ligibility correctly set: OK");
 
   // Check AccessControl
   const checkUserRoles = async (
@@ -194,9 +205,7 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     accessControlContract: any
   ) => {
     for (const userRoles of expectedUserRoles) {
-      console.log(userRoles);
       for (const role of allRoles) {
-        console.log(role);
         expect(
           await accessControlContract.hasRole(role, userRoles.USER)
         ).equals(userRoles.ROLES.includes(role));

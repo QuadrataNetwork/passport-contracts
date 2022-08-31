@@ -1,5 +1,5 @@
-import { network } from "hardhat";
 import * as dotenv from "dotenv";
+import { getAddress } from "ethers/lib/utils";
 dotenv.config();
 
 const { expect } = require("chai");
@@ -34,15 +34,15 @@ const {
 } = require("../data/testnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = "0x1ceb0a57fdfd394ace6e72c227786352e277c441"; // Goerli Address
-const QUAD_PASSPORT = "0xA8Beaa115d043351FB654256734FE331e9F4fFD8"; // Goerli
-const QUAD_READER = "0x787dC1fD39ed5bBDFbd5A43742866d82c2AA38fF"; // Goerli
+const QUAD_GOV = getAddress("0x1CeB0a57fDFd394acE6E72C227786352E277C441"); // Goerli Address
+const QUAD_PASSPORT = getAddress("0xA8Beaa115d043351FB654256734FE331e9F4fFD8"); // Goerli
+const QUAD_READER = getAddress("0x787dC1fD39ed5bBDFbd5A43742866d82c2AA38fF"); // Goerli
 
-const DEPLOYER = "0x5bc97877ede3c748aec6eaf747f09b5bb48766bd";
+const DEPLOYER = getAddress("0x5bc97877ede3c748aec6eaf747f09b5bb48766bd");
 
-const TEDDY = "0xffE462ed723275eF8E7655C4883e8cD428826669";
-const DANIEL = "0x5501CC22Be0F12381489D0980f20f872e1E6bfb9";
-const TRAVIS = "0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E";
+const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
+const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
+const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 // ------------ END - TO MODIFY --------------- //
 
 const EXPECTED_USER_ROLES_PASSPORT = [
@@ -75,19 +75,11 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
   { USER: QUAD_PASSPORT, ROLES: [] },
 ];
 
-// MAINNET CHECKS
-(async () => {
-  await network.provider.request({
-    method: "hardhat_reset",
-    params: [
-      {
-        forking: {
-          jsonRpcUrl: process.env.ETHEREUM_MAINNET,
-        },
-      },
-    ],
-  });
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// GOERLI CHECKS
+(async () => {
+  console.log("Starting Deployment Verification ..");
   const passport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT);
   const governance = await ethers.getContractAt("QuadGovernance", QUAD_GOV);
   const reader = await ethers.getContractAt("QuadReader", QUAD_READER);
@@ -126,12 +118,14 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
   expect(issuers.length).equals(ISSUERS.length);
 
   ISSUERS.forEach(async (issuer: any) => {
+    await delay(1000);
     expect(await governance.issuersTreasury(issuer.wallet)).equals(
       issuer.treasury
     );
     expect(await governance.getIssuerStatus(issuer.wallet)).equals(true);
     ALL_ATTRIBUTES.forEach(async (attrType: string) => {
-      if (attrType in issuer.attributesPermission) {
+      await delay(1000);
+      if (issuer.attributesPermission.includes(attrType)) {
         expect(
           await governance.getIssuerAttributePermission(issuer.wallet, attrType)
         ).equals(true);
@@ -141,8 +135,10 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
         ).equals(false);
       }
     });
+    console.log(
+      `[QuadGovernance] Issuer (${issuer.wallet}) have been correctly set: OK`
+    );
   });
-  console.log("[QuadGovernance] All issuers have been correctly set: OK");
 
   // Check that Revenue split have been correctly set
   expect(await governance.revSplitIssuer()).equals(ISSUER_SPLIT);
@@ -150,6 +146,7 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   // Check that Price have been correctly set
   ALL_ATTRIBUTES.forEach(async (attrType: string) => {
+    await delay(1000);
     expect(await governance.pricePerAttributeFixed(attrType)).equals(
       PRICE_PER_ATTRIBUTES_ETH[attrType]
     );
@@ -161,9 +158,10 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   // Check that tokenId have been correctly set
   TOKEN_IDS.forEach(async (tokenId: any) => {
+    await delay(1000);
     expect(await governance.eligibleTokenId(tokenId.id)).equals(true); // Default Quadrata Passport
 
-    expect(await passport.uri(tokenId)).equals(tokenId.uri);
+    expect(await passport.uri(tokenId.id)).equals(tokenId.uri);
   });
   expect(
     await governance.eligibleTokenId(TOKEN_IDS[TOKEN_IDS.length - 1].id + 1)
@@ -173,6 +171,7 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
 
   // Check attribute eligibility
   for (const attribute of ALL_ATTRIBUTES) {
+    await delay(1000);
     expect(await governance.eligibleAttributesByDID(attribute)).equals(
       ALL_ATTRIBUTES_BY_DID.includes(attribute)
     );
@@ -181,11 +180,12 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     "[QuadGovernance] attribute by DID eligibility correctly set: OK"
   );
   for (const attribute of ALL_ATTRIBUTES) {
+    await delay(1000);
     expect(await governance.eligibleAttributes(attribute)).equals(
       ALL_ACCOUNT_LEVEL_ATTRIBUTES.includes(attribute)
     );
   }
-  console.log("[QuadGovernance] attribute  eligibility correctly set: OK");
+  console.log("[QuadGovernance] attributeeligibility correctly set: OK");
 
   // Check AccessControl
   const checkUserRoles = async (
@@ -194,9 +194,7 @@ const EXPECTED_USER_ROLES_TIMELOCK = [
     accessControlContract: any
   ) => {
     for (const userRoles of expectedUserRoles) {
-      console.log(userRoles);
       for (const role of allRoles) {
-        console.log(role);
         expect(
           await accessControlContract.hasRole(role, userRoles.USER)
         ).equals(userRoles.ROLES.includes(role));
