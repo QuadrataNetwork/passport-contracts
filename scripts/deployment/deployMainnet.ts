@@ -30,7 +30,7 @@ const TOKEN_IDS = [
 ];
 
 // Careful - this doesn't work for Contract Deployment today
-const MAX_GAS_FEE = ethers.utils.parseUnits("12.001", "gwei");
+const MAX_GAS_FEE = ethers.utils.parseUnits("4.001", "gwei");
 
 const ISSUERS: any[] = [
   {
