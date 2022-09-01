@@ -6,19 +6,26 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
+  NETWORK_IDS,
 } = require("../../utils/constant.ts");
 
-export const QUADRATA_TREASURY = getAddress(
-  "0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21"
-);
+export const QUADRATA_TREASURY = {
+  [NETWORK_IDS.MAINNET]: getAddress(
+    "0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21"
+  ),
+  [NETWORK_IDS.POLYGON]: getAddress(""),
+};
 
 export const TIMELOCK = getAddress(
   "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
 );
 
-export const MULTISIG = getAddress(
-  "0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21"
-);
+export const MULTISIG = {
+  [NETWORK_IDS.MAINNET]: getAddress(
+    "0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21"
+  ),
+  [NETWORK_IDS.POLYGON]: getAddress(""),
+};
 
 export const TOKEN_IDS = [
   {

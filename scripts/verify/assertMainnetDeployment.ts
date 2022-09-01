@@ -1,4 +1,3 @@
-import { network } from "hardhat";
 import * as dotenv from "dotenv";
 import { getAddress } from "ethers/lib/utils";
 dotenv.config();
@@ -18,8 +17,8 @@ const {
   ISSUER_ROLE,
   DEFAULT_ADMIN_ROLE,
   READER_ROLE,
-  PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
+  PRICE_PER_ATTRIBUTES,
+  PRICE_PER_BUSINESS_ATTRIBUTES,
   TIMELOCK_ADMIN_ROLE,
   PROPOSER_ROLE,
   EXECUTOR_ROLE,
@@ -47,52 +46,46 @@ const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
 const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 // ------------ END - TO MODIFY --------------- //
 
-const EXPECTED_USER_ROLES_PASSPORT = [
-  { USER: TEDDY, ROLES: [] },
-  { USER: DANIEL, ROLES: [] },
-  { USER: TRAVIS, ROLES: [] },
-  { USER: FAB, ROLES: [] },
-  { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
-  { USER: QUADRATA_TREASURY, ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
-  { USER: ISSUERS[0].treasury, ROLES: [] },
-  { USER: DEPLOYER, ROLES: [] },
-  { USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE] },
-  { USER: MULTISIG, ROLES: [PAUSER_ROLE] },
-  { USER: QUAD_READER, ROLES: [READER_ROLE] },
-  { USER: QUAD_GOV, ROLES: [] },
-  { USER: QUAD_PASSPORT, ROLES: [] },
-];
-
-const EXPECTED_USER_ROLES_TIMELOCK = [
-  { USER: TEDDY, ROLES: [] },
-  { USER: DANIEL, ROLES: [] },
-  { USER: TRAVIS, ROLES: [] },
-  { USER: FAB, ROLES: [EXECUTOR_ROLE] },
-  { USER: ISSUERS[0].wallet, ROLES: [] },
-  { USER: QUADRATA_TREASURY, ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
-  { USER: ISSUERS[0].treasury, ROLES: [] },
-  { USER: DEPLOYER, ROLES: [] },
-  { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
-  { USER: MULTISIG, ROLES: [PROPOSER_ROLE] },
-  { USER: QUAD_READER, ROLES: [] },
-  { USER: QUAD_GOV, ROLES: [] },
-  { USER: QUAD_PASSPORT, ROLES: [] },
-];
-
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // MAINNET CHECKS
 (async () => {
-  await network.provider.request({
-    method: "hardhat_reset",
-    params: [
-      {
-        forking: {
-          jsonRpcUrl: process.env.ETHEREUM_MAINNET,
-        },
-      },
-    ],
-  });
+  const signers = await ethers.getSigners();
+  const network = await signers[0].provider.getNetwork();
+
+  const EXPECTED_USER_ROLES_PASSPORT = [
+    { USER: TEDDY, ROLES: [] },
+    { USER: DANIEL, ROLES: [] },
+    { USER: TRAVIS, ROLES: [] },
+    { USER: FAB, ROLES: [] },
+    { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
+    { USER: ISSUERS[0].treasury, ROLES: [] },
+    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
+    { USER: ISSUERS[0].treasury, ROLES: [] },
+    { USER: DEPLOYER, ROLES: [] },
+    { USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE] },
+    { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
+    { USER: QUAD_READER, ROLES: [READER_ROLE] },
+    { USER: QUAD_GOV, ROLES: [] },
+    { USER: QUAD_PASSPORT, ROLES: [] },
+  ];
+
+  const EXPECTED_USER_ROLES_TIMELOCK = [
+    { USER: TEDDY, ROLES: [] },
+    { USER: DANIEL, ROLES: [] },
+    { USER: TRAVIS, ROLES: [] },
+    { USER: FAB, ROLES: [EXECUTOR_ROLE] },
+    { USER: ISSUERS[0].wallet, ROLES: [] },
+    { USER: ISSUERS[0].treasury, ROLES: [] },
+    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
+    { USER: ISSUERS[0].treasury, ROLES: [] },
+    { USER: DEPLOYER, ROLES: [] },
+    { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
+    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: QUAD_READER, ROLES: [] },
+    { USER: QUAD_GOV, ROLES: [] },
+    { USER: QUAD_PASSPORT, ROLES: [] },
+  ];
 
   const passport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT);
   const governance = await ethers.getContractAt("QuadGovernance", QUAD_GOV);
@@ -159,10 +152,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ALL_ATTRIBUTES.forEach(async (attrType: string) => {
     await delay(1000);
     expect(await governance.pricePerAttributeFixed(attrType)).equals(
-      PRICE_PER_ATTRIBUTES_ETH[attrType]
+      PRICE_PER_ATTRIBUTES[network.chainId][attrType]
     );
     expect(await governance.pricePerBusinessAttributeFixed(attrType)).equals(
-      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType]
+      PRICE_PER_BUSINESS_ATTRIBUTES[network.chainId][attrType]
     );
   });
   console.log("[QuadGovernance] Price for query correctly set: OK");
