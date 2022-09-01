@@ -14,7 +14,7 @@ const {
   TOKEN_IDS,
   ISSUERS,
   MAX_GAS_FEE,
-} = require("../data/testnet.ts");
+} = require("../data/integration.ts");
 
 (async () => {
   if (!QUADRATA_TREASURY) {
