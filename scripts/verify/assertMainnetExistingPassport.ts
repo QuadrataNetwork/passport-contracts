@@ -18,7 +18,7 @@ const {
 } = require("../../utils/constant.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_READER = getAddress("");
+const QUAD_READER = getAddress("0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9");
 
 const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
 const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
@@ -36,9 +36,10 @@ const getCountry = async (
   reader: any,
   isoCodes: any
 ): Promise<string> => {
-  const queryFeeCountry = await reader.queryFee(user, ATTRIBUTE_AML);
-  const result = await reader.callStatic.getAttributes(
+  const queryFeeCountry = await reader.calculatePaymentETH(ATTRIBUTE_AML, user);
+  const result = await reader.callStatic.getAttributesETH(
     user,
+    1,
     ATTRIBUTE_COUNTRY,
     {
       value: queryFeeCountry,
@@ -56,25 +57,26 @@ const getCountry = async (
 };
 
 const getAML = async (user: any, reader: any) => {
-  const queryFee = await reader.queryFee(user, ATTRIBUTE_AML);
-  const result = await reader.callStatic.getAttributes(user, ATTRIBUTE_AML, {
+  const queryFee = await reader.calculatePaymentETH(ATTRIBUTE_AML, user);
+  const result = await reader.callStatic.getAttributesETH(user, 1, ATTRIBUTE_AML, {
     value: queryFee,
   });
   return result[0][0];
 };
 
 const getDID = async (user: any, reader: any) => {
-  const queryFee = await reader.queryFee(user, ATTRIBUTE_DID);
-  const result = await reader.callStatic.getAttributes(user, ATTRIBUTE_DID, {
+  const queryFee = await reader.calculatePaymentETH(ATTRIBUTE_DID, user);
+  const result = await reader.callStatic.getAttributesETH(user, 1, ATTRIBUTE_DID, {
     value: queryFee,
   });
   return result[0][0];
 };
 
 const getIsBusiness = async (user: any, reader: any) => {
-  const queryFee = await reader.queryFee(user, ATTRIBUTE_IS_BUSINESS);
-  const result = await reader.callStatic.getAttributes(
+  const queryFee = await reader.calculatePaymentETH(ATTRIBUTE_IS_BUSINESS, user);
+  const result = await reader.callStatic.getAttributesETH(
     user,
+    1,
     ATTRIBUTE_IS_BUSINESS,
     { value: queryFee }
   );
@@ -108,7 +110,7 @@ const getUserData = async (user: any, reader: any, isoCodes: any) => {
     ],
   });
 
-  const reader = await ethers.getContractAt("QuadReader", QUAD_READER);
+  const reader = await ethers.getContractAt("ILegacyQuadReader", QUAD_READER);
 
   // USER_1
   console.log("SAMPLING USER 1 (from CH)");
@@ -144,18 +146,19 @@ const getUserData = async (user: any, reader: any, isoCodes: any) => {
     )
   );
 
-  const queryFee = await reader.queryFee(TEDDY, ATTRIBUTE_AML);
-  const resultTeddyGetAttributesETH = await reader.callStatic.getAttributes(
+  const queryFee = await reader.calculatePaymentETH(ATTRIBUTE_AML, TEDDY);
+  const resultTeddyGetAttributesETH = await reader.callStatic.getAttributesETH(
     TEDDY,
+    1,
     ATTRIBUTE_AML,
     { value: queryFee }
   );
   expect(resultTeddyGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_TEDDY);
   console.log("Teddy AML OK");
 
-  const queryFeeCountry = await reader.queryFee(TEDDY, ATTRIBUTE_AML);
+  const queryFeeCountry = await reader.calculatePaymentETH(ATTRIBUTE_AML, TEDDY);
   const resultTeddyGetAttributesETHCountry =
-    await reader.callStatic.getAttributes(TEDDY, ATTRIBUTE_COUNTRY, {
+    await reader.callStatic.getAttributesETH(TEDDY, 1, ATTRIBUTE_COUNTRY, {
       value: queryFeeCountry,
     });
   expect(resultTeddyGetAttributesETHCountry[0][0]).equals(
@@ -163,16 +166,18 @@ const getUserData = async (user: any, reader: any, isoCodes: any) => {
   );
   console.log("Teddy COUNTRY OK");
 
-  const resultDanielGetAttributesETH = await reader.callStatic.getAttributes(
+  const resultDanielGetAttributesETH = await reader.callStatic.getAttributesETH(
     DANIEL,
+    1,
     ATTRIBUTE_AML,
     { value: queryFee }
   );
   expect(resultDanielGetAttributesETH[0][0]).equals(EXPECTED_AML_SCORE_DANIEL);
   console.log("Daniel AML OK");
 
-  const resultTravisGetAttributesETH = await reader.callStatic.getAttributes(
+  const resultTravisGetAttributesETH = await reader.callStatic.getAttributesETH(
     TRAVIS,
+    1,
     ATTRIBUTE_AML,
     { value: queryFee }
   );
