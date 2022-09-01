@@ -2,23 +2,19 @@ import { ethers } from "hardhat";
 
 const { deployQuadrata } = require("../../utils/deployment.ts");
 
-const QUADRATA_TREASURY = "";
+const {
+  GOVERNANCE_ROLE,
+  DEFAULT_ADMIN_ROLE,
+} = require("../../utils/constant.ts");
 
-const TIMELOCK = "";
-
-const MULTISIG = "";
-
-const TOKEN_IDS = [
-  {
-    id: 1,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
-  },
-];
-
-// Careful - this doesn't work for Contract Deployment today
-const MAX_GAS_FEE = ethers.utils.parseUnits("4", "gwei");
-
-const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x.....", "attributesPermission": ["kecak256("AML")"]}
+const {
+  QUADRATA_TREASURY,
+  ISSUERS,
+  TIMELOCK,
+  MULTISIG,
+  TOKEN_IDS,
+  MAX_GAS_FEE,
+} = require("../data/mainnet.ts");
 
 (async () => {
   if (!QUADRATA_TREASURY) {
@@ -58,7 +54,7 @@ const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x.....", "attribute
 
     console.log(`Deployer address: ${deployer.address}`);
 
-    await deployQuadrata(
+    const [governance] = await deployQuadrata(
       TIMELOCK,
       ISSUERS,
       QUADRATA_TREASURY,
@@ -68,6 +64,17 @@ const ISSUERS: any[] = []; // {wallet: "0x....", treasury: "0x.....", "attribute
       true, // Verbose = true,
       MAX_GAS_FEE
     );
+
+    let tx = await governance
+      .connect(deployer)
+      .renounceRole(GOVERNANCE_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
+    tx = await governance
+      .connect(deployer)
+      .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
   } else {
     throw new Error("No Provider");
   }

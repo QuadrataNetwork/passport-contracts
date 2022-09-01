@@ -436,12 +436,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _issuer
             );
 
-            IQuadPassportMigration.Attribute memory attrBusiness = _passportToMigrate.attributes(
-                account,
-                ATTRIBUTE_IS_BUSINESS,
-                _issuer
-            );
-
             _writeAttrToStorage(
                 keccak256(abi.encode(account, ATTRIBUTE_DID)),
                 attrDID.value,
@@ -454,13 +448,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 attrCountry.value,
                 _issuer,
                 attrCountry.epoch
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(account, ATTRIBUTE_IS_BUSINESS)),
-                attrBusiness.value,
-                _issuer,
-                attrBusiness.epoch
             );
 
             _writeAttrToStorage(

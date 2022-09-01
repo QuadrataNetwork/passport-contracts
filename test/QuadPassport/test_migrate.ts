@@ -164,9 +164,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -211,9 +211,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -258,9 +258,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -305,9 +305,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -387,9 +387,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
 
       await assertGetAttributes(
@@ -428,9 +428,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes2],
-        [verifiedAt + 2]
+        [],
+        [],
+        []
       );
     });
 
@@ -490,9 +490,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -553,9 +553,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -618,9 +618,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
 
       expect(await passport.balanceOf(minterA.address, 1)).equals(1);
@@ -682,9 +682,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -744,9 +744,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
     });
 
@@ -808,9 +808,9 @@ describe("QuadPassport.migrate", async () => {
         reader,
         defi,
         treasury,
-        [issuer],
-        [attributes],
-        [verifiedAt]
+        [],
+        [],
+        []
       );
 
       expect(await passport.balanceOf(minterA.address, 1)).equals(1);
