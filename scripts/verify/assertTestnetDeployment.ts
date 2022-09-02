@@ -34,9 +34,9 @@ const {
 } = require("../data/testnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("0x9e199cC1Dbf95888D8a3100784DdB486c86859C7"); // Goerli Address
-const QUAD_PASSPORT = getAddress("0x71CAb2f76Ff1d6303c3a81B6208Dd9294503679B"); // Goerli
-const QUAD_READER = getAddress("0x95953f58B56695Ff609154f364907bEE4BAe38F5"); // Goerli
+const QUAD_GOV = getAddress("0xCF6bA3a3d18bA1e35A41db79B3dBF2F6023F6071"); // Goerli / Mumbai Testnet Address
+const QUAD_PASSPORT = getAddress("0xB8Bc4cE2d3FB9b0c474affFdf018D120632B2ACc"); // Goerli / Mumbai Testnet Address
+const QUAD_READER = getAddress("0x1950814a8fB4a69Eb4f77A28f22FAfBfb9a4a6CA"); // Goerli / Mumbai Testnet Address
 
 const DEPLOYER = getAddress("0xBe7903A33682ACe2d77bbC0FDEb80c58B5b42C0F");
 
@@ -70,8 +70,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
-    { USER: TEDDY, ROLES: [] },
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+    { USER: TEDDY, ROLES: [] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
@@ -85,6 +85,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_PASSPORT, ROLES: [] },
   ];
 
+  console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
   console.log("Starting Deployment Verification ..");
   const passport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT);
   const governance = await ethers.getContractAt("QuadGovernance", QUAD_GOV);

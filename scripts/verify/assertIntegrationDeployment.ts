@@ -34,9 +34,9 @@ const {
 } = require("../data/integration.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("0x17359278763b899268429921Ff59aa57405C614C"); // Goerli Address
-const QUAD_PASSPORT = getAddress("0x82F5a215f29089429C634d686103D297b85d4e2a"); // Goerli
-const QUAD_READER = getAddress("0x04749183A47F8B8e190e3d2D384Aa4f39ca7D627"); // Goerli
+const QUAD_GOV = getAddress("0x863db2c1A43441bbAB7f34740d0d62e21e678A4b"); // Goerli & Mumbai Integration Address
+const QUAD_PASSPORT = getAddress("0xF4d4F629eDD73680767eb7b509C7C2D1fE551522"); // Goerli & Mumbai Integration Address
+const QUAD_READER = getAddress("0x5C6b81212c0A654B6e247F8DEfeC9a95c63EF954"); // Goerli & Mumbai Integration Address
 
 const DEPLOYER = getAddress("0xbC1e5DDC2e9576C06A6DAd271E740d56BC737e1c");
 
@@ -70,8 +70,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
-    { USER: TEDDY, ROLES: [EXECUTOR_ROLE] },
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+    { USER: TEDDY, ROLES: [] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
@@ -84,6 +84,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
   ];
+  console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
   console.log("Starting Deployment Verification ..");
   const passport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT);
   const governance = await ethers.getContractAt("QuadGovernance", QUAD_GOV);
@@ -114,7 +115,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // Check Treasury correctly set
   const treasury = await governance.treasury();
-  expect(treasury.toLowerCase()).equals(QUADRATA_TREASURY.toLowerCase());
+  expect(treasury.toLowerCase()).equals(
+    QUADRATA_TREASURY[network.chainId].toLowerCase()
+  );
   console.log("[QuadGovernance] Protocol treasury correctly set: OK");
 
   // Check that all issuers have been set

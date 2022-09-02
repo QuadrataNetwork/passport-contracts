@@ -87,6 +87,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_PASSPORT, ROLES: [] },
   ];
 
+  console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
+  console.log("Starting Deployment Verification on Mainnet/Polygon ..");
   const passport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT);
   const governance = await ethers.getContractAt("QuadGovernance", QUAD_GOV);
   const reader = await ethers.getContractAt("QuadReader", QUAD_READER);
@@ -116,7 +118,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   // Check Treasury correctly set
   const treasury = await governance.treasury();
-  expect(treasury.toLowerCase()).equals(QUADRATA_TREASURY.toLowerCase());
+  expect(treasury.toLowerCase()).equals(
+    QUADRATA_TREASURY[network.chainId].toLowerCase()
+  );
   console.log("[QuadGovernance] Protocol treasury correctly set: OK");
 
   // Check that all issuers have been set

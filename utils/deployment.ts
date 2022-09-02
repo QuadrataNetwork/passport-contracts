@@ -27,7 +27,7 @@ export const deployQuadrata = async (
   passportAddress: string = "",
   readerAddress: string = ""
 ) => {
-  const network = await ethers.getDefaultProvider().getNetwork();
+  const network = await deployer.provider.getNetwork();
   const governance = await deployGovernance(deployer, governanceAddress);
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
   const passport = await deployPassport(governance, deployer, passportAddress);
