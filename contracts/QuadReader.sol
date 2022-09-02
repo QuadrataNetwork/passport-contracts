@@ -290,12 +290,14 @@ import "./storage/QuadReaderStore.sol";
             issuerOrProtocol = address(this);
         }
 
-        address[] memory issuers = governance.getIssuers();
-        for (uint256 i = 0; i < issuers.length; i++) {
-            if (_to == governance.issuersTreasury(issuers[i])) {
-                isValid = true;
-                issuerOrProtocol = issuers[i];
-                break;
+        if (!isValid) {
+            address[] memory issuers = governance.getIssuers();
+            for (uint256 i = 0; i < issuers.length; i++) {
+                if (_to == governance.issuersTreasury(issuers[i])) {
+                    isValid = true;
+                    issuerOrProtocol = issuers[i];
+                    break;
+                }
             }
         }
 

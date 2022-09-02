@@ -198,6 +198,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Compute the attrKey for the mapping `_attributes`
     /// @param _account address of the wallet owner
     /// @param _attribute attribute type (ex: keccak256("COUNTRY"))
+    /// @param _did DID of the passport (optional - could be pass as bytes32(0))
     function _computeAttrKey(address _account, bytes32 _attribute, bytes32 _did) internal view returns(bytes32) {
         if (governance.eligibleAttributes(_attribute)) {
             return keccak256(abi.encode(_account, _attribute));
@@ -259,7 +260,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _position[keccak256(abi.encode(attrKey, attrToDelete.issuer))] = 0;
 
                 attrs[position-1] = attrToSwap;
-                attrs[attrs.length-1] = attrToDelete;
 
                 attrs.pop();
 
@@ -409,11 +409,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @param _issuer Address of the issuer who issued the attestation
     /// @param _oldPassport contract address of the old passport contract
     function migrate(address[] calldata _accounts, address _issuer, address _oldPassport) external whenNotPaused {
-        IQuadPassportMigration _passportToMigrate = IQuadPassportMigration(_oldPassport);
         require(
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
             "INVALID_ADMIN"
         );
+        IQuadPassportMigration _passportToMigrate = IQuadPassportMigration(_oldPassport);
 
         for (uint256 i = 0; i < _accounts.length; i++) {
             address account = _accounts[i];

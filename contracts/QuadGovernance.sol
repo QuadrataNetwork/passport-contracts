@@ -225,7 +225,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         _issuerStatus[_issuer] = _status;
 
-        if(_status == true) {
+        if(_status) {
             grantRole(ISSUER_ROLE, _issuer);
         } else {
             revokeRole(ISSUER_ROLE, _issuer);
