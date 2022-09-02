@@ -55,6 +55,7 @@ const config: HardhatUserConfig = {
         process.env.MUMBAI_PRIVATE_KEY !== undefined
           ? [process.env.MUMBAI_PRIVATE_KEY]
           : [],
+      chainId: 80001,
     },
     goerli: {
       url: process.env.GOERLI_URI || "",
@@ -62,6 +63,23 @@ const config: HardhatUserConfig = {
         process.env.GOERLI_PRIVATE_KEY !== undefined
           ? [process.env.GOERLI_PRIVATE_KEY]
           : [],
+      chainId: 5,
+    },
+    mainnet: {
+      url: process.env.MAINNET_URI || "",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 1,
+    },
+    polygon: {
+      url: process.env.POLYGON_URI || "",
+      accounts:
+        process.env.POLYGON_PRIVATE_KEY !== undefined
+          ? [process.env.POLYGON_PRIVATE_KEY]
+          : [],
+      chainId: 137,
     },
   },
   gasReporter: {

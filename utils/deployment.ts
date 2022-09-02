@@ -6,8 +6,8 @@ const {
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
-  PRICE_PER_ATTRIBUTES_ETH,
-  PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
+  PRICE_PER_ATTRIBUTES,
+  PRICE_PER_BUSINESS_ATTRIBUTES,
   READER_ROLE,
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
@@ -27,6 +27,7 @@ export const deployQuadrata = async (
   passportAddress: string = "",
   readerAddress: string = ""
 ) => {
+  const network = await deployer.provider.getNetwork();
   const governance = await deployGovernance(deployer, governanceAddress);
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
   const passport = await deployPassport(governance, deployer, passportAddress);
@@ -143,14 +144,14 @@ export const deployQuadrata = async (
   for (const attr of attributeTypes) {
     tx = await governance.setAttributePriceFixed(
       attr,
-      PRICE_PER_ATTRIBUTES_ETH[attr],
+      PRICE_PER_ATTRIBUTES[network.chainId][attr],
       { maxFeePerGas }
     );
     await tx.wait();
 
     tx = await governance.setBusinessAttributePriceFixed(
       attr,
-      PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attr],
+      PRICE_PER_BUSINESS_ATTRIBUTES[network.chainId][attr],
       { maxFeePerGas }
     );
     await tx.wait();
