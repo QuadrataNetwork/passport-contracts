@@ -1,26 +1,20 @@
 //SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.4;
+pragma solidity 0.8.16;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
+import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadReaderStore.sol";
-import "./storage/QuadPassportStore.sol";
-import "./storage/QuadGovernanceStore.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is IQuadReader, UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadReaderStore {
-     using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
-
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
     constructor() initializer {
         // used to prevent logic contract self destruct take over
     }
@@ -39,519 +33,300 @@ import "./storage/QuadGovernanceStore.sol";
         passport = IQuadPassport(_passport);
     }
 
-    function _authorizeUpgrade(address) internal view override {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
-    }
-
-    /// @notice Query the values of an attribute for a passport holder (payable with ERC20)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _excluded The list of issuers to ignore. Keep empty for full list
-    /// @return the values of the attribute from all issuers ignoring the excluded list
-    function getAttributesExcluding(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr,
-        address[] memory _excluded
-    ) public override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
-
-        _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
-
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice Query the values of an attribute for a passport holder (free)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _excluded The list of issuers to ignore. Keep empty for full list
-    /// @return the values of the attribute from all issuers ignoring the excluded list
-    function getAttributesFreeExcluding(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] memory _excluded
-    ) public override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice Query the values of an attribute for a passport holder (payable ETH)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _excluded The list of issuers to ignore. Keep empty for full list
-    /// @return the values of an attribute from all issuers ignoring the excluded list
-    function getAttributesETHExcluding(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] memory _excluded
-    ) public override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _excludedIssuers(_excluded));
-
-        _doETHPayments(_attribute, issuers, _account);
-
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice Get all values of an attribute for a passport holder (payable ETH)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @return all values from all issuers
-    function getAttributesETH(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    )external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesETHExcluding(_account, _tokenId, _attribute, new address[](0));
-    }
-
-    /// @notice Get all values of an attribute for a passport holder (free)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @return all values of the the attribute from all issuers
-    function getAttributesFree(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    )external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesFreeExcluding(_account, _tokenId, _attribute, new address[](0));
-    }
-
-    /// @notice Get all values of an attribute for a passport holder (payable with ERC20)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @return all values of the attribute from all issuers
+    /// @notice Retrieve all attestations for a specific attribute being issued about a wallet
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return attributes array of Attributes struct (values, verifiedAt, issuer)
     function getAttributes(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr
-    )external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesExcluding(_account, _tokenId, _attribute, _tokenAddr, new address[](0));
-    }
-
-    /// @notice Query the values of an attribute for a passport holder (payable ETH)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _tokenAddr address of the ERC20 token to use as a payment
-    /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
-    /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesIncludingOnly(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address _tokenAddr,
-        address[] calldata _onlyIssuers
-    ) external override returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
-
-        _doTokenPayments(_attribute, _tokenAddr, issuers, _account);
-
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice Query the values of an attribute for a passport holder (Free)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
-    /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesFreeIncludingOnly(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] calldata _onlyIssuers
-    ) external override view returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        require(governance.pricePerAttribute(_attribute) == 0, "ATTRIBUTE_NOT_FREE");
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) =  _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
-
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice Query the values of an attribute for a passport holder (Payable ETH)
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId tokenId of the Passport (1 for now)
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _onlyIssuers The list of issuers to query from. If empty, nothing is returned
-    /// @return the values of the attribute from the specified subset list `_issuers` of all issuers
-    function getAttributesETHIncludingOnly(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute,
-        address[] calldata _onlyIssuers
-    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        _validateAttributeQuery(_account, _tokenId, _attribute);
-        (
-            bytes32[] memory attributes,
-            uint256[] memory epochs,
-            address[] memory issuers
-        ) = _applyFilter(_account, _attribute, _includedIssuers(_onlyIssuers));
-
-        _doETHPayments(_attribute, issuers, _account);
-
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice removes `_issuers` if they are deactivated
-    /// @param _issuers The list of issuers to include
-    /// @return `_issuers` - deactivated issuers
-    function _includedIssuers(
-        address[] calldata _issuers
-    ) internal view returns(address[] memory) {
-        address[] memory issuers = _issuers;
-
-        uint256 gaps = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(governance.getIssuerStatus(_issuers[i]) == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                issuers[i] = address(0);
-                gaps++;
-            }
-        }
-
-
-        address[] memory newIssuers = new address[](issuers.length - gaps);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
-                continue;
-            }
-
-            newIssuers[formattedIndex++] = issuers[i];
-        }
-
-        return newIssuers;
-    }
-
-    /// @notice removes `_issuers` from the full list of supported issuers
-    /// @param _issuers The list of issuers to remove
-    /// @return the subset of `governance.issuers` - `_issuers`
-    function _excludedIssuers(
-        address[] memory _issuers
-    ) internal view returns(address[] memory) {
-        QuadGovernanceStore.Issuer[] memory issuerData = governance.getIssuers();
-        address[] memory issuers = new address[](governance.getIssuersLength());
-
-        uint256 gaps = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuerData[i].status == QuadGovernanceStore.IssuerStatus.DEACTIVATED) {
-                gaps++;
-                continue;
-            }
-            issuers[i] = issuerData[i].issuer;
-            for(uint256 j = 0; j < _issuers.length; j++) {
-                if(issuers[i] == _issuers[j]) {
-                    issuers[i] = address(0);
-                    gaps++;
-                    break;
-                }
-            }
-        }
-
-        // close the gap(s)
-        uint256 newLength = governance.getIssuersLength() - gaps;
-
-        address[] memory newIssuers  = new address[](newLength);
-        uint256 formattedIndex = 0;
-        for(uint256 i = 0; i < issuers.length; i++) {
-            if(issuers[i] == address(0)){
-                continue;
-            }
-
-            newIssuers[formattedIndex++] = issuers[i];
-        }
-        return newIssuers;
-    }
-
-    /// @notice creates a list of attribute values from filtered issuers that have attested to the data.
-    ///         lists length being returned are <= number of active passport issuers.
-    ///         the list size is not expected to grow quickly since issuers are added via governance
-    /// @param _account address of the passport holder to query
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The list of issuers to query from. If they haven't issued anything, they are removed
-    /// @return the filtered non-null values
-    function _applyFilter(
-        address _account,
-        bytes32 _attribute,
-        address[] memory _issuers
-    ) internal view returns (bytes32[] memory, uint256[] memory, address[] memory) {
-        // find gap values
-        ApplyFilterVars memory vars;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributes(_attribute)) {
-                if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            } else if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-
-                    vars.gaps++;
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account,keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    vars.gaps++;
-                }
-            }
-        }
-
-        vars.delta = _issuers.length - vars.gaps;
-
-        bytes32[] memory attributes = new bytes32[](vars.delta);
-        uint256[] memory epochs = new uint256[](vars.delta);
-        address[] memory issuers = new address[](vars.delta);
-        QuadPassportStore.Attribute memory attribute;
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(governance.eligibleAttributesByDID(_attribute)) {
-                if(!_isDataAvailable(_account,keccak256("DID"),_issuers[i])) {
-                    continue;
-                }
-                QuadPassportStore.Attribute memory dID = passport.attributes(_account, keccak256("DID"), _issuers[i]);
-                if(!_isDataAvailableByDID(dID.value, _attribute, _issuers[i])) {
-                    continue;
-                }
-
-                attribute = passport.attributesByDID(dID.value,_attribute, _issuers[i]);
-                attributes[vars.filteredIndex] = attribute.value;
-                epochs[vars.filteredIndex] = attribute.epoch;
-                issuers[vars.filteredIndex] = _issuers[i];
-                vars.filteredIndex++;
-                continue;
-            }
-
-            if(!_isDataAvailable(_account, _attribute, _issuers[i])) {
-                continue;
-            }
-
-            attribute = passport.attributes(_account,_attribute, _issuers[i]);
-            attributes[vars.filteredIndex] = attribute.value;
-            epochs[vars.filteredIndex] = attribute.epoch;
-            issuers[vars.filteredIndex] = _issuers[i];
-            vars.filteredIndex++;
-        }
-
-        require(_safetyCheckIssuers(issuers), "NO_DATA_FOUND");
-
-        return (attributes, epochs, issuers);
-    }
-
-    /// @notice safty checks for all getAttribute functions
-    /// @param _account address of the passport holder to query
-    /// @param _tokenId token id of erc1155
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    function _validateAttributeQuery(
-        address _account,
-        uint256 _tokenId,
-        bytes32 _attribute
-    ) internal view {
+        address _account, bytes32 _attribute
+    ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
-        require(passport.balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
+
+        attributes = passport.attributes(_account, _attribute);
+        uint256 fee = queryFee(_account, _attribute);
+        require(msg.value == fee, "INVALID_QUERY_FEE");
+        if (fee > 0) {
+            uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
+            for (uint256 i = 0; i < attributes.length; i++) {
+                emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
+            }
+            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
+        }
+        emit QueryEvent(_account, msg.sender, _attribute);
+    }
+
+    /// @notice Retrieve all attestations for a specific attribute being issued about a wallet (Legacy verson)
+    /// @dev For support for older version of solidity
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return values Array of Attribute values
+    /// @return epochs Array of Attribute's verifiedAt
+    /// @return issuers Array of Attribute's issuers
+    function getAttributesLegacy(
+        address _account, bytes32 _attribute
+    ) public payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        values = new bytes32[](attributes.length);
+        epochs = new uint256[](attributes.length);
+        issuers = new address[](attributes.length);
+
+        uint256 fee = queryFee(_account, _attribute);
+        require(msg.value == fee, "INVALID_QUERY_FEE");
+
+        uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
+
+        for (uint256 i = 0; i < attributes.length; i++) {
+            values[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
+
+            if (feeIssuer > 0) {
+                emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
+            }
+        }
+        if (fee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
+        }
+        emit QueryEvent(_account, msg.sender, _attribute);
+    }
+
+    /// @notice Retrieve all attestations for a batch of attributes being issued about a wallet
+    /// @notice This will only retrieve the first available value for each attribute
+    /// @param _account address of user
+    /// @param _attributes List of attributes to get respective value from
+    /// @return attributes array of Attributes struct (values, verifiedAt, issuer)
+    function getAttributesBulk(
+        address _account, bytes32[] calldata _attributes
+    ) external payable override returns(IQuadPassportStore.Attribute[] memory) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+
+        IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
+        IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
+
+        uint256 totalFee;
+        uint256 totalFeeIssuer;
+        uint256 attrFee;
+
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            attrFee = isBusiness
+                ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
+                : governance.pricePerAttributeFixed(_attributes[i]);
+            totalFee += attrFee;
+            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
+
+            if (attrs.length > 0) {
+                attributes[i] = attrs[0];
+                if (attrFee > 0) {
+                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                    totalFeeIssuer += feeIssuer;
+                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
+                }
+            }
+        }
+        require(msg.value == totalFee, " INVALID_QUERY_FEE");
+        if (totalFee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        }
+        emit QueryBulkEvent(_account, msg.sender, _attributes);
+
+        return attributes;
+    }
+
+
+    /// @notice Retrieve all attestations for a batch of attributes being issued about a wallet
+    /// @notice This will only retrieve the first available value for each attribute
+    /// @dev For support for older version of solidity
+    /// @param _account address of user
+    /// @param _attributes List of attributes to get respective value from
+    /// @return values Array of Attribute values
+    /// @return epochs Array of Attribute's verifiedAt
+    /// @return issuers Array of Attribute's issuers
+    function getAttributesBulkLegacy(
+        address _account, bytes32[] calldata _attributes
+    ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+
+        values = new bytes32[](_attributes.length);
+        epochs = new uint256[](_attributes.length);
+        issuers = new address[](_attributes.length);
+        IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
+
+        uint256 totalFee;
+        uint256 totalFeeIssuer;
+        uint256 attrFee;
+
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            attrFee = isBusiness
+                ? governance.pricePerBusinessAttributeFixed(_attributes[i])
+                : governance.pricePerAttributeFixed(_attributes[i]);
+            totalFee += attrFee;
+            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
+
+            if (attrs.length > 0) {
+                values[i] = attrs[0].value;
+                epochs[i] = attrs[0].epoch;
+                issuers[i] = attrs[0].issuer;
+
+                if (attrFee > 0) {
+                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                    totalFeeIssuer += feeIssuer;
+                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
+                }
+            }
+        }
+        require(msg.value == totalFee," INVALID_QUERY_FEE");
+        if (totalFee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        }
+        emit QueryBulkEvent(_account, msg.sender, _attributes);
+    }
+
+
+    /// @dev Calculate the amount of $ETH required to call `getAttributes`
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @param _account account getting requested for attributes
+    /// @return the amount of $ETH necessary to query the attribute
+    function queryFee(
+        address _account,
+        bytes32 _attribute
+    ) public override view returns(uint256) {
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
+
+        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+
+        uint256 fee = (attrs.length > 0 && attrs[0].value == keccak256("TRUE"))
+            ? governance.pricePerBusinessAttributeFixed(_attribute)
+            : governance.pricePerAttributeFixed(_attribute);
+
+        return fee;
     }
 
-    /// @notice Distribute the fee to query an attribute to issuers and protocol
-    /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _issuers The providers of the attributes
-    /// @param _account The account used for figuring how much it will cost to query
-    function _doETHPayments(
-        bytes32 _attribute,
-        address[] memory _issuers,
-        address _account
-    ) internal nonReentrant {
-        uint256 amountETH = calculatePaymentETH(_attribute, _account);
-        if (amountETH > 0) {
-            require(
-                 msg.value == amountETH,
-                "INSUFFICIENT_PAYMENT_AMOUNT"
-            );
-
-            (bool sent,) = payable(address(passport)).call{value: amountETH}("");
-            require(sent, "FAILED_TO_SEND_PAYMENT");
-
-            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountETH * governance.revSplitIssuer() / 1e2;
-            uint256 amountProtocol = amountETH - amountIssuer;
-            for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.increaseAccountBalanceETH(governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
-            }
-            passport.increaseAccountBalanceETH(governance.treasury(), amountProtocol);
-        }
-    }
-
-    /// @notice Distribute the fee to query an attribute to issuers and protocol
-    /// @dev If 0 issuers are able to provide data, 100% of fee goes to quadrata
-    /// @param _attribute keccak256 of the attribute type to query (ex: keccak256("DID"))
-    /// @param _tokenPayment address of erc20 payment method
-    /// @param _issuers The providers of the attributes
-    /// @param _account The account used for figuring how much it will cost to query
-    function _doTokenPayments(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address[] memory _issuers,
-        address _account
-    ) internal nonReentrant {
-        uint256 amountToken = calculatePaymentToken(_attribute, _tokenPayment, _account);
-        if (amountToken > 0) {
-            IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-
-            erc20.safeTransferFrom(msg.sender, address(passport), amountToken);
-
-            uint256 amountIssuer = _issuers.length == 0 ? 0 : amountToken * governance.revSplitIssuer() / 10 ** 2;
-            uint256 amountProtocol = amountToken - amountIssuer;
-            for(uint256 i = 0; i < _issuers.length; i++) {
-                passport.increaseAccountBalance(_tokenPayment,governance.issuersTreasury(_issuers[i]), amountIssuer / _issuers.length);
-            }
-            passport.increaseAccountBalance(_tokenPayment, governance.treasury(), amountProtocol);
-        }
-    }
-
-
-    /// @dev Calculate the amount of token required to call `getAttribute`
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @param _tokenPayment address of the ERC20 tokens to use as payment
-    /// @param _account account getting requested for attributes
-    /// @return the amount of ERC20 necessary to query the attribute
-    function calculatePaymentToken(
-        bytes32 _attribute,
-        address _tokenPayment,
-        address _account
-    ) public override view returns(uint256) {
-        IERC20MetadataUpgradeable erc20 = IERC20MetadataUpgradeable(_tokenPayment);
-        uint256 tokenPrice = governance.getPrice(_tokenPayment);
-
-        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
-        // Convert to Token Decimal
-        uint256 amountToken = (price * (10 ** (erc20.decimals())) / tokenPrice) ;
-        return amountToken;
-    }
-
-    /// @dev Calculate the amount of $ETH required to call `getAttributeETH`
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @dev Calculate the amount of $ETH required to call `getAttributesBulk`
+    /// @param _attributes Array of keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @param _account account getting requested for attributes
     /// @return the amount of $ETH necessary to query the attribute
+    function queryFeeBulk(
+        address _account,
+        bytes32[] calldata _attributes
+    ) public override view returns(uint256) {
+        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+
+        uint256 fee;
+        bool isBusiness = (attrs.length > 0 && attrs[0].value == keccak256("TRUE")) ? true : false;
+
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            require(governance.eligibleAttributes(_attributes[i])
+                || governance.eligibleAttributesByDID(_attributes[i]),
+                "ATTRIBUTE_NOT_ELIGIBLE"
+            );
+            fee += isBusiness
+                ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
+                : governance.pricePerAttributeFixed(_attributes[i]);
+        }
+
+        return fee;
+    }
+
+
+    /// @dev Returns the number of attestations for an attribute about a Passport holder
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @return the amount of existing attributes
+    function balanceOf(address _account, bytes32 _attribute) public view override returns(uint256) {
+       return passport.attributes(_account, _attribute).length;
+    }
+
+    /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @param _issuer address of issuer
+    /// @return boolean
+    function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) public view override returns(bool) {
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            if (attributes[i].issuer == _issuer){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /// @dev Returns the latest epoch about an attribute attested
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @return the latest epoch about an attribute attested
+    function latestEpoch(address _account, bytes32 _attribute) public view override returns(uint256) {
+        uint256 latest;
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            if (attributes[i].epoch > latest)
+                latest = attributes[i].epoch;
+        }
+        return latest;
+    }
+
+    /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury
+    /// @notice Restricted behind a TimelockController
+    /// @param _to address of either an issuer's treasury or the Quadrata treasury
+    /// @param _amount amount to withdraw
+    function withdraw(address payable _to, uint256 _amount) external override {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender),
+            "INVALID_ADMIN"
+        );
+        require(passport.passportPaused() == false, "Pausable: paused");
+        bool isValid = false;
+        address issuerOrProtocol;
+
+        if (_to == governance.treasury()) {
+            isValid = true;
+            issuerOrProtocol = address(this);
+        }
+
+        address[] memory issuers = governance.getIssuers();
+        for (uint256 i = 0; i < issuers.length; i++) {
+            if (_to == governance.issuersTreasury(issuers[i])) {
+                isValid = true;
+                issuerOrProtocol = issuers[i];
+                break;
+            }
+        }
+
+        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
+        require(isValid, "WITHDRAWAL_ADDRESS_INVALID");
+        require(_amount <= address(this).balance, "INSUFFICIENT_BALANCE");
+        (bool sent,) = _to.call{value: _amount}("");
+        require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
+
+        emit WithdrawEvent(issuerOrProtocol, _to, _amount);
+    }
+
+
+    function _authorizeUpgrade(address) internal view override {
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+    }
+
+    // @dev DEPRECATED - use `queryFee` instead
     function calculatePaymentETH(
         bytes32 _attribute,
         address _account
     ) public override view returns(uint256) {
-        uint256 tokenPrice = governance.getPriceETH();
-        uint256 price = _issuersContain(_account,keccak256("IS_BUSINESS")) == keccak256("TRUE") ? governance.pricePerBusinessAttribute(_attribute) : governance.pricePerAttribute(_attribute);
-        uint256 amountETH = (price * 1e18 / tokenPrice) ;
-        return amountETH;
+        return queryFee(_account, _attribute);
     }
 
-    /// @dev Used to determine if issuer has returned something useful
-    /// @param _account the value to check existence on
-    /// @param _attribute the value to check existence on
-    /// @param _issuer the issuer in question
-    /// @return whether or not we found a value
-    function _isDataAvailable(
+    // @dev DEPRECATED - use `getAttributesLegacy` instead
+    function getAttributesETH(
         address _account,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributes(_account, _attribute, _issuer);
-        return attrib.value != bytes32(0) && attrib.epoch != 0;
-    }
-
-    /// @dev Used to determine if issuer has returned something useful
-    /// @param _dID the value to check existsance on
-    /// @param _attribute the value to check existsance on
-    /// @param _issuer the issuer in question
-    /// @return whether or not we found a value
-    function _isDataAvailableByDID(
-        bytes32 _dID,
-        bytes32 _attribute,
-        address _issuer
-    ) internal view returns(bool) {
-        QuadPassportStore.Attribute memory attrib = passport.attributesByDID(_dID, _attribute, _issuer);
-        return attrib.value != bytes32(0) && attrib.epoch != 0;
-    }
-
-    /// @dev Used to determine if issuers have an attribute
-    /// @param _attribute the value to check existence on
-    /// @param _account account getting requested for attributes
-    /// @return unique bytes32 hash or bytes32(0) if issuers have the attribute
-    function _issuersContain(
-        address _account,
+        uint256 _tokenId,  // Unused parameter to be compatible with older version
         bytes32 _attribute
-    ) internal view returns(bytes32) {
-        for(uint256 i = 0; i < governance.getIssuersLength(); i++) {
-            bytes32 value = passport.attributes(_account, _attribute, governance.issuers(i).issuer).value;
-            if(value != bytes32(0)) {
-                return value;
-            }
-        }
-        return bytes32(0);
-    }
-
-    /// @dev Used to determine if any of the attributes is valid
-    /// @param _issuers the value to check existsance on
-    /// @return whether or not we found a value
-    function _safetyCheckIssuers(
-        address[] memory _issuers
-    ) internal pure returns(bool) {
-        for(uint256 i = 0; i < _issuers.length; i++) {
-            if(_issuers[i] == address(0))
-                return false;
-        }
-        return true;
+    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
+        return getAttributesLegacy(_account, _attribute);
     }
  }
