@@ -10,8 +10,7 @@ const {
   ALL_ATTRIBUTES,
   ALL_ACCOUNT_LEVEL_ATTRIBUTES,
   ALL_ATTRIBUTES_BY_DID,
-  ALL_TIMELOCK_ROLES,
-  ALL_PASSPORT_ROLES,
+  ALL_ROLES,
   GOVERNANCE_ROLE,
   PAUSER_ROLE,
   ISSUER_ROLE,
@@ -196,30 +195,29 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   console.log("[QuadGovernance] attribute ligibility correctly set: OK");
 
   // Check AccessControl
-  const checkUserRoles = async (
-    expectedUserRoles: any,
-    allRoles: any,
-    accessControlContract: any
-  ) => {
-    for (const userRoles of expectedUserRoles) {
-      for (const role of allRoles) {
-        expect(
-          await accessControlContract.hasRole(role, userRoles.USER)
-        ).equals(userRoles.ROLES.includes(role));
-      }
-    }
+  const checkUserRoles = async (accountRoles: any, contract: any) => {
+    accountRoles.forEach(async (accRole: any) => {
+      const account = accRole.USER;
+      const expectedRoles = accRole.ROLES;
+      ALL_ROLES.forEach(async (role: string) => {
+        await delay(1000);
+        // console.log(
+        //   `Checking Role ${
+        //     reversePrint[role]
+        //   } for User ${account} with expected roles ${
+        //     reversePrint[expectedRoles[0]]
+        //   }`
+        // );
+        expect(await contract.hasRole(role, account)).equals(
+          expectedRoles.includes(role)
+        );
+      });
+      await delay(1000);
+    });
   };
 
-  await checkUserRoles(
-    EXPECTED_USER_ROLES_PASSPORT,
-    ALL_PASSPORT_ROLES,
-    governance
-  );
+  await checkUserRoles(EXPECTED_USER_ROLES_PASSPORT, governance);
   console.log("[QuadGovernance] Access Control verified: OK");
-  await checkUserRoles(
-    EXPECTED_USER_ROLES_TIMELOCK,
-    ALL_TIMELOCK_ROLES,
-    timelock
-  );
+  await checkUserRoles(EXPECTED_USER_ROLES_TIMELOCK, timelock);
   console.log("[Timelock] Access Control verified: OK");
 })();
