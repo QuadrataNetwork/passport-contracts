@@ -18,8 +18,6 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-// const { signSetAttributes, signAccount } = require("../helpers/signature.ts");
-
 const { setAttributes } = require("../helpers/set_attributes.ts");
 const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 

@@ -66,6 +66,7 @@ export const setAttributes = async (
     issuedAt,
     fee,
     did,
+    passport.address,
     chainId
   );
 

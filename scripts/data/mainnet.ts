@@ -13,7 +13,9 @@ export const QUADRATA_TREASURY = {
   [NETWORK_IDS.MAINNET]: getAddress(
     "0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21"
   ),
-  [NETWORK_IDS.POLYGON]: getAddress(""),
+  [NETWORK_IDS.POLYGON]: getAddress(
+    "0x6d0E07D8b8F698EFcDb7F118F050717F9075f2ca"
+  ),
 };
 
 export const TIMELOCK = getAddress(
@@ -24,7 +26,9 @@ export const MULTISIG = {
   [NETWORK_IDS.MAINNET]: getAddress(
     "0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21"
   ),
-  [NETWORK_IDS.POLYGON]: getAddress(""),
+  [NETWORK_IDS.POLYGON]: getAddress(
+    "0x6d0E07D8b8F698EFcDb7F118F050717F9075f2ca"
+  ),
 };
 
 export const TOKEN_IDS = [
@@ -43,7 +47,10 @@ export const TOKEN_IDS = [
 ];
 
 // Careful - this doesn't work for Contract Deployment today
-export const MAX_GAS_FEE = ethers.utils.parseUnits("4.001", "gwei");
+export const MAX_GAS_FEE = {
+  [NETWORK_IDS.MAINNET]: ethers.utils.parseUnits("4.001", "gwei"),
+  [NETWORK_IDS.POLYGON]: ethers.utils.parseUnits("50.001", "gwei"),
+};
 
 export const ISSUERS: any[] = [
   {

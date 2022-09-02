@@ -37,9 +37,12 @@ const QUAD_GOV = getAddress("");
 const QUAD_PASSPORT = getAddress("");
 const QUAD_READER = getAddress("");
 
-const DEPLOYER = getAddress("");
+const DEPLOYER = getAddress("0xaF15d1B05fF8C105F68E5d6F39E8e6010593F9e6");
 
-const FAB = getAddress("");
+// GnosisSafe multisig
+const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
+
+// Passport Holders
 const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
 const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
 const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
@@ -52,11 +55,11 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const signers = await ethers.getSigners();
   const network = await signers[0].provider.getNetwork();
 
-  const EXPECTED_USER_ROLES_PASSPORT = [
+  const EXPECTED_ROLES_QUAD_GOVERNANCE = [
     { USER: TEDDY, ROLES: [] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
-    { USER: FAB, ROLES: [] },
+    { USER: FAB_MULTISIG, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
@@ -69,18 +72,21 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_PASSPORT, ROLES: [] },
   ];
 
-  const EXPECTED_USER_ROLES_TIMELOCK = [
+  const EXPECTED_ROLES_TIMELOCK = [
     { USER: TEDDY, ROLES: [] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
-    { USER: FAB, ROLES: [EXECUTOR_ROLE] },
+    { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
-    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
+    {
+      USER: QUADRATA_TREASURY[network.chainId],
+      ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
+    }, // we expect treasury to be a proposer bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
-    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },
     { USER: QUAD_READER, ROLES: [] },
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
@@ -216,8 +222,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     });
   };
 
-  await checkUserRoles(EXPECTED_USER_ROLES_PASSPORT, governance);
+  await checkUserRoles(EXPECTED_ROLES_QUAD_GOVERNANCE, governance);
   console.log("[QuadGovernance] Access Control verified: OK");
-  await checkUserRoles(EXPECTED_USER_ROLES_TIMELOCK, timelock);
+  await checkUserRoles(EXPECTED_ROLES_TIMELOCK, timelock);
   console.log("[Timelock] Access Control verified: OK");
 })();

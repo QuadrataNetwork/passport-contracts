@@ -180,7 +180,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
-                block.chainid
+                block.chainid,
+                address(this),
             )
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);

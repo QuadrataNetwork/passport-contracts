@@ -35,6 +35,7 @@ export const signSetAttributes = async (
   issuedAt: number,
   fee: any,
   did: string,
+  passportAddress: string,
   chainId: number = HARDHAT_CHAIN_ID
 ): Promise<typeof DataHexString> => {
   const attrKeys: string[] = [];
@@ -69,6 +70,7 @@ export const signSetAttributes = async (
         "uint256",
         "uint256",
         "uint256",
+        "address",
       ],
       [
         account.address,
@@ -79,6 +81,7 @@ export const signSetAttributes = async (
         issuedAt,
         fee,
         chainId,
+        passportAddress,
       ]
     )
   );
