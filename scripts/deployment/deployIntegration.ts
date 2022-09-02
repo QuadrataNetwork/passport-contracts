@@ -42,7 +42,12 @@ const {
     `Set maxFeePerGas to ${ethers.utils.formatUnits(MAX_GAS_FEE, "gwei")} Gwei`
   );
 
-  const signers = await ethers.getSigners();
+  // Retrieve value filter by Network
+  const signers: any = await ethers.getSigners();
+  const network = await signers[0].provider.getNetwork();
+  const treasuryPerNetwork = QUADRATA_TREASURY[network.chainId];
+  const multisigPerNetwork = MULTISIG[network.chainId];
+
   const deployer = signers[0];
   if (deployer && deployer.provider) {
     deployer.provider.getFeeData = async () => ({
@@ -56,8 +61,8 @@ const {
     const [governance] = await deployQuadrata(
       TIMELOCK,
       ISSUERS,
-      QUADRATA_TREASURY,
-      MULTISIG,
+      treasuryPerNetwork,
+      multisigPerNetwork,
       TOKEN_IDS,
       deployer,
       true, // Verbose = true,
