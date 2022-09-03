@@ -33,11 +33,11 @@ const {
 } = require("../data/mainnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("");
-const QUAD_PASSPORT = getAddress("");
-const QUAD_READER = getAddress("");
+const QUAD_GOV = getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3");
+const QUAD_PASSPORT = getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d");
+const QUAD_READER = getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
 
-const DEPLOYER = getAddress("0xaF15d1B05fF8C105F68E5d6F39E8e6010593F9e6");
+const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
 
 // GnosisSafe multisig
 const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
