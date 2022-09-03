@@ -301,8 +301,8 @@ import "./storage/QuadReaderStore.sol";
             }
         }
 
-        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
         require(isValid, "WITHDRAWAL_ADDRESS_INVALID");
+        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
         require(_amount <= address(this).balance, "INSUFFICIENT_BALANCE");
         (bool sent,) = _to.call{value: _amount}("");
         require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");

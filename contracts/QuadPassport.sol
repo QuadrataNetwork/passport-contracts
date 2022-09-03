@@ -167,8 +167,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         require(_config.verifiedAt <= block.timestamp, "INVALID_VERIFIED_AT");
         require(block.timestamp <= _config.issuedAt + 1 days, "EXPIRED_ISSUED_AT");
-        require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
         require(_config.attrKeys.length == _config.attrTypes.length, "MISMATCH_LENGTH");
+        require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
 
         // Verify signature
         bytes32 extractionHash = keccak256(
