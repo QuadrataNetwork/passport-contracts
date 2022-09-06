@@ -41,6 +41,7 @@ const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
 
 // GnosisSafe multisig
 const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
+const HUY_MULTISIG = getAddress("0x8Adbed5dB1Fa983A4Ae2bcaFEa26Aeac5Aee867c");
 
 // Passport Holders
 const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
@@ -59,6 +60,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: TEDDY, ROLES: [] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
+    { USER: HUY_MULTISIG, ROLES: [] },
     { USER: FAB_MULTISIG, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
@@ -73,9 +75,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
-    { USER: TEDDY, ROLES: [] },
+    { USER: TEDDY, ROLES: [EXECUTOR_ROLE] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
+    { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
@@ -83,7 +86,6 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       USER: QUADRATA_TREASURY[network.chainId],
       ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
     }, // we expect treasury to be a proposer bc it is our multisig
-    { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },

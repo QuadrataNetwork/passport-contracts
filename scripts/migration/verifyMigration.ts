@@ -16,10 +16,11 @@ const {
   assertGetAttributesStatic,
 } = require("../../test/helpers/assert/assert_get_attributes.ts");
 
+// !--------------- TO FILL IN --------------!
 const OLD_PASSPORT = "0x32791980a332F1283c69660eC8e426de3aD66E7f"; // Mainnet oldQuadPassport.sol
 
 const OLD_READER = "0x7907bD4Be498cC9a7E2CF1a31dEeFCD8B132bca9"; // Mainnet oldQuadReader.sol
-const NEW_READER = ""; // Mainnet QuadReader.ol
+const NEW_READER = "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"; // Mainnet QuadReader.ol
 
 (async () => {
   const passportOld = await ethers.getContractAt(
