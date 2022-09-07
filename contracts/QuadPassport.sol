@@ -42,7 +42,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override whenNotPaused {
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(DIGEST_TO_SIGN);
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
         address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
         _setAttributesInternal(account, _config, _sigIssuer);

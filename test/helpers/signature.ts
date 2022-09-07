@@ -5,7 +5,6 @@ const { Signer, DataHexString } = require("ethers");
 
 const {
   ATTRIBUTE_AML,
-  TOKEN_ID,
   DIGEST_TO_SIGN,
   HARDHAT_CHAIN_ID,
 } = require("../../utils/constant.ts");
@@ -22,8 +21,7 @@ export const signMessage = async (
 export const signAccount = async (
   signer: typeof Signer
 ): Promise<typeof DataHexString> => {
-  const digest = DIGEST_TO_SIGN;
-  const sig = await signer.signMessage(ethers.utils.arrayify(digest));
+  const sig = await signer.signMessage(DIGEST_TO_SIGN);
   return sig;
 };
 
