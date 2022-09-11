@@ -5,10 +5,11 @@ const OLD_PASSPORT = "0x32791980a332F1283c69660eC8e426de3aD66E7f"; // Mainnet Ol
 const NEW_PASSPORT = "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d";
 
 const ISSUER_ADDRESS = "0x38a08d73153F32DBB2f867338d0BD6E3746E3391"; // SpringLabs
-const MAX_GAS_FEE = ethers.utils.parseUnits("7.0001", "gwei");
+const MAX_GAS_FEE = ethers.utils.parseUnits("5.0002", "gwei");
 const BATCH_SIZE = 30;
-const START_POSITION = 1;
-const END_POSITION = START_POSITION + 5;
+// Last Position Index Completed 29
+const START_POSITION = 30;
+const END_POSITION = START_POSITION + 2;
 
 (async () => {
   // // !!!!!!!!!!!!!!! TODO: REMOVE!!!!!!!!!!!!!!!
@@ -95,5 +96,6 @@ const END_POSITION = START_POSITION + 5;
       });
 
     console.log(`Transaction hash: ${tx.hash}`);
+    await tx.wait();
   }
 })();
