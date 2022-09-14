@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
-import "./interfaces/IQuadPassportMigration.sol";
 import "./storage/QuadPassportStore.sol";
 import "./QuadSoulbound.sol";
 
@@ -404,64 +403,4 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             "INVALID_ADMIN"
         );
     }
-
-    /// @dev Admin function to migrate passports from older contract
-    /// @param _accounts List of passport holder addresses to migrate
-    /// @param _issuer Address of the issuer who issued the attestation
-    /// @param _oldPassport contract address of the old passport contract
-    function migrate(address[] calldata _accounts, address _issuer, address _oldPassport) external whenNotPaused {
-        require(
-            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
-            "INVALID_ADMIN"
-        );
-        IQuadPassportMigration _passportToMigrate = IQuadPassportMigration(_oldPassport);
-
-        for (uint256 i = 0; i < _accounts.length; i++) {
-            address account = _accounts[i];
-            require(_passportToMigrate.balanceOf(account, 1) > 0, "NO_PASSPORT_TO_MIGRATE");
-            IQuadPassportMigration.Attribute memory attrDID = _passportToMigrate.attributes(
-                account,
-                ATTRIBUTE_DID,
-                _issuer
-            );
-
-            IQuadPassportMigration.Attribute memory attrAML = _passportToMigrate.attributesByDID(
-                attrDID.value,
-                ATTRIBUTE_AML,
-                _issuer
-            );
-
-            IQuadPassportMigration.Attribute memory attrCountry = _passportToMigrate.attributes(
-                account,
-                ATTRIBUTE_COUNTRY,
-                _issuer
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(account, ATTRIBUTE_DID)),
-                attrDID.value,
-                _issuer,
-                attrDID.epoch
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(account, ATTRIBUTE_COUNTRY)),
-                attrCountry.value,
-                _issuer,
-                attrCountry.epoch
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(attrDID.value, ATTRIBUTE_AML)),
-                attrAML.value,
-                _issuer,
-                attrAML.epoch
-            );
-
-            if (balanceOf(account, 1) == 0)
-                _mint(account, 1, 1);
-
-        }
-    }
-
 }
