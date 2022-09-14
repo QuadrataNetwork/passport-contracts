@@ -696,6 +696,30 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
+    it("fail - issuerB cannot sign using issuerA's sig", async () => {
+      await expect(
+        passport
+          .connect(issuer2)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("ISSUER_OF_SIG_MUST_BE_SENDER");
+    });
+
     it("fail - attrKeys.length != attrValues.length", async () => {
       attrKeys.push(id("wrong"));
       await expect(
