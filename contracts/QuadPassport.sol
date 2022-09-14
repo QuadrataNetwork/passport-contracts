@@ -248,8 +248,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             bytes32 attrKey = keccak256(abi.encode(_account, attributeType));
             uint256 position = _position[keccak256(abi.encode(attrKey, _msgSender()))];
+            Attribute[] storage attrs = _attributes[attrKey];
             if (position > 0) {
-                Attribute[] storage attrs = _attributes[attrKey];
 
                 // Swap last attribute position with position of attribute to delete before calling pop()
                 Attribute memory attrToDelete = attrs[position-1];
@@ -263,9 +263,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
                 attrs.pop();
 
-                if (attrs.length > 0) {
-                    isEmpty = false;
-                }
+            }
+            if (attrs.length > 0) {
+                isEmpty = false;
             }
         }
 
