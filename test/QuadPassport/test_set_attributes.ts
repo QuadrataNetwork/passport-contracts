@@ -636,6 +636,43 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.revertedWith("INVALID_DID");
     });
 
+    it.only("fail - same wallet but diff DID from same issuer)", async () => {
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+
+      const newAttributeDID = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:newwrongdid"),
+        [ATTRIBUTE_AML]: formatBytes32String("9"),
+        [ATTRIBUTE_COUNTRY]: id("US"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          newAttributeDID,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE,
+          TOKEN_ID,
+          HARDHAT_CHAIN_ID,
+          {
+            oldDid: attributes[ATTRIBUTE_DID],
+            attemptUpdateDid: true
+          }
+        )
+      ).to.revertedWith("ISSUER_UPDATED_DID");
+    });
+
     it("fail - invalid tokenId", async () => {
       const badTokenId = 1337;
       await expect(

@@ -87,6 +87,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
             require(governance.getIssuerAttributePermission(issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
+            require(_config.attrTypes[i] != ATTRIBUTE_DID, "ISSUER_UPDATED_DID");
             // Verify attrKeys computation
             _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
             _writeAttrToStorage(
@@ -97,8 +98,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         }
 
-        if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0)
+        if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
+        }
         emit SetAttributeReceipt(_account, issuer, msg.value);
     }
 
