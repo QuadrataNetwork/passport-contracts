@@ -164,6 +164,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         require(_config.verifiedAt <= block.timestamp, "INVALID_VERIFIED_AT");
         require(block.timestamp <= _config.issuedAt + 1 days, "EXPIRED_ISSUED_AT");

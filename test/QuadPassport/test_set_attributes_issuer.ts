@@ -616,6 +616,22 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_VERIFIED_AT");
     });
 
+    it("fail - future issuedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(blockNumAfter);
+      const badIssuedAt = currentBlock.timestamp + 100;
+      await expect(
+        setAttributesIssuer(
+          businessPassport,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          badIssuedAt
+        )
+      ).to.be.revertedWith("INVALID_ISSUED_AT");
+    });
+
     it("fail - zero issuedAt", async () => {
       const badIssuedAt = 0;
       await expect(
