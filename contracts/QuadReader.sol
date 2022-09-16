@@ -290,17 +290,19 @@ import "./storage/QuadReaderStore.sol";
             issuerOrProtocol = address(this);
         }
 
-        address[] memory issuers = governance.getIssuers();
-        for (uint256 i = 0; i < issuers.length; i++) {
-            if (_to == governance.issuersTreasury(issuers[i])) {
-                isValid = true;
-                issuerOrProtocol = issuers[i];
-                break;
+        if (!isValid) {
+            address[] memory issuers = governance.getIssuers();
+            for (uint256 i = 0; i < issuers.length; i++) {
+                if (_to == governance.issuersTreasury(issuers[i])) {
+                    isValid = true;
+                    issuerOrProtocol = issuers[i];
+                    break;
+                }
             }
         }
 
-        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
         require(isValid, "WITHDRAWAL_ADDRESS_INVALID");
+        require(_to != address(0), "WITHDRAW_ADDRESS_ZERO");
         require(_amount <= address(this).balance, "INSUFFICIENT_BALANCE");
         (bool sent,) = _to.call{value: _amount}("");
         require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
@@ -311,22 +313,5 @@ import "./storage/QuadReaderStore.sol";
 
     function _authorizeUpgrade(address) internal view override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
-    }
-
-    // @dev DEPRECATED - use `queryFee` instead
-    function calculatePaymentETH(
-        bytes32 _attribute,
-        address _account
-    ) public override view returns(uint256) {
-        return queryFee(_account, _attribute);
-    }
-
-    // @dev DEPRECATED - use `getAttributesLegacy` instead
-    function getAttributesETH(
-        address _account,
-        uint256 _tokenId,  // Unused parameter to be compatible with older version
-        bytes32 _attribute
-    ) external override payable returns(bytes32[] memory, uint256[] memory, address[] memory) {
-        return getAttributesLegacy(_account, _attribute);
     }
  }

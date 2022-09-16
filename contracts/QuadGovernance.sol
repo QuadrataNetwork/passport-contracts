@@ -33,8 +33,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _newTreasury address of the treasury
     function setTreasury(address _newTreasury) external override {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_newTreasury != address(0), "TREASURY_ADDRESS_ZERO");
         require(_newTreasury != _treasury, "TREASURY_ADDRESS_ALREADY_SET");
+        require(_newTreasury != address(0), "TREASURY_ADDRESS_ZERO");
         address oldTreasury = _treasury;
         _treasury = _newTreasury;
         emit TreasuryUpdated(oldTreasury, _newTreasury);
@@ -225,7 +225,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         _issuerStatus[_issuer] = _status;
 
-        if(_status == true) {
+        if(_status) {
             grantRole(ISSUER_ROLE, _issuer);
         } else {
             revokeRole(ISSUER_ROLE, _issuer);

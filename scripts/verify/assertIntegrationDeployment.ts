@@ -202,13 +202,13 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       const expectedRoles = accRole.ROLES;
       ALL_ROLES.forEach(async (role: string) => {
         await delay(1000);
-        console.log(
-          `Checking Role ${
-            reversePrint[role]
-          } for User ${account} with expected roles ${
-            reversePrint[expectedRoles[0]]
-          }`
-        );
+        // console.log(
+        //   `Checking Role ${
+        //     reversePrint[role]
+        //   } for User ${account} with expected roles ${
+        //     reversePrint[expectedRoles[0]]
+        //   }`
+        // );
         expect(await contract.hasRole(role, account)).equals(
           expectedRoles.includes(role)
         );

@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
-import "./interfaces/IQuadPassportMigration.sol";
 import "./storage/QuadPassportStore.sol";
 import "./QuadSoulbound.sol";
 
@@ -42,10 +41,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override whenNotPaused {
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(DIGEST_TO_SIGN);
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
         address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
+        address issuer = _setAttributesVerify(account, _config, _sigIssuer);
 
-        _setAttributesInternal(account, _config, _sigIssuer);
+        _setAttributesInternal(account, _config, issuer);
     }
 
 
@@ -60,40 +60,42 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) external payable override whenNotPaused {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
+        require(issuer == _msgSender(), "ISSUER_OF_SIG_MUST_BE_SENDER");
 
-        _setAttributesInternal(_account, _config, _sigIssuer);
+        _setAttributesInternal(_account, _config, issuer);
     }
 
     /// @notice Internal function for `setAttributes` and `setAttributesIssuer`
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
-    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
+    /// @param _issuer Extracted address of ECDSA signature computed by an eligible issuer to authorize the action
     function _setAttributesInternal(
         address _account,
         AttributeSetterConfig memory _config,
-        bytes calldata _sigIssuer
+        address _issuer
     ) internal {
-        address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
         // Handle DID
         if(_config.did != bytes32(0)){
-            require(governance.getIssuerAttributePermission(issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
+            require(governance.getIssuerAttributePermission(_issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
             _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
                 _config.did,
-                issuer,
+                _issuer,
                 _config.verifiedAt);
         }
 
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
-            require(governance.getIssuerAttributePermission(issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
+            require(governance.getIssuerAttributePermission(_issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
             require(_config.attrTypes[i] != ATTRIBUTE_DID, "ISSUER_UPDATED_DID");
+
             // Verify attrKeys computation
             _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
             _writeAttrToStorage(
                 _config.attrKeys[i],
                 _config.attrValues[i],
-                issuer,
+                _issuer,
                 _config.verifiedAt);
 
         }
@@ -101,7 +103,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
         }
-        emit SetAttributeReceipt(_account, issuer, msg.value);
+        emit SetAttributeReceipt(_account, _issuer, msg.value);
     }
 
     /// @notice Internal function that validates supplied DID on updates do not change
@@ -166,11 +168,12 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
+        require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         require(_config.verifiedAt <= block.timestamp, "INVALID_VERIFIED_AT");
         require(block.timestamp <= _config.issuedAt + 1 days, "EXPIRED_ISSUED_AT");
-        require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
         require(_config.attrKeys.length == _config.attrTypes.length, "MISMATCH_LENGTH");
+        require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
 
         // Verify signature
         bytes32 extractionHash = keccak256(
@@ -182,7 +185,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
-                block.chainid
+                block.chainid,
+                address(this)
             )
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
@@ -200,6 +204,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Compute the attrKey for the mapping `_attributes`
     /// @param _account address of the wallet owner
     /// @param _attribute attribute type (ex: keccak256("COUNTRY"))
+    /// @param _did DID of the passport (optional - could be pass as bytes32(0))
     function _computeAttrKey(address _account, bytes32 _attribute, bytes32 _did) internal view returns(bytes32) {
         if (governance.eligibleAttributes(_attribute)) {
             return keccak256(abi.encode(_account, _attribute));
@@ -261,7 +266,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _position[keccak256(abi.encode(attrKey, attrToDelete.issuer))] = 0;
 
                 attrs[position-1] = attrToSwap;
-                attrs[attrs.length-1] = attrToDelete;
 
                 attrs.pop();
 
@@ -405,64 +409,4 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             "INVALID_ADMIN"
         );
     }
-
-    /// @dev Admin function to migrate passports from older contract
-    /// @param _accounts List of passport holder addresses to migrate
-    /// @param _issuer Address of the issuer who issued the attestation
-    /// @param _oldPassport contract address of the old passport contract
-    function migrate(address[] calldata _accounts, address _issuer, address _oldPassport) external whenNotPaused {
-        IQuadPassportMigration _passportToMigrate = IQuadPassportMigration(_oldPassport);
-        require(
-            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
-            "INVALID_ADMIN"
-        );
-
-        for (uint256 i = 0; i < _accounts.length; i++) {
-            address account = _accounts[i];
-            require(_passportToMigrate.balanceOf(account, 1) > 0, "NO_PASSPORT_TO_MIGRATE");
-            IQuadPassportMigration.Attribute memory attrDID = _passportToMigrate.attributes(
-                account,
-                ATTRIBUTE_DID,
-                _issuer
-            );
-
-            IQuadPassportMigration.Attribute memory attrAML = _passportToMigrate.attributesByDID(
-                attrDID.value,
-                ATTRIBUTE_AML,
-                _issuer
-            );
-
-            IQuadPassportMigration.Attribute memory attrCountry = _passportToMigrate.attributes(
-                account,
-                ATTRIBUTE_COUNTRY,
-                _issuer
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(account, ATTRIBUTE_DID)),
-                attrDID.value,
-                _issuer,
-                attrDID.epoch
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(account, ATTRIBUTE_COUNTRY)),
-                attrCountry.value,
-                _issuer,
-                attrCountry.epoch
-            );
-
-            _writeAttrToStorage(
-                keccak256(abi.encode(attrDID.value, ATTRIBUTE_AML)),
-                attrAML.value,
-                _issuer,
-                attrAML.epoch
-            );
-
-            if (balanceOf(account, 1) == 0)
-                _mint(account, 1, 1);
-
-        }
-    }
-
 }

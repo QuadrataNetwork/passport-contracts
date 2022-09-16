@@ -20,24 +20,19 @@ export const deployQuadrata = async (
   treasury: string,
   multisig: string,
   tokenIds: any[],
-  deployer: any,
   verbose: boolean = false,
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
   governanceAddress: string = "",
   passportAddress: string = "",
   readerAddress: string = ""
 ) => {
-  const network = await deployer.provider.getNetwork();
-  const governance = await deployGovernance(deployer, governanceAddress);
+  const signers: any = await ethers.getSigners();
+  const network = await signers[0].provider.getNetwork();
+  const governance = await deployGovernance(governanceAddress);
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
-  const passport = await deployPassport(governance, deployer, passportAddress);
+  const passport = await deployPassport(governance, passportAddress);
   if (verbose) console.log(`QuadPassport is deployed: ${passport.address}`);
-  const reader = await deployReader(
-    governance,
-    passport,
-    deployer,
-    readerAddress
-  );
+  const reader = await deployReader(governance, passport, readerAddress);
   if (verbose) console.log("QuadReader is deployed: ", reader.address);
   let tx;
 
@@ -189,10 +184,7 @@ export const deployQuadrata = async (
   if (verbose) console.log(`[QuadGovernance] grant PAUSER_ROLE to ${multisig}`);
 
   // Deploy TestQuadrata contracts
-  const TestQuadrata = await ethers.getContractFactory(
-    "TestQuadrata",
-    deployer
-  );
+  const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
   const testQuadrata = await TestQuadrata.deploy();
   await testQuadrata.deployed();
 
@@ -209,20 +201,12 @@ export const deployQuadrata = async (
 
 export const deployPassport = async (
   governance: Contract,
-  deployer: any,
   passportAddress: string = ""
 ): Promise<Contract> => {
   if (passportAddress !== "") {
-    return await ethers.getContractAt(
-      "QuadPassport",
-      passportAddress,
-      deployer
-    );
+    return await ethers.getContractAt("QuadPassport", passportAddress);
   }
-  const QuadPassport = await ethers.getContractFactory(
-    "QuadPassport",
-    deployer
-  );
+  const QuadPassport = await ethers.getContractFactory("QuadPassport");
   const passport = await upgrades.deployProxy(
     QuadPassport,
     [governance.address],
@@ -233,20 +217,12 @@ export const deployPassport = async (
 };
 
 export const deployGovernance = async (
-  deployer: any,
   governanceAddress: string = ""
 ): Promise<Contract> => {
   if (governanceAddress !== "") {
-    return await ethers.getContractAt(
-      "QuadGovernance",
-      governanceAddress,
-      deployer
-    );
+    return await ethers.getContractAt("QuadGovernance", governanceAddress);
   }
-  const QuadGovernance = await ethers.getContractFactory(
-    "QuadGovernance",
-    deployer
-  );
+  const QuadGovernance = await ethers.getContractFactory("QuadGovernance");
   const governance = await upgrades.deployProxy(QuadGovernance, [], {
     initializer: "initialize",
     kind: "uups",
@@ -259,13 +235,12 @@ export const deployGovernance = async (
 export const deployReader = async (
   governance: Contract,
   passport: Contract,
-  deployer: any,
   readerAddress: string = ""
 ): Promise<Contract> => {
   if (readerAddress !== "") {
-    return await ethers.getContractAt("QuadReader", readerAddress, deployer);
+    return await ethers.getContractAt("QuadReader", readerAddress);
   }
-  const QuadReader = await ethers.getContractFactory("QuadReader", deployer);
+  const QuadReader = await ethers.getContractFactory("QuadReader");
   const reader = await upgrades.deployProxy(
     QuadReader,
     [governance.address, passport.address],
