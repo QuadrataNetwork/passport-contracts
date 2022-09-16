@@ -10,6 +10,3 @@ coverage.json
 cache
 artifacts
 .openzeppelin
-
-## Typechain
-types
