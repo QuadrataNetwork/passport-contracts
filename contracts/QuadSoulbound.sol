@@ -64,7 +64,7 @@ contract QuadSoulbound is IQuadSoulbound, IERC165, ContextUpgradeable {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return
             interfaceId == type(IQuadSoulbound).interfaceId ||
             interfaceId == type(ContextUpgradeable).interfaceId ||
