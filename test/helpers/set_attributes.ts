@@ -69,6 +69,7 @@ export const setAttributes = async (
     issuedAt,
     fee,
     opts.oldDid || did,
+    passport.address,
     chainId
   );
 
