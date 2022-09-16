@@ -43,8 +43,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) external payable override whenNotPaused {
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
         address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
+        address issuer = _setAttributesVerify(account, _config, _sigIssuer);
 
-        _setAttributesInternal(account, _config, _sigIssuer);
+        _setAttributesInternal(account, _config, issuer);
     }
 
 
@@ -59,46 +60,47 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) external payable override whenNotPaused {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
+        require(issuer == _msgSender(), "ISSUER_OF_SIG_MUST_BE_SENDER");
 
-        _setAttributesInternal(_account, _config, _sigIssuer);
+        _setAttributesInternal(_account, _config, issuer);
     }
 
     /// @notice Internal function for `setAttributes` and `setAttributesIssuer`
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
-    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
+    /// @param _issuer Extracted address of ECDSA signature computed by an eligible issuer to authorize the action
     function _setAttributesInternal(
         address _account,
         AttributeSetterConfig memory _config,
-        bytes calldata _sigIssuer
+        address _issuer
     ) internal {
-        address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
         // Handle DID
         if(_config.did != bytes32(0)){
-            require(governance.getIssuerAttributePermission(issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
+            require(governance.getIssuerAttributePermission(_issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
             _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
                 _config.did,
-                issuer,
+                _issuer,
                 _config.verifiedAt);
         }
 
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
-            require(governance.getIssuerAttributePermission(issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
+            require(governance.getIssuerAttributePermission(_issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
             // Verify attrKeys computation
             _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
             _writeAttrToStorage(
                 _config.attrKeys[i],
                 _config.attrValues[i],
-                issuer,
+                _issuer,
                 _config.verifiedAt);
 
         }
 
         if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0)
             _mint(_account, _config.tokenId, 1);
-        emit SetAttributeReceipt(_account, issuer, msg.value);
+        emit SetAttributeReceipt(_account, _issuer, msg.value);
     }
 
     /// @notice Internal function that validates supplied DID on updates do not change
