@@ -636,7 +636,7 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.revertedWith("INVALID_DID");
     });
 
-    it("fail - same wallet but diff DID from same issuer)", async () => {
+    it("fail - issuers cannot update DID when passed as attribute value", async () => {
       await setAttributes(
         minterA,
         issuer,
