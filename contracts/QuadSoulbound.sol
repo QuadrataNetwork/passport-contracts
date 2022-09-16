@@ -2,13 +2,14 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
+import "@openzeppelin/contracts/interfaces/IERC165.sol";
 
 import "./interfaces/IQuadSoulbound.sol";
 
 /// @title Quadrata Soulbound NFT
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice This represents Quadrata Soulbound NFT
-contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
+contract QuadSoulbound is IQuadSoulbound, IERC165, ContextUpgradeable {
 
     // Mapping from token ID to account balances
     mapping(uint256 => mapping(address => uint256)) private _balances;
@@ -66,7 +67,8 @@ contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
         return
             interfaceId == type(IQuadSoulbound).interfaceId ||
-            interfaceId == type(ContextUpgradeable).interfaceId;
+            interfaceId == type(ContextUpgradeable).interfaceId ||
+            interfaceId == type(IERC165).interfaceId;
     }
 
     /**
