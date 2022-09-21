@@ -28,11 +28,9 @@ interface QuadReaderInterface extends ethers.utils.Interface {
     "PAUSER_ROLE()": FunctionFragment;
     "READER_ROLE()": FunctionFragment;
     "balanceOf(address,bytes32)": FunctionFragment;
-    "calculatePaymentETH(bytes32,address)": FunctionFragment;
     "getAttributes(address,bytes32)": FunctionFragment;
     "getAttributesBulk(address,bytes32[])": FunctionFragment;
     "getAttributesBulkLegacy(address,bytes32[])": FunctionFragment;
-    "getAttributesETH(address,uint256,bytes32)": FunctionFragment;
     "getAttributesLegacy(address,bytes32)": FunctionFragment;
     "governance()": FunctionFragment;
     "hasPassportByIssuer(address,bytes32,address)": FunctionFragment;
@@ -72,10 +70,6 @@ interface QuadReaderInterface extends ethers.utils.Interface {
     values: [string, BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "calculatePaymentETH",
-    values: [BytesLike, string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "getAttributes",
     values: [string, BytesLike]
   ): string;
@@ -86,10 +80,6 @@ interface QuadReaderInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "getAttributesBulkLegacy",
     values: [string, BytesLike[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAttributesETH",
-    values: [string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getAttributesLegacy",
@@ -156,10 +146,6 @@ interface QuadReaderInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "calculatePaymentETH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getAttributes",
     data: BytesLike
   ): Result;
@@ -169,10 +155,6 @@ interface QuadReaderInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getAttributesBulkLegacy",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getAttributesETH",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -325,12 +307,6 @@ export class QuadReader extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     getAttributes(
       _account: string,
       _attribute: BytesLike,
@@ -346,13 +322,6 @@ export class QuadReader extends BaseContract {
     getAttributesBulkLegacy(
       _account: string,
       _attributes: BytesLike[],
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -433,12 +402,6 @@ export class QuadReader extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  calculatePaymentETH(
-    _attribute: BytesLike,
-    _account: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   getAttributes(
     _account: string,
     _attribute: BytesLike,
@@ -454,13 +417,6 @@ export class QuadReader extends BaseContract {
   getAttributesBulkLegacy(
     _account: string,
     _attributes: BytesLike[],
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  getAttributesETH(
-    _account: string,
-    _tokenId: BigNumberish,
-    _attribute: BytesLike,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -541,12 +497,6 @@ export class QuadReader extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getAttributes(
       _account: string,
       _attribute: BytesLike,
@@ -582,13 +532,6 @@ export class QuadReader extends BaseContract {
         issuers: string[];
       }
     >;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string[], BigNumber[], string[]]>;
 
     getAttributesLegacy(
       _account: string,
@@ -786,12 +729,6 @@ export class QuadReader extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getAttributes(
       _account: string,
       _attribute: BytesLike,
@@ -807,13 +744,6 @@ export class QuadReader extends BaseContract {
     getAttributesBulkLegacy(
       _account: string,
       _attributes: BytesLike[],
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -895,12 +825,6 @@ export class QuadReader extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     getAttributes(
       _account: string,
       _attribute: BytesLike,
@@ -916,13 +840,6 @@ export class QuadReader extends BaseContract {
     getAttributesBulkLegacy(
       _account: string,
       _attributes: BytesLike[],
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
