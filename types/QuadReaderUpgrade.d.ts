@@ -28,12 +28,10 @@ interface QuadReaderUpgradeInterface extends ethers.utils.Interface {
     "PAUSER_ROLE()": FunctionFragment;
     "READER_ROLE()": FunctionFragment;
     "balanceOf(address,bytes32)": FunctionFragment;
-    "calculatePaymentETH(bytes32,address)": FunctionFragment;
     "foo()": FunctionFragment;
     "getAttributes(address,bytes32)": FunctionFragment;
     "getAttributesBulk(address,bytes32[])": FunctionFragment;
     "getAttributesBulkLegacy(address,bytes32[])": FunctionFragment;
-    "getAttributesETH(address,uint256,bytes32)": FunctionFragment;
     "getAttributesLegacy(address,bytes32)": FunctionFragment;
     "governance()": FunctionFragment;
     "hasPassportByIssuer(address,bytes32,address)": FunctionFragment;
@@ -72,10 +70,6 @@ interface QuadReaderUpgradeInterface extends ethers.utils.Interface {
     functionFragment: "balanceOf",
     values: [string, BytesLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "calculatePaymentETH",
-    values: [BytesLike, string]
-  ): string;
   encodeFunctionData(functionFragment: "foo", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAttributes",
@@ -88,10 +82,6 @@ interface QuadReaderUpgradeInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "getAttributesBulkLegacy",
     values: [string, BytesLike[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAttributesETH",
-    values: [string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getAttributesLegacy",
@@ -157,10 +147,6 @@ interface QuadReaderUpgradeInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "calculatePaymentETH",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "foo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getAttributes",
@@ -172,10 +158,6 @@ interface QuadReaderUpgradeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getAttributesBulkLegacy",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getAttributesETH",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -328,12 +310,6 @@ export class QuadReaderUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
-
     foo(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     getAttributes(
@@ -351,13 +327,6 @@ export class QuadReaderUpgrade extends BaseContract {
     getAttributesBulkLegacy(
       _account: string,
       _attributes: BytesLike[],
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -438,12 +407,6 @@ export class QuadReaderUpgrade extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  calculatePaymentETH(
-    _attribute: BytesLike,
-    _account: string,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   foo(overrides?: CallOverrides): Promise<BigNumber>;
 
   getAttributes(
@@ -461,13 +424,6 @@ export class QuadReaderUpgrade extends BaseContract {
   getAttributesBulkLegacy(
     _account: string,
     _attributes: BytesLike[],
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  getAttributesETH(
-    _account: string,
-    _tokenId: BigNumberish,
-    _attribute: BytesLike,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -548,12 +504,6 @@ export class QuadReaderUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     foo(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAttributes(
@@ -591,13 +541,6 @@ export class QuadReaderUpgrade extends BaseContract {
         issuers: string[];
       }
     >;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string[], BigNumber[], string[]]>;
 
     getAttributesLegacy(
       _account: string,
@@ -795,12 +738,6 @@ export class QuadReaderUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     foo(overrides?: CallOverrides): Promise<BigNumber>;
 
     getAttributes(
@@ -818,13 +755,6 @@ export class QuadReaderUpgrade extends BaseContract {
     getAttributesBulkLegacy(
       _account: string,
       _attributes: BytesLike[],
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -906,12 +836,6 @@ export class QuadReaderUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    calculatePaymentETH(
-      _attribute: BytesLike,
-      _account: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     foo(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getAttributes(
@@ -929,13 +853,6 @@ export class QuadReaderUpgrade extends BaseContract {
     getAttributesBulkLegacy(
       _account: string,
       _attributes: BytesLike[],
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    getAttributesETH(
-      _account: string,
-      _tokenId: BigNumberish,
-      _attribute: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

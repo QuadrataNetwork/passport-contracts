@@ -58,10 +58,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
     ) external payable override whenNotPaused {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
-        require(issuer == _msgSender(), "ISSUER_OF_SIG_MUST_BE_SENDER");
 
         _setAttributesInternal(_account, _config, issuer);
     }

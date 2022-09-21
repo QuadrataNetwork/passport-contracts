@@ -36,7 +36,6 @@ interface QuadPassportUpgradeInterface extends ethers.utils.Interface {
     "foo()": FunctionFragment;
     "governance()": FunctionFragment;
     "initialize(address)": FunctionFragment;
-    "migrate(address[],address,address)": FunctionFragment;
     "name()": FunctionFragment;
     "passportPaused()": FunctionFragment;
     "pause()": FunctionFragment;
@@ -106,10 +105,6 @@ interface QuadPassportUpgradeInterface extends ethers.utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "initialize", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "migrate",
-    values: [string[], string, string]
-  ): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "passportPaused",
@@ -225,7 +220,6 @@ interface QuadPassportUpgradeInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "foo", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "governance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "migrate", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "passportPaused",
@@ -460,13 +454,6 @@ export class QuadPassportUpgrade extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    migrate(
-      _accounts: string[],
-      _issuer: string,
-      _oldPassport: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     name(overrides?: CallOverrides): Promise<[string]>;
 
     passportPaused(overrides?: CallOverrides): Promise<[boolean]>;
@@ -611,13 +598,6 @@ export class QuadPassportUpgrade extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  migrate(
-    _accounts: string[],
-    _issuer: string,
-    _oldPassport: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   name(overrides?: CallOverrides): Promise<string>;
 
   passportPaused(overrides?: CallOverrides): Promise<boolean>;
@@ -755,13 +735,6 @@ export class QuadPassportUpgrade extends BaseContract {
 
     initialize(
       _governanceContract: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    migrate(
-      _accounts: string[],
-      _issuer: string,
-      _oldPassport: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1074,13 +1047,6 @@ export class QuadPassportUpgrade extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    migrate(
-      _accounts: string[],
-      _issuer: string,
-      _oldPassport: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
     passportPaused(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1217,13 +1183,6 @@ export class QuadPassportUpgrade extends BaseContract {
 
     initialize(
       _governanceContract: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    migrate(
-      _accounts: string[],
-      _issuer: string,
-      _oldPassport: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
