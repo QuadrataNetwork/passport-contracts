@@ -18,7 +18,7 @@ const {
 } = require("../../utils/constant.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_READER = getAddress("");
+const QUAD_READER = getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
 
 const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
 const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");

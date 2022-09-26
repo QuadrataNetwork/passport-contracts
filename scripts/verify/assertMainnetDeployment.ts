@@ -10,8 +10,7 @@ const {
   ALL_ATTRIBUTES,
   ALL_ACCOUNT_LEVEL_ATTRIBUTES,
   ALL_ATTRIBUTES_BY_DID,
-  ALL_TIMELOCK_ROLES,
-  ALL_PASSPORT_ROLES,
+  ALL_ROLES,
   GOVERNANCE_ROLE,
   PAUSER_ROLE,
   ISSUER_ROLE,
@@ -34,13 +33,17 @@ const {
 } = require("../data/mainnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("");
-const QUAD_PASSPORT = getAddress("");
-const QUAD_READER = getAddress("");
+const QUAD_GOV = getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3");
+const QUAD_PASSPORT = getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d");
+const QUAD_READER = getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
 
-const DEPLOYER = getAddress("");
+const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
 
-const FAB = getAddress("");
+// GnosisSafe multisig
+const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
+const HUY_MULTISIG = getAddress("0x8Adbed5dB1Fa983A4Ae2bcaFEa26Aeac5Aee867c");
+
+// Passport Holders
 const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
 const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
 const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
@@ -53,11 +56,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const signers = await ethers.getSigners();
   const network = await signers[0].provider.getNetwork();
 
-  const EXPECTED_USER_ROLES_PASSPORT = [
+  const EXPECTED_ROLES_QUAD_GOVERNANCE = [
     { USER: TEDDY, ROLES: [] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
-    { USER: FAB, ROLES: [] },
+    { USER: HUY_MULTISIG, ROLES: [] },
+    { USER: FAB_MULTISIG, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
@@ -70,18 +74,21 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_PASSPORT, ROLES: [] },
   ];
 
-  const EXPECTED_USER_ROLES_TIMELOCK = [
-    { USER: TEDDY, ROLES: [] },
+  const EXPECTED_ROLES_TIMELOCK = [
+    { USER: TEDDY, ROLES: [EXECUTOR_ROLE] },
     { USER: DANIEL, ROLES: [] },
     { USER: TRAVIS, ROLES: [] },
-    { USER: FAB, ROLES: [EXECUTOR_ROLE] },
+    { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+    { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
-    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
-    { USER: ISSUERS[0].treasury, ROLES: [] },
+    {
+      USER: QUADRATA_TREASURY[network.chainId],
+      ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
+    }, // we expect treasury to be a proposer bc it is our multisig
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
-    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },
     { USER: QUAD_READER, ROLES: [] },
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
@@ -196,30 +203,29 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   console.log("[QuadGovernance] attribute ligibility correctly set: OK");
 
   // Check AccessControl
-  const checkUserRoles = async (
-    expectedUserRoles: any,
-    allRoles: any,
-    accessControlContract: any
-  ) => {
-    for (const userRoles of expectedUserRoles) {
-      for (const role of allRoles) {
-        expect(
-          await accessControlContract.hasRole(role, userRoles.USER)
-        ).equals(userRoles.ROLES.includes(role));
-      }
-    }
+  const checkUserRoles = async (accountRoles: any, contract: any) => {
+    accountRoles.forEach(async (accRole: any) => {
+      const account = accRole.USER;
+      const expectedRoles = accRole.ROLES;
+      ALL_ROLES.forEach(async (role: string) => {
+        await delay(1000);
+        // console.log(
+        //   `Checking Role ${
+        //     reversePrint[role]
+        //   } for User ${account} with expected roles ${
+        //     reversePrint[expectedRoles[0]]
+        //   }`
+        // );
+        expect(await contract.hasRole(role, account)).equals(
+          expectedRoles.includes(role)
+        );
+      });
+      await delay(1000);
+    });
   };
 
-  await checkUserRoles(
-    EXPECTED_USER_ROLES_PASSPORT,
-    ALL_PASSPORT_ROLES,
-    governance
-  );
+  await checkUserRoles(EXPECTED_ROLES_QUAD_GOVERNANCE, governance);
   console.log("[QuadGovernance] Access Control verified: OK");
-  await checkUserRoles(
-    EXPECTED_USER_ROLES_TIMELOCK,
-    ALL_TIMELOCK_ROLES,
-    timelock
-  );
+  await checkUserRoles(EXPECTED_ROLES_TIMELOCK, timelock);
   console.log("[Timelock] Access Control verified: OK");
 })();

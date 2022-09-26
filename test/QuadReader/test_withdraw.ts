@@ -169,7 +169,7 @@ describe("QuadReader.withdraw", async () => {
     it("fail - withdraw to address(0)", async () => {
       await expect(
         reader.connect(admin).withdraw(ethers.constants.AddressZero, queryFee)
-      ).to.revertedWith("WITHDRAW_ADDRESS_ZERO");
+      ).to.revertedWith("WITHDRAWAL_ADDRESS_INVALID");
     });
 
     it("fail - withdraw balance 0", async () => {

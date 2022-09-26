@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import { Contract, Wallet } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { formatBytes32String, hexZeroPad, id } from "ethers/lib/utils";
+import {QuadGovernance} from "../../types"
 
 const {
   ATTRIBUTE_AML,
@@ -25,7 +26,7 @@ const {
 
 describe("QuadPassport.burnPassports", async () => {
   let passport: Contract;
-  let governance: Contract; // eslint-disable-line no-unused-vars
+  let governance: QuadGovernance; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -37,6 +38,7 @@ describe("QuadPassport.burnPassports", async () => {
     issuerB: SignerWithAddress,
     issuerTreasury: SignerWithAddress,
     issuerBTreasury: SignerWithAddress,
+    freeAccount: SignerWithAddress,
     dataChecker: SignerWithAddress; // used as READER_ROLE to check AML and DID after burn
   const verifiedAt: number = Math.floor(new Date().getTime() / 1000);
   const issuedAt: number = Math.floor(new Date().getTime() / 1000);
@@ -72,6 +74,7 @@ describe("QuadPassport.burnPassports", async () => {
       dataChecker,
       issuerB,
       issuerBTreasury,
+      freeAccount
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
@@ -1405,6 +1408,70 @@ describe("QuadPassport.burnPassports", async () => {
       await expect(
         passport.connect(admin).burnPassportsIssuer(minterA.address)
       ).to.revertedWith("INVALID_ISSUER");
+
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+    });
+
+    it("success - issuerB cannot accidentally delete issuerA's attestations", async () => {
+      await expect(
+        setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
+
+      await governance.connect(admin).addIssuer(freeAccount.address, freeAccount.address);
+
+      expect(await passport.connect(issuerB).burnPassportsIssuer(minterA.address))
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
