@@ -279,6 +279,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         mockReader
       );
     });
+
     it("success - overwritting position (multiple issuers)", async () => {
       // Issuer 1
       await setAttributesIssuer(
@@ -442,7 +443,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       attrTypes: any,
       fee: any,
       tokenId: any,
-      blockId: any,
+      chainId: any,
       sigIssuer: any;
 
     beforeEach(async () => {
@@ -484,7 +485,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
 
       fee = zeroFee;
       tokenId = TOKEN_ID;
-      blockId = HARDHAT_CHAIN_ID;
+      chainId = HARDHAT_CHAIN_ID;
 
       sigIssuer = await signSetAttributes(
         businessPassport,
@@ -494,8 +495,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         issuedAt,
         fee,
         did,
-        blockId,
-        tokenId
+        passport.address,
+        chainId
       );
     });
 
@@ -519,6 +520,79 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             value: fee,
           }
         );
+    });
+
+    it("success - issuerB can sign using issuerA's sig", async () => {
+      await expect(
+        passport
+          .connect(issuer2)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.not.be.reverted;
+    });
+
+    it("success - not an ISSUER_ROLE", async () => {
+      await governance.connect(admin).setIssuerStatus(issuer.address, false);
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.reverted;
+    });
+
+    it("success - invalid (signature) - wrong issuer sender", async () => {
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.not.be.reverted;
     });
 
     it("fail - signature already used", async () => {
@@ -616,6 +690,22 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_VERIFIED_AT");
     });
 
+    it("fail - future issuedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(blockNumAfter);
+      const badIssuedAt = currentBlock.timestamp + 100;
+      await expect(
+        setAttributesIssuer(
+          businessPassport,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          badIssuedAt
+        )
+      ).to.be.revertedWith("INVALID_ISSUED_AT");
+    });
+
     it("fail - zero issuedAt", async () => {
       const badIssuedAt = 0;
       await expect(
@@ -669,31 +759,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             }
           )
       ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_FEE");
-    });
-
-    it("fail - not an ISSUER_ROLE", async () => {
-      await governance.connect(admin).setIssuerStatus(issuer.address, false);
-      await expect(
-        passport
-          .connect(issuer)
-          .setAttributesIssuer(
-            businessPassport.address,
-            [
-              attrKeys,
-              attrValues,
-              attrTypes,
-              attributes[ATTRIBUTE_DID],
-              tokenId,
-              verifiedAt,
-              issuedAt,
-              fee,
-            ],
-            sigIssuer,
-            {
-              value: fee,
-            }
-          )
-      ).to.be.revertedWith("INVALID_ISSUER");
     });
 
     it("fail - attrKeys.length != attrValues.length", async () => {
@@ -834,8 +899,44 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         issuedAt,
         fee,
         attributes[ATTRIBUTE_DID],
-        wrongChainId,
-        tokenId
+        passport.address,
+        wrongChainId
+      );
+
+      await expect(
+        passport
+          .connect(issuer)
+          .setAttributesIssuer(
+            businessPassport.address,
+            [
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ],
+            sigIssuer,
+            {
+              value: fee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_ISSUER");
+    });
+
+    it("fail - invalid signature (passport address)", async () => {
+      sigIssuer = await signSetAttributes(
+        businessPassport,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        attributes[ATTRIBUTE_DID],
+        governance.address,
+        chainId
       );
 
       await expect(
@@ -1050,30 +1151,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             }
           )
       ).to.be.revertedWith("ACCOUNT_CANNOT_BE_ZERO");
-    });
-
-    it("fail - invalid (signature) - wrong issuer sender", async () => {
-      await expect(
-        passport
-          .connect(minterA)
-          .setAttributesIssuer(
-            businessPassport.address,
-            [
-              attrKeys,
-              attrValues,
-              attrTypes,
-              attributes[ATTRIBUTE_DID],
-              tokenId,
-              verifiedAt,
-              issuedAt,
-              fee,
-            ],
-            sigIssuer,
-            {
-              value: fee,
-            }
-          )
-      ).to.be.revertedWith("INVALID_ISSUER");
     });
 
     it("fail - contract paused", async () => {

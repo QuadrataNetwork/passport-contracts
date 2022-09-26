@@ -21,7 +21,8 @@ export const setAttributes = async (
   issuedAt: number,
   fee: any,
   tokenId: number = TOKEN_ID,
-  chainId: number = HARDHAT_CHAIN_ID
+  chainId: number = HARDHAT_CHAIN_ID,
+  opts: any = {}
 ) => {
   // Deep Copy to avoid mutating the object
   const attributes = Object.assign({}, attributesToSet);
@@ -39,7 +40,7 @@ export const setAttributes = async (
     if (k === ATTRIBUTE_AML) {
       expect(ATTRIBUTE_DID in attributes).to.equal(true);
       attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [did, k])
+        ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [opts.oldDid || did, k])
       );
     } else {
       attrKey = ethers.utils.keccak256(
@@ -49,14 +50,16 @@ export const setAttributes = async (
         )
       );
     }
-    if (k !== ATTRIBUTE_DID) {
+    if (opts.attemptUpdateDid || k !== ATTRIBUTE_DID) {
       attrKeys.push(attrKey);
       attrValues.push(attributes[k]);
       attrTypes.push(k);
     }
   });
 
-  delete attributes[ATTRIBUTE_DID];
+  if(!opts.attemptUpdateDid) {
+    delete attributes[ATTRIBUTE_DID];
+  }
 
   const sigIssuer = await signSetAttributes(
     account,
@@ -65,7 +68,8 @@ export const setAttributes = async (
     verifiedAt,
     issuedAt,
     fee,
-    did,
+    opts.oldDid || did,
+    passport.address,
     chainId
   );
 
@@ -78,7 +82,7 @@ export const setAttributes = async (
           attrKeys,
           attrValues,
           attrTypes,
-          did,
+          opts.oldDid || did,
           tokenId,
           verifiedAt,
           issuedAt,

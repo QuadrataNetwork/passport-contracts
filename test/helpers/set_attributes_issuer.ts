@@ -20,7 +20,7 @@ export const setAttributesIssuer = async (
   verifiedAt: number,
   issuedAt: number,
   tokenId: number = TOKEN_ID,
-  blockId: number = HARDHAT_CHAIN_ID
+  chainId: number = HARDHAT_CHAIN_ID
 ) => {
   // Deep Copy to avoid mutating the object
   const attributes = Object.assign({}, attributesToSet);
@@ -67,8 +67,8 @@ export const setAttributesIssuer = async (
     issuedAt,
     fee,
     did,
-    blockId,
-    tokenId
+    passport.address,
+    chainId
   );
 
   await expect(
