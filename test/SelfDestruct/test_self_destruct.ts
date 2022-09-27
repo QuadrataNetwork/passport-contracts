@@ -66,8 +66,8 @@ describe("SelfDestruct()", function () {
   it("should destroy QuadPassport", async () => {
     const calldata = selfDestruct.interface.encodeFunctionData("dangerZone");
     console.log(calldata)
-    //console.log(defaultAbiCoder.encode())
-    await quadPassport.connect(timelock).upgradeToAndCall(selfDestruct.address, calldata);
+    //await quadPassport.connect(timelock).upgradeToAndCall(selfDestruct.address, calldata);
+    await quadPassport.connect(timelock).upgradeTo("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d");
   })
 
 })
