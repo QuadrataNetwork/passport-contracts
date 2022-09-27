@@ -44,7 +44,6 @@ export const deployPassportEcosystem = async (
     treasury.address,
     admin.address,
     tokenIds,
-    deployer,
     false
   );
 

@@ -49,37 +49,27 @@ const {
   const multisigPerNetwork = MULTISIG[network.chainId];
 
   const deployer = signers[0];
-  if (deployer && deployer.provider) {
-    deployer.provider.getFeeData = async () => ({
-      maxFeePerGas: MAX_GAS_FEE,
-      maxPriorityFeePerGas: MAX_GAS_FEE.sub(1),
-      gasPrice: MAX_GAS_FEE,
-    });
 
-    console.log(`Deployer address: ${deployer.address}`);
+  console.log(`Deployer address: ${deployer.address}`);
 
-    const [governance] = await deployQuadrata(
-      TIMELOCK,
-      ISSUERS,
-      treasuryPerNetwork,
-      multisigPerNetwork,
-      TOKEN_IDS,
-      deployer,
-      true, // Verbose = true,
-      MAX_GAS_FEE
-    );
+  const [governance] = await deployQuadrata(
+    TIMELOCK,
+    ISSUERS,
+    treasuryPerNetwork,
+    multisigPerNetwork,
+    TOKEN_IDS,
+    true, // Verbose = true,
+    MAX_GAS_FEE
+  );
 
-    let tx = await governance
-      .connect(deployer)
-      .renounceRole(GOVERNANCE_ROLE, deployer.address);
-    await tx.wait();
-    console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
-    tx = await governance
-      .connect(deployer)
-      .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
-    await tx.wait();
-    console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
-  } else {
-    throw new Error("No Provider");
-  }
+  let tx = await governance
+    .connect(deployer)
+    .renounceRole(GOVERNANCE_ROLE, deployer.address);
+  await tx.wait();
+  console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
+  tx = await governance
+    .connect(deployer)
+    .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
+  await tx.wait();
+  console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
 })();
