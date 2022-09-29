@@ -95,7 +95,7 @@ describe("QuadPassport.setAttributes", async () => {
         [verifiedAt],
         [issuedAt],
         [MINT_PRICE],
-        [1],
+        [TOKEN_ID],
         [HARDHAT_CHAIN_ID],
       );
       await assertSetAttribute(
@@ -105,6 +105,33 @@ describe("QuadPassport.setAttributes", async () => {
         [attributes],
         [verifiedAt],
         [MINT_PRICE],
+        mockReader
+      );
+    });
+
+    it("setAttributesBulk (Multiple Attributes, Diff Issuers - same dataset)", async () => {
+      const attributes: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+      await setAttributesBulk(
+        passport,
+        minterA,
+        [issuer, issuer2],
+        [attributes, attributes],
+        [verifiedAt, verifiedAt],
+        [issuedAt, issuedAt],
+        [MINT_PRICE, MINT_PRICE],
+        [TOKEN_ID, TOKEN_ID],
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+      );
+
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [attributes, attributes],
+        [verifiedAt, verifiedAt],
+        [MINT_PRICE, MINT_PRICE],
         mockReader
       );
     });

@@ -80,7 +80,6 @@ export const setAttributesBulk = async (
     bulkSigIssuer.push(sigIssuer)
     bulkSigAccount.push(sigAccount)
   }
-
   await expect(
     passport
       .connect(account)
@@ -89,7 +88,7 @@ export const setAttributesBulk = async (
         bulkSigIssuer,
         bulkSigAccount,
         {
-          value: fees.reduce((total: number, eachFee: number) => total += eachFee, 0),
+          value: fees.reduce((total: number, eachFee: string) => total += parseInt(eachFee), 0),
         }
       )
   )
