@@ -89,10 +89,9 @@ export const setAttributesBulk = async (
         bulkSigIssuer,
         bulkSigAccount,
         {
-          value: fees[0],
+          value: fees.reduce((total: number, eachFee: number) => total += eachFee, 0),
         }
       )
   )
     .to.emit(passport, "SetAttributeReceipt")
-    .withArgs(account.address, issuers[0].address, fees[0]);
 };
