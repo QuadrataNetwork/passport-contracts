@@ -98,15 +98,15 @@ describe("QuadPassport.setAttributes", async () => {
         [1],
         [HARDHAT_CHAIN_ID],
       );
-      // await assertSetAttribute(
-      //   minterA,
-      //   [issuer],
-      //   passport,
-      //   [attributes],
-      //   [verifiedAt],
-      //   [MINT_PRICE],
-      //   mockReader
-      // );
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributes],
+        [verifiedAt],
+        [MINT_PRICE],
+        mockReader
+      );
     });
 
   });
