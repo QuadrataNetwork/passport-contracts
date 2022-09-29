@@ -49,7 +49,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         _setAttributesInternal(account, _config, issuer);
     }
 
-    /// @notice Set attributes for a Quadrata Passport (Only Individuals)
+    /// @notice Set attributes from multiple issuers for a Quadrata Passport (Only Individuals)
     /// @dev Only when authorized by an eligible issuer
     /// @param _configs List of input paramters required to authorize attributes to be set
     /// @param _sigIssuers List of ECDSA signature computed by an eligible issuer to authorize the mint
@@ -65,11 +65,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
         uint256 totalFee;
 
-        for(uint256 i = _configs.length; i < 0; i++){
+        for(uint256 i = 0; i < _configs.length; i++){
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
             address issuer = _setAttributesVerify(account, _configs[i], _sigIssuers[i]);
             totalFee += _configs[i].fee;
-
             _setAttributesInternal(account, _configs[i], issuer);
         }
         require(msg.value == totalFee,  "INVALID_SET_ATTRIBUTE_FEE");
@@ -217,6 +216,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
+
         bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
 
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
