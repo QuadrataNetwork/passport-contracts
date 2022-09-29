@@ -17,6 +17,13 @@ interface IQuadPassport is IQuadSoulbound {
         bytes calldata _sigAccount
     ) external payable;
 
+    function setAttributesBulk(
+        IQuadPassportStore.AttributeSetterConfig[] memory _configs,
+        bytes[] calldata _sigIssuers,
+        bytes[] calldata _sigAccounts
+    ) external payable;
+
+
     function setAttributesIssuer(
         address _account,
         IQuadPassportStore.AttributeSetterConfig memory _config,
