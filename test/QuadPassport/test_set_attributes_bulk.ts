@@ -84,14 +84,14 @@ describe("QuadPassport.setAttributes", async () => {
     beforeEach(async () => {});
 
     it("setAttributesBulk (Single Attribute)", async () => {
-      const attributes: any = {
+      const attributes1: any = {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       await setAttributesBulk(
         passport,
         minterA,
         [issuer],
-        [attributes],
+        [attributes1],
         [verifiedAt],
         [issuedAt],
         [MINT_PRICE],
@@ -102,7 +102,7 @@ describe("QuadPassport.setAttributes", async () => {
         minterA,
         [issuer],
         passport,
-        [attributes],
+        [attributes1],
         [verifiedAt],
         [MINT_PRICE],
         mockReader
@@ -110,9 +110,6 @@ describe("QuadPassport.setAttributes", async () => {
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - same dataset)", async () => {
-      const attributes: any = {
-        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-      };
       await setAttributesBulk(
         passport,
         minterA,
@@ -138,18 +135,23 @@ describe("QuadPassport.setAttributes", async () => {
 
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - diff dataset)", async () => {
-      const attributes: any = {
+      const attributes1: any = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_AML]: formatBytes32String("9"),
+        [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const attributes2: any = {
+        [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
+        [ATTRIBUTE_AML]: formatBytes32String("2"),
+        [ATTRIBUTE_COUNTRY]: id("CA"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
       };
-
       await setAttributesBulk(
         passport,
         minterA,
         [issuer, issuer2],
-        [attributes, attributes2],
+        [attributes1, attributes2],
         [verifiedAt, verifiedAt+1],
         [issuedAt, issuedAt+1],
         [MINT_PRICE, parseInt(MINT_PRICE)+1],
@@ -161,7 +163,7 @@ describe("QuadPassport.setAttributes", async () => {
         minterA,
         [issuer, issuer2],
         passport,
-        [attributes, attributes2],
+        [attributes1, attributes2],
         [verifiedAt, verifiedAt+1],
         [MINT_PRICE, parseInt(MINT_PRICE)+1],
         mockReader

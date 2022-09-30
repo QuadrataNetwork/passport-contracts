@@ -31,7 +31,8 @@ export const setAttributesBulk = async (
   // Deep Copy to avoid mutating the object
   const attributesList = Object.assign([], attributesToSet);
   for(let index = 0; index < attributesList.length; index++){
-    const attributes: any = attributesList[index];
+    // Deep Copy to avoid mutating the object
+    const attributes: any = Object.assign({}, attributesList[index]);
     const attrKeys: string[] = [];
     const attrTypes: string[] = [];
     const attrValues: string[] = [];
@@ -67,7 +68,7 @@ export const setAttributesBulk = async (
     const sigIssuer = await signSetAttributes(
       account,
       issuers[index],
-      attributesList[index],
+      attributes,
       verifiedAts[index],
       issuedAts[index],
       fees[index],
