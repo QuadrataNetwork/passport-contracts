@@ -157,7 +157,6 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
-
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - diff dataset)", async () => {
       const attributes1: any = {
         [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
@@ -227,6 +226,89 @@ describe("QuadPassport.setAttributes", async () => {
           [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
         )
       ).to.revertedWith("INVALID_DID")
+    });
+
+    it("setAttributesBulk (Multiple Attributes, Diff Issuers - reuse signature", async () => {
+      await setAttributesBulk(
+        passport,
+        minterA,
+        [issuer, issuer2],
+        [attributes, attributes],
+        [verifiedAt, verifiedAt],
+        [issuedAt, issuedAt],
+        [MINT_PRICE, MINT_PRICE],
+        [TOKEN_ID, TOKEN_ID],
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+      )
+
+      await expect(
+        setAttributesBulk(
+          passport,
+          minterA,
+          [issuer, issuer2],
+          [attributes, attributes],
+          [verifiedAt, verifiedAt],
+          [issuedAt, issuedAt],
+          [MINT_PRICE, MINT_PRICE],
+          [TOKEN_ID, TOKEN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        )
+      ).to.revertedWith("SIGNATURE_ALREADY_USED")
+    });
+
+    it("setAttributesBulk (Multiple Attributes, Diff Issuers - 0 verifiedAt", async () => {
+      await expect(
+        setAttributesBulk(
+          passport,
+          minterA,
+          [issuer, issuer2],
+          [attributes, attributes],
+          [0, verifiedAt],
+          [issuedAt, issuedAt],
+          [MINT_PRICE, MINT_PRICE],
+          [TOKEN_ID, TOKEN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        )
+      ).to.revertedWith("VERIFIED_AT_CANNOT_BE_ZERO")
+    });
+
+    it("setAttributesBulk (Multiple Attributes, Diff Issuers - future verifiedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(blockNumAfter);
+      const badVerifiedAt = currentBlock.timestamp + 100;
+
+      await expect(
+        setAttributesBulk(
+          passport,
+          minterA,
+          [issuer, issuer2],
+          [attributes, attributes],
+          [badVerifiedAt, verifiedAt],
+          [issuedAt, issuedAt],
+          [MINT_PRICE, MINT_PRICE],
+          [TOKEN_ID, TOKEN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        )
+      ).to.revertedWith("INVALID_VERIFIED_AT")
+    });
+
+    it("setAttributesBulk (Multiple Attributes, Diff Issuers - expired issuedAt", async () => {
+      const blockNumAfter = await ethers.provider.getBlockNumber();
+      const currentBlock = await ethers.provider.getBlock(blockNumAfter);
+      const expiredIssuedAt = currentBlock.timestamp - 90400;
+      await expect(
+        setAttributesBulk(
+          passport,
+          minterA,
+          [issuer, issuer2],
+          [attributes, attributes],
+          [verifiedAt, verifiedAt],
+          [expiredIssuedAt, issuedAt],
+          [MINT_PRICE, MINT_PRICE],
+          [TOKEN_ID, TOKEN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        )
+      ).to.revertedWith("EXPIRED_ISSUED_AT")
     });
   });
 });
