@@ -136,6 +136,37 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
+
+    it("setAttributesBulk (Multiple Attributes, Diff Issuers - diff dataset)", async () => {
+      const attributes: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+      const attributes2: any = {
+        [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
+      };
+
+      await setAttributesBulk(
+        passport,
+        minterA,
+        [issuer, issuer2],
+        [attributes, attributes2],
+        [verifiedAt, verifiedAt+1],
+        [issuedAt, issuedAt+1],
+        [MINT_PRICE, parseInt(MINT_PRICE)+1],
+        [TOKEN_ID, TOKEN_ID],
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+      );
+
+      await assertSetAttribute(
+        minterA,
+        [issuer, issuer2],
+        passport,
+        [attributes, attributes2],
+        [verifiedAt, verifiedAt+1],
+        [MINT_PRICE, parseInt(MINT_PRICE)+1],
+        mockReader
+      );
+    });
   });
 
   // ******************************************************************************* //
