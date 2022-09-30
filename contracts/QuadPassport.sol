@@ -71,7 +71,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             totalFee += _configs[i].fee;
             _setAttributesInternal(account, _configs[i], issuer);
         }
-        require(msg.value == totalFee,  "INVALID_SET_ATTRIBUTE_FEE");
+        require(msg.value == totalFee,  "INVALID_SET_ATTRIBUTE_BULK_FEE");
 
     }
 

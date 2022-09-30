@@ -205,6 +205,72 @@ describe("QuadPassport.setAttributes", async () => {
   // ******************************************************************************* //
 
   describe("QuadPassport.setAttributesBulk (ALL ERRORS)", async () => {
+    let attrKeys: any,
+      attrValues: any,
+      attrTypes: any,
+      fee: any,
+      tokenId: any,
+      chainId: any,
+      sigIssuer: any,
+      sigAccount: any,
+      attributesCopy: any;
+
+    beforeEach(async () => {
+      attrKeys = [];
+      attrValues = [];
+      attrTypes = [];
+
+      let did = formatBytes32String("0");
+
+      // Deep Copy to avoid mutating the object
+      attributesCopy = Object.assign({}, attributes);
+      Object.keys(attributesCopy).forEach((k, i) => {
+        let attrKey;
+        if (k === ATTRIBUTE_AML) {
+          expect(ATTRIBUTE_DID in attributesCopy).to.equal(true);
+          did = attributes[ATTRIBUTE_DID];
+          attrKey = ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+              ["bytes32", "bytes32"],
+              [did, k]
+            )
+          );
+        } else {
+          attrKey = ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+              ["address", "bytes32"],
+              [minterA.address, k]
+            )
+          );
+        }
+        if (k !== ATTRIBUTE_DID) {
+          attrKeys.push(attrKey);
+          attrValues.push(attributesCopy[k]);
+          attrTypes.push(k);
+        }
+      });
+
+      delete attributesCopy[ATTRIBUTE_DID];
+
+      fee = MINT_PRICE;
+      tokenId = TOKEN_ID;
+      chainId = HARDHAT_CHAIN_ID;
+
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributesCopy,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
+
+      sigAccount = await signAccount(minterA);
+    });
+
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - wrong DID", async () => {
       const attributes2 = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:newwrongdid"),
@@ -310,5 +376,31 @@ describe("QuadPassport.setAttributes", async () => {
         )
       ).to.revertedWith("EXPIRED_ISSUED_AT")
     });
+
+    it("fail - invalid fee", async () => {
+      const wrongFee = fee.sub(1);
+      await expect(
+        passport
+          .connect(minterA)
+          .setAttributesBulk(
+            [[
+              attrKeys,
+              attrValues,
+              attrTypes,
+              attributes[ATTRIBUTE_DID],
+              tokenId,
+              verifiedAt,
+              issuedAt,
+              fee,
+            ]],
+            [sigIssuer],
+            [sigAccount],
+            {
+              value: wrongFee,
+            }
+          )
+      ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_BULK_FEE");
+    });
+
   });
 });
