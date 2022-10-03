@@ -36,7 +36,7 @@ describe("SelfDestruct()", function () {
       params: [
         {
           forking: {
-            jsonRpcUrl: process.env.ETHEREUM_MAINNET,
+            jsonRpcUrl: process.env.MAINNET_URI,
             blockNumber: 15627738,
           },
         },
