@@ -89,6 +89,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
       name: "IQuadGovernance",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IQuadGovernance__factory>;
@@ -96,10 +100,6 @@ declare module "hardhat/types/runtime" {
       name: "IQuadPassport",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IQuadPassport__factory>;
-    getContractFactory(
-      name: "IQuadPassportMigration",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.IQuadPassportMigration__factory>;
     getContractFactory(
       name: "IQuadReader",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -341,6 +341,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
+      name: "IERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
+    getContractAt(
       name: "IQuadGovernance",
       address: string,
       signer?: ethers.Signer
@@ -350,11 +355,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IQuadPassport>;
-    getContractAt(
-      name: "IQuadPassportMigration",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.IQuadPassportMigration>;
     getContractAt(
       name: "IQuadReader",
       address: string,

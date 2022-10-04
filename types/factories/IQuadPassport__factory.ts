@@ -361,6 +361,71 @@ const _abi = [
   {
     inputs: [
       {
+        components: [
+          {
+            internalType: "bytes32[]",
+            name: "attrKeys",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "attrValues",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32[]",
+            name: "attrTypes",
+            type: "bytes32[]",
+          },
+          {
+            internalType: "bytes32",
+            name: "did",
+            type: "bytes32",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "verifiedAt",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "issuedAt",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "fee",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct IQuadPassportStore.AttributeSetterConfig[]",
+        name: "_configs",
+        type: "tuple[]",
+      },
+      {
+        internalType: "bytes[]",
+        name: "_sigIssuers",
+        type: "bytes[]",
+      },
+      {
+        internalType: "bytes[]",
+        name: "_sigAccounts",
+        type: "bytes[]",
+      },
+    ],
+    name: "setAttributesBulk",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "_account",
         type: "address",

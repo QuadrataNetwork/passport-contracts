@@ -43,6 +43,7 @@ interface QuadPassportUpgradeInterface extends ethers.utils.Interface {
     "pendingGovernance()": FunctionFragment;
     "proxiableUUID()": FunctionFragment;
     "setAttributes((bytes32[],bytes32[],bytes32[],bytes32,uint256,uint256,uint256,uint256),bytes,bytes)": FunctionFragment;
+    "setAttributesBulk(tuple[],bytes[],bytes[])": FunctionFragment;
     "setAttributesIssuer(address,(bytes32[],bytes32[],bytes32[],bytes32,uint256,uint256,uint256,uint256),bytes)": FunctionFragment;
     "setGovernance(address)": FunctionFragment;
     "setTokenURI(uint256,string)": FunctionFragment;
@@ -135,6 +136,23 @@ interface QuadPassportUpgradeInterface extends ethers.utils.Interface {
       },
       BytesLike,
       BytesLike
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAttributesBulk",
+    values: [
+      {
+        attrKeys: BytesLike[];
+        attrValues: BytesLike[];
+        attrTypes: BytesLike[];
+        did: BytesLike;
+        tokenId: BigNumberish;
+        verifiedAt: BigNumberish;
+        issuedAt: BigNumberish;
+        fee: BigNumberish;
+      }[],
+      BytesLike[],
+      BytesLike[]
     ]
   ): string;
   encodeFunctionData(
@@ -237,6 +255,10 @@ interface QuadPassportUpgradeInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setAttributes",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAttributesBulk",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -484,6 +506,22 @@ export class QuadPassportUpgrade extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setAttributesBulk(
+      _configs: {
+        attrKeys: BytesLike[];
+        attrValues: BytesLike[];
+        attrTypes: BytesLike[];
+        did: BytesLike;
+        tokenId: BigNumberish;
+        verifiedAt: BigNumberish;
+        issuedAt: BigNumberish;
+        fee: BigNumberish;
+      }[],
+      _sigIssuers: BytesLike[],
+      _sigAccounts: BytesLike[],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setAttributesIssuer(
       _account: string,
       _config: {
@@ -628,6 +666,22 @@ export class QuadPassportUpgrade extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setAttributesBulk(
+    _configs: {
+      attrKeys: BytesLike[];
+      attrValues: BytesLike[];
+      attrTypes: BytesLike[];
+      did: BytesLike;
+      tokenId: BigNumberish;
+      verifiedAt: BigNumberish;
+      issuedAt: BigNumberish;
+      fee: BigNumberish;
+    }[],
+    _sigIssuers: BytesLike[],
+    _sigAccounts: BytesLike[],
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   setAttributesIssuer(
     _account: string,
     _config: {
@@ -763,6 +817,22 @@ export class QuadPassportUpgrade extends BaseContract {
       },
       _sigIssuer: BytesLike,
       _sigAccount: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setAttributesBulk(
+      _configs: {
+        attrKeys: BytesLike[];
+        attrValues: BytesLike[];
+        attrTypes: BytesLike[];
+        did: BytesLike;
+        tokenId: BigNumberish;
+        verifiedAt: BigNumberish;
+        issuedAt: BigNumberish;
+        fee: BigNumberish;
+      }[],
+      _sigIssuers: BytesLike[],
+      _sigAccounts: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1077,6 +1147,22 @@ export class QuadPassportUpgrade extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setAttributesBulk(
+      _configs: {
+        attrKeys: BytesLike[];
+        attrValues: BytesLike[];
+        attrTypes: BytesLike[];
+        did: BytesLike;
+        tokenId: BigNumberish;
+        verifiedAt: BigNumberish;
+        issuedAt: BigNumberish;
+        fee: BigNumberish;
+      }[],
+      _sigIssuers: BytesLike[],
+      _sigAccounts: BytesLike[],
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setAttributesIssuer(
       _account: string,
       _config: {
@@ -1213,6 +1299,22 @@ export class QuadPassportUpgrade extends BaseContract {
       },
       _sigIssuer: BytesLike,
       _sigAccount: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setAttributesBulk(
+      _configs: {
+        attrKeys: BytesLike[];
+        attrValues: BytesLike[];
+        attrTypes: BytesLike[];
+        did: BytesLike;
+        tokenId: BigNumberish;
+        verifiedAt: BigNumberish;
+        issuedAt: BigNumberish;
+        fee: BigNumberish;
+      }[],
+      _sigIssuers: BytesLike[],
+      _sigAccounts: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

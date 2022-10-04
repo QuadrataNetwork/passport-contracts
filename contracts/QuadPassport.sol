@@ -31,7 +31,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     }
 
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
-    /// @notice If passing a `DID` in _config.attrTypes, make sure that it's always first in the list
     /// @dev Only when authorized by an eligible issuer
     /// @param _config Input paramters required to authorize attributes to be set
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
@@ -41,6 +40,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override whenNotPaused {
+        require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
+
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
         address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
         address issuer = _setAttributesVerify(account, _config, _sigIssuer);
@@ -48,6 +49,31 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         _setAttributesInternal(account, _config, issuer);
     }
 
+    /// @notice Set attributes from multiple issuers for a Quadrata Passport (Only Individuals)
+    /// @dev Only when authorized by an eligible issuer
+    /// @param _configs List of input paramters required to authorize attributes to be set
+    /// @param _sigIssuers List of ECDSA signature computed by an eligible issuer to authorize the mint
+    /// @param _sigAccounts List of ECDSA signature computed by an eligible EOA to prove ownership
+    function setAttributesBulk(
+        AttributeSetterConfig[] memory _configs,
+        bytes[] calldata _sigIssuers,
+        bytes[] calldata _sigAccounts
+    ) external payable override whenNotPaused {
+        require(_configs.length == _sigIssuers.length, "INVALID_BULK_ATTRIBUTES_LENGTH");
+        require(_configs.length == _sigAccounts.length, "INVALID_BULK_ATTRIBUTES_LENGTH");
+
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
+        uint256 totalFee;
+
+        for(uint256 i = 0; i < _configs.length; i++){
+            address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
+            address issuer = _setAttributesVerify(account, _configs[i], _sigIssuers[i]);
+            totalFee += _configs[i].fee;
+            _setAttributesInternal(account, _configs[i], issuer);
+        }
+        require(msg.value == totalFee,  "INVALID_SET_ATTRIBUTE_BULK_FEE");
+
+    }
 
     /// @notice Set attributes for a Quadrata Passport (only by Issuers)
     /// @param _account Address of the Quadrata Passport holder
@@ -59,6 +85,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer
     ) external payable override whenNotPaused {
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
+
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
 
         _setAttributesInternal(_account, _config, issuer);
@@ -101,7 +129,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
         }
-        emit SetAttributeReceipt(_account, _issuer, msg.value);
+        emit SetAttributeReceipt(_account, _issuer, _config.fee);
     }
 
     /// @notice Internal function that validates supplied DID on updates do not change
@@ -162,7 +190,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
     ) internal returns(address) {
-        require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
         require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
@@ -189,6 +216,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
+
         bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
 
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
