@@ -60,8 +60,8 @@ const config = {
     goerli: {
       url: process.env.GOERLI_URI || "",
       accounts:
-        process.env.GOERLI_PRIVATE_KEY !== undefined
-          ? [process.env.GOERLI_PRIVATE_KEY]
+        process.env.PRIVATE_KEY !== undefined
+          ? [process.env.PRIVATE_KEY]
           : [],
       chainId: 5,
     },

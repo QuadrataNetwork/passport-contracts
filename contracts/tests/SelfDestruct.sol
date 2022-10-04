@@ -1,14 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract SelfDestruct {
-    address payable public treasury;
-
-    constructor(address payable _treasury) {
-        treasury = _treasury;
+contract SelfDestruct is UUPSUpgradeable{
+    constructor() {
     }
 
+    function _authorizeUpgrade(address) internal view override {
+    }
     function dangerZone() external {
-        selfdestruct(treasury);
+        selfdestruct(payable(tx.origin));
     }
 }
