@@ -48,6 +48,6 @@ describe("SelfDestruct()", function () {
     await passport.connect(admin).upgradeToAndCall(selfDestruct.address, calldata);
 
     const signers: any = await ethers.getSigners();
-    console.log(await signers[0].provider.getCode(selfDestruct.address))
+    console.log(await signers[0].provider.getCode(passport.address))
   })
 })
