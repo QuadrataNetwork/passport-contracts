@@ -44,7 +44,6 @@ const {
 
   // Retrieve address filter by Network
   const signers: any = await ethers.getSigners();
-  console.log("FUCK", signers)
   const network = await signers[0].provider.getNetwork();
   const treasuryPerNetwork = QUADRATA_TREASURY[network.chainId];
   const multisigPerNetwork = MULTISIG[network.chainId];
