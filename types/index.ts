@@ -20,7 +20,6 @@ export type { IERC20Upgradeable } from "./IERC20Upgradeable";
 export type { ContextUpgradeable } from "./ContextUpgradeable";
 export type { ERC165Upgradeable } from "./ERC165Upgradeable";
 export type { IERC165Upgradeable } from "./IERC165Upgradeable";
-export type { IERC20 } from "./IERC20";
 export type { IQuadGovernance } from "./IQuadGovernance";
 export type { IQuadPassport } from "./IQuadPassport";
 export type { IQuadReader } from "./IQuadReader";
@@ -77,7 +76,6 @@ export { IERC20Upgradeable__factory } from "./factories/IERC20Upgradeable__facto
 export { ContextUpgradeable__factory } from "./factories/ContextUpgradeable__factory";
 export { ERC165Upgradeable__factory } from "./factories/ERC165Upgradeable__factory";
 export { IERC165Upgradeable__factory } from "./factories/IERC165Upgradeable__factory";
-export { IERC20__factory } from "./factories/IERC20__factory";
 export { IQuadGovernance__factory } from "./factories/IQuadGovernance__factory";
 export { IQuadPassport__factory } from "./factories/IQuadPassport__factory";
 export { IQuadReader__factory } from "./factories/IQuadReader__factory";
