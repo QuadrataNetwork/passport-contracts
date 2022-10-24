@@ -13,7 +13,6 @@ const {
   ATTRIBUTE_DID,
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
-
   ATTRIBUTE_IS_BUSINESS,
 } = require("../../utils/constant.ts");
 
@@ -26,7 +25,7 @@ const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 
 const EXPECTED_AML_SCORE_TEDDY = hexZeroPad("0x01", 32);
 const EXPECTED_AML_SCORE_DANIEL = hexZeroPad("0x03", 32);
-const EXPECTED_AML_SCORE_TRAVIS = hexZeroPad("0x03", 32);
+const EXPECTED_AML_SCORE_TRAVIS = hexZeroPad("0x01", 32);
 
 const EXPECTED_COUNTRY_SCORE_TEDDY = id("US");
 // ------------ END - TO MODIFY --------------- //
@@ -78,6 +77,9 @@ const getIsBusiness = async (user: any, reader: any) => {
     ATTRIBUTE_IS_BUSINESS,
     { value: queryFee }
   );
+  if (result.length == 0){
+    return false
+  }
   return result[0][0];
 };
 
@@ -102,7 +104,7 @@ const getUserData = async (user: any, reader: any, isoCodes: any) => {
     params: [
       {
         forking: {
-          jsonRpcUrl: process.env.ETHEREUM_MAINNET,
+          jsonRpcUrl: process.env.MAINNET_URI,
         },
       },
     ],
@@ -119,6 +121,7 @@ const getUserData = async (user: any, reader: any, isoCodes: any) => {
       COUNTRY_CODES
     )
   ).equals("CH");
+
   console.log(
     await getUserData(
       "0x4e95fEdB012831e3207c8167be1690f812f964a5",
