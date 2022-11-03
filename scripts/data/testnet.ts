@@ -17,6 +17,9 @@ export const QUADRATA_TREASURY = {
   [NETWORK_IDS.GOERLI]: getAddress(
     "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
   ),
+  [NETWORK_IDS.FUJI]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
 };
 
 export const TIMELOCK = getAddress(
@@ -28,6 +31,9 @@ export const MULTISIG = {
     "0x096A0Fb5954998Aa9F711B98E4d1A65f342F69Db"
   ),
   [NETWORK_IDS.GOERLI]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
+  [NETWORK_IDS.FUJI]: getAddress(
     "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
   ),
 };
@@ -48,7 +54,7 @@ export const TOKEN_IDS = [
 ];
 
 // Careful - this doesn't work for Contract Deployment today
-export const MAX_GAS_FEE = ethers.utils.parseUnits("4.1337", "gwei");
+export const MAX_GAS_FEE = ethers.utils.parseUnits("413.37", "gwei");
 
 export const ISSUERS = [
   {

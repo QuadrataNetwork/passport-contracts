@@ -83,9 +83,10 @@ const config = {
     },
     fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
+      gasMultiplier: 10,
       chainId: 43113,
-      accounts: process.env.SNOWTRACE_PRIVATE_KEY !== undefined
-      ? [process.env.SNOWTRACE_PRIVATE_KEY]
+      accounts: process.env.FUJI_PRIVATE_KEY !== undefined
+      ? [process.env.FUJI_PRIVATE_KEY]
       : []
     }
   },
