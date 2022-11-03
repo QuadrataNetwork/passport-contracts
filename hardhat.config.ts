@@ -81,6 +81,13 @@ const config = {
           : [],
       chainId: 137,
     },
+    fuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
+      chainId: 43113,
+      accounts: process.env.SNOWTRACE_PRIVATE_KEY !== undefined
+      ? [process.env.SNOWTRACE_PRIVATE_KEY]
+      : []
+    }
   },
   gasReporter: {
     enabled: true,
@@ -96,6 +103,7 @@ const config = {
       // polygon
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+
     },
   },
   typechain: {

@@ -50,6 +50,7 @@ export const NETWORK_IDS = {
   POLYGON: 137,
   MUMBAI: 80001,
   GOERLI: 5,
+  FUJI: 43113
 };
 
 export const HARDHAT_CHAIN_ID = 31337;
