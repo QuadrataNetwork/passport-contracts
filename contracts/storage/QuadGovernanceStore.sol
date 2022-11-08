@@ -29,4 +29,7 @@ contract QuadGovernanceStore is QuadConstant {
     uint256 internal _maxEligibleTokenId;
     IQuadPassport internal _passport;
     address internal _treasury;
+
+    // Avax Subnet AllowList AML Threshold
+    uint256 internal _allowListAMLThreshold;
 }

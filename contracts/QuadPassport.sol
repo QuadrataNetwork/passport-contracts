@@ -124,6 +124,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _issuer,
                 _config.verifiedAt);
 
+            // AVAX Subnet Allowlist Management
+            if (_config.attrTypes[i] == ATTRIBUTE_AML) {
+                _manageAllowList(_account);
+            }
         }
 
         if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
@@ -263,6 +267,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 attrs.pop();
             }
         }
+
+        // Revoke from AllowList
+        _manageAllowList(_msgSender());
         _burnPassports(_msgSender());
     }
 
@@ -301,9 +308,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             }
         }
 
-        if (isEmpty){
+        if (isEmpty)
             _burnPassports(_account);
-        }
+
+        // Potentially revoke from AllowList
+        _manageAllowList(_msgSender());
         emit BurnPassportsIssuer(_msgSender(), _account);
     }
 
@@ -328,6 +337,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) public view override returns (Attribute[] memory) {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
 
+        return _attributesInternal(_account, _attribute);
+    }
+
+    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return value of attribute from issuer
+    function _attributesInternal(
+        address _account,
+        bytes32 _attribute
+    ) internal view returns (Attribute[] memory) {
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
@@ -434,5 +454,32 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
             "INVALID_ADMIN"
         );
+    }
+
+    /// @dev Manage allow list based on passport holder higher AML risk scores
+    /// @param _account address of the passport holder
+    function _manageAllowList(address _account) internal {
+        require(_account != address(this), "CANNOT_REVOKE_ALLOWLIST_QP");
+        // Precompiled Allow List Contract Address
+        IAllowList allowList = IAllowList(0x0200000000000000000000000000000000000002);
+        Attribute[] memory attributes = _attributesInternal(_account, ATTRIBUTE_AML);
+        if (attributes.length == 0) {
+            // Revoke from allow list
+            allowList.setNone(_account);
+            return;
+        }
+
+        uint256 maxAml = 1;
+        for (uint256 i = 0; i < attributes.length; i++) {
+            if (uint256(attributes[i].value) > maxAml)
+                maxAml = uint256(attributes[i].value);
+        }
+
+        if (maxAml <= governance.getAllowListAMLThreshold())
+            // Enable in allow list
+            allowList.setEnabled(_account);
+        else
+            // Revoke from allow list
+            allowList.setNone(_account);
     }
 }

@@ -43,6 +43,8 @@ interface IQuadGovernance {
 
     function setIssuerAttributePermission(address _issuer, bytes32 _attribute, bool _permission) external;
 
+    function setAllowListAMLThreshold(uint256 _threshold) external;
+
     function getEligibleAttributesLength() external view returns(uint256);
 
     function getMaxEligibleTokenId() external view returns(uint256);
@@ -74,4 +76,6 @@ interface IQuadGovernance {
     function getIssuerStatus(address _issuer) external view returns(bool);
 
     function getIssuerAttributePermission(address _issuer, bytes32 _attribute) external view returns(bool);
+
+    function getAllowListAMLThreshold() external view returns (uint256);
 }

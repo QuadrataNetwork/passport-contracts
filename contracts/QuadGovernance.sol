@@ -249,6 +249,17 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit IssuerAttributePermission(_issuer, _attribute, _permission);
     }
 
+    /// @dev Set AML threshold for AllowList management
+    /// @notice Restricted behind a TimelockController
+    /// @param _threshold AML threshold
+    function setAllowListAMLThreshold(uint256 _threshold) external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_threshold > 0, "THRESHOLD_TOO_LOW");
+        require(_threshold <= 10, "THRESHOLD_TOO_HIGH");
+
+        _allowListAMLThreshold = _threshold;
+    }
+
     function _authorizeUpgrade(address) override internal view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
@@ -364,6 +375,12 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @return issuer treasury
     function issuersTreasury(address _issuer) override public view returns (address) {
         return _issuerTreasury[_issuer];
+    }
+
+    /// @dev Get AML threshold for AVAX subnet AllowList management
+    /// @return AML threshold
+    function getAllowListAMLThreshold() override public view returns (uint256) {
+        return _allowListAMLThreshold;
     }
 }
 
