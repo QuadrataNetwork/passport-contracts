@@ -52,7 +52,7 @@ export const NETWORK_IDS = {
   GOERLI: 5,
 };
 
-export const HARDHAT_CHAIN_ID = 31337;
+export const HARDHAT_CHAIN_ID = 424242;
 
 export const PRICE_PER_ATTRIBUTES_ETH = {
   [ATTRIBUTE_AML]: parseEther("0.0012"),
