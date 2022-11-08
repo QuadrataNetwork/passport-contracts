@@ -89,6 +89,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
+      name: "IAllowList",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAllowList__factory>;
+    getContractFactory(
       name: "IQuadGovernance",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IQuadGovernance__factory>;
@@ -136,6 +144,10 @@ declare module "hardhat/types/runtime" {
       name: "QuadReaderStore",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.QuadReaderStore__factory>;
+    getContractFactory(
+      name: "AllowList",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AllowList__factory>;
     getContractFactory(
       name: "DeFi",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -337,6 +349,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
+      name: "Ownable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
+    getContractAt(
+      name: "IAllowList",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAllowList>;
+    getContractAt(
       name: "IQuadGovernance",
       address: string,
       signer?: ethers.Signer
@@ -396,6 +418,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.QuadReaderStore>;
+    getContractAt(
+      name: "AllowList",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AllowList>;
     getContractAt(
       name: "DeFi",
       address: string,

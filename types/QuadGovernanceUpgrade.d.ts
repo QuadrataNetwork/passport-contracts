@@ -35,6 +35,7 @@ interface QuadGovernanceUpgradeInterface extends ethers.utils.Interface {
     "eligibleAttributesArray(uint256)": FunctionFragment;
     "eligibleAttributesByDID(bytes32)": FunctionFragment;
     "eligibleTokenId(uint256)": FunctionFragment;
+    "getAllowListAMLThreshold()": FunctionFragment;
     "getEligibleAttributesLength()": FunctionFragment;
     "getIssuerAttributePermission(address,bytes32)": FunctionFragment;
     "getIssuerStatus(address)": FunctionFragment;
@@ -55,6 +56,7 @@ interface QuadGovernanceUpgradeInterface extends ethers.utils.Interface {
     "renounceRole(bytes32,address)": FunctionFragment;
     "revSplitIssuer()": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
+    "setAllowListAMLThreshold(uint256)": FunctionFragment;
     "setAttributePriceFixed(bytes32,uint256)": FunctionFragment;
     "setBusinessAttributePriceFixed(bytes32,uint256)": FunctionFragment;
     "setEligibleAttribute(bytes32,bool)": FunctionFragment;
@@ -123,6 +125,10 @@ interface QuadGovernanceUpgradeInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "eligibleTokenId",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllowListAMLThreshold",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getEligibleAttributesLength",
@@ -200,6 +206,10 @@ interface QuadGovernanceUpgradeInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "revokeRole",
     values: [BytesLike, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAllowListAMLThreshold",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setAttributePriceFixed",
@@ -303,6 +313,10 @@ interface QuadGovernanceUpgradeInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getAllowListAMLThreshold",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getEligibleAttributesLength",
     data: BytesLike
   ): Result;
@@ -361,6 +375,10 @@ interface QuadGovernanceUpgradeInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setAllowListAMLThreshold",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "setAttributePriceFixed",
     data: BytesLike
@@ -638,6 +656,8 @@ export class QuadGovernanceUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    getAllowListAMLThreshold(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     getEligibleAttributesLength(
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -711,6 +731,11 @@ export class QuadGovernanceUpgrade extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -844,6 +869,8 @@ export class QuadGovernanceUpgrade extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  getAllowListAMLThreshold(overrides?: CallOverrides): Promise<BigNumber>;
+
   getEligibleAttributesLength(overrides?: CallOverrides): Promise<BigNumber>;
 
   getIssuerAttributePermission(
@@ -909,6 +936,11 @@ export class QuadGovernanceUpgrade extends BaseContract {
   revokeRole(
     role: BytesLike,
     account: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setAllowListAMLThreshold(
+    _threshold: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1037,6 +1069,8 @@ export class QuadGovernanceUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    getAllowListAMLThreshold(overrides?: CallOverrides): Promise<BigNumber>;
+
     getEligibleAttributesLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     getIssuerAttributePermission(
@@ -1106,6 +1140,11 @@ export class QuadGovernanceUpgrade extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1523,6 +1562,8 @@ export class QuadGovernanceUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getAllowListAMLThreshold(overrides?: CallOverrides): Promise<BigNumber>;
+
     getEligibleAttributesLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     getIssuerAttributePermission(
@@ -1600,6 +1641,11 @@ export class QuadGovernanceUpgrade extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1736,6 +1782,10 @@ export class QuadGovernanceUpgrade extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getAllowListAMLThreshold(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getEligibleAttributesLength(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1817,6 +1867,11 @@ export class QuadGovernanceUpgrade extends BaseContract {
     revokeRole(
       role: BytesLike,
       account: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

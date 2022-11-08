@@ -27,6 +27,7 @@ interface IQuadGovernanceInterface extends ethers.utils.Interface {
     "eligibleAttributesArray(uint256)": FunctionFragment;
     "eligibleAttributesByDID(bytes32)": FunctionFragment;
     "eligibleTokenId(uint256)": FunctionFragment;
+    "getAllowListAMLThreshold()": FunctionFragment;
     "getEligibleAttributesLength()": FunctionFragment;
     "getIssuerAttributePermission(address,bytes32)": FunctionFragment;
     "getIssuerStatus(address)": FunctionFragment;
@@ -38,6 +39,7 @@ interface IQuadGovernanceInterface extends ethers.utils.Interface {
     "pricePerAttributeFixed(bytes32)": FunctionFragment;
     "pricePerBusinessAttributeFixed(bytes32)": FunctionFragment;
     "revSplitIssuer()": FunctionFragment;
+    "setAllowListAMLThreshold(uint256)": FunctionFragment;
     "setAttributePriceFixed(bytes32,uint256)": FunctionFragment;
     "setBusinessAttributePriceFixed(bytes32,uint256)": FunctionFragment;
     "setEligibleAttribute(bytes32,bool)": FunctionFragment;
@@ -75,6 +77,10 @@ interface IQuadGovernanceInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "eligibleTokenId",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllowListAMLThreshold",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getEligibleAttributesLength",
@@ -119,6 +125,10 @@ interface IQuadGovernanceInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "revSplitIssuer",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setAllowListAMLThreshold",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "setAttributePriceFixed",
@@ -185,6 +195,10 @@ interface IQuadGovernanceInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getAllowListAMLThreshold",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getEligibleAttributesLength",
     data: BytesLike
   ): Result;
@@ -220,6 +234,10 @@ interface IQuadGovernanceInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "revSplitIssuer",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setAllowListAMLThreshold",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -434,6 +452,8 @@ export class IQuadGovernance extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    getAllowListAMLThreshold(overrides?: CallOverrides): Promise<[BigNumber]>;
+
     getEligibleAttributesLength(
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -470,6 +490,11 @@ export class IQuadGovernance extends BaseContract {
     ): Promise<[BigNumber]>;
 
     revSplitIssuer(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     setAttributePriceFixed(
       _attribute: BytesLike,
@@ -569,6 +594,8 @@ export class IQuadGovernance extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  getAllowListAMLThreshold(overrides?: CallOverrides): Promise<BigNumber>;
+
   getEligibleAttributesLength(overrides?: CallOverrides): Promise<BigNumber>;
 
   getIssuerAttributePermission(
@@ -600,6 +627,11 @@ export class IQuadGovernance extends BaseContract {
   ): Promise<BigNumber>;
 
   revSplitIssuer(overrides?: CallOverrides): Promise<BigNumber>;
+
+  setAllowListAMLThreshold(
+    _threshold: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   setAttributePriceFixed(
     _attribute: BytesLike,
@@ -696,6 +728,8 @@ export class IQuadGovernance extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    getAllowListAMLThreshold(overrides?: CallOverrides): Promise<BigNumber>;
+
     getEligibleAttributesLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     getIssuerAttributePermission(
@@ -730,6 +764,11 @@ export class IQuadGovernance extends BaseContract {
     ): Promise<BigNumber>;
 
     revSplitIssuer(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setAttributePriceFixed(
       _attribute: BytesLike,
@@ -1019,6 +1058,8 @@ export class IQuadGovernance extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getAllowListAMLThreshold(overrides?: CallOverrides): Promise<BigNumber>;
+
     getEligibleAttributesLength(overrides?: CallOverrides): Promise<BigNumber>;
 
     getIssuerAttributePermission(
@@ -1056,6 +1097,11 @@ export class IQuadGovernance extends BaseContract {
     ): Promise<BigNumber>;
 
     revSplitIssuer(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     setAttributePriceFixed(
       _attribute: BytesLike,
@@ -1156,6 +1202,10 @@ export class IQuadGovernance extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getAllowListAMLThreshold(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     getEligibleAttributesLength(
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1200,6 +1250,11 @@ export class IQuadGovernance extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     revSplitIssuer(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setAllowListAMLThreshold(
+      _threshold: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     setAttributePriceFixed(
       _attribute: BytesLike,
