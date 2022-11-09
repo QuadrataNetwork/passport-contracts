@@ -23,9 +23,6 @@ const { setAttributes } = require("../helpers/set_attributes.ts");
 const { setAttributesIssuer } = require("../helpers/set_attributes_issuer.ts");
 const { setAttributesBulk } = require("../helpers/set_attributes_bulk.ts");
 
-// make sure this is always an admin for minter precompile
-const TX_ALLOW_LIST_ADDRESS = "0x0200000000000000000000000000000000000002";
-
 const ROLES = {
   NONE: 0,
   ALLOWED: 1,
@@ -85,6 +82,8 @@ describe("AllowList", async () => {
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
+
+    const TX_ALLOW_LIST_ADDRESS = "0x0200000000000000000000000000000000000002";
     await governance
       .connect(admin)
       .setAllowListAMLThreshold(ALLOW_LIST_AML_THRESHOLD);
@@ -103,19 +102,6 @@ describe("AllowList", async () => {
       // test precompile first
       const adminRole = await allowList.readAllowList(admin.address);
       expect(adminRole).to.be.equal(ROLES.ADMIN);
-    });
-
-    it("should allow admin to add contract as admin", async function () {
-      const allowList = await ethers.getContractAt(
-        "IAllowList",
-        TX_ALLOW_LIST_ADDRESS,
-        admin
-      );
-      let role = await allowList.readAllowList(passport.address);
-      expect(role).to.be.equal(ROLES.NONE);
-      await allowList.setAdmin(passport.address);
-      role = await allowList.readAllowList(passport.address);
-      expect(role).to.be.equal(ROLES.ADMIN);
     });
 
     it("setAttributes (AML below threshold)", async () => {

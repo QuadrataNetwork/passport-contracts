@@ -63,5 +63,15 @@ export const deployPassportEcosystem = async (
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
 
+  // Add QuadPassport as Admin of AllowList
+  const TX_ALLOW_LIST_ADDRESS = "0x0200000000000000000000000000000000000002";
+
+  const allowList = await ethers.getContractAt(
+    "IAllowList",
+    TX_ALLOW_LIST_ADDRESS,
+    admin
+  );
+  await allowList.connect(admin).setAdmin(passport.address);
+
   return [governance, passport, reader, defi, mockbusiness];
 };
