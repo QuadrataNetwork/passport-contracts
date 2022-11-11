@@ -9,6 +9,7 @@ import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
+import { parseEther } from "ethers/lib/utils";
 
 dotenv.config();
 
@@ -85,9 +86,23 @@ const config = {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       gasMultiplier: 10,
       chainId: 43113,
-      accounts: process.env.FUJI_PRIVATE_KEY !== undefined
-      ? [process.env.FUJI_PRIVATE_KEY]
+      accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
+      ? [process.env.TESTNET_PRIVATE_KEY]
       : []
+    },
+
+    bscTestnet: {
+      url: "https://data-seed-prebsc-1-s3.binance.org:8545",
+      chainId: 97,
+      accounts: [process.env.TESTNET_PRIVATE_KEY]
+    },
+
+    hardhat: {
+      fork: {
+        url: "https://bsc-testnet.public.blastapi.io"
+      },
+      chainId: 97,
+      accounts: [{privateKey: process.env.TESTNET_PRIVATE_KEY, balance: parseEther("100").toString()}]
     }
   },
   gasReporter: {
@@ -100,6 +115,7 @@ const config = {
 
       goerli: process.env.ETHERSCAN_API_KEY || "",
       rinkeby: process.env.ETHERSCAN_API_KEY || "",
+      bscTestnet: process.env.BSCSCAN_API_KEY || "",
 
       // polygon
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",

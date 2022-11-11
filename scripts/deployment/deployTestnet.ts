@@ -1,3 +1,4 @@
+import { parseEther } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
 const { deployQuadrata } = require("../../utils/deployment.ts");
@@ -49,6 +50,17 @@ const {
   const multisigPerNetwork = MULTISIG[network.chainId];
 
   const deployer = signers[0];
+  const targetNonce = 67;
+  const currentNonce = await deployer.getTransactionCount();
+
+  for(var i = currentNonce; i < targetNonce; i++) {
+    await deployer.sendTransaction({
+      to: deployer.address,
+      value: parseEther("0.00001"),
+    })
+    console.log(i, "/", targetNonce)
+  }
+  console.log(currentNonce, "/", targetNonce)
 
   console.log(`Deployer address: ${deployer.address}`);
 
@@ -62,14 +74,14 @@ const {
     MAX_GAS_FEE
   );
 
-  let tx = await governance
-    .connect(deployer)
-    .renounceRole(GOVERNANCE_ROLE, deployer.address);
-  await tx.wait();
-  console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
-  tx = await governance
-    .connect(deployer)
-    .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
-  await tx.wait();
-  console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  // let tx = await governance
+  //   .connect(deployer)
+  //   .renounceRole(GOVERNANCE_ROLE, deployer.address);
+  // await tx.wait();
+  // console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
+  // tx = await governance
+  //   .connect(deployer)
+  //   .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
+  // await tx.wait();
+  // console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
 })();

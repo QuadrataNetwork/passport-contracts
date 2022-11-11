@@ -105,6 +105,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
+      name: "IAllowList",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAllowList__factory>;
+    getContractFactory(
       name: "IQuadGovernance",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IQuadGovernance__factory>;
@@ -253,10 +257,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.QuadReaderUpgrade__factory>;
     getContractFactory(
-      name: "SelfDestruct",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SelfDestruct__factory>;
-    getContractFactory(
       name: "TestQuadrata",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestQuadrata__factory>;
@@ -376,6 +376,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
+    getContractAt(
+      name: "IAllowList",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAllowList>;
     getContractAt(
       name: "IQuadGovernance",
       address: string,
@@ -561,11 +566,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.QuadReaderUpgrade>;
-    getContractAt(
-      name: "SelfDestruct",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.SelfDestruct>;
     getContractAt(
       name: "TestQuadrata",
       address: string,
