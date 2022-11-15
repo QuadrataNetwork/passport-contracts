@@ -89,9 +89,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
-      name: "Ownable",
+      name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Ownable__factory>;
+    ): Promise<Contracts.ERC20__factory>;
+    getContractFactory(
+      name: "IERC20Metadata",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20Metadata__factory>;
+    getContractFactory(
+      name: "IERC20",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC20__factory>;
+    getContractFactory(
+      name: "IERC165",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
       name: "IAllowList",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -144,10 +156,6 @@ declare module "hardhat/types/runtime" {
       name: "QuadReaderStore",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.QuadReaderStore__factory>;
-    getContractFactory(
-      name: "AllowList",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.AllowList__factory>;
     getContractFactory(
       name: "DeFi",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -349,10 +357,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
-      name: "Ownable",
+      name: "ERC20",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Ownable>;
+    ): Promise<Contracts.ERC20>;
+    getContractAt(
+      name: "IERC20Metadata",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20Metadata>;
+    getContractAt(
+      name: "IERC20",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC20>;
+    getContractAt(
+      name: "IERC165",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165>;
     getContractAt(
       name: "IAllowList",
       address: string,
@@ -418,11 +441,6 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.QuadReaderStore>;
-    getContractAt(
-      name: "AllowList",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.AllowList>;
     getContractAt(
       name: "DeFi",
       address: string,
