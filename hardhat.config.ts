@@ -53,7 +53,7 @@ const config = {
       fork: {
         url: localConf.rpc,
       },
-      // chainId: localConf.chainId,
+      chainId: localConf.chainId,
       accounts: [
         {privateKey: "0xbb96b9527686f2ca62c92428e5c7592987b9a6244b48a0e25bd096ec4caea048", balance: parseEther("100").toString()}, // AVAX Subnet Admin (0xaF15d1B05fF8C105F68E5d6F39E8e6010593F9e6)
         {privateKey: "0x7b4198529994b0dc604278c99d153cfd069d594753d471171a1d102a10438e07", balance: parseEther("100").toString()}, // AVAX Subnet Admin (0xaF15d1B05fF8C105F68E5d6F39E8e6010593F9e6)
