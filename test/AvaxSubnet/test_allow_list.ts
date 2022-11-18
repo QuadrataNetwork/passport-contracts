@@ -13,6 +13,7 @@ const {
   READER_ROLE,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
+  ALLOW_LIST_AML_THRESHOLD
 } = require("../../utils/constant.ts");
 
 const {
@@ -29,9 +30,10 @@ const ROLES = {
   ADMIN: 2,
 };
 
-const ALLOW_LIST_AML_THRESHOLD = 5;
 
-describe("AllowList", async () => {
+describe("AllowList", function() {
+  this.timeout(1000 * 60 * 60);
+
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract; // eslint-disable-line no-unused-vars
@@ -71,6 +73,11 @@ describe("AllowList", async () => {
       mockReader,
     ] = await ethers.getSigners();
 
+    admin = deployer;
+
+    console.log(deployer.address);
+    console.log(admin.address);
+
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
       [issuer, issuer2],
@@ -81,13 +88,7 @@ describe("AllowList", async () => {
     issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
 
-    await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
-
     const TX_ALLOW_LIST_ADDRESS = "0x0200000000000000000000000000000000000002";
-    await governance
-      .connect(admin)
-      .setAllowListAMLThreshold(ALLOW_LIST_AML_THRESHOLD);
-
     allowList = await ethers.getContractAt(
       "IAllowList",
       TX_ALLOW_LIST_ADDRESS,
@@ -100,11 +101,13 @@ describe("AllowList", async () => {
 
     it("precompile should see admin address has admin role", async function () {
       // test precompile first
+      console.log(admin.address)
       const adminRole = await allowList.readAllowList(admin.address);
+      console.log(adminRole)
       expect(adminRole).to.be.equal(ROLES.ADMIN);
     });
 
-    it("setAttributes (AML below threshold)", async () => {
+    it.only("setAttributes (AML below threshold)", async () => {
       let role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
 

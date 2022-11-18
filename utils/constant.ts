@@ -55,6 +55,9 @@ export const NETWORK_IDS = {
 
 export const HARDHAT_CHAIN_ID = 424242;
 
+export const ALLOW_LIST_AML_THRESHOLD = 5;
+
+
 export const PRICE_PER_ATTRIBUTES_ETH = {
   [ATTRIBUTE_AML]: parseEther("0.0012"),
   [ATTRIBUTE_COUNTRY]: parseEther("0.0012"),

@@ -5,6 +5,7 @@ const { deployQuadrata } = require("../../utils/deployment.ts");
 const {
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
+  ALLOW_LIST_AML_THRESHOLD
 } = require("../../utils/constant.ts");
 
 const {
@@ -62,7 +63,7 @@ const {
     MAX_GAS_FEE
   );
 
-  let tx = await governance
+ /* let tx = await governance
     .connect(deployer)
     .renounceRole(GOVERNANCE_ROLE, deployer.address);
   await tx.wait();
@@ -72,4 +73,5 @@ const {
     .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
   await tx.wait();
   console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  */
 })();
