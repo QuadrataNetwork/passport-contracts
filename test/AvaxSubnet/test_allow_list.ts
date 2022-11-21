@@ -53,7 +53,7 @@ describe("AllowList", function() {
   let issuedAt: number, verifiedAt: number;
   const attributes: any = {
     [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-    [ATTRIBUTE_AML]: formatBytes32String("1"),
+    [ATTRIBUTE_AML]: hexZeroPad("0x01", 32),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
   };
@@ -323,7 +323,7 @@ describe("AllowList", function() {
       expect(role).to.be.equal(ROLES.ALLOWED);
     });
 
-    it.only("setAttributes (single issuer override AML 1 and then AML 6", async () => {
+    it("setAttributes (single issuer override AML 1 and then AML 6", async () => {
       let role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
       const attributes: any = {
@@ -380,6 +380,7 @@ describe("AllowList", function() {
 
     it("setAttributes (no AML)", async () => {
       const attributes: any = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
         [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
       };
       await setAttributes(
@@ -414,11 +415,12 @@ describe("AllowList", function() {
 
       const attributes: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("3"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x03", 32),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
+      await allowList.setEnabled(issuer.address);
       await setAttributesIssuer(
         minterA,
         issuer,
@@ -437,7 +439,7 @@ describe("AllowList", function() {
 
       const attributes: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("6"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x06", 32),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
@@ -452,16 +454,16 @@ describe("AllowList", function() {
       );
 
       role = await allowList.readAllowList(minterA.address);
-      expect(role).to.be.equal(ROLES.ALLOWED);
+      expect(role).to.be.equal(ROLES.NONE);
     });
 
-    it("setAttributesIssuer - fail to revoke ADMIN Allowlist from QuadPassport contract address", async () => {
+    it.only("setAttributesIssuer - fail to revoke ADMIN Allowlist from QuadPassport contract address", async () => {
       let role = await allowList.readAllowList(passport.address);
       expect(role).to.be.equal(ROLES.ADMIN);
 
       const attributes: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("6"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x06", 32),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
