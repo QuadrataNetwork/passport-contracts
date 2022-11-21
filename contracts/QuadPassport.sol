@@ -268,8 +268,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
 
         // Revoke from AllowList
-        _manageAllowList(_msgSender());
         _burnPassports(_msgSender());
+        _manageAllowList(_msgSender());
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
