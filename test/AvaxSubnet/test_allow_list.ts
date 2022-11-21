@@ -143,7 +143,37 @@ describe("AllowList", function() {
       expect(role).to.be.equal(ROLES.ALLOWED);
     });
 
-    it.only("setAttributes (AML above threshold)", async () => {
+    it("setAttributes (AML above threshold)", async () => {
+      let role = await allowList.readAllowList(minterA.address);
+      console.log("minter a inital role", role)
+      expect(role).to.be.equal(ROLES.ALLOWED);
+
+      const attributes: any = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x08", 32),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE,
+        TOKEN_ID,
+        NETWORK_IDS.INSTI1
+      );
+
+
+      role = await allowList.readAllowList(minterA.address);
+      console.log("minter a final role", role)
+      expect(role).to.be.equal(ROLES.NONE);
+    });
+
+    it("setAttributes (AML equal threshold)", async () => {
       let role = await allowList.readAllowList(minterA.address);
       console.log("minter a inital role", role)
       expect(role).to.be.equal(ROLES.NONE);
@@ -170,40 +200,15 @@ describe("AllowList", function() {
 
       role = await allowList.readAllowList(minterA.address);
       console.log("minter a final role", role)
-      expect(role).to.be.equal(ROLES.NONE);
-    });
-
-    it("setAttributes (AML above threshold)", async () => {
-      console.log("Minter A inital role: ")
-      let role = await allowList.readAllowList(minterA.address);
-      expect(role).to.be.equal(ROLES.NONE);
-
-      const attributes: any = {
-        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("6"),
-        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
-        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
-      };
-      await setAttributes(
-        minterA,
-        issuer,
-        passport,
-        attributes,
-        verifiedAt,
-        issuedAt,
-        MINT_PRICE
-      );
-
-      role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.ALLOWED);
     });
 
-    it("setAttributes (Multiple issuers for exact same Attribute: AML 1 and then AML 6", async () => {
+    it.only("setAttributes (Multiple issuers for exact same Attribute: AML 1 and then AML 6", async () => {
       let role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
       const attributes: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("1"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x01", 32),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
@@ -221,7 +226,7 @@ describe("AllowList", function() {
       expect(role).to.be.equal(ROLES.ALLOWED);
 
       const attributes2: any = {
-        [ATTRIBUTE_AML]: formatBytes32String("6"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x06", 32),
       };
       await setAttributes(
         minterA,

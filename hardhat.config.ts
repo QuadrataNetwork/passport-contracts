@@ -81,7 +81,7 @@ const config = {
       chainId: localConf.chainId,
       accounts:
       [
-        "0xbb96b9527686f2ca62c92428e5c7592987b9a6244b48a0e25bd096ec4caea048", // AVAX Subnet Admin (0xaF15d1B05fF8C105F68E5d6F39E8e6010593F9e6)
+        "0xbb96b9527686f2ca62c92428e5c7592987b9a6244b48a0e25bd096ec4caea048", // AVAX Subnet Admin/Deployer (0xaF15d1B05fF8C105F68E5d6F39E8e6010593F9e6)
         "0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027",
         "0x7b4198529994b0dc604278c99d153cfd069d594753d471171a1d102a10438e07",
         "0x15614556be13730e9e8d6eacc1603143e7b96987429df8726384c2ec4502ef6e",

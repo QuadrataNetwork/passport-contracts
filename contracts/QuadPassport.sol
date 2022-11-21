@@ -16,8 +16,6 @@ import "./QuadSoulbound.sol";
 /// @notice This represents a Quadrata NFT Passport
 contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStore {
 
-    event TestLog(uint256);
-
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
 
@@ -104,7 +102,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _issuer
     ) internal {
         // Handle DID
-        emit TestLog(0);
         if(_config.did != bytes32(0)){
             require(governance.getIssuerAttributePermission(_issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
             _validateDid(_account, _config.did);
@@ -114,9 +111,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _issuer,
                 _config.verifiedAt);
 
-            emit TestLog(1);
         }
-        emit TestLog(2);
         for (uint256 i = 0; i < _config.attrKeys.length; i++) {
             require(governance.getIssuerAttributePermission(_issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
             require(_config.attrTypes[i] != ATTRIBUTE_DID, "ISSUER_UPDATED_DID");
@@ -129,19 +124,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _issuer,
                 _config.verifiedAt);
 
-            emit TestLog(3);
             // AVAX Subnet Allowlist Management
             if (_config.attrTypes[i] == ATTRIBUTE_AML) {
-                emit TestLog(4);
                 _manageAllowList(_account);
             }
         }
-        emit TestLog(5);
         if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
-            emit TestLog(6);
         }
-        emit TestLog(7);
         emit SetAttributeReceipt(_account, _issuer, _config.fee);
     }
 
