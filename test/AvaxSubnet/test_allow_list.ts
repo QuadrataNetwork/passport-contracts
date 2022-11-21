@@ -628,7 +628,7 @@ describe("AllowList", function() {
   // ******************************************************************************* //
 
   describe("QuadPassport.burnPassports (AllowList)", async () => {
-    it.only("burnPassports", async () => {
+    it("burnPassports", async () => {
       let role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
 
@@ -663,20 +663,20 @@ describe("AllowList", function() {
   // ******************************************************************************* //
   // ******************************************************************************* //
   // ******************************************************************************* //
-  // >>>>>>>>>>>>>>>>>>>>>>>>>>>      burnPassportsIssuer   <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
+  // >>>>>>>>>>>>>>>>>>>>>>>>    burnPassportsIssuer   <<<<<<<<<<<<<<<<<<<<<<<<<<<<< //
   // ******************************************************************************* //
   // ******************************************************************************* //
   // ******************************************************************************* //
   // ******************************************************************************* //
 
   describe("QuadPassport.burnPassportsIssuer (AllowList)", async () => {
-    it("burnPassportsIssuer - single issuer", async () => {
+    it.only("burnPassportsIssuer - single issuer", async () => {
       let role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
 
       const attributes: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("3"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x03", 32),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
