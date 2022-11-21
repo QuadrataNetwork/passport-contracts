@@ -83,7 +83,6 @@ export const setAttributesBulk = async (
   }
   await expect(
     passport
-      .connect(account)
       .setAttributesBulk(
         bulkConfig,
         bulkSigIssuer,
