@@ -293,7 +293,6 @@ interface QuadPassportInterface extends ethers.utils.Interface {
     "Paused(address)": EventFragment;
     "SetAttributeReceipt(address,address,uint256)": EventFragment;
     "SetPendingGovernance(address)": EventFragment;
-    "TestLog(string,bytes32)": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
     "URI(string,uint256)": EventFragment;
     "Unpaused(address)": EventFragment;
@@ -309,7 +308,6 @@ interface QuadPassportInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Paused"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetAttributeReceipt"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SetPendingGovernance"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "TestLog"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferSingle"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "URI"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Unpaused"): EventFragment;
@@ -345,10 +343,6 @@ export type SetAttributeReceiptEvent = TypedEvent<
 
 export type SetPendingGovernanceEvent = TypedEvent<
   [string] & { _pendingGovernance: string }
->;
-
-export type TestLogEvent = TypedEvent<
-  [string, string] & { arg0: string; arg1: string }
 >;
 
 export type TransferSingleEvent = TypedEvent<
@@ -985,16 +979,6 @@ export class QuadPassport extends BaseContract {
     SetPendingGovernance(
       _pendingGovernance?: string | null
     ): TypedEventFilter<[string], { _pendingGovernance: string }>;
-
-    "TestLog(string,bytes32)"(
-      undefined?: null,
-      undefined?: null
-    ): TypedEventFilter<[string, string], { arg0: string; arg1: string }>;
-
-    TestLog(
-      undefined?: null,
-      undefined?: null
-    ): TypedEventFilter<[string, string], { arg0: string; arg1: string }>;
 
     "TransferSingle(address,address,address,uint256,uint256)"(
       operator?: string | null,

@@ -311,7 +311,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             _burnPassports(_account);
 
         // Potentially revoke from AllowList
-        _manageAllowList(_msgSender());
+        _manageAllowList(_account);
         emit BurnPassportsIssuer(_msgSender(), _account);
     }
 
