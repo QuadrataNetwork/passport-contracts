@@ -78,9 +78,10 @@ export const deployPassportEcosystem = async (
   //await allowList.setAdmin(passport.address, {maxFeePerGas});
   const allowList = await ethers.getContractAt(
     "IAllowList",
-    TX_ALLOW_LIST_ADDRESS
+    TX_ALLOW_LIST_ADDRESS,
+    admin
   );
-  await allowList.setAdmin(admin.address);
+  await allowList.connect(admin).setAdmin(passport.address);
 
   console.log("governance setting allow list threshold")
   await governance.setAllowListAMLThreshold(ALLOW_LIST_AML_THRESHOLD, {maxFeePerGas});

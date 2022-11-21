@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { formatBytes32String, id } from "ethers/lib/utils";
+import { formatBytes32String, hexZeroPad, id } from "ethers/lib/utils";
 
 const {
   MINT_PRICE,
@@ -13,7 +13,8 @@ const {
   READER_ROLE,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
-  ALLOW_LIST_AML_THRESHOLD
+  ALLOW_LIST_AML_THRESHOLD,
+  NETWORK_IDS
 } = require("../../utils/constant.ts");
 
 const {
@@ -73,6 +74,11 @@ describe("AllowList", function() {
       mockReader,
     ] = await ethers.getSigners();
 
+    console.log("minter", minterA.address)
+    console.log("issuer", issuer.address)
+    console.log(minterB.address)
+    console.log(issuer2.address)
+
     admin = deployer;
 
     console.log(deployer.address);
@@ -107,13 +113,14 @@ describe("AllowList", function() {
       expect(adminRole).to.be.equal(ROLES.ADMIN);
     });
 
-    it.only("setAttributes (AML below threshold)", async () => {
+    it("setAttributes (AML below threshold)", async () => {
       let role = await allowList.readAllowList(minterA.address);
+      console.log("minter a inital role", role)
       expect(role).to.be.equal(ROLES.NONE);
 
       const attributes: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
-        [ATTRIBUTE_AML]: formatBytes32String("3"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x03", 32),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
@@ -125,14 +132,49 @@ describe("AllowList", function() {
         attributes,
         verifiedAt,
         issuedAt,
-        MINT_PRICE
+        MINT_PRICE,
+        TOKEN_ID,
+        NETWORK_IDS.INSTI1
       );
 
+
       role = await allowList.readAllowList(minterA.address);
+      console.log("minter a final role", role)
       expect(role).to.be.equal(ROLES.ALLOWED);
     });
 
+    it.only("setAttributes (AML above threshold)", async () => {
+      let role = await allowList.readAllowList(minterA.address);
+      console.log("minter a inital role", role)
+      expect(role).to.be.equal(ROLES.NONE);
+
+      const attributes: any = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: hexZeroPad("0x05", 32),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
+
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE,
+        TOKEN_ID,
+        NETWORK_IDS.INSTI1
+      );
+
+
+      role = await allowList.readAllowList(minterA.address);
+      console.log("minter a final role", role)
+      expect(role).to.be.equal(ROLES.NONE);
+    });
+
     it("setAttributes (AML above threshold)", async () => {
+      console.log("Minter A inital role: ")
       let role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
 
