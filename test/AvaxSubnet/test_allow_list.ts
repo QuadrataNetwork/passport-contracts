@@ -787,10 +787,10 @@ describe("AllowList", function() {
       role = await allowList.readAllowList(minterA.address);
       expect(role).to.be.equal(ROLES.NONE);
 
-      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
+      await passport.connect(issuer).burnPassportsIssuer(minterA.address); //  DOES NOT BURN DID LEVEL ATTRIBUTES
 
       role = await allowList.readAllowList(minterA.address);
-      expect(role).to.be.equal(ROLES.ALLOWED);
+      expect(role).to.be.equal(ROLES.NONE);
     });
 
     it("burnPassportsIssuer - multiple issuer (remain revoke to allowlist)", async () => {

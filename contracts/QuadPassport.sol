@@ -472,8 +472,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         for (uint256 i = 0; i < attributes.length; i++) {
             if (uint256(attributes[i].value) > maxAml)
                 maxAml = uint256(attributes[i].value);
-        }
 
+        }
         if (maxAml <= governance.getAllowListAMLThreshold())
             // Enable in allow list
             allowList.setEnabled(_account);
