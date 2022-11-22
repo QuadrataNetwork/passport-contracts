@@ -21,7 +21,7 @@ export const deployQuadrata = async (
   multisig: string,
   tokenIds: any[],
   verbose: boolean = false,
-  maxFeePerGas: any = /*ethers.utils.parseUnits("3", "gwei")*/ 25000000000 * 4,
+  maxFeePerGas: any = /*ethers.utils.parseUnits("3", "gwei")*/ 25000000000 * 8,
   governanceAddress: string = "",
   passportAddress: string = "",
   readerAddress: string = ""

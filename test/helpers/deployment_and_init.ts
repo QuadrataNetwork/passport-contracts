@@ -54,10 +54,11 @@ export const deployPassportEcosystem = async (
   console.log("Completed deploying quadrata")
 
   // Revoke Deployer Role
-  //await governance.revokeRole(GOVERNANCE_ROLE, deployer.address, {maxFeePerGas});
-  //await governance.revokeRole(DEFAULT_ADMIN_ROLE, deployer.address, {maxFeePerGas});
+  //await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address, {maxFeePerGas});
+  //await governance.connect(admin).revokeRole(DEFAULT_ADMIN_ROLE, deployer.address, {maxFeePerGas});
 
-  console.log("revoked")
+  //console.log("revoked")
+  console.log("deployer is not revoked of admin rights")
 
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");

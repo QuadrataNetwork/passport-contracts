@@ -152,7 +152,7 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
     it("fail (not admin)", async () => {
       const newAttribute = ethers.utils.id("CREDIT");
       await expect(
-        governance.setEligibleAttribute(newAttribute, true)
+        governance.connect(issuerTreasury1).setEligibleAttribute(newAttribute, true)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
@@ -189,7 +189,7 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
     it("fail (not admin)", async () => {
       const newAttribute = ethers.utils.id("CREDIT");
       await expect(
-        governance.setEligibleAttributeByDID(newAttribute, true)
+        governance.connect(treasury).setEligibleAttributeByDID(newAttribute, true)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 

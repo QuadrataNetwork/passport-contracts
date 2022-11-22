@@ -63,7 +63,7 @@ describe("QuadGovernance.setPassportContractAddress + updateGovernanceInPassport
     it("fail (not admin)", async () => {
       await expect(
         governance
-          .connect(deployer)
+          .connect(treasury)
           .updateGovernanceInPassport(deployer.address)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
@@ -104,7 +104,7 @@ describe("QuadGovernance.setPassportContractAddress + updateGovernanceInPassport
 
     it("fail (not admin)", async () => {
       await expect(
-        governance.setPassportContractAddress(deployer.address)
+        governance.connect(treasury).setPassportContractAddress(deployer.address)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 

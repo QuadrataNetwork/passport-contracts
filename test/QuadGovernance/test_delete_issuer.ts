@@ -94,7 +94,7 @@ describe("QuadGovernance.deleteIssuer", async () => {
 
     it("fail - not admin", async () => {
       expect(await governance.getIssuersLength()).to.equal(3);
-      await expect(governance.deleteIssuer(issuer1.address)).to.be.revertedWith(
+      await expect(governance.connect(issuerTreasury3).deleteIssuer(issuer1.address)).to.be.revertedWith(
         "INVALID_ADMIN"
       );
       expect(await governance.getIssuersLength()).to.equal(3);

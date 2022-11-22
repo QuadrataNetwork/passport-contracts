@@ -83,11 +83,11 @@ describe("QuadGovernance.setAttributePriceFixed + setBusinessAttributePriceFixed
     it("fail (not admin)", async () => {
       const newPrice = parseEther("0");
       await expect(
-        governance.setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
+        governance.connect(treasury).setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
 
       await expect(
-        governance.setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
+        governance.connect(treasury).setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 
@@ -144,7 +144,7 @@ describe("QuadGovernance.setAttributePriceFixed + setBusinessAttributePriceFixed
       const newPrice = parseEther("0");
 
       await expect(
-        governance.setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
+        governance.connect(treasury).setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 

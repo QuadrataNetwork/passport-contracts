@@ -64,7 +64,7 @@ describe("QuadGovernance.setEligibleTokenId", async () => {
 
     it("fail (not admin)", async () => {
       await expect(
-        governance.setEligibleTokenId(2, true, uri)
+        governance.connect(treasury).setEligibleTokenId(2, true, uri)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
     it("fail (incremented by more than one)", async () => {

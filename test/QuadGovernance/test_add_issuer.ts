@@ -94,7 +94,7 @@ describe("QuadGovernance.addIssuer", async () => {
 
     it("fail (not admin)", async () => {
       await expect(
-        governance.addIssuer(issuer1.address, admin.address)
+        governance.connect(issuerTreasury3).addIssuer(issuer1.address, admin.address)
       ).to.revertedWith("INVALID_ADMIN");
     });
   });

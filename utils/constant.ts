@@ -45,15 +45,17 @@ export const ALL_ACCOUNT_LEVEL_ATTRIBUTES = [
 
 export const ALL_ATTRIBUTES_BY_DID = [ATTRIBUTE_AML];
 
+
+export const HARDHAT_CHAIN_ID = 31337;
+
 export const NETWORK_IDS = {
   MAINNET: 1,
   POLYGON: 137,
   MUMBAI: 80001,
   GOERLI: 5,
   INSTI1: 424242,
+  HARDHAT_CHAIN_ID: HARDHAT_CHAIN_ID,
 };
-
-export const HARDHAT_CHAIN_ID = 424242;
 
 export const ALLOW_LIST_AML_THRESHOLD = 5;
 
@@ -87,14 +89,14 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES_MATIC = {
 };
 
 export const PRICE_PER_ATTRIBUTES_TESTNET = {
-  [ATTRIBUTE_AML]: parseEther(".000002"),
+  [ATTRIBUTE_AML]: parseEther("0"),
   [ATTRIBUTE_COUNTRY]: parseEther(".00002"),
   [ATTRIBUTE_DID]: parseEther(".00002"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_TESTNET = {
-  [ATTRIBUTE_AML]: parseEther("0.00025"),
+  [ATTRIBUTE_AML]: parseEther("0"),
   [ATTRIBUTE_COUNTRY]: parseEther("0.00025"),
   [ATTRIBUTE_DID]: parseEther("0.00025"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
