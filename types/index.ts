@@ -34,6 +34,7 @@ export type { QuadGovernanceStore } from "./QuadGovernanceStore";
 export type { QuadPassportStore } from "./QuadPassportStore";
 export type { QuadReaderStore } from "./QuadReaderStore";
 export type { DeFi } from "./DeFi";
+export type { MockAllowList } from "./MockAllowList";
 export type { MockBusiness } from "./MockBusiness";
 export type { ERC1155Upgradeable } from "./ERC1155Upgradeable";
 export type { ERC1155BurnableUpgradeable } from "./ERC1155BurnableUpgradeable";
@@ -91,6 +92,7 @@ export { QuadGovernanceStore__factory } from "./factories/QuadGovernanceStore__f
 export { QuadPassportStore__factory } from "./factories/QuadPassportStore__factory";
 export { QuadReaderStore__factory } from "./factories/QuadReaderStore__factory";
 export { DeFi__factory } from "./factories/DeFi__factory";
+export { MockAllowList__factory } from "./factories/MockAllowList__factory";
 export { MockBusiness__factory } from "./factories/MockBusiness__factory";
 export { ERC1155Upgradeable__factory } from "./factories/ERC1155Upgradeable__factory";
 export { ERC1155BurnableUpgradeable__factory } from "./factories/ERC1155BurnableUpgradeable__factory";

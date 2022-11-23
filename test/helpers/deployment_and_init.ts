@@ -26,6 +26,12 @@ export const deployPassportEcosystem = async (
 ): Promise<
   [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any]
 > => {
+
+  const MockAllowList = await ethers.getContractFactory("MockAllowList");
+  const mockAllowList = await MockAllowList.deploy();
+  await mockAllowList.deployed();
+  console.log("[MockAllowList] Deployed at:", mockAllowList.address)
+
   const issuersToAdd: any[] = [];
   for (let i = 0; i < issuers.length; i++) {
     issuersToAdd.push({

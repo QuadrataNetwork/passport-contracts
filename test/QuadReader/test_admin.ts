@@ -35,7 +35,8 @@ describe("QuadReader", async () => {
   describe("upgrade", async () => {
     it("fail (not admin)", async () => {
       const QuadReaderUpgrade = await ethers.getContractFactory(
-        "QuadReaderUpgrade"
+        "QuadReaderUpgrade",
+        treasury
       );
       await expect(
         upgrades.upgradeProxy(reader.address, QuadReaderUpgrade, {

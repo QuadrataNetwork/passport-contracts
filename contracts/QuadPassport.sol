@@ -460,7 +460,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     function _manageAllowList(address _account) internal {
         require(_account != address(this), "CANNOT_REVOKE_ALLOWLIST_QP");
         // Precompiled Allow List Contract Address
-        IAllowList allowList = IAllowList(0x0200000000000000000000000000000000000002);
+        //IAllowList allowList = IAllowList(0x0200000000000000000000000000000000000002);
+        IAllowList allowList = IAllowList(0x5FbDB2315678afecb367f032d93F642f64180aa3); // Mock Deployment
         Attribute[] memory attributes = _attributesInternal(_account, ATTRIBUTE_AML);
         if (attributes.length == 0) {
             // Revoke from allow list

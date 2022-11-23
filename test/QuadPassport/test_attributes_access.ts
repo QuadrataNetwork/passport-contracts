@@ -19,7 +19,8 @@ const {
 
 const { setAttributes } = require("../helpers/set_attributes.ts");
 
-describe("QuadPassport.attributes", async () => {
+describe("QuadPassport.attributes", function() {
+  this.timeout(1000 * 60 * 20);
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars

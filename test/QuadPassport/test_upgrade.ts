@@ -32,7 +32,8 @@ describe("QuadPassport", async () => {
   describe("upgrade", async () => {
     it("fail (not admin)", async () => {
       const QuadPassportUpgrade = await ethers.getContractFactory(
-        "QuadPassportUpgrade"
+        "QuadPassportUpgrade",
+        treasury
       );
       await expect(
         upgrades.upgradeProxy(passport.address, QuadPassportUpgrade, {

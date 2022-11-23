@@ -145,6 +145,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DeFi__factory>;
     getContractFactory(
+      name: "MockAllowList",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockAllowList__factory>;
+    getContractFactory(
       name: "MockBusiness",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockBusiness__factory>;
@@ -410,6 +414,11 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.DeFi>;
+    getContractAt(
+      name: "MockAllowList",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockAllowList>;
     getContractAt(
       name: "MockBusiness",
       address: string,
