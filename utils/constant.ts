@@ -17,6 +17,7 @@ export const ATTRIBUTE_AML = ethers.utils.id("AML");
 export const ATTRIBUTE_COUNTRY = ethers.utils.id("COUNTRY");
 export const ATTRIBUTE_DID = ethers.utils.id("DID");
 export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
+export const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id("CRED_PROTOCOL_SCORE")
 export const TOKEN_ID = 1;
 
 export const ALL_ROLES = [
@@ -65,6 +66,7 @@ export const PRICE_PER_ATTRIBUTES_ETH = {
   [ATTRIBUTE_COUNTRY]: parseEther("0.0012"),
   [ATTRIBUTE_DID]: parseEther("0.0012"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0.012"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
@@ -72,6 +74,8 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
   [ATTRIBUTE_COUNTRY]: parseEther("0.015"),
   [ATTRIBUTE_DID]: parseEther("0.015"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0.015"),
+
 };
 
 export const PRICE_PER_ATTRIBUTES_MATIC = {
@@ -79,6 +83,7 @@ export const PRICE_PER_ATTRIBUTES_MATIC = {
   [ATTRIBUTE_COUNTRY]: parseEther("2"),
   [ATTRIBUTE_DID]: parseEther("2"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther(".5"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_MATIC = {
@@ -86,6 +91,7 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES_MATIC = {
   [ATTRIBUTE_COUNTRY]: parseEther("25"),
   [ATTRIBUTE_DID]: parseEther("25"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("6"),
 };
 
 export const PRICE_PER_ATTRIBUTES_TESTNET = {

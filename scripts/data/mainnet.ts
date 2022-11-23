@@ -34,15 +34,15 @@ export const MULTISIG = {
 export const TOKEN_IDS = [
   {
     id: 1,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+    uri: "ipfs://Qmak1wtZE45eez5Q9AMeCBdxkVcTrctJjuh72pS9pXXo1H",
   },
   {
     id: 2,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+    uri: "ipfs://QmTr4TxF7UthBTdtDRENS8jhXMnpGFmddMojgLRchyfYtf",
   },
   {
     id: 3,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+    uri: "ipfs://Qmb6HVdr3dkb5pgFhK74MA2gdV6aXwsBf3fjdBpdNjG4QP",
   },
 ];
 
