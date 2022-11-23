@@ -63,6 +63,8 @@ const {
     MAX_GAS_FEE
   );
 
+  await governance.setAllowListAMLThreshold(ALLOW_LIST_AML_THRESHOLD)
+
  /* let tx = await governance
     .connect(deployer)
     .renounceRole(GOVERNANCE_ROLE, deployer.address);
