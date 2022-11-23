@@ -54,7 +54,7 @@ describe("QuadGovernance.setRevSplitIssuer", async () => {
     it("fail (not admin)", async () => {
       const newRevSplit = 0;
       await expect(
-        governance.setRevSplitIssuer(newRevSplit)
+        governance.connect(treasury).setRevSplitIssuer(newRevSplit)
       ).to.be.revertedWith("INVALID_ADMIN");
     });
 

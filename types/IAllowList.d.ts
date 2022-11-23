@@ -11,6 +11,7 @@ import {
   PopulatedTransaction,
   BaseContract,
   ContractTransaction,
+  Overrides,
   CallOverrides,
 } from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
@@ -18,37 +19,34 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface IQuadPassportMigrationInterface extends ethers.utils.Interface {
+interface IAllowListInterface extends ethers.utils.Interface {
   functions: {
-    "attributes(address,bytes32,address)": FunctionFragment;
-    "attributesByDID(bytes32,bytes32,address)": FunctionFragment;
-    "balanceOf(address,uint256)": FunctionFragment;
+    "readAllowList(address)": FunctionFragment;
+    "setAdmin(address)": FunctionFragment;
+    "setEnabled(address)": FunctionFragment;
+    "setNone(address)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "attributes",
-    values: [string, BytesLike, string]
+    functionFragment: "readAllowList",
+    values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "attributesByDID",
-    values: [BytesLike, BytesLike, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "balanceOf",
-    values: [string, BigNumberish]
-  ): string;
+  encodeFunctionData(functionFragment: "setAdmin", values: [string]): string;
+  encodeFunctionData(functionFragment: "setEnabled", values: [string]): string;
+  encodeFunctionData(functionFragment: "setNone", values: [string]): string;
 
-  decodeFunctionResult(functionFragment: "attributes", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "attributesByDID",
+    functionFragment: "readAllowList",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setAdmin", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setEnabled", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setNone", data: BytesLike): Result;
 
   events: {};
 }
 
-export class IQuadPassportMigration extends BaseContract {
+export class IAllowList extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -89,115 +87,97 @@ export class IQuadPassportMigration extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: IQuadPassportMigrationInterface;
+  interface: IAllowListInterface;
 
   functions: {
-    attributes(
-      arg0: string,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
-    ): Promise<[[string, BigNumber] & { value: string; epoch: BigNumber }]>;
-
-    attributesByDID(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
-    ): Promise<[[string, BigNumber] & { value: string; epoch: BigNumber }]>;
-
-    balanceOf(
-      arg0: string,
-      arg1: BigNumberish,
+    readAllowList(
+      addr: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    setAdmin(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setEnabled(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setNone(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
-  attributes(
-    arg0: string,
-    arg1: BytesLike,
-    arg2: string,
-    overrides?: CallOverrides
-  ): Promise<[string, BigNumber] & { value: string; epoch: BigNumber }>;
+  readAllowList(addr: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-  attributesByDID(
-    arg0: BytesLike,
-    arg1: BytesLike,
-    arg2: string,
-    overrides?: CallOverrides
-  ): Promise<[string, BigNumber] & { value: string; epoch: BigNumber }>;
+  setAdmin(
+    addr: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
-  balanceOf(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
+  setEnabled(
+    addr: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setNone(
+    addr: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   callStatic: {
-    attributes(
-      arg0: string,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
-    ): Promise<[string, BigNumber] & { value: string; epoch: BigNumber }>;
+    readAllowList(addr: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    attributesByDID(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
-    ): Promise<[string, BigNumber] & { value: string; epoch: BigNumber }>;
+    setAdmin(addr: string, overrides?: CallOverrides): Promise<void>;
 
-    balanceOf(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
+    setEnabled(addr: string, overrides?: CallOverrides): Promise<void>;
+
+    setNone(addr: string, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {};
 
   estimateGas: {
-    attributes(
-      arg0: string,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
+    readAllowList(addr: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    setAdmin(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    attributesByDID(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
+    setEnabled(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    balanceOf(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
+    setNone(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    attributes(
-      arg0: string,
-      arg1: BytesLike,
-      arg2: string,
+    readAllowList(
+      addr: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    attributesByDID(
-      arg0: BytesLike,
-      arg1: BytesLike,
-      arg2: string,
-      overrides?: CallOverrides
+    setAdmin(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    balanceOf(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
+    setEnabled(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setNone(
+      addr: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
 }

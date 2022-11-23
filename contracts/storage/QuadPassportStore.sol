@@ -3,6 +3,7 @@ pragma solidity 0.8.16;
 
 import "../interfaces/IQuadPassportStore.sol";
 import "../interfaces/IQuadGovernance.sol";
+import "../interfaces/IAllowList.sol";
 
 import "./QuadConstant.sol";
 

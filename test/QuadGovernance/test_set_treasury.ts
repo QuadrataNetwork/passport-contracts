@@ -39,7 +39,7 @@ describe("QuadGovernance.setTreasury", async () => {
     });
 
     it("fail (not admin)", async () => {
-      await expect(governance.setTreasury(deployer.address)).to.be.revertedWith(
+      await expect(governance.connect(treasury).setTreasury(deployer.address)).to.be.revertedWith(
         "INVALID_ADMIN"
       );
     });

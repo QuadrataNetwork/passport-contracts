@@ -6,6 +6,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
+  ATTRIBUTE_CRED_PROTOCOL_SCORE,
   NETWORK_IDS,
 } = require("../../utils/constant.ts");
 
@@ -15,6 +16,12 @@ export const QUADRATA_TREASURY = {
     "0x096A0Fb5954998Aa9F711B98E4d1A65f342F69Db"
   ),
   [NETWORK_IDS.GOERLI]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
+  [NETWORK_IDS.HARDHAT_CHAIN_ID]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
+  [NETWORK_IDS.INSTI1]: getAddress(
     "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
   ),
 };
@@ -28,6 +35,12 @@ export const MULTISIG = {
     "0x096A0Fb5954998Aa9F711B98E4d1A65f342F69Db"
   ),
   [NETWORK_IDS.GOERLI]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
+  [NETWORK_IDS.HARDHAT_CHAIN_ID]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
+  [NETWORK_IDS.INSTI1]: getAddress(
     "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
   ),
 };
@@ -48,7 +61,7 @@ export const TOKEN_IDS = [
 ];
 
 // Careful - this doesn't work for Contract Deployment today
-export const MAX_GAS_FEE = ethers.utils.parseUnits("4.1337", "gwei");
+export const MAX_GAS_FEE = 25000000000 * 4 //ethers.utils.parseUnits("4.1337", "gwei");
 
 export const ISSUERS = [
   {
@@ -59,6 +72,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -70,6 +84,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -81,6 +96,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -92,6 +108,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -103,6 +120,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -114,6 +132,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -125,6 +144,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -136,6 +156,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 ];

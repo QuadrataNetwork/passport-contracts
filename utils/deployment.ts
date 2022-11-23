@@ -21,7 +21,7 @@ export const deployQuadrata = async (
   multisig: string,
   tokenIds: any[],
   verbose: boolean = false,
-  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
+  maxFeePerGas: any = /*ethers.utils.parseUnits("3", "gwei")*/ 25000000000 * 8,
   governanceAddress: string = "",
   passportAddress: string = "",
   readerAddress: string = ""
@@ -184,7 +184,7 @@ export const deployQuadrata = async (
   if (verbose) console.log(`[QuadGovernance] grant PAUSER_ROLE to ${multisig}`);
 
   // Deploy TestQuadrata contracts
-  const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
+  /*const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
   const testQuadrata = await TestQuadrata.deploy();
   await testQuadrata.deployed();
 
@@ -195,8 +195,8 @@ export const deployQuadrata = async (
     console.log(
       `[TestQuadrata] setting QuadReader address with ${reader.address}`
     );
-
-  return [governance, passport, reader];
+*/
+  return [governance, passport, reader, maxFeePerGas];
 };
 
 export const deployPassport = async (

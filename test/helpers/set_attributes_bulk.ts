@@ -81,17 +81,21 @@ export const setAttributesBulk = async (
     bulkSigIssuer.push(sigIssuer)
     bulkSigAccount.push(sigAccount)
   }
-  await expect(
-    passport
-      .connect(account)
-      .setAttributesBulk(
-        bulkConfig,
-        bulkSigIssuer,
-        bulkSigAccount,
-        {
-          value: fees.reduce((total: number, eachFee: string) => total += parseInt(eachFee), 0),
-        }
-      )
+
+  const tx = await passport
+  .setAttributesBulk(
+    bulkConfig,
+    bulkSigIssuer,
+    bulkSigAccount,
+    {
+      value: fees.reduce((total: number, eachFee: string) => total += parseInt(eachFee), 0),
+    }
   )
-    .to.emit(passport, "SetAttributeReceipt")
+
+  const value = await tx.wait();
+
+  for(const val of value.events) {
+    console.log(val.args.toString())
+  }
+
 };

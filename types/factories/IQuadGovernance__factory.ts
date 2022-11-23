@@ -359,6 +359,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "getAllowListAMLThreshold",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "getEligibleAttributesLength",
     outputs: [
       {
@@ -539,6 +552,19 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_threshold",
+        type: "uint256",
+      },
+    ],
+    name: "setAllowListAMLThreshold",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {

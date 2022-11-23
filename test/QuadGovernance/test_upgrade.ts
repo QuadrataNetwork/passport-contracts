@@ -51,7 +51,8 @@ describe("QuadGovernance.upgrade", async () => {
 
     it("fail (not admin)", async () => {
       const QuadGovernanceV2 = await ethers.getContractFactory(
-        "QuadGovernanceUpgrade"
+        "QuadGovernanceUpgrade",
+        treasury
       );
       await expect(
         upgrades.upgradeProxy(governance.address, QuadGovernanceV2, {
