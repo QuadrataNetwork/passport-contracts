@@ -60,7 +60,7 @@ export const PRICE_PER_ATTRIBUTES_ETH = {
   [ATTRIBUTE_COUNTRY]: parseEther("0.0012"),
   [ATTRIBUTE_DID]: parseEther("0.0012"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
-  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0.012"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0.0012"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
