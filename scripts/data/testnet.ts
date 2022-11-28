@@ -6,6 +6,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
+  ATTRIBUTE_CRED_PROTOCOL_SCORE,
   NETWORK_IDS,
 } = require("../../utils/constant.ts");
 
@@ -65,6 +66,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -76,6 +78,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -87,6 +90,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -98,6 +102,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -109,6 +114,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -120,6 +126,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -131,6 +138,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 
@@ -142,6 +150,7 @@ export const ISSUERS = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE
     ],
   },
 ];
