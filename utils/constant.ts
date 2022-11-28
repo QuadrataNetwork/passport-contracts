@@ -94,6 +94,8 @@ export const PRICE_PER_ATTRIBUTES_FUJI = {
   [ATTRIBUTE_COUNTRY]: parseEther(".002"),
   [ATTRIBUTE_DID]: parseEther(".002"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther(".0002"),
+
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_FUJI = {
@@ -101,6 +103,7 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES_FUJI = {
   [ATTRIBUTE_COUNTRY]: parseEther(".025"),
   [ATTRIBUTE_DID]: parseEther(".025"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther(".002"),
 };
 
 export const PRICE_PER_ATTRIBUTES = {

@@ -9,6 +9,7 @@ import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
+import { parseEther, parseUnits } from "ethers/lib/utils";
 
 dotenv.config();
 
