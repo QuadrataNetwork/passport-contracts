@@ -86,9 +86,17 @@ const config = {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       gasMultiplier: 10,
       chainId: 43113,
-      accounts: process.env.FUJI_PRIVATE_KEY !== undefined
-      ? [process.env.FUJI_PRIVATE_KEY]
+      accounts: process.env.DEPLOYER_V2_PRIVATE_KEY !== undefined
+      ? [process.env.DEPLOYER_V2_PRIVATE_KEY]
       : []
+    },
+
+    bnc_testnet: {
+      url: "https://data-seed-prebsc-1-s3.binance.org:8545",
+      chainId: 97,
+      accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
+      ? [process.env.TESTNET_PRIVATE_KEY]
+      : [],
     }
   },
   gasReporter: {
