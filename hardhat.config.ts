@@ -97,6 +97,14 @@ const config = {
       accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
       ? [process.env.TESTNET_PRIVATE_KEY]
       : [],
+    },
+
+    celo_testnet: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      chainId: 44787,
+      accounts: process.env.DEPLOYER_V2_PRIVATE_KEY !== undefined
+      ? [process.env.DEPLOYER_V2_PRIVATE_KEY]
+      : []
     }
   },
   gasReporter: {

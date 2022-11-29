@@ -21,6 +21,9 @@ export const QUADRATA_TREASURY = {
   [NETWORK_IDS.FUJI]: getAddress(
     "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
   ),
+  [NETWORK_IDS.CELO_TESTNET]: getAddress(
+    "0x8c3026C6f065dEcE3E7F641F4daC8f57BF9C4BE1"
+  ),
 };
 
 export const TIMELOCK = getAddress(

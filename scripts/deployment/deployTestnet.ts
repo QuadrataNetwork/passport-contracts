@@ -24,6 +24,7 @@ const {
     throw new Error("ISSUERS not set");
   }
 
+  /*
   if (!TIMELOCK) {
     throw new Error("TIMELOCK not set");
   }
@@ -31,7 +32,7 @@ const {
   if (!MULTISIG) {
     throw new Error("MULTISIG not set");
   }
-
+ */
   if (TOKEN_IDS.length === 0) {
     throw new Error("TOKEN_IDS not set");
   }
@@ -61,7 +62,7 @@ const {
     true, // Verbose = true,
     MAX_GAS_FEE
   );
-
+/*
   let tx = await governance
     .connect(deployer)
     .renounceRole(GOVERNANCE_ROLE, deployer.address);
@@ -72,4 +73,5 @@ const {
     .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
   await tx.wait();
   console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  */
 })();
