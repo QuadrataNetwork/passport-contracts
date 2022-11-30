@@ -113,6 +113,14 @@ const config = {
       accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
       ? [process.env.TESTNET_PRIVATE_KEY]
       : []
+    },
+
+    optimism_testnet: {
+      url: process.env.OPTIM_GOERLI,
+      chainId: 420,
+      accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
+      ? [process.env.TESTNET_PRIVATE_KEY]
+      : []
     }
   },
   gasReporter: {

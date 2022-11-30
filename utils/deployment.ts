@@ -1,4 +1,5 @@
 import { Contract } from "ethers";
+import { ATTRIBUTE_CRED_PROTOCOL_SCORE } from "./constant";
 const { ethers, upgrades } = require("hardhat");
 
 const {
@@ -90,6 +91,14 @@ export const deployQuadrata = async (
     console.log(
       `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_IS_BUSINESS`
     );
+  tx = await governance.setEligibleAttribute(ATTRIBUTE_CRED_PROTOCOL_SCORE, true, {
+    maxFeePerGas,
+  });
+  await tx.wait();
+  if (verbose)
+  console.log(
+    `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_CRED_PROTOCOL_SCORE`
+  );
 
   // Set Eligible Attributes by DID
   tx = await governance.setEligibleAttributeByDID(ATTRIBUTE_AML, true, {
