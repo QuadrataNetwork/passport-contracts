@@ -105,6 +105,14 @@ const config = {
       accounts: process.env.DEPLOYER_V2_PRIVATE_KEY !== undefined
       ? [process.env.DEPLOYER_V2_PRIVATE_KEY]
       : []
+    },
+
+    arbitrum_testnet: {
+      url: process.env.ARB_GOERLI,
+      chainId: 421613,
+      accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
+      ? [process.env.TESTNET_PRIVATE_KEY]
+      : []
     }
   },
   gasReporter: {

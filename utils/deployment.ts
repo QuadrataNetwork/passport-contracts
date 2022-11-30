@@ -167,6 +167,7 @@ export const deployQuadrata = async (
     console.log(`[QuadGovernance] grant READER_ROLE to ${reader.address}`);
 
   // Grant `GOVERNANCE_ROLE` and `DEFAULT_ADMIN_ROLE` to Timelock
+  /*
   tx = await governance.grantRole(GOVERNANCE_ROLE, timelock, { maxFeePerGas });
   await tx.wait();
   if (verbose)
@@ -179,12 +180,12 @@ export const deployQuadrata = async (
     console.log(`[QuadGovernance] grant DEFAULT_ADMIN_ROLE to ${timelock}`);
 
   // GRANT `PAUSER_ROLE` to MULTISIG
-  tx = await governance.grantRole(PAUSER_ROLE, multisig, { maxFeePerGas });
-  await tx.wait();
-  if (verbose) console.log(`[QuadGovernance] grant PAUSER_ROLE to ${multisig}`);
+  // tx = await governance.grantRole(PAUSER_ROLE, multisig, { maxFeePerGas });
+  // await tx.wait();
+  // if (verbose) console.log(`[QuadGovernance] grant PAUSER_ROLE to ${multisig}`);
 
   // Deploy TestQuadrata contracts
-  const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
+ const TestQuadrata = await ethers.getContractFactory("TestQuadrata");
   const testQuadrata = await TestQuadrata.deploy();
   await testQuadrata.deployed();
 
@@ -194,7 +195,7 @@ export const deployQuadrata = async (
   if (verbose)
     console.log(
       `[TestQuadrata] setting QuadReader address with ${reader.address}`
-    );
+    );*/
 
   return [governance, passport, reader];
 };
