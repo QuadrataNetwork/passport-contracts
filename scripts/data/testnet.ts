@@ -35,15 +35,31 @@ export const MULTISIG = {
 export const TOKEN_IDS = [
   {
     id: 1,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+    uri: "ipfs://Qmak1wtZE45eez5Q9AMeCBdxkVcTrctJjuh72pS9pXXo1H",
   },
   {
     id: 2,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+    uri: "ipfs://QmTr4TxF7UthBTdtDRENS8jhXMnpGFmddMojgLRchyfYtf",
   },
   {
     id: 3,
-    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+    uri: "ipfs://Qmb6HVdr3dkb5pgFhK74MA2gdV6aXwsBf3fjdBpdNjG4QP",
+  },
+  {
+    id: 4,
+    uri: "ipfs://QmTFKP2b9moWzAhdWLELg2XGQkMMirgSxVvJDGArT7o4Cd",
+  },
+  {
+    id: 5,
+    uri: "ipfs://QmVisUZ78Hr9uTg9MaRi2M5PWRs39P3JGKwwTayJXdhUjD",
+  },
+  {
+    id: 6,
+    uri: "ipfs://QmUgZ9rP7iRAAaA6UBTNoid1NS1k3GbMaiXKN6VccUfw6h",
+  },
+  {
+    id: 7,
+    uri: "",
   },
 ];
 

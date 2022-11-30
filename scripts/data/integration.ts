@@ -45,6 +45,22 @@ export const TOKEN_IDS = [
     id: 3,
     uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
   },
+  {
+    id: 4,
+    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+  },
+  {
+    id: 5,
+    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+  },
+  {
+    id: 6,
+    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+  },
+  {
+    id: 7,
+    uri: "ipfs://QmSczMjKWDJBoYSFzPAm3MVFznKcHNnR4EJW23Ng1zQAWu",
+  },
 ];
 
 // Careful - this doesn't work for Contract Deployment today
