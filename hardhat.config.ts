@@ -121,6 +121,14 @@ const config = {
       accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
       ? [process.env.TESTNET_PRIVATE_KEY]
       : []
+    },
+
+    fantom_testnet: {
+      url: "https://rpc.ankr.com/fantom_testnet",
+      chainId: 4002,
+      accounts: process.env.TESTNET_PRIVATE_KEY !== undefined
+      ? [process.env.TESTNET_PRIVATE_KEY]
+      : []
     }
   },
   gasReporter: {
