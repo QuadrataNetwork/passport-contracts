@@ -60,6 +60,10 @@ export const TOKEN_IDS = [
     id: 7,
     uri: "ipfs://QmU9Srf9P4Sh93tHJyStR3Y9YXr1EeD79dH6v1j1wQZoWv",
   },
+  {
+    id: 8,
+    uri: "ipfs://QmcomrcMoSjm1yGdGr81P7JDwu3cYMx1sexXHL933k4nTE",
+  },
 ];
 
 // Careful - this doesn't work for Contract Deployment today
