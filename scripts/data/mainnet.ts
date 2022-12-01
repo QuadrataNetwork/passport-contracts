@@ -34,15 +34,35 @@ export const MULTISIG = {
 export const TOKEN_IDS = [
   {
     id: 1,
-    uri: "ipfs://Qmak1wtZE45eez5Q9AMeCBdxkVcTrctJjuh72pS9pXXo1H",
+    uri: "ipfs://QmTgCFpyGdSDJehhpYJ8fHFo5wRfchdVxz8mAdGud5RcYc",
   },
   {
     id: 2,
-    uri: "ipfs://QmTr4TxF7UthBTdtDRENS8jhXMnpGFmddMojgLRchyfYtf",
+    uri: "ipfs://QmTtANgqFTKZVwLxqebbBQdDYqoi4YnMLaRtW2PpE196uE",
   },
   {
     id: 3,
-    uri: "ipfs://Qmb6HVdr3dkb5pgFhK74MA2gdV6aXwsBf3fjdBpdNjG4QP",
+    uri: "ipfs://QmSJXYHPRDgQUFFMYGjoW6oDy7JuPQLcDJnSaqcB7TFRed",
+  },
+  {
+    id: 4,
+    uri: "ipfs://QmTFKP2b9moWzAhdWLELg2XGQkMMirgSxVvJDGArT7o4Cd",
+  },
+  {
+    id: 5,
+    uri: "ipfs://QmVisUZ78Hr9uTg9MaRi2M5PWRs39P3JGKwwTayJXdhUjD",
+  },
+  {
+    id: 6,
+    uri: "ipfs://QmUgZ9rP7iRAAaA6UBTNoid1NS1k3GbMaiXKN6VccUfw6h",
+  },
+  {
+    id: 7,
+    uri: "ipfs://QmU9Srf9P4Sh93tHJyStR3Y9YXr1EeD79dH6v1j1wQZoWv",
+  },
+  {
+    id: 8,
+    uri: "ipfs://QmcomrcMoSjm1yGdGr81P7JDwu3cYMx1sexXHL933k4nTE",
   },
 ];
 
