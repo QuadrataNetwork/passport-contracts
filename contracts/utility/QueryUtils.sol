@@ -4,55 +4,55 @@ pragma solidity >= 0.5.0;
 library QueryUtils {
   /// @dev Checks if IsBusiness return value is true
   /// @param _attrValue return value of query
-  function IsBusinessTrue(bytes32 _attrValue) public pure returns (bool) {
+  function isBusinessTrue(bytes32 _attrValue) public pure returns (bool) {
     return(_attrValue == keccak256("TRUE"));
   }
 
   /// @dev Checks if IsBusiness return value is false
   /// @param _attrValue return value of query
-  function IsBusinessFalse(bytes32 _attrValue) public pure returns (bool) {
+  function isBusinessFalse(bytes32 _attrValue) public pure returns (bool) {
     return(_attrValue == keccak256("FALSE") || _attrValue == bytes32(0));
   }
 
   /// @dev Checks if Country return value is equal to a given string value
   /// @param _attrValue return value of query
   /// @param _expectedString expected country value as string
-  function CountryIsEqual(bytes32 _attrValue, string memory _expectedString) public pure returns (bool) {
+  function countryIsEqual(bytes32 _attrValue, string memory _expectedString) public pure returns (bool) {
     return(_attrValue == keccak256(abi.encodePacked(_expectedString)));
   }
 
   /// @dev Checks if AML return value is equal to a given uint256 value
   /// @param _attrValue return value of query
   /// @param _expectedInt expected AML value as uint256
-  function AmlIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns (bool) {
+  function amlIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns (bool) {
     return(uint256(_attrValue) == _expectedInt);
   }
 
   /// @dev Checks if AML return value is greater than a given uint256 value
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound AML value as uint256
-  function AmlGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
+  function amlGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
     return(uint256(_attrValue) > _lowerBound);
   }
 
   /// @dev Checks if AML return value is greater than or equal to a given uint256 value
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound AML value as uint256
-  function AmlGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
+  function amlGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
     return(uint256(_attrValue) >= _lowerBound);
   }
 
   /// @dev Checks if AML return value is less than a given uint256 value
   /// @param _attrValue return value of query
   /// @param _upperBound upper bound AML value as uint256
-  function AmlLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
+  function amlLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) < _upperBound);
   }
 
   /// @dev Checks if AML return value is less than or equal to a given uint256 value
   /// @param _attrValue return value of query
   /// @param _upperBound upper bound AML value as uint256
-  function AmlLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
+  function amlLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) <= _upperBound);
   }
 
@@ -60,7 +60,7 @@ library QueryUtils {
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound AML value as uint256
   /// @param _upperBound upper bound AML value as uint256
-  function AmlBetweenInclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
+  function amlBetweenInclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) <= _upperBound && uint256(_attrValue) >= _lowerBound);
   }
 
@@ -68,7 +68,7 @@ library QueryUtils {
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound AML value as uint256
   /// @param _upperBound upper bound AML value as uint256
-  function AmlBetweenExclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
+  function amlBetweenExclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) < _upperBound && uint256(_attrValue) > _lowerBound);
   }
 
@@ -76,7 +76,7 @@ library QueryUtils {
   /// @param _attrValue return value of query
   /// @param _startingHiddenScore starting hidden score hash
   /// @param _iteratorThreshold maximum number of hashing to meet criteria
-  function VantageScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
+  function vantageScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
     if(_attrValue == bytes32(0)){
       return false;
     }
@@ -98,35 +98,35 @@ library QueryUtils {
   /// @dev Checks if CredProtocolScore return value is equal to a given uint256 value
   /// @param _attrValue return value of query
   /// @param _expectedInt expected CredProtocolScore value as uint256
-  function CredProtocolScoreIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns (bool) {
+  function credProtocolScoreIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns (bool) {
     return(uint256(_attrValue) == _expectedInt);
   }
 
   /// @dev Checks if CredProtocolScore return value is greater than a given uint256 value
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound CredProtocolScore value as uint256
-  function CredProtocolScoreGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
+  function credProtocolScoreGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
     return(uint256(_attrValue) > _lowerBound);
   }
 
   /// @dev Checks if CredProtocolScore return value is greater than or equal to a given uint256 value
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound CredProtocolScore value as uint256
-  function CredProtocolScoreGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
+  function credProtocolScoreGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
     return(uint256(_attrValue) >= _lowerBound);
   }
 
   /// @dev Checks if CredProtocolScore return value is less than a given uint256 value
   /// @param _attrValue return value of query
   /// @param _upperBound upper bound CredProtocolScore value as uint256
-  function CredProtocolScoreLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
+  function credProtocolScoreLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) < _upperBound);
   }
 
   /// @dev Checks if CredProtocolScore return value is less than or equal to a given uint256 value
   /// @param _attrValue return value of query
   /// @param _upperBound upper bound CredProtocolScore value as uint256
-  function CredProtocolScoreLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
+  function credProtocolScoreLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) <= _upperBound);
   }
 
@@ -134,7 +134,7 @@ library QueryUtils {
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound CredProtocolScore value as uint256
   /// @param _upperBound upper bound CredProtocolScore value as uint256
-  function CredProtocolScoreBetweenInclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
+  function credProtocolScoreBetweenInclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) <= _upperBound && uint256(_attrValue) >= _lowerBound);
   }
 
@@ -142,7 +142,7 @@ library QueryUtils {
   /// @param _attrValue return value of query
   /// @param _lowerBound lower bound CredProtocolScore value as uint256
   /// @param _upperBound upper bound CredProtocolScore value as uint256
-  function CredProtocolScoreBetweenExclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
+  function credProtocolScoreBetweenExclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
     return(uint256(_attrValue) < _upperBound && uint256(_attrValue) > _lowerBound);
   }
 

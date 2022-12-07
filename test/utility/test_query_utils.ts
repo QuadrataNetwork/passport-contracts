@@ -26,323 +26,323 @@ describe('QueryUtils()', function() {
       await testQueryUtilsInstance.deployed();
   });
 
-  describe('IsBusinessTrue()', function() {
-    it("asserts correct IsBusinessTrue value", async () => {
-      expect(await testQueryUtilsInstance.functions.IsBusinessTrue(
+  describe('isBusinessTrue()', function() {
+    it("asserts correct isBusinessTrue value", async () => {
+      expect(await testQueryUtilsInstance.functions.isBusinessTrue(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('TRUE'))
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.IsBusinessTrue(
+      expect(await testQueryUtilsInstance.functions.isBusinessTrue(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FALSE'))
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.IsBusinessTrue(
+      expect(await testQueryUtilsInstance.functions.isBusinessTrue(
         ethers.constants.HashZero
       )).eql([false]);
     });
   });
 
-  describe('IsBusinessFalse()', function() {
-    it("asserts correct IsBusinessFalse value", async () => {
-      expect(await testQueryUtilsInstance.functions.IsBusinessFalse(
+  describe('isBusinessFalse()', function() {
+    it("asserts correct isBusinessFalse value", async () => {
+      expect(await testQueryUtilsInstance.functions.isBusinessFalse(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('TRUE'))
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.IsBusinessFalse(
+      expect(await testQueryUtilsInstance.functions.isBusinessFalse(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FALSE'))
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.IsBusinessFalse(
+      expect(await testQueryUtilsInstance.functions.isBusinessFalse(
         ethers.constants.HashZero
       )).eql([true]);
     });
   });
 
-  describe('CountryIsEqual()', function() {
-    it("asserts correct CountryIsEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.CountryIsEqual(
+  describe('countryIsEqual()', function() {
+    it("asserts correct countryIsEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.countryIsEqual(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('US')), 'US'
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CountryIsEqual(
+      expect(await testQueryUtilsInstance.functions.countryIsEqual(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('CA')), 'US'
       )).eql([false]);
     });
   });
 
-  describe('AmlIsEqual()', function() {
-    it("asserts correct AmlIsEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlIsEqual(
+  describe('amlIsEqual()', function() {
+    it("asserts correct amlIsEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlIsEqual(
+      expect(await testQueryUtilsInstance.functions.amlIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
 
-  describe('AmlGreaterThan()', function() {
-    it("asserts correct AmlGreaterThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlGreaterThan(
+  describe('amlGreaterThan()', function() {
+    it("asserts correct amlGreaterThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlGreaterThan(
+      expect(await testQueryUtilsInstance.functions.amlGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlGreaterThan(
+      expect(await testQueryUtilsInstance.functions.amlGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
   });
 
-  describe('AmlGreaterThanEqual()', function() {
-    it("asserts correct AmlGreaterThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlGreaterThanEqual(
+  describe('amlGreaterThanEqual()', function() {
+    it("asserts correct amlGreaterThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlGreaterThanEqual(
+      expect(await testQueryUtilsInstance.functions.amlGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlGreaterThanEqual(
+      expect(await testQueryUtilsInstance.functions.amlGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
   });
 
-  describe('AmlLessThan()', function() {
-    it("asserts correct AmlLessThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlLessThan(
+  describe('amlLessThan()', function() {
+    it("asserts correct amlLessThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlLessThan(
+      expect(await testQueryUtilsInstance.functions.amlLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlLessThan(
+      expect(await testQueryUtilsInstance.functions.amlLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
 
-  describe('AmlLessThanEqual()', function() {
-    it("asserts correct AmlLessThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlLessThanEqual(
+  describe('amlLessThanEqual()', function() {
+    it("asserts correct amlLessThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlLessThanEqual(
+      expect(await testQueryUtilsInstance.functions.amlLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlLessThanEqual(
+      expect(await testQueryUtilsInstance.functions.amlLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
 
-  describe('AmlBetweenInclusive()', function() {
-    it("asserts correct AmlBetweenInclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+  describe('amlBetweenInclusive()', function() {
+    it("asserts correct amlBetweenInclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
   });
 
-  describe('AmlBetweenExclusive()', function() {
-    it("asserts correct AmlBetweenExclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+  describe('amlBetweenExclusive()', function() {
+    it("asserts correct amlBetweenExclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
   });
 
-  describe('VantageScoreIteratorLessThan()', function() {
-    it("asserts correct VantageScoreIteratorLessThan value", async () => {
+  describe('vantageScoreIteratorLessThan()', function() {
+    it("asserts correct vantageScoreIteratorLessThan value", async () => {
       const startHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('NeverFadeFaze'))
       const startHashPlus1 = ethers.utils.keccak256(startHash)
       const startHashPlus2 = ethers.utils.keccak256(startHashPlus1)
 
       const randomHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('AlwaysFadeFaze'))
 
-      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorLessThan(
         startHashPlus2, startHash, 3
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorLessThan(
         startHashPlus2, startHash, 2
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorLessThan(
         startHashPlus2, startHash, 1
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorLessThan(
         randomHash, startHash, 200
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorLessThan(
         ethers.constants.HashZero, startHash, 200
       )).eql([false]);
     });
   })
 
-  describe('CredProtocolScoreIsEqual()', function() {
-    it("asserts correct CredProtocolScoreIsEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIsEqual(
+  describe('credProtocolScoreIsEqual()', function() {
+    it("asserts correct credProtocolScoreIsEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIsEqual(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
 
-  describe('CredProtocolScoreGreaterThan()', function() {
-    it("asserts correct CredProtocolScoreGreaterThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThan(
+  describe('credProtocolScoreGreaterThan()', function() {
+    it("asserts correct credProtocolScoreGreaterThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThan(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThan(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
   });
 
-  describe('CredProtocolScoreGreaterThanEqual()', function() {
-    it("asserts correct CredProtocolScoreGreaterThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThanEqual(
+  describe('credProtocolScoreGreaterThanEqual()', function() {
+    it("asserts correct credProtocolScoreGreaterThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThanEqual(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThanEqual(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
   });
 
-  describe('CredProtocolScoreLessThan()', function() {
-    it("asserts correct CredProtocolScoreLessThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThan(
+  describe('credProtocolScoreLessThan()', function() {
+    it("asserts correct credProtocolScoreLessThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThan(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThan(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
 
-  describe('CredProtocolScoreLessThanEqual()', function() {
-    it("asserts correct CredProtocolScoreLessThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThanEqual(
+  describe('credProtocolScoreLessThanEqual()', function() {
+    it("asserts correct credProtocolScoreLessThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThanEqual(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThanEqual(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
 
-  describe('CredProtocolScoreBetweenInclusive()', function() {
-    it("asserts correct CredProtocolScoreBetweenInclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+  describe('credProtocolScoreBetweenInclusive()', function() {
+    it("asserts correct credProtocolScoreBetweenInclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
   });
 
-  describe('CredProtocolScoreBetweenExclusive()', function() {
-    it("asserts correct CredProtocolScoreBetweenExclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+  describe('credProtocolScoreBetweenExclusive()', function() {
+    it("asserts correct credProtocolScoreBetweenExclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
