@@ -187,7 +187,7 @@ describe('QueryUtils()', function() {
   });
 
   describe('CredProtocolScoreIteratorLessThan()', function() {
-    it.only("asserts correct CredProtocolScoreIteratorLessThan value", async () => {
+    it("asserts correct CredProtocolScoreIteratorLessThan value", async () => {
       const startHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('NeverFadeFaze'))
       const startHashPlus1 = ethers.utils.keccak256(startHash)
       const startHashPlus2 = ethers.utils.keccak256(startHashPlus1)
