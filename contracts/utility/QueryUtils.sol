@@ -11,7 +11,7 @@ library QueryUtils {
   /// @dev Checks if IsBusiness return value is false
   /// @param _attrValue return value of query
   function IsBusinessFalse(bytes32 _attrValue) public pure returns (bool) {
-    return(_attrValue == keccak256("FALSE"));
+    return(_attrValue == keccak256("FALSE") || _attrValue == bytes32(0));
   }
 
   /// @dev Checks if Country return value is equal to a given string value

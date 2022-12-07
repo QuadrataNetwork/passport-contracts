@@ -35,6 +35,10 @@ describe('QueryUtils()', function() {
       expect(await testQueryUtilsInstance.functions.IsBusinessTrue(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FALSE'))
       )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.IsBusinessTrue(
+        ethers.constants.HashZero
+      )).eql([false]);
     });
   });
 
@@ -46,6 +50,10 @@ describe('QueryUtils()', function() {
 
       expect(await testQueryUtilsInstance.functions.IsBusinessFalse(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FALSE'))
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.IsBusinessFalse(
+        ethers.constants.HashZero
       )).eql([true]);
     });
   });
