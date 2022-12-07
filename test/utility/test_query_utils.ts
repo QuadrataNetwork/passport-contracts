@@ -138,4 +138,78 @@ describe('QueryUtils()', function() {
     });
   });
 
+  describe('AmlBetweenInclusive()', function() {
+    it("asserts correct AmlBetweenInclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
+      )).eql([false]);
+    });
+  });
+
+  describe('AmlBetweenExclusive()', function() {
+    it("asserts correct AmlBetweenExclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
+      )).eql([false]);
+    });
+  });
+
+  describe('CredProtocolScoreIteratorLessThan()', function() {
+    it.only("asserts correct CredProtocolScoreIteratorLessThan value", async () => {
+      const startHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('NeverFadeFaze'))
+      const startHashPlus1 = ethers.utils.keccak256(startHash)
+      const startHashPlus2 = ethers.utils.keccak256(startHashPlus1)
+
+      const randomHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('AlwaysFadeFaze'))
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+        startHashPlus2, startHash, 3
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+        startHashPlus2, startHash, 2
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+        startHashPlus2, startHash, 1
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+        randomHash, startHash, 200
+      )).eql([false]);
+    });
+  })
+
 });
