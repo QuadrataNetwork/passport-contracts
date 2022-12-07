@@ -21,4 +21,20 @@ contract TestQueryUtils {
     function AmlIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns(bool) {
         return _attrValue.AmlIsEqual(_expectedInt);
     }
+
+    function AmlGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns(bool) {
+        return _attrValue.AmlGreaterThan(_lowerBound);
+    }
+
+    function AmlGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns(bool) {
+        return _attrValue.AmlGreaterThanEqual(_lowerBound);
+    }
+
+    function AmlLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns(bool) {
+        return _attrValue.AmlLessThan(_upperBound);
+    }
+
+    function AmlLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns(bool) {
+        return _attrValue.AmlLessThanEqual(_upperBound);
+    }
 }

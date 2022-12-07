@@ -62,8 +62,8 @@ describe('QueryUtils()', function() {
     });
   });
 
-  describe('AMLIsEqual()', function() {
-    it.only("asserts correct AMLIsEqual value", async () => {
+  describe('AmlIsEqual()', function() {
+    it("asserts correct AmlIsEqual value", async () => {
       expect(await testQueryUtilsInstance.functions.AmlIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
@@ -73,4 +73,69 @@ describe('QueryUtils()', function() {
       )).eql([false]);
     });
   });
+
+  describe('AmlGreaterThan()', function() {
+    it("asserts correct AmlGreaterThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlGreaterThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlGreaterThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlGreaterThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([true]);
+    });
+  });
+
+  describe('AmlGreaterThanEqual()', function() {
+    it("asserts correct AmlGreaterThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlGreaterThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlGreaterThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlGreaterThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([true]);
+    });
+  });
+
+  describe('AmlLessThan()', function() {
+    it("asserts correct AmlLessThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlLessThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.AmlLessThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlLessThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([false]);
+    });
+  });
+
+  describe('AmlLessThanEqual()', function() {
+    it("asserts correct AmlLessThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlLessThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlLessThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlLessThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([false]);
+    });
+  });
+
 });
