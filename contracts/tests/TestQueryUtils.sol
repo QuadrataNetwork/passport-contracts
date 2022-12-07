@@ -17,4 +17,8 @@ contract TestQueryUtils {
     function CountryIsEqual(bytes32 _attrValue, string memory _expectedString) public pure returns(bool) {
         return _attrValue.CountryIsEqual(_expectedString);
     }
+
+    function AmlIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns(bool) {
+        return _attrValue.AmlIsEqual(_expectedInt);
+    }
 }

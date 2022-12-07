@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract } from "ethers";
+import { BytesLike } from '@ethersproject/bytes';
 
 
 describe('QueryUtils()', function() {
@@ -57,6 +58,18 @@ describe('QueryUtils()', function() {
 
       expect(await testQueryUtilsInstance.functions.CountryIsEqual(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('CA')), 'US'
+      )).eql([false]);
+    });
+  });
+
+  describe('AMLIsEqual()', function() {
+    it.only("asserts correct AMLIsEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.AmlIsEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.AmlIsEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
   });
