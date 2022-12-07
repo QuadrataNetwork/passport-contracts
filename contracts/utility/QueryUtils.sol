@@ -77,6 +77,10 @@ library QueryUtils {
   /// @param _startingHiddenScore starting hidden score hash
   /// @param _iteratorThreshold maximum number of hashing to meet criteria
   function TuCreditScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
+    if(_attrValue == bytes32(0)){
+      return false;
+    }
+
     uint256 count = 0 ;
     bytes32 hashIterator = _startingHiddenScore;
 

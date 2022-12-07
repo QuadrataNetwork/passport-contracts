@@ -217,6 +217,10 @@ describe('QueryUtils()', function() {
       expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
         randomHash, startHash, 200
       )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
+        ethers.constants.HashZero, startHash, 2
+      )).eql([false]);
     });
   })
 
