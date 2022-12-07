@@ -194,31 +194,31 @@ describe('QueryUtils()', function() {
     });
   });
 
-  describe('TuCreditScoreIteratorLessThan()', function() {
-    it("asserts correct TuCreditScoreIteratorLessThan value", async () => {
+  describe('VantageScoreIteratorLessThan()', function() {
+    it("asserts correct VantageScoreIteratorLessThan value", async () => {
       const startHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('NeverFadeFaze'))
       const startHashPlus1 = ethers.utils.keccak256(startHash)
       const startHashPlus2 = ethers.utils.keccak256(startHashPlus1)
 
       const randomHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('AlwaysFadeFaze'))
 
-      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
         startHashPlus2, startHash, 3
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
         startHashPlus2, startHash, 2
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
         startHashPlus2, startHash, 1
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
         randomHash, startHash, 200
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.VantageScoreIteratorLessThan(
         ethers.constants.HashZero, startHash, 200
       )).eql([false]);
     });

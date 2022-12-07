@@ -46,8 +46,8 @@ contract TestQueryUtils {
         return _attrValue.AmlBetweenExclusive(_lowerBound, _upperBound);
     }
 
-    function TuCreditScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns(bool) {
-        return _attrValue.TuCreditScoreIteratorLessThan(_startingHash, _iteratorThreshold);
+    function VantageScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns(bool) {
+        return _attrValue.VantageScoreIteratorLessThan(_startingHash, _iteratorThreshold);
     }
 
     function CredProtocolScoreIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns(bool) {

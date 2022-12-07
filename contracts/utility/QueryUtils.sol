@@ -72,11 +72,11 @@ library QueryUtils {
     return(uint256(_attrValue) < _upperBound && uint256(_attrValue) > _lowerBound);
   }
 
-  /// @dev Checks if supplied hash is within threshold of TU Credit Score value
+  /// @dev Checks if supplied hash is within threshold of Vantage Score value
   /// @param _attrValue return value of query
   /// @param _startingHiddenScore starting hidden score hash
   /// @param _iteratorThreshold maximum number of hashing to meet criteria
-  function TuCreditScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
+  function VantageScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
     if(_attrValue == bytes32(0)){
       return false;
     }
