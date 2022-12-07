@@ -20,16 +20,34 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface TestQueryUtilsInterface extends ethers.utils.Interface {
   functions: {
-    "isBusinessTrue(bytes32)": FunctionFragment;
+    "CountryIsEqual(bytes32,string)": FunctionFragment;
+    "IsBusinessFalse(bytes32)": FunctionFragment;
+    "IsBusinessTrue(bytes32)": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "isBusinessTrue",
+    functionFragment: "CountryIsEqual",
+    values: [BytesLike, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "IsBusinessFalse",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "IsBusinessTrue",
     values: [BytesLike]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "isBusinessTrue",
+    functionFragment: "CountryIsEqual",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "IsBusinessFalse",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "IsBusinessTrue",
     data: BytesLike
   ): Result;
 
@@ -80,19 +98,52 @@ export class TestQueryUtils extends BaseContract {
   interface: TestQueryUtilsInterface;
 
   functions: {
-    isBusinessTrue(
+    CountryIsEqual(
+      _attrValue: BytesLike,
+      _expectedString: string,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    IsBusinessFalse(
+      _attrValue: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean]>;
+
+    IsBusinessTrue(
       _attrValue: BytesLike,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
   };
 
-  isBusinessTrue(
+  CountryIsEqual(
+    _attrValue: BytesLike,
+    _expectedString: string,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  IsBusinessFalse(
+    _attrValue: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
+
+  IsBusinessTrue(
     _attrValue: BytesLike,
     overrides?: CallOverrides
   ): Promise<boolean>;
 
   callStatic: {
-    isBusinessTrue(
+    CountryIsEqual(
+      _attrValue: BytesLike,
+      _expectedString: string,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    IsBusinessFalse(
+      _attrValue: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
+
+    IsBusinessTrue(
       _attrValue: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
@@ -101,14 +152,36 @@ export class TestQueryUtils extends BaseContract {
   filters: {};
 
   estimateGas: {
-    isBusinessTrue(
+    CountryIsEqual(
+      _attrValue: BytesLike,
+      _expectedString: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    IsBusinessFalse(
+      _attrValue: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    IsBusinessTrue(
       _attrValue: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    isBusinessTrue(
+    CountryIsEqual(
+      _attrValue: BytesLike,
+      _expectedString: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    IsBusinessFalse(
+      _attrValue: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    IsBusinessTrue(
       _attrValue: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
