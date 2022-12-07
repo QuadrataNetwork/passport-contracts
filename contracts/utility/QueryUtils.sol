@@ -23,7 +23,7 @@ library QueryUtils {
 
   /// @dev Checks if AML return value is equal to a given uint256 value
   /// @param _attrValue return value of query
-  /// @param _expectedString expected AML value as uint256
+  /// @param _expectedInt expected AML value as uint256
   function AmlIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns (bool) {
     return(uint256(_attrValue) == _expectedInt);
   }
@@ -72,15 +72,15 @@ library QueryUtils {
     return(uint256(_attrValue) < _upperBound && uint256(_attrValue) > _lowerBound);
   }
 
-  /// @dev Checks if supplied hash is within threshold of onchain Cred Protocol value
+  /// @dev Checks if supplied hash is within threshold of TU Credit Score value
   /// @param _attrValue return value of query
-  /// @param _startingHash starting proof hash
+  /// @param _startingHiddenScore starting hidden score hash
   /// @param _iteratorThreshold maximum number of hashing to meet criteria
-  function CredProtocolScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns (bool){
+  function TuCreditScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
     uint256 count = 0 ;
-    bytes32 hashIterator = _startingHash;
+    bytes32 hashIterator = _startingHiddenScore;
 
-    for(uint256 i = 0; i < 100; i++){
+    for(uint256 i = 0; i < 25; i++){
       if(hashIterator==_attrValue){
         return(count <= _iteratorThreshold);
       }

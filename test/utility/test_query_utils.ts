@@ -186,27 +186,27 @@ describe('QueryUtils()', function() {
     });
   });
 
-  describe('CredProtocolScoreIteratorLessThan()', function() {
-    it("asserts correct CredProtocolScoreIteratorLessThan value", async () => {
+  describe('TuCreditScoreIteratorLessThan()', function() {
+    it("asserts correct TuCreditScoreIteratorLessThan value", async () => {
       const startHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('NeverFadeFaze'))
       const startHashPlus1 = ethers.utils.keccak256(startHash)
       const startHashPlus2 = ethers.utils.keccak256(startHashPlus1)
 
       const randomHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('AlwaysFadeFaze'))
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
         startHashPlus2, startHash, 3
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
         startHashPlus2, startHash, 2
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
         startHashPlus2, startHash, 1
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIteratorLessThan(
+      expect(await testQueryUtilsInstance.functions.TuCreditScoreIteratorLessThan(
         randomHash, startHash, 200
       )).eql([false]);
     });
