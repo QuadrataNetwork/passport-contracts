@@ -46,9 +46,9 @@ library QueryUtils {
   }
 
   // Cred Protocol Score
-  function CredProtocolScoreIteratorLessThan(bytes32 _attrValue, bytes32 _givenHash, uint256 _iteratorThreshold) public pure returns (bool){
+  function CredProtocolScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns (bool){
     uint256 count = 0 ;
-    bytes32 hashIterator = _givenHash;
+    bytes32 hashIterator = _startingHash;
 
     for(uint256 i = 0; i < 100; i++){
       if(hashIterator==_attrValue){
