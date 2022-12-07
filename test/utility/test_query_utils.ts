@@ -224,4 +224,127 @@ describe('QueryUtils()', function() {
     });
   })
 
+  describe('CredProtocolScoreIsEqual()', function() {
+    it("asserts correct CredProtocolScoreIsEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIsEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreIsEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([false]);
+    });
+  });
+
+  describe('CredProtocolScoreGreaterThan()', function() {
+    it("asserts correct CredProtocolScoreGreaterThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([true]);
+    });
+  });
+
+  describe('CredProtocolScoreGreaterThanEqual()', function() {
+    it("asserts correct CredProtocolScoreGreaterThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreGreaterThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([true]);
+    });
+  });
+
+  describe('CredProtocolScoreLessThan()', function() {
+    it("asserts correct CredProtocolScoreLessThan value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThan(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([false]);
+    });
+  });
+
+  describe('CredProtocolScoreLessThanEqual()', function() {
+    it("asserts correct CredProtocolScoreLessThanEqual value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreLessThanEqual(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
+      )).eql([false]);
+    });
+  });
+
+  describe('CredProtocolScoreBetweenInclusive()', function() {
+    it("asserts correct CredProtocolScoreBetweenInclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenInclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
+      )).eql([false]);
+    });
+  });
+
+  describe('CredProtocolScoreBetweenExclusive()', function() {
+    it("asserts correct CredProtocolScoreBetweenExclusive value", async () => {
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
+      )).eql([true]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
+      )).eql([false]);
+
+      expect(await testQueryUtilsInstance.functions.CredProtocolScoreBetweenExclusive(
+        ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
+      )).eql([false]);
+    });
+  });
 });

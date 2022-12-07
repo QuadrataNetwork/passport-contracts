@@ -49,4 +49,33 @@ contract TestQueryUtils {
     function TuCreditScoreIteratorLessThan(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns(bool) {
         return _attrValue.TuCreditScoreIteratorLessThan(_startingHash, _iteratorThreshold);
     }
+
+    function CredProtocolScoreIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreIsEqual(_expectedInt);
+    }
+
+    function CredProtocolScoreGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreGreaterThan(_lowerBound);
+    }
+
+    function CredProtocolScoreGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreGreaterThanEqual(_lowerBound);
+    }
+
+    function CredProtocolScoreLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreLessThan(_upperBound);
+    }
+
+    function CredProtocolScoreLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreLessThanEqual(_upperBound);
+    }
+
+    function CredProtocolScoreBetweenInclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreBetweenInclusive(_lowerBound, _upperBound);
+    }
+
+    function CredProtocolScoreBetweenExclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns(bool) {
+        return _attrValue.CredProtocolScoreBetweenExclusive(_lowerBound, _upperBound);
+    }
+
 }

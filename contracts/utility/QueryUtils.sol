@@ -94,5 +94,57 @@ library QueryUtils {
 
     return false;
   }
+
+  /// @dev Checks if CredProtocolScore return value is equal to a given uint256 value
+  /// @param _attrValue return value of query
+  /// @param _expectedInt expected CredProtocolScore value as uint256
+  function CredProtocolScoreIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns (bool) {
+    return(uint256(_attrValue) == _expectedInt);
+  }
+
+  /// @dev Checks if CredProtocolScore return value is greater than a given uint256 value
+  /// @param _attrValue return value of query
+  /// @param _lowerBound lower bound CredProtocolScore value as uint256
+  function CredProtocolScoreGreaterThan(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
+    return(uint256(_attrValue) > _lowerBound);
+  }
+
+  /// @dev Checks if CredProtocolScore return value is greater than or equal to a given uint256 value
+  /// @param _attrValue return value of query
+  /// @param _lowerBound lower bound CredProtocolScore value as uint256
+  function CredProtocolScoreGreaterThanEqual(bytes32 _attrValue, uint256 _lowerBound) public pure returns (bool) {
+    return(uint256(_attrValue) >= _lowerBound);
+  }
+
+  /// @dev Checks if CredProtocolScore return value is less than a given uint256 value
+  /// @param _attrValue return value of query
+  /// @param _upperBound upper bound CredProtocolScore value as uint256
+  function CredProtocolScoreLessThan(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
+    return(uint256(_attrValue) < _upperBound);
+  }
+
+  /// @dev Checks if CredProtocolScore return value is less than or equal to a given uint256 value
+  /// @param _attrValue return value of query
+  /// @param _upperBound upper bound CredProtocolScore value as uint256
+  function CredProtocolScoreLessThanEqual(bytes32 _attrValue, uint256 _upperBound) public pure returns (bool) {
+    return(uint256(_attrValue) <= _upperBound);
+  }
+
+  /// @dev Checks if CredProtocolScore return value is inclusively between two uint256 value
+  /// @param _attrValue return value of query
+  /// @param _lowerBound lower bound CredProtocolScore value as uint256
+  /// @param _upperBound upper bound CredProtocolScore value as uint256
+  function CredProtocolScoreBetweenInclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
+    return(uint256(_attrValue) <= _upperBound && uint256(_attrValue) >= _lowerBound);
+  }
+
+  /// @dev Checks if CredProtocolScore return value is exlusively between two uint256 value
+  /// @param _attrValue return value of query
+  /// @param _lowerBound lower bound CredProtocolScore value as uint256
+  /// @param _upperBound upper bound CredProtocolScore value as uint256
+  function CredProtocolScoreBetweenExclusive(bytes32 _attrValue, uint256 _lowerBound, uint256 _upperBound) public pure returns (bool) {
+    return(uint256(_attrValue) < _upperBound && uint256(_attrValue) > _lowerBound);
+  }
+
 }
 
