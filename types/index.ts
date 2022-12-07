@@ -56,6 +56,8 @@ export type { QuadGovernanceUpgrade } from "./QuadGovernanceUpgrade";
 export type { QuadPassportUpgrade } from "./QuadPassportUpgrade";
 export type { QuadReaderUpgrade } from "./QuadReaderUpgrade";
 export type { TestQuadrata } from "./TestQuadrata";
+export type { TestQueryUtils } from "./TestQueryUtils";
+export type { QueryUtils } from "./QueryUtils";
 
 export { AccessControlEnumerableUpgradeable__factory } from "./factories/AccessControlEnumerableUpgradeable__factory";
 export { AccessControlUpgradeable__factory } from "./factories/AccessControlUpgradeable__factory";
@@ -112,3 +114,5 @@ export { QuadGovernanceUpgrade__factory } from "./factories/QuadGovernanceUpgrad
 export { QuadPassportUpgrade__factory } from "./factories/QuadPassportUpgrade__factory";
 export { QuadReaderUpgrade__factory } from "./factories/QuadReaderUpgrade__factory";
 export { TestQuadrata__factory } from "./factories/TestQuadrata__factory";
+export { TestQueryUtils__factory } from "./factories/TestQueryUtils__factory";
+export { QueryUtils__factory } from "./factories/QueryUtils__factory";

@@ -240,6 +240,14 @@ declare module "hardhat/types/runtime" {
       name: "TestQuadrata",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestQuadrata__factory>;
+    getContractFactory(
+      name: "TestQueryUtils",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestQueryUtils__factory>;
+    getContractFactory(
+      name: "QueryUtils",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.QueryUtils__factory>;
 
     getContractAt(
       name: "AccessControlEnumerableUpgradeable",
@@ -526,6 +534,16 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.TestQuadrata>;
+    getContractAt(
+      name: "TestQueryUtils",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestQueryUtils>;
+    getContractAt(
+      name: "QueryUtils",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.QueryUtils>;
 
     // default types
     getContractFactory(

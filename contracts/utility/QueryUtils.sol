@@ -3,16 +3,16 @@ pragma solidity >= 0.5.0;
 
 library QueryUtils {
   // IsBusiness
-  function IsBusinessTrue(bytes32 _attrValue)public pure returns (bool) {
+  function IsBusinessTrue(bytes32 _attrValue) public pure returns (bool) {
     return(_attrValue == keccak256("TRUE"));
   }
 
-  function IsBusinessFalse(bytes32 _attrValue)public pure returns (bool) {
+  function IsBusinessFalse(bytes32 _attrValue) public pure returns (bool) {
     return(_attrValue == keccak256("FALSE"));
   }
 
   // Country
-  function CountryIsEqual(bytes32 _attrValue, string memory _expectedString)public pure returns (bool) {
+  function CountryIsEqual(bytes32 _attrValue, string memory _expectedString) public pure returns (bool) {
     return(_attrValue == keccak256(abi.encodePacked(_expectedString)));
   }
 
