@@ -3,7 +3,6 @@ import { ethers } from "hardhat";
 import { Contract, Wallet } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { formatBytes32String, hexZeroPad, id } from "ethers/lib/utils";
-import {QuadGovernance} from "../../types"
 
 const {
   ATTRIBUTE_AML,
@@ -26,7 +25,7 @@ const {
 
 describe("QuadPassport.burnPassports", async () => {
   let passport: Contract;
-  let governance: QuadGovernance; // eslint-disable-line no-unused-vars
+  let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
