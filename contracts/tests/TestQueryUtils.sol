@@ -46,8 +46,8 @@ contract TestQueryUtils {
         return _attrValue.amlBetweenExclusive(_lowerBound, _upperBound);
     }
 
-    function vantageScoreIteratorLessThanEqual(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns(bool) {
-        return _attrValue.vantageScoreIteratorLessThanEqual(_startingHash, _iteratorThreshold);
+    function vantageScoreIteratorGreaterThan(bytes32 _attrValue, bytes32 _startingHash, uint256 _iteratorThreshold) public pure returns(bool) {
+        return _attrValue.vantageScoreIteratorGreaterThan(_startingHash, _iteratorThreshold);
     }
 
     function credProtocolScoreIsEqual(bytes32 _attrValue, uint256 _expectedInt) public pure returns(bool) {
