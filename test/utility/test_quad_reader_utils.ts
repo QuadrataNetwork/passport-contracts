@@ -4,39 +4,39 @@ import { Contract } from "ethers";
 import { BytesLike } from '@ethersproject/bytes';
 
 
-describe('QueryUtils()', function() {
+describe('QuadReaderUtils()', function() {
   let TestQueryUtils;
   let signers;
-  let testQueryUtilsInstance: Contract;
+  let testQuadReaderUtilsInstance: Contract;
 
   beforeEach(async () => {
       signers = await ethers.getSigners();
 
-      const QueryUtilsLib = await ethers.getContractFactory("QueryUtils");
-      const queryUtilsLibInstance = await QueryUtilsLib.deploy();
-      await queryUtilsLibInstance.deployed();
+      const QuadReaderUtils = await ethers.getContractFactory("QuadReaderUtils");
+      const quadReaderUtilsInstance = await QuadReaderUtils.deploy();
+      await quadReaderUtilsInstance.deployed();
 
-      TestQueryUtils = await ethers.getContractFactory("TestQueryUtils", {
+      TestQueryUtils = await ethers.getContractFactory("TestQuadReaderUtils", {
           libraries: {
-              QueryUtils: queryUtilsLibInstance.address
+              QuadReaderUtils: quadReaderUtilsInstance.address
           }
       });
 
-      testQueryUtilsInstance = await TestQueryUtils.deploy();
-      await testQueryUtilsInstance.deployed();
+      testQuadReaderUtilsInstance = await TestQueryUtils.deploy();
+      await testQuadReaderUtilsInstance.deployed();
   });
 
   describe('isBusinessTrue()', function() {
     it("asserts correct isBusinessTrue value", async () => {
-      expect(await testQueryUtilsInstance.functions.isBusinessTrue(
+      expect(await testQuadReaderUtilsInstance.functions.isBusinessTrue(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('TRUE'))
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.isBusinessTrue(
+      expect(await testQuadReaderUtilsInstance.functions.isBusinessTrue(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FALSE'))
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.isBusinessTrue(
+      expect(await testQuadReaderUtilsInstance.functions.isBusinessTrue(
         ethers.constants.HashZero
       )).eql([false]);
     });
@@ -44,15 +44,15 @@ describe('QueryUtils()', function() {
 
   describe('isBusinessFalse()', function() {
     it("asserts correct isBusinessFalse value", async () => {
-      expect(await testQueryUtilsInstance.functions.isBusinessFalse(
+      expect(await testQuadReaderUtilsInstance.functions.isBusinessFalse(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('TRUE'))
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.isBusinessFalse(
+      expect(await testQuadReaderUtilsInstance.functions.isBusinessFalse(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('FALSE'))
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.isBusinessFalse(
+      expect(await testQuadReaderUtilsInstance.functions.isBusinessFalse(
         ethers.constants.HashZero
       )).eql([true]);
     });
@@ -60,11 +60,11 @@ describe('QueryUtils()', function() {
 
   describe('countryIsEqual()', function() {
     it("asserts correct countryIsEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.countryIsEqual(
+      expect(await testQuadReaderUtilsInstance.functions.countryIsEqual(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('US')), 'US'
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.countryIsEqual(
+      expect(await testQuadReaderUtilsInstance.functions.countryIsEqual(
         ethers.utils.keccak256(ethers.utils.toUtf8Bytes('CA')), 'US'
       )).eql([false]);
     });
@@ -72,11 +72,11 @@ describe('QueryUtils()', function() {
 
   describe('amlIsEqual()', function() {
     it("asserts correct amlIsEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlIsEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlIsEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
@@ -84,15 +84,15 @@ describe('QueryUtils()', function() {
 
   describe('amlGreaterThan()', function() {
     it("asserts correct amlGreaterThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.amlGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.amlGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.amlGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
@@ -100,15 +100,15 @@ describe('QueryUtils()', function() {
 
   describe('amlGreaterThanEqual()', function() {
     it("asserts correct amlGreaterThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlGreaterThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlGreaterThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlGreaterThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
@@ -116,15 +116,15 @@ describe('QueryUtils()', function() {
 
   describe('amlLessThan()', function() {
     it("asserts correct amlLessThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlLessThan(
+      expect(await testQuadReaderUtilsInstance.functions.amlLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlLessThan(
+      expect(await testQuadReaderUtilsInstance.functions.amlLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlLessThan(
+      expect(await testQuadReaderUtilsInstance.functions.amlLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
@@ -132,15 +132,15 @@ describe('QueryUtils()', function() {
 
   describe('amlLessThanEqual()', function() {
     it("asserts correct amlLessThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlLessThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlLessThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlLessThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.amlLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
@@ -148,23 +148,23 @@ describe('QueryUtils()', function() {
 
   describe('amlBetweenInclusive()', function() {
     it("asserts correct amlBetweenInclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
@@ -172,23 +172,23 @@ describe('QueryUtils()', function() {
 
   describe('amlBetweenExclusive()', function() {
     it("asserts correct amlBetweenExclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.amlBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.amlBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
@@ -203,31 +203,31 @@ describe('QueryUtils()', function() {
 
       const randomHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes('AlwaysFadeFaze'))
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         startHashPlus2, startHash, 3
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         startHashPlus2, startHash, 2
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         startHashPlus2, startHash, 1
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         startHashPlus3, startHash, 1
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         startHashPlus3, startHash, 2
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         randomHash, startHash, 200
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.vantageScoreIteratorGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.vantageScoreIteratorGreaterThan(
         ethers.constants.HashZero, startHash, 200
       )).eql([false]);
     });
@@ -235,11 +235,11 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreIsEqual()', function() {
     it("asserts correct credProtocolScoreIsEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreIsEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreIsEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreIsEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
@@ -247,15 +247,15 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreGreaterThan()', function() {
     it("asserts correct credProtocolScoreGreaterThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThan(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreGreaterThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
@@ -263,15 +263,15 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreGreaterThanEqual()', function() {
     it("asserts correct credProtocolScoreGreaterThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreGreaterThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([true]);
     });
@@ -279,15 +279,15 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreLessThan()', function() {
     it("asserts correct credProtocolScoreLessThan value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThan(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThan(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThan(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreLessThan(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
@@ -295,15 +295,15 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreLessThanEqual()', function() {
     it("asserts correct credProtocolScoreLessThanEqual value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreLessThanEqual(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreLessThanEqual(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 2
       )).eql([false]);
     });
@@ -311,23 +311,23 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreBetweenInclusive()', function() {
     it("asserts correct credProtocolScoreBetweenInclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenInclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenInclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
@@ -335,23 +335,23 @@ describe('QueryUtils()', function() {
 
   describe('credProtocolScoreBetweenExclusive()', function() {
     it("asserts correct credProtocolScoreBetweenExclusive value", async () => {
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 8, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 6, 8
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 4, 10
       )).eql([true]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 9, 10
       )).eql([false]);
 
-      expect(await testQueryUtilsInstance.functions.credProtocolScoreBetweenExclusive(
+      expect(await testQuadReaderUtilsInstance.functions.credProtocolScoreBetweenExclusive(
         ethers.utils.hexZeroPad(parseInt('8') as unknown as BytesLike, 32), 1, 4
       )).eql([false]);
     });
