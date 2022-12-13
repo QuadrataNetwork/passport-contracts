@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >= 0.5.0;
 
-library QueryUtils {
+library QuadReaderUtils {
   /// @dev Checks if IsBusiness return value is true
   /// @param _attrValue return value of query
   function isBusinessTrue(bytes32 _attrValue) public pure returns (bool) {
