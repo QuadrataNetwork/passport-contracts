@@ -129,7 +129,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         issuerQueryFee[msg.sender] = _amount;
     }
 
-    function setQuadrataIssuerFee(uint256 _amount) public {
+    function setQuadrataQueryFee(uint256 _amount) public {
         require(IAccessControlUpgradeable(address(QUAD_GOVERNANCE)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
         issuerQueryFee[quadrataTreasury()] = _amount;
     }
