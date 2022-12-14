@@ -5,10 +5,10 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
-import "./IQuadReader.sol";
-import "./IQuadGovernance.sol";
-import "./QuadConstant.sol";
-import "./IQuadPassportStore.sol";
+import "./interfaces/IQuadReader.sol";
+import "./interfaces/IQuadGovernance.sol";
+import "./interfaces/IQuadPassportStore.sol";
+import "./storage/QuadConstant.sol";
 
 contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     using SafeMath for uint256;
