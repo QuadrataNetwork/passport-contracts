@@ -2,12 +2,15 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 
-import "../interfaces/IQuadReader.sol";
-import "../interfaces/IQuadGovernance.sol";
-import "../interfaces/IQuadPassportStore.sol";
+import "./IQuadReader.sol";
+import "./IQuadGovernance.sol";
+import "./QuadConstant.sol";
+import "./IQuadPassportStore.sol";
 
-contract SocialAttributeReader {
+contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     using SafeMath for uint256;
 
     address public constant QUAD_READER = 0x5C6b81212c0A654B6e247F8DEfeC9a95c63EF954;
@@ -19,6 +22,14 @@ contract SocialAttributeReader {
     mapping(address=>uint256) public issuerQueryFee;
     mapping(address=>uint256) public funds;
 
+    // used to prevent logic contract self destruct take over
+    constructor() initializer {}
+
+    function initialize(
+        uint256 _quadrataQueryFee
+    ) public initializer {
+        issuerQueryFee[quadrataTreasury()] = _quadrataQueryFee;
+    }
 
     function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {
         require(allowList[_targetAddr][msg.sender], 'NOT_ALLOWED');
@@ -116,5 +127,17 @@ contract SocialAttributeReader {
 
     function setIssuerQueryFee(uint256 _amount) public {
         issuerQueryFee[msg.sender] = _amount;
+    }
+
+    function setQuadrataIssuerFee(uint256 _amount) public {
+        require(IAccessControlUpgradeable(address(QUAD_GOVERNANCE)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        issuerQueryFee[quadrataTreasury()] = _amount;
+    }
+
+    function _authorizeUpgrade(address) internal view override {
+        require(
+            IAccessControlUpgradeable(address(QUAD_GOVERNANCE)).hasRole(GOVERNANCE_ROLE, msg.sender),
+            "INVALID_ADMIN"
+        );
     }
 }
