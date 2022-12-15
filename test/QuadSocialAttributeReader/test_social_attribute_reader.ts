@@ -70,11 +70,11 @@ describe('SocialAttributeReader()', function() {
     });
   });
 
-  describe('queryFee()', function() {
+  describe('queryFeeBulk()', function() {
     it('returns baseFee for single attributes', async () =>{
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
 
-      const fee = await socialReader.connect(issuer).queryFee(issuer.address, issuer.address, [ethers.utils.id('RANDOM')])
+      const fee = await socialReader.connect(issuer).queryFeeBulk(issuer.address, issuer.address, [ethers.utils.id('RANDOM')])
       expect(fee.toString()).eql(baseFee)
     });
 
@@ -83,7 +83,7 @@ describe('SocialAttributeReader()', function() {
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-2'), baseFee)
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-3'), baseFee)
 
-      const fee = await socialReader.connect(issuer).queryFee(
+      const fee = await socialReader.connect(issuer).queryFeeBulk(
         issuer.address,
         issuer.address,
         [ethers.utils.id('RANDOM'), ethers.utils.id('RANDOM-2'), ethers.utils.id('RANDOM-3')]
@@ -92,21 +92,21 @@ describe('SocialAttributeReader()', function() {
     });
 
     it('returns correct fee for primary attributes', async () =>{
-      let fee = await socialReader.connect(issuer).queryFee(
+      let fee = await socialReader.connect(issuer).queryFeeBulk(
         issuer.address,
         issuer.address,
         [ethers.utils.id('COUNTRY')]
       )
       expect(fee.toString()).eql('1200000000000000')
 
-      fee = await socialReader.connect(issuer).queryFee(
+      fee = await socialReader.connect(issuer).queryFeeBulk(
         issuer.address,
         issuer.address,
         [ethers.utils.id('IS_BUSINESS')]
       )
       expect(fee.toString()).eql('0')
 
-      fee = await socialReader.connect(issuer).queryFee(
+      fee = await socialReader.connect(issuer).queryFeeBulk(
         issuer.address,
         issuer.address,
         [ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
@@ -117,7 +117,7 @@ describe('SocialAttributeReader()', function() {
     it('returns correct fee for combined attributes', async () =>{
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
 
-      const fee = await socialReader.connect(issuer).queryFee(
+      const fee = await socialReader.connect(issuer).queryFeeBulk(
         issuer.address,
         issuer.address,
         [ethers.utils.id('RANDOM'), ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]

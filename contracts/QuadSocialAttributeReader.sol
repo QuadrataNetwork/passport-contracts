@@ -57,7 +57,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         return !governance.eligibleAttributes(_attrName) && !governance.eligibleAttributesByDID(_attrName);
     }
 
-    function queryFee(
+    function queryFeeBulk(
         address _issuer,
         address _account,
         bytes32[] calldata _attrNames) public view returns(uint256){
