@@ -28,7 +28,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     function initialize(
         uint256 _quadrataQueryFee,
         address _governance,
-        address _reader,
+        address _reader
     ) public initializer {
         issuerQueryFee[governance.treasury()] = _quadrataQueryFee;
 
@@ -130,14 +130,11 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     }
 
     function setQuadrataQueryFee(uint256 _amount) public {
-        require(IAccessControlUpgradeable(address(QUAD_GOVERNANCE)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
         issuerQueryFee[governance.treasury()] = _amount;
     }
 
     function _authorizeUpgrade(address) internal view override {
-        require(
-            IAccessControlUpgradeable(address(QUAD_GOVERNANCE)).hasRole(GOVERNANCE_ROLE, msg.sender),
-            "INVALID_ADMIN"
-        );
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 }
