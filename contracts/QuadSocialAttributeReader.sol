@@ -43,6 +43,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {
         require(allowList[_targetAddr][msg.sender], 'NOT_ALLOWED');
         require(_isSocialAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
+
         bytes32 attrKey = keccak256(abi.encode(_targetAddr, msg.sender, _attrName));
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
@@ -89,10 +90,12 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         for(uint256 i = 0; i < _attrNames.length; i++){
             if(_isSocialAttribute(_attrNames[i])){
                 bytes32 attrKey = keccak256(abi.encode(_account, _issuer, _attrNames[i]));
-                attributes[i] = _attributes[attrKey][0];
+                attributes[i] = _attributes[attrKey][_attributes[attrKey].length - 1];
+
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer);
                 issuerFee += interimIssuer;
                 quadrataFee += interimQuadrata;
+
             } else {
                 queryFee = reader.queryFee(_account, _attrNames[i]);
                 attributes[i] = reader.getAttributes{value: queryFee}(_account, _attrNames[i])[0];
