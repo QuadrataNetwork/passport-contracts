@@ -14,7 +14,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     using SafeMath for uint256;
 
     // keccak256(userAddress, issuerAddr, attrType))
-    mapping(bytes32 => IQuadPassportStore.Attribute[]) internal _attributes;
+    mapping(bytes32 => IQuadPassportStore.Attribute) internal _attributes;
     mapping(address=>mapping(address=>bool)) public allowList;
     mapping(address=>mapping(bytes32=>uint256)) public queryFeeMap;
     mapping(address=>uint256) public funds;
@@ -40,21 +40,21 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
 
     function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {
         require(allowList[_targetAddr][msg.sender], 'NOT_ALLOWED');
-        require(_isSocialAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
+        require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
         bytes32 attrKey = keccak256(abi.encode(_targetAddr, msg.sender, _attrName));
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
-            value:  _attrValue,
+            value: _attrValue,
             epoch: block.timestamp,
             issuer: msg.sender
         });
 
-        _attributes[attrKey].push(attr);
+        _attributes[attrKey] = attr;
     }
 
-    function _isSocialAttribute(bytes32 _attrName) internal view returns(bool) {
-        return !governance.eligibleAttributes(_attrName) && !governance.eligibleAttributesByDID(_attrName);
+    function _isPassportAttribute(bytes32 _attrName) public view returns(bool) {
+        return governance.eligibleAttributes(_attrName) || governance.eligibleAttributesByDID(_attrName);
     }
 
     function queryFeeBulk(
@@ -63,7 +63,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         bytes32[] calldata _attrNames) public view returns(uint256){
         uint256 fee;
         for(uint256 i = 0; i < _attrNames.length; i++){
-            if(_isSocialAttribute(_attrNames[i])){
+            if(!_isPassportAttribute(_attrNames[i])){
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer, _attrNames[i]);
                 fee = fee.add(interimIssuer.add(interimQuadrata));
             } else {
@@ -74,7 +74,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         return fee;
     }
 
-    function getAttributesBulk(
+    function getAttributes(
         address _issuer,
         address _account,
         bytes32[] calldata _attrNames
@@ -86,9 +86,9 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attrNames.length);
 
         for(uint256 i = 0; i < _attrNames.length; i++){
-            if(_isSocialAttribute(_attrNames[i])){
+            if(!_isPassportAttribute(_attrNames[i])){
                 bytes32 attrKey = keccak256(abi.encode(_account, _issuer, _attrNames[i]));
-                attributes[i] = _attributes[attrKey][_attributes[attrKey].length - 1];
+                attributes[i] = _attributes[attrKey];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer, _attrNames[i]);
                 issuerFee = issuerFee.add(interimIssuer);
