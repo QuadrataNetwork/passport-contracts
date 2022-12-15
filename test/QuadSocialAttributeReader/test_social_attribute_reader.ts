@@ -11,19 +11,17 @@ const {
 
 describe('SocialAttributeReader()', function() {
   let socialReader: Contract;
+  let passport: Contract;
+  let governance: Contract;
+  let reader: Contract;
+  let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
+    admin: SignerWithAddress,
+    treasury: SignerWithAddress,
+    issuer: SignerWithAddress,
+    issuerTreasury: SignerWithAddress;
+  const baseURI = "https://quadrata.io";
 
   beforeEach(async () => {
-    let passport: Contract;
-    let governance: Contract;
-    let reader: Contract;
-    let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
-      admin: SignerWithAddress,
-      treasury: SignerWithAddress,
-      issuer: SignerWithAddress,
-      issuerTreasury: SignerWithAddress;
-    const baseURI = "https://quadrata.io";
-
-
     [deployer, admin, issuer, treasury, issuerTreasury] =
       await ethers.getSigners();
     [governance, passport, reader] = await deployPassportEcosystem(
@@ -49,8 +47,16 @@ describe('SocialAttributeReader()', function() {
 
   });
 
-  describe('blah()', function() {
-    it("asserts correct isBusinessTrue value", async () => {
+  describe('writeAttributes()', function() {
+    it("fails if issuer is not allowed", async () => {
+      await expect(
+        socialReader.connect(issuer).writeAttributes(ethers.utils.id('RANDOM_ATTR'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
+      ).to.be.revertedWith("NOT_ALLOWED");
+    });
+
+    it("succeeds", async () => {
+      socialReader.connect(treasury).allowAddress(issuer.address, true);
+      socialReader.connect(issuer).writeAttributes(ethers.utils.id('RANDOM_ATTR'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
     });
   });
 });
