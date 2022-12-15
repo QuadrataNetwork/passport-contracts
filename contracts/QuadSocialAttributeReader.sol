@@ -16,8 +16,10 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     // keccak256(userAddress, issuerAddr, attrType))
     mapping(bytes32 => IQuadPassportStore.Attribute[]) internal _attributes;
     mapping(address=>mapping(address=>bool)) public allowList;
-    mapping(address=>uint256) public issuerQueryFee;
+    mapping(address=>mapping(bytes32=>uint256)) public queryFeeMap;
     mapping(address=>uint256) public funds;
+
+    uint256 public quadrataFee;
 
     IQuadGovernance public governance;
     IQuadReader public reader;
@@ -26,7 +28,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     constructor() initializer {}
 
     function initialize(
-        uint256 _quadrataQueryFee,
         address _governance,
         address _reader
     ) public initializer {
@@ -35,9 +36,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
 
         governance = IQuadGovernance(_governance);
         reader = IQuadReader(_reader);
-
-        issuerQueryFee[governance.treasury()] = _quadrataQueryFee;
-
     }
 
     function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {
@@ -66,7 +64,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         uint256 fee;
         for(uint256 i = 0; i < _attrNames.length; i++){
             if(_isSocialAttribute(_attrNames[i])){
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer);
+                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer, _attrNames[i]);
                 fee += interimIssuer.add(interimQuadrata);
             } else {
                 fee += reader.queryFee(_account, _attrNames[i]);
@@ -83,7 +81,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     ) payable public returns(IQuadPassportStore.Attribute[] memory){
         uint256 quadrataFee;
         uint256 issuerFee;
-        uint256 queryFee;
+        uint256 quadReaderFee;
 
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attrNames.length);
 
@@ -92,13 +90,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 bytes32 attrKey = keccak256(abi.encode(_account, _issuer, _attrNames[i]));
                 attributes[i] = _attributes[attrKey][_attributes[attrKey].length - 1];
 
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer);
+                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer, _attrNames[i]);
                 issuerFee += interimIssuer;
                 quadrataFee += interimQuadrata;
 
             } else {
-                queryFee = reader.queryFee(_account, _attrNames[i]);
-                attributes[i] = reader.getAttributes{value: queryFee}(_account, _attrNames[i])[0];
+                quadReaderFee = reader.queryFee(_account, _attrNames[i]);
+                attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attrNames[i])[0];
             }
         }
         require(msg.value == (quadrataFee.add(issuerFee)), "INVALID_FEE");
@@ -109,13 +107,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         return attributes;
     }
 
-    function calculateSocialFees(address _issuer) view internal returns (uint256 quadrataFee, uint256 issuerFee){
-         if(issuerQueryFee[_issuer].div(uint256(2)) > issuerQueryFee[governance.treasury()]) {
-             issuerFee = issuerQueryFee[_issuer].div(uint256(2));
-             quadrataFee = issuerQueryFee[_issuer].sub(issuerFee);
+    function calculateSocialFees(address _issuer, bytes32 _attrName) view internal returns (uint256 quadrataFee, uint256 issuerFee){
+         if(queryFeeMap[_issuer][_attrName].div(uint256(2)) > quadrataFee) {
+             issuerFee = queryFeeMap[_issuer][_attrName].div(uint256(2));
+             quadrataFee = queryFeeMap[_issuer][_attrName].sub(issuerFee);
          }else{
-             issuerFee = issuerQueryFee[_issuer].div(uint256(2));
-             quadrataFee = issuerQueryFee[governance.treasury()];
+             issuerFee = queryFeeMap[_issuer][_attrName].div(uint256(2));
+             quadrataFee = quadrataFee;
          }
      }
 
@@ -131,13 +129,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         require(success, "TRANSFER_FAILED");
     }
 
-    function setIssuerQueryFee(uint256 _amount) public {
-        issuerQueryFee[msg.sender] = _amount;
+    function setQueryFee(bytes32 _attrName, uint256 _amount) public {
+        queryFeeMap[msg.sender][_attrName] = _amount;
     }
 
-    function setQuadrataQueryFee(uint256 _amount) public {
+    function setQuadrataFee(uint256 _amount) public {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
-        issuerQueryFee[governance.treasury()] = _amount;
+        quadrataFee = _amount;
     }
 
     function _authorizeUpgrade(address) internal view override {

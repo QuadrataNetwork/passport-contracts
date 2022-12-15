@@ -20,7 +20,7 @@ describe('SocialAttributeReader()', function() {
     issuer: SignerWithAddress,
     issuerTreasury: SignerWithAddress;
   const baseURI = 'https://quadrata.io';
-  const baseQueryFee = '5000000000000007';
+  const baseFee = '5000000000000007';
 
   beforeEach(async () => {
     [deployer, admin, issuer, treasury, issuerTreasury] =
@@ -37,7 +37,7 @@ describe('SocialAttributeReader()', function() {
 
     socialReader = await upgrades.deployProxy(
     SocialAttributeReader,
-    [baseQueryFee, governance.address, reader.address],
+    [governance.address, reader.address],
     {
       initializer: 'initialize',
       kind: 'uups',
@@ -45,7 +45,7 @@ describe('SocialAttributeReader()', function() {
     });
 
     await socialReader.deployed();
-
+    await socialReader.connect(admin).setQuadrataFee(baseFee)
   });
 
   describe('writeAttributes()', function() {
@@ -71,18 +71,24 @@ describe('SocialAttributeReader()', function() {
   });
 
   describe('queryFee()', function() {
-    it('returns baseQueryFee for single attributes', async () =>{
+    it('returns baseFee for single attributes', async () =>{
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
       const fee = await socialReader.connect(issuer).queryFee(issuer.address, issuer.address, [ethers.utils.id('RANDOM')])
-      expect(fee.toString()).eql(baseQueryFee)
+      expect(fee.toString()).eql(baseFee)
     });
 
-    it('returns (baseQueryFee * n) for multiple attributes', async () =>{
+    it('returns (baseFee * n) for multiple attributes', async () =>{
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-2'), baseFee)
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-3'), baseFee)
+
       const fee = await socialReader.connect(issuer).queryFee(
         issuer.address,
         issuer.address,
         [ethers.utils.id('RANDOM'), ethers.utils.id('RANDOM-2'), ethers.utils.id('RANDOM-3')]
       )
-      expect(fee.toString()).eql(BigNumber.from(baseQueryFee).mul(3).toString())
+      expect(fee.toString()).eql(BigNumber.from(baseFee).mul(3).toString())
     });
 
     it('returns correct fee for primary attributes', async () =>{
@@ -109,6 +115,8 @@ describe('SocialAttributeReader()', function() {
     });
 
     it('returns correct fee for combined attributes', async () =>{
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
       const fee = await socialReader.connect(issuer).queryFee(
         issuer.address,
         issuer.address,
