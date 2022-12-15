@@ -30,10 +30,14 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         address _governance,
         address _reader
     ) public initializer {
-        issuerQueryFee[governance.treasury()] = _quadrataQueryFee;
+        require(_governance != address(0), "GOVERNANCE_ADDRESS_ZERO");
+        require(_reader != address(0), "READER_ADDRESS_ZERO");
 
         governance = IQuadGovernance(_governance);
         reader = IQuadReader(_reader);
+
+        issuerQueryFee[governance.treasury()] = _quadrataQueryFee;
+
     }
 
     function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {

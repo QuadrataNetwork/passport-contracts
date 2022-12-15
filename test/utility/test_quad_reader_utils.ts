@@ -3,7 +3,6 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { BytesLike } from '@ethersproject/bytes';
 
-
 describe('QuadReaderUtils()', function() {
   let TestQueryUtils;
   let signers;
