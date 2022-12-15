@@ -13,22 +13,27 @@ import "./storage/QuadConstant.sol";
 contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     using SafeMath for uint256;
 
-    address public constant QUAD_READER = 0x5C6b81212c0A654B6e247F8DEfeC9a95c63EF954;
-    address public constant QUAD_GOVERNANCE = 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b;
-
     // keccak256(userAddress, issuerAddr, attrType))
     mapping(bytes32 => IQuadPassportStore.Attribute[]) internal _attributes;
     mapping(address=>mapping(address=>bool)) public allowList;
     mapping(address=>uint256) public issuerQueryFee;
     mapping(address=>uint256) public funds;
 
+    IQuadGovernance public governance;
+    IQuadReader public reader;
+
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
 
     function initialize(
-        uint256 _quadrataQueryFee
+        uint256 _quadrataQueryFee,
+        address _governance,
+        address _reader,
     ) public initializer {
-        issuerQueryFee[quadrataTreasury()] = _quadrataQueryFee;
+        issuerQueryFee[governance.treasury()] = _quadrataQueryFee;
+
+        governance = IQuadGovernance(_governance);
+        reader = IQuadReader(_reader);
     }
 
     function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {
@@ -45,7 +50,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     }
 
     function isSocialAttribute(bytes32 _attrName) internal returns(bool) {
-        IQuadGovernance governance = IQuadGovernance(QUAD_GOVERNANCE);
         return !governance.eligibleAttributes(_attrName) && !governance.eligibleAttributesByDID(_attrName);
     }
 
@@ -59,7 +63,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer);
                 fee += (interimIssuer+interimQuadrata);
             } else {
-                fee += IQuadReader(QUAD_READER).queryFee(_account, _attrNames[i]);
+                fee += reader.queryFee(_account, _attrNames[i]);
             }
         }
 
@@ -85,31 +89,27 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 issuerFee += interimIssuer;
                 quadrataFee += interimQuadrata;
             } else {
-                queryFee = IQuadReader(QUAD_READER).queryFee(_account, _attrNames[i]);
-                attributes[i] = IQuadReader(QUAD_READER).getAttributes{value: queryFee}(_account, _attrNames[i])[0];
+                queryFee = reader.queryFee(_account, _attrNames[i]);
+                attributes[i] = reader.getAttributes{value: queryFee}(_account, _attrNames[i])[0];
             }
         }
         require(msg.value == (quadrataFee + issuerFee), "INVALID_FEE");
 
-        funds[quadrataTreasury()] += quadrataFee;
+        funds[governance.treasury()] += quadrataFee;
         funds[_issuer] += issuerFee;
 
         return attributes;
     }
 
-    function quadrataTreasury() view internal returns (address) {
-        return IQuadGovernance(QUAD_GOVERNANCE).treasury();
-    }
-
     function calculateSocialFees(address _issuer) view internal returns (uint256, uint256){
         uint256 quadrataFee;
         uint256 issuerFee;
-        if(issuerQueryFee[_issuer].div(uint256(2)) > issuerQueryFee[quadrataTreasury()]) {
+        if(issuerQueryFee[_issuer].div(uint256(2)) > issuerQueryFee[governance.treasury()]) {
             issuerFee = issuerQueryFee[_issuer].div(uint256(2));
             quadrataFee = issuerQueryFee[_issuer] - issuerFee;
         }else{
             issuerFee = issuerQueryFee[_issuer].div(uint256(2));
-            quadrataFee = issuerQueryFee[quadrataTreasury()];
+            quadrataFee = issuerQueryFee[governance.treasury()];
         }
         return(issuerFee, quadrataFee);
     }
@@ -131,7 +131,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
 
     function setQuadrataQueryFee(uint256 _amount) public {
         require(IAccessControlUpgradeable(address(QUAD_GOVERNANCE)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
-        issuerQueryFee[quadrataTreasury()] = _amount;
+        issuerQueryFee[governance.treasury()] = _amount;
     }
 
     function _authorizeUpgrade(address) internal view override {
