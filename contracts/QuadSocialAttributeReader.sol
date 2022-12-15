@@ -127,7 +127,8 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         require(funds[msg.sender] > 0, "CANNOT_WITHDRAW");
         uint256 amount = funds[msg.sender];
         funds[msg.sender] = 0;
-        payable(msg.sender).transfer(amount);
+        (bool success, ) = payable(msg.sender).call{value:amount}("");
+        require(success, "TRANSFER_FAILED");
     }
 
     function setIssuerQueryFee(uint256 _amount) public {
