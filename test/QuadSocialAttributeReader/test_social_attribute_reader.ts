@@ -1,6 +1,6 @@
 const { ethers, upgrades } = require('hardhat');
 import { expect } from 'chai';
-import { Contract } from 'ethers';
+import { Contract, BigNumber } from 'ethers';
 import { BytesLike } from '@ethersproject/bytes';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 
@@ -20,7 +20,7 @@ describe('SocialAttributeReader()', function() {
     issuer: SignerWithAddress,
     issuerTreasury: SignerWithAddress;
   const baseURI = 'https://quadrata.io';
-  const baseQueryFee = '50000000000000000';
+  const baseQueryFee = '5000000000000007';
 
   beforeEach(async () => {
     [deployer, admin, issuer, treasury, issuerTreasury] =
@@ -62,9 +62,50 @@ describe('SocialAttributeReader()', function() {
   });
 
   describe('queryFee()', function() {
-    it.only('returns baseQueryFee for invalid attributes', async () =>{
+    it('returns baseQueryFee for single attributes', async () =>{
       const fee = await socialReader.connect(issuer).queryFee(issuer.address, issuer.address, [ethers.utils.id('RANDOM')])
       expect(fee.toString()).eql(baseQueryFee)
+    });
+
+    it('returns (baseQueryFee * n) for multiple attributes', async () =>{
+      const fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        issuer.address,
+        [ethers.utils.id('RANDOM'), ethers.utils.id('RANDOM-2'), ethers.utils.id('RANDOM-3')]
+      )
+      expect(fee.toString()).eql(BigNumber.from(baseQueryFee).mul(3).toString())
+    });
+
+    it('returns correct fee for primary attributes', async () =>{
+      let fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        issuer.address,
+        [ethers.utils.id('COUNTRY')]
+      )
+      expect(fee.toString()).eql('1200000000000000')
+
+      fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        issuer.address,
+        [ethers.utils.id('IS_BUSINESS')]
+      )
+      expect(fee.toString()).eql('0')
+
+      fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        issuer.address,
+        [ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
+      )
+      expect(fee.toString()).eql('1200000000000000')
+    });
+
+    it('returns correct fee for combined attributes', async () =>{
+      const fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        issuer.address,
+        [ethers.utils.id('RANDOM'), ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
+      )
+      expect(fee.toString()).eql('6200000000000007')
     });
   });
 });
