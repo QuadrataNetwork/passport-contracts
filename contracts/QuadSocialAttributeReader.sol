@@ -67,7 +67,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         for(uint256 i = 0; i < _attrNames.length; i++){
             if(_isSocialAttribute(_attrNames[i])){
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer);
-                fee += (interimIssuer+interimQuadrata);
+                fee += interimIssuer.add(interimQuadrata);
             } else {
                 fee += reader.queryFee(_account, _attrNames[i]);
             }
@@ -101,7 +101,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 attributes[i] = reader.getAttributes{value: queryFee}(_account, _attrNames[i])[0];
             }
         }
-        require(msg.value == (quadrataFee + issuerFee), "INVALID_FEE");
+        require(msg.value == (quadrataFee.add(issuerFee)), "INVALID_FEE");
 
         funds[governance.treasury()] += quadrataFee;
         funds[_issuer] += issuerFee;
@@ -112,7 +112,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     function calculateSocialFees(address _issuer) view internal returns (uint256 quadrataFee, uint256 issuerFee){
          if(issuerQueryFee[_issuer].div(uint256(2)) > issuerQueryFee[governance.treasury()]) {
              issuerFee = issuerQueryFee[_issuer].div(uint256(2));
-             quadrataFee = issuerQueryFee[_issuer] - issuerFee;
+             quadrataFee = issuerQueryFee[_issuer].sub(issuerFee);
          }else{
              issuerFee = issuerQueryFee[_issuer].div(uint256(2));
              quadrataFee = issuerQueryFee[governance.treasury()];
