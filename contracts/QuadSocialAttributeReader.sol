@@ -117,7 +117,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
          }
      }
 
-    function allowAddress(address _addr, bool _allow) public {
+    function allowance(address _addr, bool _allow) public {
         allowList[msg.sender][_addr] = _allow;
     }
 

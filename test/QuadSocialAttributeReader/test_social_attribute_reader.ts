@@ -56,7 +56,7 @@ describe('SocialAttributeReader()', function() {
     });
 
     it('fails if attrName is primary attribute is not allowed', async () => {
-      await socialReader.connect(treasury).allowAddress(issuer.address, true);
+      await socialReader.connect(treasury).allowance(issuer.address, true);
 
       await expect(
         socialReader.connect(issuer).writeAttributes(ethers.utils.id('COUNTRY'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
@@ -65,7 +65,7 @@ describe('SocialAttributeReader()', function() {
 
 
     it('succeeds', async () => {
-      await socialReader.connect(treasury).allowAddress(issuer.address, true);
+      await socialReader.connect(treasury).allowance(issuer.address, true);
       await socialReader.connect(issuer).writeAttributes(ethers.utils.id('RANDOM_ATTR'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
     });
   });
