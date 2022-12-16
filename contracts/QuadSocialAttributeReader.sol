@@ -63,18 +63,18 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         bytes32[] calldata _attrNames) public view returns(uint256){
         uint256 fee;
         for(uint256 i = 0; i < _attrNames.length; i++){
-            if(!_isPassportAttribute(_attrNames[i])){
+            if(_isPassportAttribute(_attrNames[i])){
+                fee = fee.add(reader.queryFee(_account, _attrNames[i]));
+            } else {
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer, _attrNames[i]);
                 fee = fee.add(interimIssuer.add(interimQuadrata));
-            } else {
-                fee = fee.add(reader.queryFee(_account, _attrNames[i]));
             }
         }
 
         return fee;
     }
 
-    function getAttributes(
+    function getAttributesBulk(
         address _issuer,
         address _account,
         bytes32[] calldata _attrNames
@@ -86,17 +86,16 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attrNames.length);
 
         for(uint256 i = 0; i < _attrNames.length; i++){
-            if(!_isPassportAttribute(_attrNames[i])){
+            if(_isPassportAttribute(_attrNames[i])){
+                quadReaderFee = reader.queryFee(_account, _attrNames[i]);
+                attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attrNames[i])[0];
+            } else {
                 bytes32 attrKey = keccak256(abi.encode(_account, _issuer, _attrNames[i]));
                 attributes[i] = _attributes[attrKey];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_issuer, _attrNames[i]);
                 issuerFee = issuerFee.add(interimIssuer);
                 quadrataFee = quadrataFee.add(interimQuadrata);
-
-            } else {
-                quadReaderFee = reader.queryFee(_account, _attrNames[i]);
-                attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attrNames[i])[0];
             }
         }
         require(msg.value == (quadrataFee.add(issuerFee)), "INVALID_FEE");
