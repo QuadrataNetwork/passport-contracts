@@ -65,7 +65,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
             issuer: msg.sender
         });
 
-        _attributes[_attrName] = attr;
+        _attributes[keccak256(abi.encode(_account, _attrName))] = attr;
     }
 
     /// @dev Checks if attribute is a primary passport attribute
@@ -112,7 +112,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 quadReaderFee = reader.queryFee(_account, _attrNames[i]);
                 attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attrNames[i])[0];
             } else {
-                attributes[i] = _attributes[_attrNames[i]];
+                attributes[i] = _attributes[keccak256(abi.encode(_account, _attrNames[i]))];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attrNames[i]);
                 issuerFee = issuerFee.add(interimIssuer);
