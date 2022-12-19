@@ -13,7 +13,7 @@ import "./storage/QuadConstant.sol";
 
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
-contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
+contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     using SafeMath for uint256;
 
     // keccak256(userAddress, attrType))
@@ -48,14 +48,19 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     /// @param _attrName attribute name
     /// @param _attrValue attribute value
     /// @param _account target wallet address being attested to
-    function setAttributes(bytes32 _attrName, bytes32 _attrValue, address _account, bytes32 _sigAccount) public {
+    function setAttributes(
+        bytes32 _attrName,
+        bytes32 _attrValue,
+        address _account,
+        bytes calldata _sigAccount
+    ) public {
         if(!allowList[_account][msg.sender][_attrName]){
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(_attrName);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
-            // require(_account == account, 'INVALID_SIGNER');
+            require(_account == account, 'INVALID_SIGNER');
 
-            // allowList[account][msg.sender][_attrName] = true;
+            allowList[account][msg.sender][_attrName] = true;
         }
 
         require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
