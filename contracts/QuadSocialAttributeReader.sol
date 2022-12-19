@@ -2,8 +2,9 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -45,16 +46,16 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
 
     /// @dev Write attribute onchain
     /// @param _attrName attribute name
-    /// @param _attrvalue attribute value
+    /// @param _attrValue attribute value
     /// @param _account target wallet address being attested to
     function setAttributes(bytes32 _attrName, bytes32 _attrValue, address _account, bytes32 _sigAccount) public {
-        if(!allowList[_account][msg.sender][_attrName])){
+        if(!allowList[_account][msg.sender][_attrName]){
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(_attrName);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
-            require(_account == account, 'INVALID_SIGNER');
+            // require(_account == account, 'INVALID_SIGNER');
 
-            allowList[account][msg.sender][_attrName] = true;
+            // allowList[account][msg.sender][_attrName] = true;
         }
 
         require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
@@ -101,8 +102,8 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         address _account,
         bytes32[] calldata _attrNames
     ) payable public returns(IQuadPassportStore.Attribute[] memory){
-        uint256 quadrataFee;
-        uint256 issuerFee;
+        uint256 quadFeeCounter;
+        uint256 issuerFeeCounter;
         uint256 quadReaderFee;
 
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attrNames.length);
@@ -115,27 +116,28 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 attributes[i] = _attributes[keccak256(abi.encode(_account, _attrNames[i]))];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attrNames[i]);
-                issuerFee = issuerFee.add(interimIssuer);
-                quadrataFee = quadrataFee.add(interimQuadrata);
+                quadFeeCounter = quadFeeCounter.add(interimQuadrata);
+                issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
+                funds[attributes[i].issuer] = funds[attributes[i].issuer].add(interimIssuer);
+
             }
         }
-        require(msg.value == (quadrataFee.add(issuerFee)), "INVALID_FEE");
+        require(msg.value == (quadFeeCounter.add(issuerFeeCounter)), "INVALID_FEE");
 
-        funds[governance.treasury()] = funds[governance.treasury()].add(quadrataFee);
-        funds[_issuer] = funds[_issuer].add(issuerFee);
+        funds[governance.treasury()] = funds[governance.treasury()].add(quadFeeCounter);
 
         return attributes;
     }
 
     /// @dev Calculate the fees for issuer/quadrata
     /// @param _attrName attribute name
-    function calculateSocialFees(bytes32 _attrName) view internal returns (uint256 issuerFee, uint256 quadrataFee){
-        if(queryFeeMap[_attrName].div(uint256(2)) > quadrataFee) {
-            issuerFee = queryFeeMap[_attrName].div(uint256(2));
-            quadrataFee = queryFeeMap[_attrName].sub(issuerFee);
+    function calculateSocialFees(bytes32 _attrName) view internal returns (uint256 interimIssuerFee, uint256 interimQuadFee){
+        if(queryFeeMap[_attrName].div(uint256(2)) > interimQuadFee) {
+            interimIssuerFee = queryFeeMap[_attrName].div(uint256(2));
+            interimQuadFee = queryFeeMap[_attrName].sub(interimIssuerFee);
         }else{
-            issuerFee = queryFeeMap[_attrName].div(uint256(2));
-            quadrataFee = quadrataFee;
+            interimIssuerFee = queryFeeMap[_attrName].div(uint256(2));
+            interimQuadFee = interimQuadFee;
         }
     }
 
