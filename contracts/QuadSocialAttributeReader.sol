@@ -46,12 +46,17 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
     /// @dev Write attribute onchain
     /// @param _attrName attribute name
     /// @param _attrvalue attribute value
-    /// @param _targetAddr target wallet address being attested to
-    function writeAttributes(bytes32 _attrName, bytes32 _attrValue, address _targetAddr) public {
-        require(allowList[_targetAddr][msg.sender][_attrName]), 'NOT_ALLOWED');
+    /// @param _account target wallet address being attested to
+    function setAttributes(bytes32 _attrName, bytes32 _attrValue, address _account, bytes32 _sigAccount) public {
+        if(!allowList[_account][msg.sender][_attrName])){
+            bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(_attrName);
+            address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
+            require(_account == account, 'INVALID_SIGNER');
+            allowList[account][msg.sender][_attrName] = true;
+        }
         require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
-        bytes32 attrKey = keccak256(abi.encode(_targetAddr, _attrName));
+        bytes32 attrKey = keccak256(abi.encode(_account, _attrName));
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
             value: _attrValue,
@@ -141,16 +146,8 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         return keccak256(abi.encode(_issuer, _attrName));
     }
 
-    /// @dev Allows target address to write about you
-    /// @param _issuer issuer address
-    /// @param _attrName attribute name
-    /// @param _allow boolean to allow
-    function allowance(address _addr, bytes32 _attrName, bool _allow) public {
-        allowList[msg.sender][_addr][_attrName] = _allow;
-    }
-
     /// @dev Withdraw function
-    /// TODO: Gas optimization test
+    /// TODO: Gas optimization test - might delete this later
     function withdraw() public {
         require(funds[msg.sender] > 0, "CANNOT_WITHDRAW");
         uint256 amount = funds[msg.sender];
