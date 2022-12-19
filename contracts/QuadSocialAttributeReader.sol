@@ -51,12 +51,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
         if(!allowList[_account][msg.sender][_attrName])){
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(_attrName);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
+
             require(_account == account, 'INVALID_SIGNER');
+
             allowList[account][msg.sender][_attrName] = true;
         }
-        require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
-        bytes32 attrKey = keccak256(abi.encode(_account, _attrName));
+        require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
             value: _attrValue,
@@ -64,7 +65,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
             issuer: msg.sender
         });
 
-        _attributes[attrKey] = attr;
+        _attributes[_attrName] = attr;
     }
 
     /// @dev Checks if attribute is a primary passport attribute
@@ -111,8 +112,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant{
                 quadReaderFee = reader.queryFee(_account, _attrNames[i]);
                 attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attrNames[i])[0];
             } else {
-                bytes32 attrKey = keccak256(abi.encode(_account, _attrNames[i]));
-                attributes[i] = _attributes[attrKey];
+                attributes[i] = _attributes[_attrNames[i]];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attrNames[i]);
                 issuerFee = issuerFee.add(interimIssuer);
