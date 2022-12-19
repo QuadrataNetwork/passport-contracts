@@ -19,7 +19,7 @@ export const signMessage = async (
 };
 
 export const signAccount = async (
-  signer: typeof Signer
+  signer: typeof Signer,
 ): Promise<typeof DataHexString> => {
   const sig = await signer.signMessage(DIGEST_TO_SIGN);
   return sig;

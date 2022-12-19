@@ -11,6 +11,9 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadConstant.sol";
 
+import "hardhat/console.sol";
+
+
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
 contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
@@ -18,7 +21,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
 
     // keccak256(userAddress, attrType))
     mapping(bytes32 => IQuadPassportStore.Attribute) internal _attributes;
-    mapping(address=>mapping(address=>mapping(bytes32 => bool))) public allowList;
+    mapping(address=>mapping(bytes32 => bool)) public allowList;
     mapping(bytes32=>uint256) public queryFeeMap;
     mapping(address=>uint256) public funds;
 
@@ -49,21 +52,21 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     /// @param _attrValue attribute value
     /// @param _account target wallet address being attested to
     function setAttributes(
-        bytes32 _attrName,
+        bytes32 _attrName, // keccak(issuerAddr|keccak(attrName))
         bytes32 _attrValue,
         address _account,
         bytes calldata _sigAccount
     ) public {
-        if(!allowList[_account][msg.sender][_attrName]){
+        require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
+
+        if(!allowList[_account][_attrName]){
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(_attrName);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
             require(_account == account, 'INVALID_SIGNER');
 
-            allowList[account][msg.sender][_attrName] = true;
+            allowList[account][_attrName] = true;
         }
-
-        require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
             value: _attrValue,
@@ -146,7 +149,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
         }
     }
 
-    /// @dev Calculate the fees for issuer/quadrata
+    /// @dev Calculate the attribute name for issuer/quadrata
     /// @param _issuer issuer address
     /// @param _attrName attribute name
     function getAttributeKey(address _issuer, bytes32 _attrName) public view returns(bytes32){

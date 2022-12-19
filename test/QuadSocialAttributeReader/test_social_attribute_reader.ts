@@ -48,25 +48,68 @@ describe('SocialAttributeReader()', function() {
     await socialReader.connect(admin).setQuadrataFee(baseFee)
   });
 
-  describe('writeAttributes()', function() {
+  describe('setAttributes()', function() {
     it('fails if issuer is not allowed', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+
       await expect(
-        socialReader.connect(issuer).writeAttributes(ethers.utils.id('RANDOM_ATTR'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
-      ).to.be.revertedWith('NOT_ALLOWED');
+        socialReader.connect(issuer).setAttributes(
+          attrKey,
+          ethers.utils.id('RANDOM-VALUE'),
+          treasury.address,
+          await treasury.signMessage('INVALID')
+        )
+      ).to.be.revertedWith('INVALID_SIGNER');
     });
 
     it('fails if attrName is primary attribute is not allowed', async () => {
-      await socialReader.connect(treasury).allowance(issuer.address, true);
+      const sigAccount = await treasury.signMessage(ethers.utils.id('COUNTRY'));
 
       await expect(
-        socialReader.connect(issuer).writeAttributes(ethers.utils.id('COUNTRY'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
+        socialReader.connect(issuer).setAttributes(
+          ethers.utils.id('COUNTRY'),
+          ethers.utils.id('RANDOM-VALUE'),
+          treasury.address,
+          sigAccount
+        )
       ).to.be.revertedWith('ATTR_NAME_NOT_ALLOWED');
     });
 
 
     it('succeeds', async () => {
-      await socialReader.connect(treasury).allowance(issuer.address, true);
-      await socialReader.connect(issuer).writeAttributes(ethers.utils.id('RANDOM_ATTR'), ethers.utils.id('RANDOM-VALUE'), treasury.address)
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value'),
+        treasury.address,
+        sigAccount
+      )
+    });
+
+    it('succeeds on first call and then multiple calls with empty signature', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value'),
+        treasury.address,
+        sigAccount
+      )
+
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-2'),
+        treasury.address,
+        await treasury.signMessage('BLAHBLAH')
+      )
+
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-3'),
+        treasury.address,
+        await treasury.signMessage('RANDOM123824812852123')
+      )
     });
   });
 
