@@ -9,27 +9,15 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadConstant.sol";
+import "./storage/QuadSocialAttributeReaderStore.sol";
 
 import "hardhat/console.sol";
 
 
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
-contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
+contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStore{
     using SafeMath for uint256;
-
-    // keccak256(userAddress, attrType))
-    mapping(bytes32=>IQuadPassportStore.Attribute) internal _attributeStorage;
-    mapping(address=>mapping(bytes32=>bool)) public allowList;
-    mapping(address=>mapping(bytes32=>bool)) public revokedAttributes;
-    mapping(bytes32=>uint256) public queryFeeMap;
-    mapping(address=>uint256) public funds;
-
-    uint256 public quadrataFee;
-
-    IQuadGovernance public governance;
-    IQuadReader public reader;
 
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
@@ -152,12 +140,12 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
                 issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
-                funds[attributes[i].issuer] = funds[attributes[i].issuer].add(interimIssuer);
+                emit QueryFeeReceipt(attributes[i].issuer, interimIssuer);
             }
         }
         require(msg.value == (quadFeeCounter.add(issuerFeeCounter)), "INVALID_FEE");
 
-        funds[governance.treasury()] = funds[governance.treasury()].add(quadFeeCounter);
+        emit QueryFeeReceipt(governance.treasury(), quadFeeCounter);
 
         return attributes;
     }
@@ -182,13 +170,14 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     }
 
     /// @dev Withdraw function
-    /// TODO: Gas optimization test - might delete this later
+    /// TODO: Handle ERC20 withdrawals in case of accidents
     function withdraw() public {
-        require(funds[msg.sender] > 0, "CANNOT_WITHDRAW");
-        uint256 amount = funds[msg.sender];
-        funds[msg.sender] = 0;
-        (bool success, ) = payable(msg.sender).call{value:amount}("");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        uint256 balance = address(this).balance;
+        (bool success, ) = payable(governance.treasury()).call{value: balance}("");
         require(success, "TRANSFER_FAILED");
+
+        emit WithdrawEvent(address(governance), governance.treasury(), balance);
     }
 
     /// @dev Set query fee on a per address per attribute basis

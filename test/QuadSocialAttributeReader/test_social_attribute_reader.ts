@@ -112,6 +112,7 @@ describe('SocialAttributeReader()', function() {
       )
     });
   });
+
   describe('setRevokedAttributes()', function(){
     it('revoked and unrevokes attributes', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
