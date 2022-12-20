@@ -111,16 +111,50 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         return fee;
     }
 
-    // TODO: Huy
+    /// @dev Purchase the attributes
+    /// @param _account target wallet address
+    /// @param _attribute attribute name to query
     function getAttributes(
         address _account, bytes32 _attribute
     ) external payable returns(IQuadPassportStore.Attribute[] memory attributes) {
+        if(_isPassportAttribute(_attribute)){
+            uint256 quadReaderFee = reader.queryFee(_account, _attribute);
+            return reader.getAttributes{value: quadReaderFee}(_account, _attribute);
+        }
+        IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
+        attrs[0] = _attributeStorage[keccak256(abi.encode(_account, _attribute))];
+
+        (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
+        emit QueryFeeReceipt(attrs[0].issuer, interimIssuer);
+        emit QueryFeeReceipt(governance.treasury(), interimQuadrata);
+
+        return attrs;
     }
 
-    // TODO: Huy
+    /// @dev Purchase the attributes
+    /// @param _account target wallet address
+    /// @param _attribute attribute name to query
     function getAttributesLegacy(
         address _account, bytes32 _attribute
     ) public payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+        if(_isPassportAttribute(_attribute)){
+            uint256 quadReaderFee = reader.queryFee(_account, _attribute);
+            return reader.getAttributesLegacy{value: quadReaderFee}(_account, _attribute);
+        }
+
+        IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
+
+        values = new bytes32[](1);
+        epochs = new uint256[](1);
+        issuers = new address[](1);
+
+        values[0] = attrs[0].value;
+        epochs[0] = attrs[0].epoch;
+        issuers[0] = attrs[0].issuer;
+
+        (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
+        emit QueryFeeReceipt(issuers[0], interimIssuer);
+        emit QueryFeeReceipt(governance.treasury(), interimQuadrata);
     }
 
     /// @dev Purchase the attributes
