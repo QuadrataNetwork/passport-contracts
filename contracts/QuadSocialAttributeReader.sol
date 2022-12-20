@@ -95,7 +95,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 fee = fee.add(interimIssuer.add(interimQuadrata));
             }
         }
-
         return fee;
     }
 
@@ -115,6 +114,42 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     function getAttributesBulkLegacy(
         address _account, bytes32[] calldata _attributes
     ) external payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+
+        values = new bytes32[](_attributes.length);
+        epochs = new uint256[](_attributes.length);
+        issuers = new address[](_attributes.length);
+
+        uint256 quadFeeCounter;
+        uint256 issuerFeeCounter;
+        uint256 quadReaderFeeCounter;
+
+        uint256 quadReaderFee;
+
+        IQuadPassportStore.Attribute memory attribute;
+
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            if(_isPassportAttribute(_attributes[i])){
+                quadReaderFee = reader.queryFee(_account, _attributes[i]);
+                attribute = reader.getAttributes{value: quadReaderFee}(_account, _attributes[i])[0];
+                values[i] = attribute.value;
+                epochs[i] = attribute.epoch;
+                issuers[i] = attribute.issuer;
+                quadReaderFeeCounter = quadReaderFeeCounter.add(quadReaderFee);
+            }else{
+                attribute = _attributeStorage[keccak256(abi.encode(_account, _attributes[i]))];
+                values[i] = attribute.value;
+                epochs[i] = attribute.epoch;
+                issuers[i] = attribute.issuer;
+
+                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
+                quadFeeCounter = quadFeeCounter.add(interimQuadrata);
+                issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
+                emit QueryFeeReceipt(attribute.issuer, interimIssuer);
+
+            }
+        }
+        require(msg.value == quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)," INVALID_QUERY_FEE");
     }
 
     /// @dev Purchase the attributes
@@ -126,6 +161,8 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     ) external payable returns(IQuadPassportStore.Attribute[] memory){
         uint256 quadFeeCounter;
         uint256 issuerFeeCounter;
+        uint256 quadReaderFeeCounter;
+
         uint256 quadReaderFee;
 
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
@@ -134,6 +171,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
             if(_isPassportAttribute(_attributes[i])){
                 quadReaderFee = reader.queryFee(_account, _attributes[i]);
                 attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attributes[i])[0];
+                quadReaderFeeCounter.add(quadReaderFee);
             } else {
                 attributes[i] = _attributeStorage[keccak256(abi.encode(_account, _attributes[i]))];
 
@@ -143,7 +181,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 emit QueryFeeReceipt(attributes[i].issuer, interimIssuer);
             }
         }
-        require(msg.value == (quadFeeCounter.add(issuerFeeCounter)), "INVALID_FEE");
+        require(msg.value == (quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)), "INVALID_FEE");
 
         emit QueryFeeReceipt(governance.treasury(), quadFeeCounter);
 

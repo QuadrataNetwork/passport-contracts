@@ -165,7 +165,6 @@ import "./storage/QuadReaderStore.sol";
                 : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
-
             if (attrs.length > 0) {
                 values[i] = attrs[0].value;
                 epochs[i] = attrs[0].epoch;
