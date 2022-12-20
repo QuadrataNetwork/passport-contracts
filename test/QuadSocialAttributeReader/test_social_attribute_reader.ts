@@ -111,8 +111,9 @@ describe('SocialAttributeReader()', function() {
         await treasury.signMessage('RANDOM123824812852123')
       )
     });
-
-    it.only('succeeds on first call and then multiple calls with empty signature with revoked attributes enabled', async () => {
+  });
+  describe('setRevokedAttributes()', function(){
+    it('revoked and unrevokes attributes', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
       await socialReader.connect(issuer).setAttributes(
