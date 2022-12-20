@@ -20,7 +20,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     using SafeMath for uint256;
 
     // keccak256(userAddress, attrType))
-    mapping(bytes32 => IQuadPassportStore.Attribute) internal _attributes;
+    mapping(bytes32 => IQuadPassportStore.Attribute) internal _attributeStorage;
     mapping(address=>mapping(bytes32 => bool)) public allowList;
     mapping(bytes32=>uint256) public queryFeeMap;
     mapping(address=>uint256) public funds;
@@ -74,7 +74,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
             issuer: msg.sender
         });
 
-        _attributes[keccak256(abi.encode(_account, _attrName))] = attr;
+        _attributeStorage[keccak256(abi.encode(_account, _attrName))] = attr;
     }
 
     /// @dev Checks if attribute is a primary passport attribute
@@ -85,17 +85,17 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
 
     /// @dev Get the query fee for a getAttributes* call
     /// @param _account target wallet address
-    /// @param _attrNames list of attribute names to query
+    /// @param _attributes list of attribute names to query
     function queryFeeBulk(
         address _account,
-        bytes32[] calldata _attrNames
+        bytes32[] calldata _attributes
     ) public view returns(uint256){
         uint256 fee;
-        for(uint256 i = 0; i < _attrNames.length; i++){
-            if(_isPassportAttribute(_attrNames[i])){
-                fee = fee.add(reader.queryFee(_account, _attrNames[i]));
+        for(uint256 i = 0; i < _attributes.length; i++){
+            if(_isPassportAttribute(_attributes[i])){
+                fee = fee.add(reader.queryFee(_account, _attributes[i]));
             } else {
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attrNames[i]);
+                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
                 fee = fee.add(interimIssuer.add(interimQuadrata));
             }
         }
@@ -105,31 +105,31 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
 
     // TODO: Huy
     function getAttributesLegacy(
-        address _account, bytes32 _attribute
-    ) public payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+        address _account, bytes32 _attributes
+    ) public payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
     }
 
     /// @dev Purchase the attributes
     /// @param _account target wallet address
-    /// @param _attrNames list of attribute names to query
+    /// @param _attributes list of attribute names to query
     function getAttributesBulk(
         address _account,
-        bytes32[] calldata _attrNames
+        bytes32[] calldata _attributes
     ) external payable returns(IQuadPassportStore.Attribute[] memory){
         uint256 quadFeeCounter;
         uint256 issuerFeeCounter;
         uint256 quadReaderFee;
 
-        IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attrNames.length);
+        IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
 
-        for(uint256 i = 0; i < _attrNames.length; i++){
-            if(_isPassportAttribute(_attrNames[i])){
-                quadReaderFee = reader.queryFee(_account, _attrNames[i]);
-                attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attrNames[i])[0];
+        for(uint256 i = 0; i < _attributes.length; i++){
+            if(_isPassportAttribute(_attributes[i])){
+                quadReaderFee = reader.queryFee(_account, _attributes[i]);
+                attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attributes[i])[0];
             } else {
-                attributes[i] = _attributes[keccak256(abi.encode(_account, _attrNames[i]))];
+                attributes[i] = _attributeStorage[keccak256(abi.encode(_account, _attributes[i]))];
 
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attrNames[i]);
+                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
                 issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
                 funds[attributes[i].issuer] = funds[attributes[i].issuer].add(interimIssuer);
