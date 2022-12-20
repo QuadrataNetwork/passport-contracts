@@ -66,6 +66,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
 
             require(account == _account, 'INVALID_SIGNER');
             require(!revokedAttributes[account][_attrName], 'REVOKED_ATTRIBUTE');
+
             allowList[account][_attrName] = true;
         }
 
