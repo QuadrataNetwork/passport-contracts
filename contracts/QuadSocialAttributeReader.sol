@@ -51,13 +51,20 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     /// @dev Write attribute onchain
     /// @param _attrName attribute name
     /// @param _attrValue attribute value
-    /// @param _account target wallet address being attested to
+    /// @param _account target wallet address being attested
+    /// @param _sigAccount authorization signature to write to _attrName
+    ///
+    /// note The _sigAccount is a one-time use key (per attribute) to enable writing
+    ///      to a specific _attrName. The user can revoke by calling setRevokedAttributes().
+    ///      The user must call setRevokedAttributes() and set it to False for the datatype to be
+    ///      writable again.
     function setAttributes(
         bytes32 _attrName, // keccak(issuerAddr|keccak(attrName))
         bytes32 _attrValue,
         address _account,
         bytes calldata _sigAccount
     ) public {
+        require(!revokedAttributes[_account][_attrName], 'REVOKED_ATTRIBUTE');
         require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
         if(!allowList[_account][_attrName]){
@@ -65,7 +72,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
             require(account == _account, 'INVALID_SIGNER');
-            require(!revokedAttributes[account][_attrName], 'REVOKED_ATTRIBUTE');
 
             allowList[account][_attrName] = true;
         }
@@ -204,7 +210,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     /// @dev Set the revoked attribute boolean
     /// @param _attrName attrName to change
     /// @param _status new revoked value as a boolean
-    function setRevokedAttribute(bytes32 _attrName, bool _status) public {
+    function setRevokedAttributes(bytes32 _attrName, bool _status) public {
         revokedAttributes[msg.sender][_attrName] = _status;
     }
 

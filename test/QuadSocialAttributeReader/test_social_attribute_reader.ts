@@ -111,6 +111,54 @@ describe('SocialAttributeReader()', function() {
         await treasury.signMessage('RANDOM123824812852123')
       )
     });
+
+    it.only('succeeds on first call and then multiple calls with empty signature with revoked attributes enabled', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value'),
+        treasury.address,
+        sigAccount
+      )
+
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-2'),
+        treasury.address,
+        await treasury.signMessage('BLAHBLAH')
+      )
+
+      // User revokes
+      await socialReader.connect(treasury).setRevokedAttributes(
+        attrKey,
+        true
+      )
+
+      // Write should fail
+      await expect(socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-3'),
+        treasury.address,
+        sigAccount
+      )).to.revertedWith(
+        "REVOKED_ATTRIBUTE"
+      )
+
+      // User unrevokes
+      await socialReader.connect(treasury).setRevokedAttributes(
+        attrKey,
+        false
+      )
+
+      // Different sig account to prove you can write without needing sig again once user unrevokes
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-3'),
+        treasury.address,
+        await treasury.signMessage('BLAHBLAH')
+      )
+    });
   });
 
   describe('queryFeeBulk()', function() {
