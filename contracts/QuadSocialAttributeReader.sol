@@ -103,6 +103,12 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
         return fee;
     }
 
+    // TODO: Huy
+    function getAttributesLegacy(
+        address _account, bytes32 _attribute
+    ) public payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+    }
+
     /// @dev Purchase the attributes
     /// @param _account target wallet address
     /// @param _attrNames list of attribute names to query
