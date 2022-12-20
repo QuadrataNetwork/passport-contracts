@@ -125,8 +125,9 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         attrs[0] = _attributeStorage[keccak256(abi.encode(_account, _attribute))];
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-        emit QueryFeeReceipt(attrs[0].issuer, interimIssuer);
-        emit QueryFeeReceipt(governance.treasury(), interimQuadrata);
+
+        funds[attrs[0].issuer] = funds[attrs[0].issuer].add(interimIssuer);
+        funds[governance.treasury()] = funds[governance.treasury()].add(interimQuadrata);
 
         return attrs;
     }
@@ -153,8 +154,9 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         issuers[0] = attrs[0].issuer;
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-        emit QueryFeeReceipt(issuers[0], interimIssuer);
-        emit QueryFeeReceipt(governance.treasury(), interimQuadrata);
+
+        funds[issuers[0]] = funds[issuers[0]].add(interimIssuer);
+        funds[governance.treasury()] = funds[governance.treasury()].add(interimQuadrata);
     }
 
     /// @dev Purchase the attributes
@@ -194,11 +196,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
                 issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
-                emit QueryFeeReceipt(attribute.issuer, interimIssuer);
+
+                funds[attribute.issuer] = funds[attribute.issuer].add(interimIssuer);
             }
         }
         require(msg.value == quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)," INVALID_QUERY_FEE");
-        emit QueryFeeReceipt(governance.treasury(), quadFeeCounter);
+
+        funds[governance.treasury()] = funds[governance.treasury()].add(quadFeeCounter);
     }
 
     /// @dev Purchase the attributes
@@ -227,13 +231,12 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
                 issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
-                emit QueryFeeReceipt(attributes[i].issuer, interimIssuer);
+                funds[attributes[i].issuer] = funds[attributes[i].issuer].add(interimIssuer);
             }
         }
         require(msg.value == (quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)), "INVALID_FEE");
 
-        emit QueryFeeReceipt(governance.treasury(), quadFeeCounter);
-
+        funds[governance.treasury()] = funds[governance.treasury()].add(quadFeeCounter);
         return attributes;
     }
 
@@ -259,12 +262,12 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     /// @dev Withdraw function
     /// TODO: Handle ERC20 withdrawals in case of accidents
     function withdraw() public {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
-        uint256 balance = address(this).balance;
-        (bool success, ) = payable(governance.treasury()).call{value: balance}("");
-        require(success, "TRANSFER_FAILED");
+        require(funds[msg.sender] > 0, "CANNOT_WITHDRAW");
+        uint256 amount = funds[msg.sender];
+        funds[msg.sender] = 0;
+        (bool success, ) = payable(msg.sender).call{value:amount}("");
 
-        emit WithdrawEvent(address(governance), governance.treasury(), balance);
+        require(success, "TRANSFER_FAILED");
     }
 
     /// @dev Set query fee on a per address per attribute basis
