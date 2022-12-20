@@ -163,6 +163,34 @@ describe('SocialAttributeReader()', function() {
     });
   });
 
+  describe('queryFee()', function() {
+    it('returns baseFee for single attributes', async () =>{
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+
+      const fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        attrKey
+      );
+
+      expect(fee.toString()).eql(baseFee)
+    });
+
+    it('returns correct fee for primary attributes', async () =>{
+      let fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        ethers.utils.id('COUNTRY')
+      )
+      expect(fee.toString()).eql('1200000000000000')
+
+      fee = await socialReader.connect(issuer).queryFee(
+        issuer.address,
+        ethers.utils.id('IS_BUSINESS')
+      )
+      expect(fee.toString()).eql('0')
+    });
+  });
+
   describe('queryFeeBulk()', function() {
     it('returns baseFee for single attributes', async () =>{
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
@@ -224,6 +252,21 @@ describe('SocialAttributeReader()', function() {
     });
   });
 
+  describe('getAttributes()', function() {
+    // TODO:
+  });
+  describe('getAttributesLegacy()', function() {
+    // TODO:
+  });
+  describe('getAttributeKey()', function() {
+    // TODO:
+  });
+  describe('withdraw()', function() {
+    // TODO:
+  });
+  describe('setQueryFee()', function() {
+    // TODO:
+  });
   describe('getAttributesBulk()', function() {
     it('succeeds', async () =>{
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
