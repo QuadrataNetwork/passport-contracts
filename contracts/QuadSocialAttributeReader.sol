@@ -110,7 +110,9 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     ) public payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
     }
 
-    // TODO: Huy
+    /// @dev Purchase the attributes
+    /// @param _account target wallet address
+    /// @param _attributes list of attribute names to query
     function getAttributesBulkLegacy(
         address _account, bytes32[] calldata _attributes
     ) external payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
@@ -146,7 +148,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
                 issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
                 emit QueryFeeReceipt(attribute.issuer, interimIssuer);
-
             }
         }
         require(msg.value == quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)," INVALID_QUERY_FEE");

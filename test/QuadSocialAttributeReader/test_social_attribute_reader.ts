@@ -246,4 +246,28 @@ describe('SocialAttributeReader()', function() {
       await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee})
     });
   });
+
+  describe('getAttributesBulkLegacy()', function() {
+    it('succeeds', async () =>{
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value'),
+        treasury.address,
+        sigAccount
+      )
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      const attributes = await socialReader.connect(issuer).callStatic.getAttributesBulkLegacy(treasury.address, [attrKey], {value: fee})
+
+      expect(attributes.length).eql(3)
+      expect(attributes[0]).eql([ethers.utils.id('some-random-value')])
+      expect(parseInt(attributes[1][0])).greaterThan(0)
+      expect(attributes[2]).eql([issuer.address])
+
+      await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee})
+    });
+  });
 });
