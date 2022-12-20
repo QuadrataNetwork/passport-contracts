@@ -173,4 +173,27 @@ describe('SocialAttributeReader()', function() {
       expect(fee.toString()).eql('6200000000000007')
     });
   });
+
+  describe('getAttributesBulk()', function() {
+    it('succeeds', async () =>{
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value'),
+        treasury.address,
+        sigAccount
+      )
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      const attributes = await socialReader.connect(issuer).callStatic.getAttributesBulk(treasury.address, [attrKey], {value: fee})
+
+      expect(attributes.length).eql(1)
+      expect(attributes[0].value).eql(ethers.utils.id('some-random-value'))
+      expect(attributes[0].issuer).eql(issuer.address)
+
+      await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee})
+    });
+  });
 });

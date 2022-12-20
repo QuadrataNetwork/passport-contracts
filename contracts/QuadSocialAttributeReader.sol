@@ -109,7 +109,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     function getAttributesBulk(
         address _account,
         bytes32[] calldata _attrNames
-    ) payable public returns(IQuadPassportStore.Attribute[] memory){
+    ) external payable returns(IQuadPassportStore.Attribute[] memory){
         uint256 quadFeeCounter;
         uint256 issuerFeeCounter;
         uint256 quadReaderFee;
