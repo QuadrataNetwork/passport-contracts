@@ -104,9 +104,21 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     }
 
     // TODO: Huy
+    function getAttributes(
+        address _account, bytes32 _attribute
+    ) external payable returns(IQuadPassportStore.Attribute[] memory attributes) {
+    }
+
+    // TODO: Huy
     function getAttributesLegacy(
-        address _account, bytes32 _attributes
+        address _account, bytes32 _attribute
     ) public payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+    }
+
+    // TODO: Huy
+    function getAttributesBulkLegacy(
+        address _account, bytes32[] calldata _attributes
+    ) external payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
     }
 
     /// @dev Purchase the attributes
