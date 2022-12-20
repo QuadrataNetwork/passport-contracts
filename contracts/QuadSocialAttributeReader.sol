@@ -151,6 +151,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
             }
         }
         require(msg.value == quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)," INVALID_QUERY_FEE");
+        emit QueryFeeReceipt(governance.treasury(), quadFeeCounter);
     }
 
     /// @dev Purchase the attributes
