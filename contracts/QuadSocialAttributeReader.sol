@@ -20,8 +20,9 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     using SafeMath for uint256;
 
     // keccak256(userAddress, attrType))
-    mapping(bytes32 => IQuadPassportStore.Attribute) internal _attributeStorage;
-    mapping(address=>mapping(bytes32 => bool)) public allowList;
+    mapping(bytes32=>IQuadPassportStore.Attribute) internal _attributeStorage;
+    mapping(address=>mapping(bytes32=>bool)) public allowList;
+    mapping(address=>mapping(bytes32=>bool)) public revokedAttributes;
     mapping(bytes32=>uint256) public queryFeeMap;
     mapping(address=>uint256) public funds;
 
@@ -63,8 +64,8 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(_attrName);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
-            require(_account == account, 'INVALID_SIGNER');
-
+            require(account == _account, 'INVALID_SIGNER');
+            require(!revokedAttributes[account][_attrName], 'REVOKED_ATTRIBUTE');
             allowList[account][_attrName] = true;
         }
 
@@ -145,7 +146,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
                 issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
                 funds[attributes[i].issuer] = funds[attributes[i].issuer].add(interimIssuer);
-
             }
         }
         require(msg.value == (quadFeeCounter.add(issuerFeeCounter)), "INVALID_FEE");
@@ -198,6 +198,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadConstant {
     function setQuadrataFee(uint256 _amount) public {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
         quadrataFee = _amount;
+    }
+
+    /// @dev Set the revoked attribute boolean
+    /// @param _attrName attrName to change
+    /// @param _status new revoked value as a boolean
+    function setRevokedAttribute(bytes32 _attrName, bool _status) public {
+        revokedAttributes[msg.sender][_attrName] = _status;
     }
 
     /// @dev Auth upgrade
