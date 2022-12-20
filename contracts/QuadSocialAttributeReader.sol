@@ -79,7 +79,20 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         return governance.eligibleAttributes(_attrName) || governance.eligibleAttributesByDID(_attrName);
     }
 
+
     /// @dev Get the query fee for a getAttributes* call
+    /// @param _account target wallet address
+    /// @param _attribute attribute name to query
+    function queryFee(address _account,  bytes32 _attribute) public view returns(uint256){
+        if(_isPassportAttribute(_attribute)){
+            return reader.queryFee(_account, _attribute);
+        } else {
+            (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
+            return interimIssuer + interimQuadrata;
+        }
+    }
+
+    /// @dev Get the query fee for a getAttributesBulk* call
     /// @param _account target wallet address
     /// @param _attributes list of attribute names to query
     function queryFeeBulk(
