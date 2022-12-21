@@ -144,6 +144,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         }
 
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
+        attrs[0] = _attributeStorage[keccak256(abi.encode(_account, _attribute))];
 
         values = new bytes32[](1);
         epochs = new uint256[](1);

@@ -253,14 +253,51 @@ describe('SocialAttributeReader()', function() {
   });
 
   describe('getAttributes()', function() {
-    // TODO:
+    it('succeeds', async () =>{
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      const attributes = await socialReader.connect(issuer).callStatic.getAttributes(treasury.address, attrKey, {value: fee})
+
+      expect(attributes.length).eql(1)
+      expect(attributes[0].value).eql(ethers.utils.id('some-random-value-25'))
+      expect(attributes[0].issuer).eql(issuer.address)
+
+      await socialReader.connect(issuer).getAttributes(treasury.address, attrKey, {value: fee})
+    });
   });
+
   describe('getAttributesLegacy()', function() {
-    // TODO:
+    it('succeeds', async () =>{
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      const attributes = await socialReader.connect(issuer).callStatic.getAttributesLegacy(treasury.address, attrKey, {value: fee})
+
+      expect(attributes.length).eql(3)
+      expect(attributes[0][0]).eql(ethers.utils.id('some-random-value-25'))
+      expect(attributes[2][0]).eql(issuer.address)
+
+      await socialReader.connect(issuer).getAttributesLegacy(treasury.address, attrKey, {value: fee})
+    });
   });
-  describe('getAttributeKey()', function() {
-    // TODO:
-  });
+
   describe('withdraw()', function() {
     // TODO:
   });
