@@ -78,13 +78,28 @@ describe('SocialAttributeReader()', function() {
 
     it.only('succeeds', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+
+      const msg = new Uint8Array([
+        ...ethers.utils.toUtf8Bytes("I authorize "),
+        ...ethers.utils.arrayify(issuer.address),
+        ...ethers.utils.toUtf8Bytes(" to attest to my address "),
+        ...ethers.utils.arrayify(treasury.address)
+      ])
+
+      var string = new TextDecoder('utf-8').decode(msg);
+
+      console.log("HELP!", string)
+      const sigAccount = await treasury.signMessage(msg);
+
       // const sigAccount = await treasury.signMessage(
-      //   "I authorize " + ethers.utils.arrayify(issuer.address) + " to attest to my address " + ethers.utils.arrayify(treasury.address)
+      //   ethers.utils.arrayify('0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000')
       // );
-      const sigAccount = await treasury.signMessage(
-        ethers.utils.arrayify(ethers.constants.HashZero)
-      );
-      console.log("HELLO", treasury.address)
+      // const sigAccount = await treasury.signMessage(
+      //   ethers.utils.arrayify('0x00000000000000000000000000000000000000000000000000000000000000000000000000000000')
+      // )
+      // const sigAccount = await treasury.signMessage(
+      //   issuer.address
+      // )
 
       await socialReader.connect(issuer).setAttributes(
         attrKey,
