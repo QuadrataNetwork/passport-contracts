@@ -246,7 +246,7 @@ import "./storage/QuadReaderStore.sol";
     /// @param _account account getting requested for attributes
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @return the amount of existing attributes
-    function balancePerAttribute(address _account, bytes32 _attribute) public view override returns(uint256) {
+    function balancePerAttribute(address _account, bytes32 _attribute) public view returns(uint256) {
        return passport.attributes(_account, _attribute).length;
     }
 
