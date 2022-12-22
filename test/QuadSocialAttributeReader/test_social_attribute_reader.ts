@@ -76,9 +76,16 @@ describe('SocialAttributeReader()', function() {
     });
 
 
-    it('succeeds', async () => {
+    it.only('succeeds', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      // const sigAccount = await treasury.signMessage(
+      //   "I authorize " + ethers.utils.arrayify(issuer.address) + " to attest to my address " + ethers.utils.arrayify(treasury.address)
+      // );
+      const sigAccount = await treasury.signMessage(
+        ethers.utils.arrayify(ethers.constants.HashZero)
+      );
+      console.log("HELLO", treasury.address)
+
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value'),
@@ -304,6 +311,7 @@ describe('SocialAttributeReader()', function() {
   describe('setQueryFee()', function() {
     // TODO:
   });
+
   describe('getAttributesBulk()', function() {
     it('succeeds', async () =>{
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
