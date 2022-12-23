@@ -35,7 +35,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     }
 
     /// @dev Write attribute onchain
-    /// @param _attrName attribute name
+    /// @param _attrIssuerName attribute name
     /// @param _attrValue attribute value
     /// @param _account target wallet address being attested
     /// @param _sigAccount authorization signature to write to _attrName
@@ -45,15 +45,15 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     ///      The user must call setRevokedAttributes() and set it to False for the datatype to be
     ///      writable again.
     function setAttributes(
-        bytes32 _attrName, // keccak(issuerAddr|keccak(attrName))
+        bytes32 _attrIssuerName, // keccak(issuerAddr|keccak(attrName))
         bytes32 _attrValue,
         address _account,
         bytes calldata _sigAccount
     ) public {
-        require(!revokedAttributes[_account][_attrName], 'REVOKED_ATTRIBUTE');
-        require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
+        require(!revokedAttributes[_account][_attrIssuerName], 'REVOKED_ATTRIBUTE');
+        require(!_isPassportAttribute(_attrIssuerName), 'ATTR_NAME_NOT_ALLOWED');
 
-        if(!allowList[_account][_attrName]){
+        if(!allowList[_account][_attrIssuerName]){
             bytes memory message = abi.encodePacked("I authorize ", toString(msg.sender), " to attest to my address ", toString(_account));
 
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(message);
@@ -61,7 +61,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
 
             require(account == _account, 'INVALID_SIGNER');
 
-            allowList[account][_attrName] = true;
+            allowList[account][_attrIssuerName] = true;
         }
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
@@ -70,7 +70,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
             issuer: msg.sender
         });
 
-        _attributeStorage[keccak256(abi.encode(_account, _attrName))] = attr;
+        _attributeStorage[getAttributeKey(_account, _attrIssuerName)] = attr;
     }
 
     /// @dev Convert address to string
@@ -144,7 +144,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
             return reader.getAttributes{value: quadReaderFee}(_account, _attribute);
         }
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
-        attrs[0] = _attributeStorage[keccak256(abi.encode(_account, _attribute))];
+        attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
 
@@ -166,7 +166,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         }
 
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
-        attrs[0] = _attributeStorage[keccak256(abi.encode(_account, _attribute))];
+        attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
 
         values = new bytes32[](1);
         epochs = new uint256[](1);
@@ -211,7 +211,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 issuers[i] = attribute.issuer;
                 quadReaderFeeCounter = quadReaderFeeCounter.add(quadReaderFee);
             }else{
-                attribute = _attributeStorage[keccak256(abi.encode(_account, _attributes[i]))];
+                attribute = _attributeStorage[getAttributeKey(_account, _attributes[i])];
                 values[i] = attribute.value;
                 epochs[i] = attribute.epoch;
                 issuers[i] = attribute.issuer;
@@ -249,7 +249,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attributes[i])[0];
                 quadReaderFeeCounter.add(quadReaderFee);
             } else {
-                attributes[i] = _attributeStorage[keccak256(abi.encode(_account, _attributes[i]))];
+                attributes[i] = _attributeStorage[getAttributeKey(_account, _attributes[i])];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
                 quadFeeCounter = quadFeeCounter.add(interimQuadrata);
@@ -299,7 +299,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     function setQueryFee(bytes32 _rawAttrName, uint256 _amount) public {
         // Uses raw attr name and hashes against msg.sender to prevent
         // bad actors from changing others' fees.
-        queryFeeMap[keccak256(abi.encode(msg.sender, _rawAttrName))] = _amount;
+        queryFeeMap[getAttributeKey(msg.sender, _rawAttrName)] = _amount;
     }
 
     /// @dev Set the quadrata base fee

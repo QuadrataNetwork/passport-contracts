@@ -76,9 +76,8 @@ describe('SocialAttributeReader()', function() {
     });
 
 
-    it.only('succeeds', async () => {
+    it('succeeds', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
-
       const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
       const sigAccount = await treasury.signMessage(msg);
 
@@ -92,7 +91,9 @@ describe('SocialAttributeReader()', function() {
 
     it('succeeds on first call and then multiple calls with empty signature', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value'),
@@ -119,7 +120,9 @@ describe('SocialAttributeReader()', function() {
   describe('setRevokedAttributes()', function(){
     it('revoked and unrevokes attributes', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value'),
@@ -259,8 +262,9 @@ describe('SocialAttributeReader()', function() {
     it('succeeds', async () =>{
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
 
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value-25'),
@@ -283,7 +287,9 @@ describe('SocialAttributeReader()', function() {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
 
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value-25'),
@@ -313,7 +319,9 @@ describe('SocialAttributeReader()', function() {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
 
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value'),
@@ -336,7 +344,9 @@ describe('SocialAttributeReader()', function() {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
 
-      const sigAccount = await treasury.signMessage(ethers.utils.arrayify(attrKey));
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
       await socialReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value'),
