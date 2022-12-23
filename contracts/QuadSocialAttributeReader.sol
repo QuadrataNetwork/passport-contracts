@@ -75,11 +75,15 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         _attributeStorage[keccak256(abi.encode(_account, _attrName))] = attr;
     }
 
-    function toString(address account) public pure returns(string memory) {
+    /// @dev Convert address to string
+    /// @param account address to convert
+    function toString(address account) internal pure returns(string memory) {
         return toString(abi.encodePacked(account));
     }
 
-    function toString(bytes memory data) public pure returns(string memory) {
+    /// @dev Convert bytes to string
+    /// @param data data to convert
+    function toString(bytes memory data) internal pure returns(string memory) {
         bytes memory alphabet = "0123456789abcdef";
 
         bytes memory str = new bytes(2 + data.length * 2);
