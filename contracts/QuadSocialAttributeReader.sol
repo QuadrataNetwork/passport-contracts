@@ -57,7 +57,9 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
 
         if(!allowList[_account][_attrName]){
             bytes memory message = abi.encodePacked("I authorize ", msg.sender, " to attest to my address ", _account);
-            bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(bytes(message));
+            // bytes memory message = abi.encodePacked("I 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
+            // console.log("HELP!", toString(msg.sender), toString(_account));
+            bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(message);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
 
             require(account == _account, 'INVALID_SIGNER');
@@ -72,6 +74,23 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         });
 
         _attributeStorage[keccak256(abi.encode(_account, _attrName))] = attr;
+    }
+
+    function toString(address account) public pure returns(string memory) {
+        return toString(abi.encodePacked(account));
+    }
+
+    function toString(bytes memory data) public pure returns(string memory) {
+        bytes memory alphabet = "0123456789abcdef";
+
+        bytes memory str = new bytes(2 + data.length * 2);
+        str[0] = "0";
+        str[1] = "x";
+        for (uint i = 0; i < data.length; i++) {
+            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        }
+        return string(str);
     }
 
     /// @dev Checks if attribute is a primary passport attribute
