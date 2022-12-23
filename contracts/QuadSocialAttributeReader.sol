@@ -56,7 +56,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
         require(!_isPassportAttribute(_attrName), 'ATTR_NAME_NOT_ALLOWED');
 
         if(!allowList[_account][_attrName]){
-            bytes memory message = abi.encodePacked("I authorize ", msg.sender, " to attest to my address ", _account);
+            bytes memory message = abi.encodePacked("I authorize ", toString(msg.sender), " to attest to my address ", toString(_account));
             // bytes memory message = abi.encodePacked("I 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
             // console.log("HELP!", toString(msg.sender), toString(_account));
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(message);
