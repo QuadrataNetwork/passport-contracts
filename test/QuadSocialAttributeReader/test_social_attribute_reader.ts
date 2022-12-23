@@ -79,10 +79,7 @@ describe('SocialAttributeReader()', function() {
     it.only('succeeds', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
 
-      // 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
-
       const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
-
       const sigAccount = await treasury.signMessage(msg);
 
       await socialReader.connect(issuer).setAttributes(
