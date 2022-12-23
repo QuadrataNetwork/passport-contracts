@@ -11,8 +11,6 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadSocialAttributeReaderStore.sol";
 
-import "hardhat/console.sol";
-
 
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
