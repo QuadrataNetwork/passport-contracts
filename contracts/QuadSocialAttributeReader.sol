@@ -109,7 +109,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
             return reader.queryFee(_account, _attribute);
         } else {
             (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-            return interimIssuer + interimQuadrata;
+            return interimIssuer.add(interimQuadrata);
         }
     }
 
