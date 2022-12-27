@@ -75,7 +75,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
 
     /// @dev Convert address to string
     /// @param _account address to convert
-    function toString(address _account) internal pure returns(string memory) {
+    function toString(address _account) public pure returns(string memory) {
         return toString(abi.encodePacked(_account));
     }
 
