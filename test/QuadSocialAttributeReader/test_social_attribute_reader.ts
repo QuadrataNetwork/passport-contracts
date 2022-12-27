@@ -308,7 +308,38 @@ describe('SocialAttributeReader()', function() {
   });
 
   describe('withdraw()', function() {
-    // TODO:
+    it('succeeds', async () => {
+      // No one should be able to withdraw
+      await expect(socialReader.connect(issuer).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+      await expect(socialReader.connect(treasury).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+      await expect(socialReader.connect(admin).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+
+      // Attest and query
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      await socialReader.connect(issuer).getAttributesLegacy(treasury.address, attrKey, {value: fee})
+
+      // Issuer and Quadrata treasury should be withdrawable
+      await socialReader.connect(issuer).withdraw();
+      await socialReader.connect(treasury).withdraw();
+      await expect(socialReader.connect(admin).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+
+      // No one should be able to withdraw anymore
+      await expect(socialReader.connect(issuer).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+      await expect(socialReader.connect(treasury).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+      await expect(socialReader.connect(admin).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
+    });
   });
 
   describe('setQueryFee()', function() {
