@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -13,7 +14,7 @@ import "./storage/QuadSocialAttributeReaderStore.sol";
 
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
-contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStore{
+contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadSocialAttributeReaderStore{
     using SafeMath for uint256;
 
     // used to prevent logic contract self destruct take over
