@@ -74,21 +74,21 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
 
     /// @dev Convert address to string
     /// @param account address to convert
-    function toString(address account) internal pure returns(string memory) {
-        return toString(abi.encodePacked(account));
+    function toString(address _account) internal pure returns(string memory) {
+        return toString(abi.encodePacked(_account));
     }
 
     /// @dev Convert bytes to string
     /// @param data data to convert
-    function toString(bytes memory data) internal pure returns(string memory) {
+    function toString(bytes memory _data) internal pure returns(string memory) {
         bytes memory alphabet = "0123456789abcdef";
 
-        bytes memory str = new bytes(2 + data.length * 2);
+        bytes memory str = new bytes(2 + _data.length * 2);
         str[0] = "0";
         str[1] = "x";
-        for (uint i = 0; i < data.length; i++) {
-            str[2+i*2] = alphabet[uint(uint8(data[i] >> 4))];
-            str[3+i*2] = alphabet[uint(uint8(data[i] & 0x0f))];
+        for (uint i = 0; i < _data.length; i++) {
+            str[2+i*2] = alphabet[uint(uint8(_data[i] >> 4))];
+            str[3+i*2] = alphabet[uint(uint8(_data[i] & 0x0f))];
         }
         return string(str);
     }
@@ -119,8 +119,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     function queryFeeBulk(
         address _account,
         bytes32[] calldata _attributes
-    ) public view returns(uint256){
-        uint256 fee;
+    ) public view returns(uint256 fee){
         for(uint256 i = 0; i < _attributes.length; i++){
             if(_isPassportAttribute(_attributes[i])){
                 fee = fee.add(reader.queryFee(_account, _attributes[i]));
@@ -130,7 +129,6 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 fee = fee.add(interimIssuer);
             }
         }
-        return fee;
     }
 
     /// @dev Purchase the attributes
