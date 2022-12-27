@@ -81,7 +81,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
 
     /// @dev Convert bytes to string
     /// @param _data data to convert
-    function toString(bytes memory _data) internal pure returns(string memory) {
+    function toString(bytes memory _data) public pure returns(string memory) {
         bytes memory alphabet = "0123456789abcdef";
 
         bytes memory str = new bytes(2 + _data.length * 2);
