@@ -73,13 +73,13 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     }
 
     /// @dev Convert address to string
-    /// @param account address to convert
+    /// @param _account address to convert
     function toString(address _account) internal pure returns(string memory) {
         return toString(abi.encodePacked(_account));
     }
 
     /// @dev Convert bytes to string
-    /// @param data data to convert
+    /// @param _data data to convert
     function toString(bytes memory _data) internal pure returns(string memory) {
         bytes memory alphabet = "0123456789abcdef";
 
@@ -136,7 +136,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     /// @param _attribute attribute name to query
     function getAttributes(
         address _account, bytes32 _attribute
-    ) external payable returns(IQuadPassportStore.Attribute[] memory attributes) {
+    ) external payable nonReentrant returns(IQuadPassportStore.Attribute[] memory attributes) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
             return reader.getAttributes{value: quadReaderFee}(_account, _attribute);
@@ -157,7 +157,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     /// @param _attribute attribute name to query
     function getAttributesLegacy(
         address _account, bytes32 _attribute
-    ) public payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+    ) public payable nonReentrant returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
             return reader.getAttributesLegacy{value: quadReaderFee}(_account, _attribute);
@@ -185,7 +185,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     /// @param _attributes list of attribute names to query
     function getAttributesBulkLegacy(
         address _account, bytes32[] calldata _attributes
-    ) external payable returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
+    ) external payable nonReentrant returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
 
         values = new bytes32[](_attributes.length);
@@ -232,7 +232,7 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
     function getAttributesBulk(
         address _account,
         bytes32[] calldata _attributes
-    ) external payable returns(IQuadPassportStore.Attribute[] memory){
+    ) external payable nonReentrant returns(IQuadPassportStore.Attribute[] memory){
         uint256 quadFeeCounter;
         uint256 issuerFeeCounter;
         uint256 quadReaderFeeCounter;
