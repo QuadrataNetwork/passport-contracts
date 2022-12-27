@@ -310,12 +310,23 @@ describe('SocialAttributeReader()', function() {
   describe('withdraw()', function() {
     // TODO:
   });
+
   describe('setQueryFee()', function() {
-    // TODO:
+    it('succeeds', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-RAW-ATTR'))
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+
+      expect(fee.toString()).eql("0")
+
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-RAW-ATTR'), baseFee)
+
+      const feeAfter = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      expect(feeAfter.toString()).eql(baseFee)
+    });
   });
 
   describe('getAttributesBulk()', function() {
-    it('succeeds', async () =>{
+    it('succeeds', async () => {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
 
@@ -337,6 +348,51 @@ describe('SocialAttributeReader()', function() {
 
       await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee})
     });
+
+    it('succeeds with multiple attributes', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const attrKey2 = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-2'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-2'), baseFee)
+
+      const attrKey3 = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-3'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-3'), baseFee)
+
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+
+      await socialReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value'),
+        treasury.address,
+        sigAccount
+      )
+      await socialReader.connect(issuer).setAttributes(
+        attrKey2,
+        ethers.utils.id('some-random-value2'),
+        treasury.address,
+        sigAccount
+      )
+      await socialReader.connect(issuer).setAttributes(
+        attrKey3,
+        ethers.utils.id('some-random-value3'),
+        treasury.address,
+        sigAccount
+      )
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey, attrKey2, attrKey3])
+      const attributes = await socialReader.connect(issuer).callStatic.getAttributesBulk(treasury.address, [attrKey, attrKey2, attrKey3], {value: fee})
+
+      expect(attributes.length).eql(3)
+      expect(attributes[0].value).eql(ethers.utils.id('some-random-value'))
+      expect(attributes[0].issuer).eql(issuer.address)
+      expect(attributes[1].value).eql(ethers.utils.id('some-random-value2'))
+      expect(attributes[1].issuer).eql(issuer.address)
+      expect(attributes[2].value).eql(ethers.utils.id('some-random-value3'))
+      expect(attributes[2].issuer).eql(issuer.address)
+
+      await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey, attrKey2, attrKey3], {value: fee})
+    })
   });
 
   describe('getAttributesBulkLegacy()', function() {

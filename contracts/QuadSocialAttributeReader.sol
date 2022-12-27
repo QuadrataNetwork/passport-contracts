@@ -11,7 +11,6 @@ import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadSocialAttributeReaderStore.sol";
 
-
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
 contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStore{
@@ -127,7 +126,8 @@ contract SocialAttributeReader is UUPSUpgradeable, QuadSocialAttributeReaderStor
                 fee = fee.add(reader.queryFee(_account, _attributes[i]));
             } else {
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                fee = fee.add(interimIssuer.add(interimQuadrata));
+                fee = fee.add(interimQuadrata);
+                fee = fee.add(interimIssuer);
             }
         }
         return fee;
