@@ -34,7 +34,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     }
 
     /// @dev Write attribute onchain
-    /// @param _attrIssuerName attribute name
+    /// @param _issuerAndAttr attribute name
     /// @param _attrValue attribute value
     /// @param _account target wallet address being attested
     /// @param _sigAccount authorization signature to write to _attrName
@@ -44,15 +44,15 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     ///      The user must call setRevokedAttributes() and set it to False for the datatype to be
     ///      writable again.
     function setAttributes(
-        bytes32 _attrIssuerName, // keccak(issuerAddr|keccak(attrName))
+        bytes32 _issuerAndAttr, // keccak(issuerAddr|keccak(attrName))
         bytes32 _attrValue,
         address _account,
         bytes calldata _sigAccount
     ) public {
-        require(!revokedAttributes[_account][_attrIssuerName], 'REVOKED_ATTRIBUTE');
-        require(!_isPassportAttribute(_attrIssuerName), 'ATTR_NAME_NOT_ALLOWED');
+        require(!revokedAttributes[_account][_issuerAndAttr], 'REVOKED_ATTRIBUTE');
+        require(!_isPassportAttribute(_issuerAndAttr), 'ATTR_NAME_NOT_ALLOWED');
 
-        if(!allowList[_account][_attrIssuerName]){
+        if(!allowList[_account][_issuerAndAttr]){
             bytes memory message = abi.encodePacked("I authorize ", Strings.toHexString(uint256(uint160(msg.sender)), 20), " to attest to my address ", Strings.toHexString(uint256(uint160(_account)), 20));
 
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(message);
@@ -60,7 +60,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
 
             require(account == _account, 'INVALID_SIGNER');
 
-            allowList[account][_attrIssuerName] = true;
+            allowList[account][_issuerAndAttr] = true;
         }
 
         IQuadPassportStore.Attribute memory attr = IQuadPassportStore.Attribute({
@@ -69,7 +69,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
             issuer: msg.sender
         });
 
-        _attributeStorage[getAttributeKey(_account, _attrIssuerName)] = attr;
+        _attributeStorage[getAttributeKey(_account, _issuerAndAttr)] = attr;
     }
 
     /// @dev Checks if attribute is a primary passport attribute
