@@ -2,7 +2,6 @@
 pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
@@ -17,8 +16,6 @@ import "./storage/QuadSocialAttributeReaderStore.sol";
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
 contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadSocialAttributeReaderStore{
-    using SafeMath for uint256;
-
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
 
@@ -89,7 +86,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
             return reader.queryFee(_account, _attribute);
         } else {
             (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-            return interimIssuer.add(interimQuadrata);
+            return (interimIssuer + interimQuadrata);
         }
     }
 
@@ -102,11 +99,11 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     ) public view returns(uint256 fee){
         for(uint256 i = 0; i < _attributes.length; i++){
             if(_isPassportAttribute(_attributes[i])){
-                fee = fee.add(reader.queryFee(_account, _attributes[i]));
+                fee += reader.queryFee(_account, _attributes[i]);
             } else {
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                fee = fee.add(interimQuadrata);
-                fee = fee.add(interimIssuer);
+                fee += interimQuadrata;
+                fee += interimIssuer;
             }
         }
     }
@@ -126,8 +123,8 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
 
-        funds[attrs[0].issuer] = funds[attrs[0].issuer].add(interimIssuer);
-        funds[governance.treasury()] = funds[governance.treasury()].add(interimQuadrata);
+        funds[attrs[0].issuer] += interimIssuer;
+        funds[governance.treasury()] += interimQuadrata;
 
         return attrs;
     }
@@ -156,8 +153,8 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
 
-        funds[issuers[0]] = funds[issuers[0]].add(interimIssuer);
-        funds[governance.treasury()] = funds[governance.treasury()].add(interimQuadrata);
+        funds[issuers[0]] += interimIssuer;
+        funds[governance.treasury()] += interimQuadrata;
     }
 
     /// @dev Purchase the attributes
@@ -187,7 +184,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
                 values[i] = attribute.value;
                 epochs[i] = attribute.epoch;
                 issuers[i] = attribute.issuer;
-                quadReaderFeeCounter = quadReaderFeeCounter.add(quadReaderFee);
+                quadReaderFeeCounter += quadReaderFee;
             }else{
                 attribute = _attributeStorage[getAttributeKey(_account, _attributes[i])];
                 values[i] = attribute.value;
@@ -195,15 +192,14 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
                 issuers[i] = attribute.issuer;
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                quadFeeCounter = quadFeeCounter.add(interimQuadrata);
-                issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
+                quadFeeCounter += interimQuadrata;
+                issuerFeeCounter += interimIssuer;
 
-                funds[attribute.issuer] = funds[attribute.issuer].add(interimIssuer);
+                funds[attribute.issuer] += interimIssuer;
             }
         }
-        require(msg.value == quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)," INVALID_QUERY_FEE");
-
-        funds[governance.treasury()] = funds[governance.treasury()].add(quadFeeCounter);
+        require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter)," INVALID_QUERY_FEE");
+        funds[governance.treasury()] += quadFeeCounter;
     }
 
     /// @dev Purchase the attributes
@@ -225,30 +221,30 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
             if(_isPassportAttribute(_attributes[i])){
                 quadReaderFee = reader.queryFee(_account, _attributes[i]);
                 attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attributes[i])[0];
-                quadReaderFeeCounter.add(quadReaderFee);
+                quadReaderFeeCounter += quadReaderFee;
             } else {
                 attributes[i] = _attributeStorage[getAttributeKey(_account, _attributes[i])];
 
                 (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                quadFeeCounter = quadFeeCounter.add(interimQuadrata);
-                issuerFeeCounter = issuerFeeCounter.add(interimIssuer);
-                funds[attributes[i].issuer] = funds[attributes[i].issuer].add(interimIssuer);
+                quadFeeCounter += interimQuadrata;
+                issuerFeeCounter += interimIssuer;
+                funds[attributes[i].issuer] += interimIssuer;
             }
         }
-        require(msg.value == (quadFeeCounter.add(issuerFeeCounter).add(quadReaderFeeCounter)), "INVALID_FEE");
+        require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter), "INVALID_FEE");
 
-        funds[governance.treasury()] = funds[governance.treasury()].add(quadFeeCounter);
+        funds[governance.treasury()] += quadFeeCounter;
         return attributes;
     }
 
     /// @dev Calculate the fees for issuer/quadrata
     /// @param _attrName attribute name
     function calculateSocialFees(bytes32 _attrName) view internal returns (uint256 interimIssuerFee, uint256 interimQuadFee){
-        if(queryFeeMap[_attrName].div(uint256(2)) > interimQuadFee) {
-            interimIssuerFee = queryFeeMap[_attrName].div(uint256(2));
-            interimQuadFee = queryFeeMap[_attrName].sub(interimIssuerFee);
+        if(queryFeeMap[_attrName] / 2 > interimQuadFee) {
+            interimIssuerFee = queryFeeMap[_attrName] / 2;
+            interimQuadFee = queryFeeMap[_attrName] - interimIssuerFee;
         }else{
-            interimIssuerFee = queryFeeMap[_attrName].div(uint256(2));
+            interimIssuerFee = queryFeeMap[_attrName]/ 2;
             interimQuadFee = interimQuadFee;
         }
     }
