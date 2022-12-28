@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.16;
 
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -11,6 +12,7 @@ import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadSocialAttributeReaderStore.sol";
+
 
 /// @title Quadrata SocialAttributeReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
@@ -54,7 +56,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
         require(!_isPassportAttribute(_attrIssuerName), 'ATTR_NAME_NOT_ALLOWED');
 
         if(!allowList[_account][_attrIssuerName]){
-            bytes memory message = abi.encodePacked("I authorize ", toString(msg.sender), " to attest to my address ", toString(_account));
+            bytes memory message = abi.encodePacked("I authorize ", Strings.toHexString(uint256(uint160(msg.sender)), 20), " to attest to my address ", Strings.toHexString(uint256(uint160(_account)), 20));
 
             bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(message);
             address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
@@ -73,34 +75,11 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
         _attributeStorage[getAttributeKey(_account, _attrIssuerName)] = attr;
     }
 
-    /// @dev Convert address to string
-    /// @param _account address to convert
-    function toString(address _account) internal pure returns(string memory) {
-        return toString(abi.encodePacked(_account));
-    }
-
-    /// @dev Convert bytes to string
-    /// @param _data data to convert
-    function toString(bytes memory _data) internal pure returns(string memory) {
-        bytes memory alphabet = "0123456789abcdef";
-
-        bytes memory str = new bytes(2 + _data.length * 2);
-        str[0] = "0";
-        str[1] = "x";
-        for (uint i = 0; i < _data.length; i++) {
-            str[2+i*2] = alphabet[uint(uint8(_data[i] >> 4))];
-            str[3+i*2] = alphabet[uint(uint8(_data[i] & 0x0f))];
-        }
-        return string(str);
-    }
-
     /// @dev Checks if attribute is a primary passport attribute
     /// @param _attrName attribute name
     function _isPassportAttribute(bytes32 _attrName) public view returns(bool) {
         return governance.eligibleAttributes(_attrName) || governance.eligibleAttributesByDID(_attrName);
     }
-
-
 
     /// @dev Get the query fee for a getAttributes* call
     /// @param _account target wallet address
