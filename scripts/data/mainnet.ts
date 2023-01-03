@@ -6,6 +6,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
+  ATTRIBUTE_CRED_PROTOCOL_SCORE,
   NETWORK_IDS,
 } = require("../../utils/constant.ts");
 
@@ -81,6 +82,13 @@ export const ISSUERS: any[] = [
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
+    ],
+  },
+  {
+    wallet: getAddress("0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF"), // CredProtocol
+    treasury: getAddress("0xb93b22B75ac3EA6B5066c169B747DF249034F467"),
+    attributesPermission: [
+      ATTRIBUTE_CRED_PROTOCOL_SCORE,
     ],
   },
 ];
