@@ -115,7 +115,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     ) external payable nonReentrant returns(IQuadPassportStore.Attribute[] memory attributes) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
-            require(msg.value == quadReaderFee," INVALID_QUERY_FEE");
+            require(msg.value == quadReaderFee, "INVALID_FEE");
 
             return reader.getAttributes{value: quadReaderFee}(_account, _attribute);
         }
@@ -123,7 +123,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
         attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-        require(msg.value == (interimIssuer+interimQuadrata)," INVALID_QUERY_FEE");
+        require(msg.value == (interimIssuer+interimQuadrata), "INVALID_FEE");
 
         funds[attrs[0].issuer] += interimIssuer;
         funds[governance.treasury()] += interimQuadrata;
@@ -139,7 +139,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     ) public payable nonReentrant returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
-            require(msg.value == quadReaderFee," INVALID_QUERY_FEE");
+            require(msg.value == quadReaderFee, "INVALID_FEE");
 
             return reader.getAttributesLegacy{value: quadReaderFee}(_account, _attribute);
         }
@@ -156,7 +156,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
         issuers[0] = attrs[0].issuer;
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-        require(msg.value == (interimIssuer+interimQuadrata)," INVALID_QUERY_FEE");
+        require(msg.value == (interimIssuer+interimQuadrata), "INVALID_FEE");
         funds[issuers[0]] += interimIssuer;
         funds[governance.treasury()] += interimQuadrata;
     }
@@ -202,7 +202,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
                 funds[attribute.issuer] += interimIssuer;
             }
         }
-        require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter)," INVALID_QUERY_FEE");
+        require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter), "INVALID_FEE");
         funds[governance.treasury()] += quadFeeCounter;
     }
 

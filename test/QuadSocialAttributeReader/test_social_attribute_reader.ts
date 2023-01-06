@@ -425,6 +425,20 @@ describe('SocialAttributeReader()', function() {
 
       await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey, attrKey2, attrKey3], {value: fee})
     })
+
+    it('fails with not enough eth', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      await expect(
+        socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: 0})
+      ).to.be.revertedWith('INVALID_FEE');
+
+      await expect(
+        socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee + 100})
+      ).to.be.revertedWith('INVALID_FEE');
+    });
   });
 
   describe('getAttributesBulkLegacy()', function() {
@@ -450,6 +464,20 @@ describe('SocialAttributeReader()', function() {
       expect(attributes[2]).eql([issuer.address])
 
       await socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee})
+    });
+
+    it('fails with not enough eth', async () => {
+      const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
+      await expect(
+        socialReader.connect(issuer).getAttributesBulkLegacy(treasury.address, [attrKey], {value: 0})
+      ).to.be.revertedWith('INVALID_FEE');
+
+      await expect(
+        socialReader.connect(issuer).getAttributesBulkLegacy(treasury.address, [attrKey], {value: fee + 100})
+      ).to.be.revertedWith('INVALID_FEE');
     });
   });
 });
