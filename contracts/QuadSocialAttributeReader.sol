@@ -240,12 +240,12 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     /// @dev Calculate the fees for issuer/quadrata
     /// @param _attrName attribute name
     function calculateSocialFees(bytes32 _attrName) view internal returns (uint256 interimIssuerFee, uint256 interimQuadFee){
-        if(queryFeeMap[_attrName] / 2 > interimQuadFee) {
+        if(queryFeeMap[_attrName] / 2 > quadrataFee) {
             interimIssuerFee = queryFeeMap[_attrName] / 2;
             interimQuadFee = queryFeeMap[_attrName] - interimIssuerFee;
         }else{
             interimIssuerFee = queryFeeMap[_attrName]/ 2;
-            interimQuadFee = interimQuadFee;
+            interimQuadFee = quadrataFee;
         }
     }
 
