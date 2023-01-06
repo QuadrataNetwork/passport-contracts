@@ -21,6 +21,7 @@ describe('SocialAttributeReader()', function() {
     issuerTreasury: SignerWithAddress;
   const baseURI = 'https://quadrata.io';
   const baseFee = '5000000000000007';
+  const quadrataFee = '1000000000000000';
 
   beforeEach(async () => {
     [deployer, admin, issuer, treasury, issuerTreasury] =
@@ -45,7 +46,7 @@ describe('SocialAttributeReader()', function() {
     });
 
     await socialReader.deployed();
-    await socialReader.connect(admin).setQuadrataFee(baseFee)
+    await socialReader.connect(admin).setQuadrataFee(quadrataFee)
   });
 
   describe('setAttributes()', function() {
@@ -347,7 +348,7 @@ describe('SocialAttributeReader()', function() {
       const attrKey = await socialReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-RAW-ATTR'))
       const fee = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
 
-      expect(fee.toString()).eql("0")
+      expect(fee.toString()).eql(quadrataFee)
 
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-RAW-ATTR'), baseFee)
 
