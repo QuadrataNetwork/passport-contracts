@@ -2,7 +2,7 @@
   "name": "Quadrata Passport",
   "description": "Quadrata is a web3 company bringing the identity and compliance layer to decentralized applications - Claim your Quadrata Passport at https://quadrata.com",
   "external_url": "https://quadrata.com",
-  "animation_url": "ipfs://QmQqCkLwiiNRZfH54UDke3yYkj7GVX8zTFhvmE6DQyh4MW",
-  "image": "ipfs://QmdXGL73JKcD5BLkj59bpQ29mRL9tkMfEbuCf3avS37TYd",
+  "animation_url": "https://d1kwq86i91fjpj.cloudfront.net/quad-token-1.mp4",
+  "image": "https://d1kwq86i91fjpj.cloudfront.net/quad-token-1.gif",
   "attributes": []
 }
