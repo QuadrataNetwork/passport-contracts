@@ -39,7 +39,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     /// @param _account target wallet address being attested
     /// @param _sigAccount authorization signature to write to _attrName
     ///
-    /// note The _sigAccount is a one-time use key (per attribute) to enable writing
+    /// @notice The _sigAccount is a one-time use key (per attribute) to enable writing
     ///      to a specific _attrName. The user can revoke by calling setRevokedAttributes().
     ///      The user must call setRevokedAttributes() and set it to False for the datatype to be
     ///      writable again.
@@ -116,12 +116,15 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     ) external payable nonReentrant returns(IQuadPassportStore.Attribute[] memory attributes) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
+            require(msg.value == quadReaderFee," INVALID_QUERY_FEE");
+
             return reader.getAttributes{value: quadReaderFee}(_account, _attribute);
         }
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
         attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
+        require(msg.value == (interimIssuer+interimQuadrata)," INVALID_QUERY_FEE");
 
         funds[attrs[0].issuer] += interimIssuer;
         funds[governance.treasury()] += interimQuadrata;
@@ -137,6 +140,8 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
     ) public payable nonReentrant returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
+            require(msg.value == quadReaderFee," INVALID_QUERY_FEE");
+
             return reader.getAttributesLegacy{value: quadReaderFee}(_account, _attribute);
         }
 
@@ -152,7 +157,7 @@ contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, Q
         issuers[0] = attrs[0].issuer;
 
         (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-
+        require(msg.value == (interimIssuer+interimQuadrata)," INVALID_QUERY_FEE");
         funds[issuers[0]] += interimIssuer;
         funds[governance.treasury()] += interimQuadrata;
     }
