@@ -172,7 +172,7 @@ describe('QuadFlexKitReader()', function() {
   });
 
   describe('queryFee()', function() {
-    it('returns baseFee for single attributes', async () =>{
+    it('returns baseFee for single attributes no data', async () =>{
       await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
       const attrKey = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
 
@@ -181,8 +181,30 @@ describe('QuadFlexKitReader()', function() {
         attrKey
       );
 
+      expect(fee.toString()).eql(BigNumber.from(quadrataFee).toString())
+    });
+
+    it('returns baseFee for single attributes with data', async () =>{
+      await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+      const attrKey = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+      await flexkitReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-3'),
+        treasury.address,
+        sigAccount
+      )
+
+      const fee = await flexkitReader.connect(issuer).queryFee(
+        treasury.address,
+        attrKey
+      );
+
       expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).toString())
     });
+
 
     it('returns correct fee for primary attributes', async () =>{
       let fee = await flexkitReader.connect(issuer).queryFee(
@@ -331,6 +353,80 @@ describe('QuadFlexKitReader()', function() {
       await expect(flexkitReader.connect(treasury).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
       await expect(flexkitReader.connect(admin).withdraw()).to.be.revertedWith('CANNOT_WITHDRAW');
     });
+
+    it('succeeds with legacy attributes', async () => {
+      // Expect funds to be set properly
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(0);
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(0);
+
+      const fee1 = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [ethers.utils.id('COUNTRY')]);
+      await flexkitReader.connect(issuer).getAttributesLegacy(treasury.address, ethers.utils.id('COUNTRY'), {value: fee1});
+
+      // Expect funds to be set properly
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(0);
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(0);
+    });
+
+    it('succeeds with no attributes posted', async () => {
+      const attrKey = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      // Expect funds to be set properly
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(0);
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(0);
+
+      //First query
+      const fee1 = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey]);
+      await flexkitReader.connect(issuer).getAttributesLegacy(treasury.address, attrKey, {value: fee1});
+
+      // Expect funds to be set properly - issuer does not get fund since nothing was attested
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(quadrataFee);
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(0);
+    });
+
+    it('succeeds with multiple queries', async () => {
+      const attrKey = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
+      // Expect funds to be set properly
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(0);
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(0);
+
+      //First query
+      const fee1 = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey]);
+      await flexkitReader.connect(issuer).getAttributesLegacy(treasury.address, attrKey, {value: fee1});
+
+      // Expect funds to be set properly - issuer does not get fund since nothing was attested
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(quadrataFee);
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(0);
+
+      // Attest data
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+      await flexkitReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
+
+      //Second query
+      const fee2 = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey]);
+      await flexkitReader.connect(issuer).getAttributesLegacy(treasury.address, attrKey, {value: fee2});
+
+      // Expect funds to be set properly
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(BigNumber.from(quadrataFee).mul(2).toString());
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(baseFee.toString());
+
+      //Third legacy query
+      const fee3 = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [ethers.utils.id('COUNTRY')]);
+      await flexkitReader.connect(issuer).getAttributesLegacy(treasury.address, ethers.utils.id('COUNTRY'), {value: fee3});
+
+      // Expect funds to be set properly
+      expect(await flexkitReader.connect(issuer).funds(treasury.address)).eq(BigNumber.from(quadrataFee).mul(2).toString());
+      expect(await flexkitReader.connect(issuer).funds(issuer.address)).eq(baseFee.toString());
+    });
+
   });
 
   describe('setQueryFee()', function() {
