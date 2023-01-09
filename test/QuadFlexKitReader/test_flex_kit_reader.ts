@@ -1,4 +1,5 @@
 const { ethers, upgrades } = require('hardhat');
+import { parseEther } from "ethers/lib/utils";
 import { expect } from 'chai';
 import { Contract, BigNumber } from 'ethers';
 import { BytesLike } from '@ethersproject/bytes';
@@ -7,7 +8,6 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-wit
 const {
   deployPassportEcosystem,
 } = require('../helpers/deployment_and_init.ts');
-
 
 describe('QuadFlexKitReader()', function() {
   let socialReader: Contract;
@@ -22,6 +22,7 @@ describe('QuadFlexKitReader()', function() {
   const baseURI = 'https://quadrata.io';
   const baseFee = '5000000000000007';
   const quadrataFee = '1000000000000000';
+
 
   beforeEach(async () => {
     [deployer, admin, issuer, treasury, issuerTreasury] =
@@ -180,7 +181,7 @@ describe('QuadFlexKitReader()', function() {
         attrKey
       );
 
-      expect(fee.toString()).eql(baseFee)
+      expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).toString())
     });
 
     it('returns correct fee for primary attributes', async () =>{
@@ -188,7 +189,9 @@ describe('QuadFlexKitReader()', function() {
         issuer.address,
         ethers.utils.id('COUNTRY')
       )
-      expect(fee.toString()).eql('1200000000000000')
+
+      expect(fee.toString()).eql(parseEther("0.0012").toString())
+
 
       fee = await socialReader.connect(issuer).queryFee(
         issuer.address,
@@ -208,7 +211,7 @@ describe('QuadFlexKitReader()', function() {
         [attrKey]
       );
 
-      expect(fee.toString()).eql(baseFee)
+      expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).toString())
     });
 
     it('returns (baseFee * n) for multiple attributes', async () =>{
@@ -224,7 +227,7 @@ describe('QuadFlexKitReader()', function() {
         issuer.address,
         [attr1Key, attr2Key, attr3Key]
       )
-      expect(fee.toString()).eql(BigNumber.from(baseFee).mul(3).toString())
+      expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).mul(3).toString())
     });
 
     it('returns correct fee for primary attributes', async () =>{
@@ -232,7 +235,8 @@ describe('QuadFlexKitReader()', function() {
         issuer.address,
         [ethers.utils.id('COUNTRY')]
       )
-      expect(fee.toString()).eql('1200000000000000')
+
+      expect(fee.toString()).eql(parseEther("0.0012").toString())
 
       fee = await socialReader.connect(issuer).queryFeeBulk(
         issuer.address,
@@ -244,7 +248,8 @@ describe('QuadFlexKitReader()', function() {
         issuer.address,
         [ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
       )
-      expect(fee.toString()).eql('1200000000000000')
+
+      expect(fee.toString()).eql(parseEther("0.0012").toString())
     });
 
     it('returns correct fee for combined attributes', async () =>{
@@ -255,7 +260,7 @@ describe('QuadFlexKitReader()', function() {
         issuer.address,
         [attr1Key, ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
       )
-      expect(fee.toString()).eql('6200000000000007')
+      expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).add(parseEther("0.0012")).toString())
     });
   });
 
@@ -353,7 +358,8 @@ describe('QuadFlexKitReader()', function() {
       await socialReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-RAW-ATTR'), baseFee)
 
       const feeAfter = await socialReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
-      expect(feeAfter.toString()).eql(baseFee)
+
+      expect(feeAfter.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).toString())
     });
   });
 
