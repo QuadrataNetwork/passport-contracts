@@ -84,7 +84,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
         if(_isPassportAttribute(_attribute)){
             return reader.queryFee(_account, _attribute);
         } else {
-            if(_attributeStorage[getAttributeKey(_account, _attribute)].issuer == address(0)){
+            if(_attributeStorage[_attribute].issuer == address(0)){
                 return quadrataFee;
             }
             return (queryFeeMap[_attribute] + quadrataFee);
@@ -102,7 +102,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
             if(_isPassportAttribute(_attributes[i])){
                 fee += reader.queryFee(_account, _attributes[i]);
             } else {
-                if(_attributeStorage[getAttributeKey(_account, _attributes[i])].issuer != address(0)){
+                if(_attributeStorage[_attributes[i]].issuer != address(0)){
                     fee += queryFeeMap[_attributes[i]];
                 }
                 fee += quadrataFee;
@@ -141,7 +141,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
     ) public payable nonReentrant returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         if(_isPassportAttribute(_attribute)){
             uint256 quadReaderFee = reader.queryFee(_account, _attribute);
-            require(msg.value == quadReaderFee, "INVALID_FEE!");
+            require(msg.value == quadReaderFee, "INVALID_FEE");
 
             return reader.getAttributesLegacy{value: quadReaderFee}(_account, _attribute);
         }
@@ -158,10 +158,10 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
         issuers[0] = attrs[0].issuer;
 
         if(issuers[0] == address(0)){
-            require(msg.value == quadrataFee, "INVALID_FEE!!");
+            require(msg.value == quadrataFee, "INVALID_FEE");
             funds[governance.treasury()] += quadrataFee;
         } else {
-            require(msg.value == (queryFeeMap[_attribute]+quadrataFee), "INVALID_FEE!!!");
+            require(msg.value == (queryFeeMap[_attribute]+quadrataFee), "INVALID_FEE");
             funds[issuers[0]] += queryFeeMap[_attribute];
             funds[governance.treasury()] += quadrataFee;
         }
@@ -196,7 +196,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
                 issuers[i] = attribute.issuer;
                 quadReaderFeeCounter += quadReaderFee;
             }else{
-                attribute = _attributeStorage[getAttributeKey(_account, _attributes[i])];
+                attribute = _attributeStorage[_attributes[i]];
                 values[i] = attribute.value;
                 epochs[i] = attribute.epoch;
                 issuers[i] = attribute.issuer;
@@ -233,7 +233,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
                 attributes[i] = reader.getAttributes{value: quadReaderFee}(_account, _attributes[i])[0];
                 quadReaderFeeCounter += quadReaderFee;
             } else {
-                attributes[i] = _attributeStorage[getAttributeKey(_account, _attributes[i])];
+                attributes[i] = _attributeStorage[_attributes[i]];
 
                 quadFeeCounter += quadrataFee;
 
