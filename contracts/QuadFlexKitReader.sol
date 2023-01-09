@@ -10,11 +10,11 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadSocialAttributeReaderStore.sol";
+import "./storage/QuadFlexKitReaderStore.sol";
 
-/// @title Quadrata SocialAttributeReader
+/// @title Quadrata FlexKitReader
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
-contract SocialAttributeReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadSocialAttributeReaderStore{
+contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKitReaderStore{
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
 

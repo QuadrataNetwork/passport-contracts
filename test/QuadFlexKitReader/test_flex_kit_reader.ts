@@ -9,7 +9,7 @@ const {
 } = require('../helpers/deployment_and_init.ts');
 
 
-describe('SocialAttributeReader()', function() {
+describe('QuadFlexKitReader()', function() {
   let socialReader: Contract;
   let passport: Contract;
   let governance: Contract;
@@ -34,10 +34,10 @@ describe('SocialAttributeReader()', function() {
       baseURI
     );
 
-    const SocialAttributeReader = await ethers.getContractFactory('SocialAttributeReader');
+    const FlexKitReader = await ethers.getContractFactory('QuadFlexKitReader');
 
     socialReader = await upgrades.deployProxy(
-    SocialAttributeReader,
+    FlexKitReader,
     [governance.address, reader.address],
     {
       initializer: 'initialize',
@@ -439,6 +439,10 @@ describe('SocialAttributeReader()', function() {
         socialReader.connect(issuer).getAttributesBulk(treasury.address, [attrKey], {value: fee + 100})
       ).to.be.revertedWith('INVALID_FEE');
     });
+  });
+
+  describe('calculateSocialFees()', function() {
+    // TODO: HUY
   });
 
   describe('getAttributesBulkLegacy()', function() {
