@@ -245,43 +245,43 @@ describe('QuadFlexKitReader()', function() {
       expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).toString())
     });
 
-    // it.only('returns (baseFee * n) for multiple attributes', async () =>{
-    //   await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
-    //   await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-2'), baseFee)
-    //   await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-3'), baseFee)
+    it('returns (baseFee * n) for multiple attributes', async () =>{
+      await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+      await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-2'), baseFee)
+      await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM-3'), baseFee)
 
-    //   const attr1Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
-    //   const attr2Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-2'))
-    //   const attr3Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-3'))
+      const attr1Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      const attr2Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-2'))
+      const attr3Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM-3'))
 
-    //   const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
-    //   const sigAccount = await treasury.signMessage(msg);
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
 
-    //   await flexkitReader.connect(issuer).setAttributes(
-    //     attr1Key,
-    //     ethers.utils.id('some-random-value-25'),
-    //     treasury.address,
-    //     sigAccount
-    //   )
-    //   await flexkitReader.connect(issuer).setAttributes(
-    //     attr2Key,
-    //     ethers.utils.id('some-random-value-25'),
-    //     treasury.address,
-    //     sigAccount
-    //   )
-    //   await flexkitReader.connect(issuer).setAttributes(
-    //     attr3Key,
-    //     ethers.utils.id('some-random-value-25'),
-    //     treasury.address,
-    //     sigAccount
-    //   )
+      await flexkitReader.connect(issuer).setAttributes(
+        attr1Key,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
+      await flexkitReader.connect(issuer).setAttributes(
+        attr2Key,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
+      await flexkitReader.connect(issuer).setAttributes(
+        attr3Key,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
 
-    //   const fee = await flexkitReader.connect(issuer).queryFeeBulk(
-    //     issuer.address,
-    //     [attr1Key, attr2Key, attr3Key]
-    //   )
-    //   expect(fee.toString()).eql(BigNumber.from(baseFee).mul(3).add(quadrataFee).toString())
-    // });
+      const fee = await flexkitReader.connect(issuer).queryFeeBulk(
+        issuer.address,
+        [attr1Key, attr2Key, attr3Key]
+      )
+      expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).mul(3).toString())
+    });
 
     it('returns correct fee for primary attributes', async () =>{
       let fee = await flexkitReader.connect(issuer).queryFeeBulk(
@@ -307,11 +307,20 @@ describe('QuadFlexKitReader()', function() {
 
     it('returns correct fee for combined attributes', async () =>{
       await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
-      const attr1Key = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+      const attrKey = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
+
+      const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
+      const sigAccount = await treasury.signMessage(msg);
+      await flexkitReader.connect(issuer).setAttributes(
+        attrKey,
+        ethers.utils.id('some-random-value-25'),
+        treasury.address,
+        sigAccount
+      )
 
       const fee = await flexkitReader.connect(issuer).queryFeeBulk(
         issuer.address,
-        [attr1Key, ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
+        [attrKey, ethers.utils.id('COUNTRY'), ethers.utils.id('IS_BUSINESS')]
       )
       expect(fee.toString()).eql(BigNumber.from(baseFee).add(quadrataFee).add(parseEther("0.0012")).toString())
     });
@@ -321,15 +330,16 @@ describe('QuadFlexKitReader()', function() {
     it('succeeds', async () =>{
       const attrKey = await flexkitReader.connect(issuer).getAttributeKey(issuer.address, ethers.utils.id('RANDOM'))
       await flexkitReader.connect(issuer).setQueryFee(ethers.utils.id('RANDOM'), baseFee)
+
       const msg = `I authorize ${issuer.address.toLowerCase()} to attest to my address ${treasury.address.toLowerCase()}`
       const sigAccount = await treasury.signMessage(msg);
-
       await flexkitReader.connect(issuer).setAttributes(
         attrKey,
         ethers.utils.id('some-random-value-25'),
         treasury.address,
         sigAccount
       )
+
       const fee = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
       const attributes = await flexkitReader.connect(issuer).callStatic.getAttributes(treasury.address, attrKey, {value: fee})
 
@@ -637,6 +647,7 @@ describe('QuadFlexKitReader()', function() {
         treasury.address,
         sigAccount
       )
+
       const fee = await flexkitReader.connect(issuer).queryFeeBulk(treasury.address, [attrKey])
       const attributes = await flexkitReader.connect(issuer).callStatic.getAttributesBulkLegacy(treasury.address, [attrKey], {value: fee})
 

@@ -68,7 +68,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
             issuer: msg.sender
         });
 
-        _attributeStorage[getAttributeKey(_account, _issuerAndAttr)] = attr;
+        _attributeStorage[_issuerAndAttr] = attr;
     }
 
     /// @dev Checks if attribute is a primary passport attribute
@@ -123,7 +123,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
             return reader.getAttributes{value: quadReaderFee}(_account, _attribute);
         }
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
-        attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
+        attrs[0] = _attributeStorage[_attribute];
 
         require(msg.value == (queryFeeMap[_attribute] + quadrataFee), "INVALID_FEE");
 
@@ -147,7 +147,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
         }
 
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
-        attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
+        attrs[0] = _attributeStorage[_attribute];
 
         values = new bytes32[](1);
         epochs = new uint256[](1);
