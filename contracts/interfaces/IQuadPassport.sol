@@ -9,6 +9,7 @@ interface IQuadPassport is IQuadSoulbound {
     event SetPendingGovernance(address indexed _pendingGovernance);
     event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
     event BurnPassportsIssuer(address indexed _issuer, address indexed _account);
+    event BurnPassports(address indexed _account);
     event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee);
 
     function setAttributes(
