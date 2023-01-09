@@ -84,8 +84,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
         if(_isPassportAttribute(_attribute)){
             return reader.queryFee(_account, _attribute);
         } else {
-            (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-            return (interimIssuer + interimQuadrata);
+            return (queryFeeMap[_attribute] + quadrataFee);
         }
     }
 
@@ -100,9 +99,8 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
             if(_isPassportAttribute(_attributes[i])){
                 fee += reader.queryFee(_account, _attributes[i]);
             } else {
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                fee += interimQuadrata;
-                fee += interimIssuer;
+                fee += quadrataFee;
+                fee += queryFeeMap[_attributes[i]];
             }
         }
     }
@@ -122,11 +120,10 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
         IQuadPassportStore.Attribute[] memory attrs = new IQuadPassportStore.Attribute[](1);
         attrs[0] = _attributeStorage[getAttributeKey(_account, _attribute)];
 
-        (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-        require(msg.value == (interimIssuer+interimQuadrata), "INVALID_FEE");
+        require(msg.value == (queryFeeMap[_attribute] + quadrataFee), "INVALID_FEE");
 
-        funds[attrs[0].issuer] += interimIssuer;
-        funds[governance.treasury()] += interimQuadrata;
+        funds[attrs[0].issuer] +=  queryFeeMap[_attribute];
+        funds[governance.treasury()] += quadrataFee;
 
         return attrs;
     }
@@ -155,10 +152,9 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
         epochs[0] = attrs[0].epoch;
         issuers[0] = attrs[0].issuer;
 
-        (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attribute);
-        require(msg.value == (interimIssuer+interimQuadrata), "INVALID_FEE");
-        funds[issuers[0]] += interimIssuer;
-        funds[governance.treasury()] += interimQuadrata;
+        require(msg.value == (queryFeeMap[_attribute]+quadrataFee), "INVALID_FEE");
+        funds[issuers[0]] +=  queryFeeMap[_attribute];
+        funds[governance.treasury()] += quadrataFee;
     }
 
     /// @dev Purchase the attributes
@@ -195,11 +191,9 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
                 epochs[i] = attribute.epoch;
                 issuers[i] = attribute.issuer;
 
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                quadFeeCounter += interimQuadrata;
-                issuerFeeCounter += interimIssuer;
-
-                funds[attribute.issuer] += interimIssuer;
+                quadFeeCounter += quadrataFee;
+                issuerFeeCounter +=  queryFeeMap[_attributes[i]];
+                funds[attribute.issuer] += queryFeeMap[_attributes[i]];
             }
         }
         require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter), "INVALID_FEE");
@@ -229,28 +223,15 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
             } else {
                 attributes[i] = _attributeStorage[getAttributeKey(_account, _attributes[i])];
 
-                (uint256 interimIssuer, uint256 interimQuadrata) = calculateSocialFees(_attributes[i]);
-                quadFeeCounter += interimQuadrata;
-                issuerFeeCounter += interimIssuer;
-                funds[attributes[i].issuer] += interimIssuer;
+                quadFeeCounter += quadrataFee;
+                issuerFeeCounter += queryFeeMap[_attributes[i]];
+                funds[attributes[i].issuer] += queryFeeMap[_attributes[i]];
             }
         }
         require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter), "INVALID_FEE");
 
         funds[governance.treasury()] += quadFeeCounter;
         return attributes;
-    }
-
-    /// @dev Calculate the fees for issuer/quadrata
-    /// @param _attrName attribute name
-    function calculateSocialFees(bytes32 _attrName) view internal returns (uint256 interimIssuerFee, uint256 interimQuadFee){
-        if(queryFeeMap[_attrName] / 2 > quadrataFee) {
-            interimIssuerFee = queryFeeMap[_attrName] / 2;
-            interimQuadFee = queryFeeMap[_attrName] - interimIssuerFee;
-        }else{
-            interimIssuerFee = queryFeeMap[_attrName] / 2;
-            interimQuadFee = quadrataFee;
-        }
     }
 
     /// @dev Calculate the attribute name for issuer/quadrata
