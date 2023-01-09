@@ -257,7 +257,6 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
     }
 
     /// @dev Withdraw function
-    /// TODO: Handle ERC20 withdrawals in case of accidents
     function withdraw() public {
         require(funds[msg.sender] > 0, "CANNOT_WITHDRAW");
         uint256 amount = funds[msg.sender];
