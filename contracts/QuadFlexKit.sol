@@ -10,11 +10,11 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadFlexKitReaderStore.sol";
+import "./storage/QuadFlexKitStore.sol";
 import "hardhat/console.sol";
-/// @title Quadrata FlexKitReader
+/// @title QuadFlexKit
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
-contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKitReaderStore{
+contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKitStore{
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
 
@@ -252,7 +252,7 @@ contract QuadFlexKitReader is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadF
     /// @dev Calculate the attribute name for issuer/quadrata
     /// @param _issuer issuer address
     /// @param _attrName attribute name
-    function getAttributeKey(address _issuer, bytes32 _attrName) public view returns(bytes32){
+    function getAttributeKey(address _issuer, bytes32 _attrName) public pure returns(bytes32){
         return keccak256(abi.encode(_issuer, _attrName));
     }
 

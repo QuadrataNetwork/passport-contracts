@@ -6,7 +6,7 @@ import "../interfaces/IQuadGovernance.sol";
 
 import "./QuadConstant.sol";
 
-contract QuadFlexKitReaderStore is QuadConstant{
+contract QuadFlexKitStore is QuadConstant{
     mapping(bytes32=>IQuadPassportStore.Attribute) internal _attributeStorage;
     mapping(address=>mapping(bytes32=>bool)) public allowList;
     mapping(address=>mapping(bytes32=>bool)) public revokedAttributes;
