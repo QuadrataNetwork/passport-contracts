@@ -40,7 +40,10 @@ export const setAttributes = async (
     if (k === ATTRIBUTE_AML) {
       expect(ATTRIBUTE_DID in attributes).to.equal(true);
       attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [opts.oldDid || did, k])
+        ethers.utils.defaultAbiCoder.encode(
+          ["bytes32", "bytes32"],
+          [opts.oldDid || did, k]
+        )
       );
     } else {
       attrKey = ethers.utils.keccak256(
@@ -57,7 +60,7 @@ export const setAttributes = async (
     }
   });
 
-  if(!opts.attemptUpdateDid) {
+  if (!opts.attemptUpdateDid) {
     delete attributes[ATTRIBUTE_DID];
   }
 

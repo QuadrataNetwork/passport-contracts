@@ -30,7 +30,7 @@ export const setAttributesBulk = async (
 
   // Deep Copy to avoid mutating the object
   const attributesList = Object.assign([], attributesToSet);
-  for(let index = 0; index < attributesList.length; index++){
+  for (let index = 0; index < attributesList.length; index++) {
     // Deep Copy to avoid mutating the object
     const attributes: any = Object.assign({}, attributesList[index]);
     const attrKeys: string[] = [];
@@ -46,7 +46,10 @@ export const setAttributesBulk = async (
       if (k === ATTRIBUTE_AML) {
         expect(ATTRIBUTE_DID in attributes).to.equal(true);
         attrKey = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [opts.oldDid || did, k])
+          ethers.utils.defaultAbiCoder.encode(
+            ["bytes32", "bytes32"],
+            [opts.oldDid || did, k]
+          )
         );
       } else {
         attrKey = ethers.utils.keccak256(
@@ -62,7 +65,7 @@ export const setAttributesBulk = async (
         attrTypes.push(k);
       }
     });
-    if(!opts.attemptUpdateDid) {
+    if (!opts.attemptUpdateDid) {
       delete attributes[ATTRIBUTE_DID];
     }
     const sigIssuer = await signSetAttributes(
@@ -77,21 +80,27 @@ export const setAttributesBulk = async (
       chainIds[index]
     );
     const sigAccount = await signAccount(account);
-    bulkConfig.push([attrKeys, attrValues, attrTypes, (opts.oldDid || did), tokenIds[index], verifiedAts[index], issuedAts[index], parseInt(fees[index])])
-    bulkSigIssuer.push(sigIssuer)
-    bulkSigAccount.push(sigAccount)
+    bulkConfig.push([
+      attrKeys,
+      attrValues,
+      attrTypes,
+      opts.oldDid || did,
+      tokenIds[index],
+      verifiedAts[index],
+      issuedAts[index],
+      parseInt(fees[index]),
+    ]);
+    bulkSigIssuer.push(sigIssuer);
+    bulkSigAccount.push(sigAccount);
   }
   await expect(
     passport
       .connect(account)
-      .setAttributesBulk(
-        bulkConfig,
-        bulkSigIssuer,
-        bulkSigAccount,
-        {
-          value: fees.reduce((total: number, eachFee: string) => total += parseInt(eachFee), 0),
-        }
-      )
-  )
-    .to.emit(passport, "SetAttributeReceipt")
+      .setAttributesBulk(bulkConfig, bulkSigIssuer, bulkSigAccount, {
+        value: fees.reduce(
+          (total: number, eachFee: string) => (total += parseInt(eachFee)),
+          0
+        ),
+      })
+  ).to.emit(passport, "SetAttributeReceipt");
 };

@@ -165,7 +165,6 @@ import "./storage/QuadReaderStore.sol";
                 : governance.pricePerAttributeFixed(_attributes[i]);
             totalFee += attrFee;
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
-
             if (attrs.length > 0) {
                 values[i] = attrs[0].value;
                 epochs[i] = attrs[0].epoch;
@@ -235,11 +234,19 @@ import "./storage/QuadReaderStore.sol";
     }
 
 
-    /// @dev Returns the number of attestations for an attribute about a Passport holder
+    /// @dev (DEPRECATED) Returns the number of attestations for an attribute about a Passport holder
     /// @param _account account getting requested for attributes
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @return the amount of existing attributes
     function balanceOf(address _account, bytes32 _attribute) public view override returns(uint256) {
+       return passport.attributes(_account, _attribute).length;
+    }
+
+    /// @dev Returns the number of attestations for an attribute about a Passport holder
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @return the amount of existing attributes
+    function balancePerAttribute(address _account, bytes32 _attribute) public view returns(uint256) {
        return passport.attributes(_account, _attribute).length;
     }
 

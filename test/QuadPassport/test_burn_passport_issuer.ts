@@ -73,7 +73,7 @@ describe("QuadPassport.burnPassports", async () => {
       dataChecker,
       issuerB,
       issuerBTreasury,
-      freeAccount
+      freeAccount,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
@@ -1468,9 +1468,13 @@ describe("QuadPassport.burnPassports", async () => {
         )
       ).to.not.be.reverted;
 
-      await governance.connect(admin).addIssuer(freeAccount.address, freeAccount.address);
+      await governance
+        .connect(admin)
+        .addIssuer(freeAccount.address, freeAccount.address);
 
-      expect(await passport.connect(issuerB).burnPassportsIssuer(minterA.address))
+      expect(
+        await passport.connect(issuerB).burnPassportsIssuer(minterA.address)
+      );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 

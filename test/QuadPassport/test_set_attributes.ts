@@ -667,7 +667,7 @@ describe("QuadPassport.setAttributes", async () => {
           HARDHAT_CHAIN_ID,
           {
             oldDid: attributes[ATTRIBUTE_DID],
-            attemptUpdateDid: true
+            attemptUpdateDid: true,
           }
         )
       ).to.revertedWith("ISSUER_UPDATED_DID");
