@@ -11,10 +11,14 @@ import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadFlexKitStore.sol";
-import "hardhat/console.sol";
+
 /// @title QuadFlexKit
 /// @notice This contract houses the logic relating to posting/querying secondary (ie. "social") attributes.
 contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKitStore{
+    event WriteEvent(address indexed _account, address indexed _caller, bytes32 _attribute);
+    event QueryEvent(address indexed _account, address indexed _caller, bytes32 _attribute);
+    event WithdrawEvent(address indexed _caller, uint256 _fee);
+
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
 
@@ -69,6 +73,8 @@ contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKit
         });
 
         _attributeStorage[_issuerAndAttr] = attr;
+
+        emit WriteEvent(_account, msg.sender, _issuerAndAttr);
     }
 
     /// @dev Checks if attribute is a primary passport attribute
@@ -130,6 +136,8 @@ contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKit
         funds[attrs[0].issuer] +=  queryFeeMap[_attribute];
         funds[governance.treasury()] += quadrataFee;
 
+        emit QueryEvent(_account, msg.sender, _attribute);
+
         return attrs;
     }
 
@@ -165,6 +173,8 @@ contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKit
             funds[issuers[0]] += queryFeeMap[_attribute];
             funds[governance.treasury()] += quadrataFee;
         }
+
+        emit QueryEvent(_account, msg.sender, _attribute);
     }
 
     /// @dev Purchase the attributes
@@ -207,6 +217,7 @@ contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKit
                     funds[attribute.issuer] += queryFeeMap[_attributes[i]];
                 }
             }
+            emit QueryEvent(_account, msg.sender, _attributes[i]);
         }
         require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter), "INVALID_FEE");
         funds[governance.treasury()] += quadFeeCounter;
@@ -242,6 +253,7 @@ contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKit
                     funds[attributes[i].issuer] += queryFeeMap[_attributes[i]];
                 }
             }
+            emit QueryEvent(_account, msg.sender, _attributes[i]);
         }
         require(msg.value == (quadFeeCounter + issuerFeeCounter + quadReaderFeeCounter), "INVALID_FEE");
 
@@ -264,6 +276,8 @@ contract QuadFlexKit is UUPSUpgradeable, ReentrancyGuardUpgradeable, QuadFlexKit
         (bool success, ) = payable(msg.sender).call{value:amount}("");
 
         require(success, "TRANSFER_FAILED");
+
+        emit WithdrawEvent(msg.sender, amount);
     }
 
     /// @dev Set query fee on a per address per attribute basis

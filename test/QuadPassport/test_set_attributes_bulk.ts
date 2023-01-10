@@ -96,7 +96,7 @@ describe("QuadPassport.setAttributes", async () => {
         [issuedAt],
         [MINT_PRICE],
         [TOKEN_ID],
-        [HARDHAT_CHAIN_ID],
+        [HARDHAT_CHAIN_ID]
       );
       await assertSetAttribute(
         minterA,
@@ -119,7 +119,7 @@ describe("QuadPassport.setAttributes", async () => {
         [issuedAt, issuedAt],
         [MINT_PRICE, MINT_PRICE],
         [TOKEN_ID, TOKEN_ID],
-        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
       );
 
       await assertSetAttribute(
@@ -143,7 +143,7 @@ describe("QuadPassport.setAttributes", async () => {
         [issuedAt, issuedAt],
         [0, 0],
         [TOKEN_ID, TOKEN_ID],
-        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
       );
 
       await assertSetAttribute(
@@ -175,11 +175,11 @@ describe("QuadPassport.setAttributes", async () => {
         minterA,
         [issuer, issuer2],
         [attributes1, attributes2],
-        [verifiedAt, verifiedAt+1],
-        [issuedAt, issuedAt+1],
-        [MINT_PRICE, parseInt(MINT_PRICE)+1],
+        [verifiedAt, verifiedAt + 1],
+        [issuedAt, issuedAt + 1],
+        [MINT_PRICE, parseInt(MINT_PRICE) + 1],
         [TOKEN_ID, TOKEN_ID],
-        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
       );
 
       await assertSetAttribute(
@@ -187,8 +187,8 @@ describe("QuadPassport.setAttributes", async () => {
         [issuer, issuer2],
         passport,
         [attributes1, attributes2],
-        [verifiedAt, verifiedAt+1],
-        [MINT_PRICE, parseInt(MINT_PRICE)+1],
+        [verifiedAt, verifiedAt + 1],
+        [MINT_PRICE, parseInt(MINT_PRICE) + 1],
         mockReader
       );
     });
@@ -289,9 +289,9 @@ describe("QuadPassport.setAttributes", async () => {
           [issuedAt, issuedAt],
           [MINT_PRICE, MINT_PRICE],
           [TOKEN_ID, TOKEN_ID],
-          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("INVALID_DID")
+      ).to.revertedWith("INVALID_DID");
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - reuse signature", async () => {
@@ -304,8 +304,8 @@ describe("QuadPassport.setAttributes", async () => {
         [issuedAt, issuedAt],
         [MINT_PRICE, MINT_PRICE],
         [TOKEN_ID, TOKEN_ID],
-        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
-      )
+        [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
+      );
 
       await expect(
         setAttributesBulk(
@@ -317,9 +317,9 @@ describe("QuadPassport.setAttributes", async () => {
           [issuedAt, issuedAt],
           [MINT_PRICE, MINT_PRICE],
           [TOKEN_ID, TOKEN_ID],
-          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("SIGNATURE_ALREADY_USED")
+      ).to.revertedWith("SIGNATURE_ALREADY_USED");
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - 0 verifiedAt", async () => {
@@ -333,9 +333,9 @@ describe("QuadPassport.setAttributes", async () => {
           [issuedAt, issuedAt],
           [MINT_PRICE, MINT_PRICE],
           [TOKEN_ID, TOKEN_ID],
-          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("VERIFIED_AT_CANNOT_BE_ZERO")
+      ).to.revertedWith("VERIFIED_AT_CANNOT_BE_ZERO");
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - future verifiedAt", async () => {
@@ -353,9 +353,9 @@ describe("QuadPassport.setAttributes", async () => {
           [issuedAt, issuedAt],
           [MINT_PRICE, MINT_PRICE],
           [TOKEN_ID, TOKEN_ID],
-          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("INVALID_VERIFIED_AT")
+      ).to.revertedWith("INVALID_VERIFIED_AT");
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - expired issuedAt", async () => {
@@ -372,9 +372,9 @@ describe("QuadPassport.setAttributes", async () => {
           [expiredIssuedAt, issuedAt],
           [MINT_PRICE, MINT_PRICE],
           [TOKEN_ID, TOKEN_ID],
-          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID],
+          [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("EXPIRED_ISSUED_AT")
+      ).to.revertedWith("EXPIRED_ISSUED_AT");
     });
 
     it("fail - invalid fee", async () => {
@@ -383,16 +383,18 @@ describe("QuadPassport.setAttributes", async () => {
         passport
           .connect(minterA)
           .setAttributesBulk(
-            [[
-              attrKeys,
-              attrValues,
-              attrTypes,
-              attributes[ATTRIBUTE_DID],
-              tokenId,
-              verifiedAt,
-              issuedAt,
-              fee,
-            ]],
+            [
+              [
+                attrKeys,
+                attrValues,
+                attrTypes,
+                attributes[ATTRIBUTE_DID],
+                tokenId,
+                verifiedAt,
+                issuedAt,
+                fee,
+              ],
+            ],
             [sigIssuer],
             [sigAccount],
             {
@@ -401,6 +403,5 @@ describe("QuadPassport.setAttributes", async () => {
           )
       ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_BULK_FEE");
     });
-
   });
 });
