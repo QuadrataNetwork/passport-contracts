@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
 
-const { deployQuadrata } = require("../../utils/deployment.ts");
+const { deployQuadrata } = require("../../../utils/deployment.ts");
 
 const {
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
-} = require("../../utils/constant.ts");
+} = require("../../../utils/constant.ts");
 
 const {
   QUADRATA_TREASURY,
@@ -14,7 +14,7 @@ const {
   TOKEN_IDS,
   ISSUERS,
   MAX_GAS_FEE,
-} = require("../data/integration.ts");
+} = require("../../data/integration.ts");
 
 (async () => {
   if (!QUADRATA_TREASURY) {

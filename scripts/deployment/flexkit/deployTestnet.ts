@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-const { deployFlexkit } = require("../../utils/deployment.ts");
+const { deployFlexkit } = require("../../../utils/deployment.ts");
 
 (async () => {
   // Integration Mumbai/Goerli Addresses
