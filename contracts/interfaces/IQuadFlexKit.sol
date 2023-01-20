@@ -1,8 +1,7 @@
-//SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.16;
 
-import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadFlexKitStore.sol";
+import "./IQuadPassportStore.sol";
 
 interface IQuadFlexKit{
     event WriteEvent(address indexed _account, address indexed _caller, bytes32 _attribute);
