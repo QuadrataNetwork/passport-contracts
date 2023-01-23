@@ -249,3 +249,18 @@ export const deployReader = async (
   await reader.deployed();
   return reader;
 };
+
+export const deployFlexkit = async (
+  governanceAddress: string = "",
+  readerAddress: string = "",
+): Promise<Contract> => {
+  const QuadFlexkit = await ethers.getContractFactory("QuadFlexKit");
+  const flexkit = await upgrades.deployProxy(
+    QuadFlexkit,
+    [governanceAddress, readerAddress],
+    { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
+  );
+  await flexkit.deployed();
+  return flexkit;
+
+}

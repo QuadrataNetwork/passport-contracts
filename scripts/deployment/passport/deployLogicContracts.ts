@@ -4,7 +4,7 @@ const {
   deployGovernance,
   deployPassport,
   deployReader,
-} = require("../../utils/deployment.ts");
+} = require("../../../utils/deployment.ts");
 
 (async () => {
   // const governance = await deployGovernance();
