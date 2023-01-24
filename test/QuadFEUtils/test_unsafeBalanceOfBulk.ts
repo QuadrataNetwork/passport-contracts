@@ -3,8 +3,9 @@ import { ethers, upgrades } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { deploy } from "@openzeppelin/hardhat-upgrades/dist/utils";
-import { id } from "ethers/lib/utils";
-import {READER_ROLE} from "../../utils/constant"
+import { formatBytes32String, id } from "ethers/lib/utils";
+import {ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS, MINT_PRICE, READER_ROLE} from "../../utils/constant"
+import { setAttributes } from "../helpers/set_attributes";
 
 const {
   deployPassportEcosystem,
@@ -27,6 +28,7 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
       deployer,
       [deployer, issuerA, issuerB]
     );
+
   });
 
   it("success - isEmpty", async () => {
@@ -37,10 +39,78 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
   });
 
   it("success - has one", async () => {
+    const attributes: any = {
+      [ATTRIBUTE_DID]: formatBytes32String("did:quad:helloworld"),
+      [ATTRIBUTE_AML]: formatBytes32String("1"),
+      [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+      [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+    };
+
+    const issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+
+    await setAttributes(
+      deployer,
+      deployer,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    );
+
     const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML")]);
-    expect(attributeNames.length == 0).equals(true)
-    expect(issuers.length == 0).equals(true)
-    expect(issuedAts.length == 0).equals(true)
+    expect(attributeNames.length == 1).equals(true)
+    expect(issuers.length == 1).equals(true)
+    expect(issuedAts.length == 1).equals(true)
+    expect(attributeNames[0]).equals(ATTRIBUTE_AML);
+    expect(issuers[0]).equals(deployer.address);
+    expect(issuedAts[0]).equals(issuedAt);
+  });
+
+  it("success - has two", async () => {
+    const attributes: any = {
+      [ATTRIBUTE_DID]: formatBytes32String("did:quad:helloworld"),
+      [ATTRIBUTE_AML]: formatBytes32String("1"),
+      [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+      [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+    };
+
+    const issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+
+    await setAttributes(
+      deployer,
+      deployer,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    );
+
+    await setAttributes(
+      deployer,
+      issuerA,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    );
+
+    const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML")]);
+    expect(attributeNames.length == 2).equals(true)
+    expect(issuers.length == 2).equals(true)
+    expect(issuedAts.length == 2).equals(true)
+
+    expect(attributeNames[0]).equals(ATTRIBUTE_AML);
+    expect(issuers[0]).equals(deployer.address);
+    expect(issuedAts[0]).equals(issuedAt);
+
+    expect(attributeNames[1]).equals(ATTRIBUTE_AML);
+    expect(issuers[1]).equals(issuerA.address);
+    expect(issuedAts[1]).equals(issuedAt);
   });
 
 });
