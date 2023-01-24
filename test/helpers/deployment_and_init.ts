@@ -1,6 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { READER_ROLE } from "../../utils/constant";
 
 const { deployQuadrata, deployFEUtils } = require("../../utils/deployment.ts");
 
@@ -46,6 +47,10 @@ export const deployPassportEcosystem = async (
     tokenIds,
     false
   );
+  // Deploy FEUtils
+  const feUtils = await deployFEUtils(governance, passport)
+  // add fe utils to have reader role
+  await governance.connect(admin).grantRole(READER_ROLE, feUtils.address)
 
   // Revoke Deployer Role
   await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address);
@@ -63,8 +68,6 @@ export const deployPassportEcosystem = async (
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
 
-  // Deploy FEUtils
-  const feUtils = await deployFEUtils(governance, passport)
 
   return [governance, passport, reader, defi, mockbusiness, feUtils];
 };
