@@ -2,7 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
-const { deployQuadrata } = require("../../utils/deployment.ts");
+const { deployQuadrata, deployFEUtils } = require("../../utils/deployment.ts");
 
 const {
   ATTRIBUTE_DID,
@@ -19,7 +19,7 @@ export const deployPassportEcosystem = async (
   treasury: SignerWithAddress,
   issuerTreasuries: SignerWithAddress[]
 ): Promise<
-  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any]
+  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, Promise<Contract>]
 > => {
   const issuersToAdd: any[] = [];
   for (let i = 0; i < issuers.length; i++) {
@@ -63,5 +63,8 @@ export const deployPassportEcosystem = async (
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
 
-  return [governance, passport, reader, defi, mockbusiness];
+  // Deploy FEUtils
+  const feUtils = await deployFEUtils(governance, passport)
+
+  return [governance, passport, reader, defi, mockbusiness, feUtils];
 };

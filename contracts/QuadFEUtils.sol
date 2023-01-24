@@ -29,11 +29,40 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
         passport = IQuadPassport(_passport);
     }
 
+    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @param _account address of user
+    /// @param _attributes attributes to get respective non-value data from
+    /// @return attributeNames list of attribute names encoded as keccack256("AML") for example
+    /// @return issuers list of issuers for the attribute[i]
+    /// @return issuedAts list of epochs for the attribute[i]
     function unsafeGetBalanceOfBulk(
         address _account,
         bytes32[] memory _attributes
-    ) public view override returns (bytes32[] memory attributeTypes, address[] memory issuers, uint256[] memory issuedAts) {
+    ) public view override returns (bytes32[] memory attributeNames, address[] memory issuers, uint256[] memory issuedAts) {
 
+        // first pass calculate length
+        uint256 attributeLength;
+        for(uint256 i = 0; i < _attributes.length; i++) {
+            IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attributes[i]);
+            attributeLength += attributes.length;
+        }
+
+        // second pass fill arrays
+        attributeNames = new bytes32[](attributeLength);
+        issuers = new address[](attributeLength);
+        issuedAts = new uint256[](attributeLength);
+        uint256 attributeIndex;
+
+        for(uint256 i = 0; i < _attributes.length; i++) {
+            IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attributes[i]);
+            attributeLength += attributes.length;
+            for(uint256 j = 0; j < attributes.length; j++) {
+                attributeNames[attributeIndex] = _attributes[i];
+                issuers[attributeIndex] = attributes[j].issuer;
+                issuedAts[attributeIndex] = attributes[j].epoch;
+                attributeIndex++;
+            }
+        }
     }
 
 
