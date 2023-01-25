@@ -10,20 +10,7 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
 
-dotenv.config();
-
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
+require('dotenv').config({ path: require('find-config')('.env') })
 
 const config = {
   solidity: {
@@ -108,3 +95,24 @@ const config = {
 };
 
 export default config;
+
+
+task("deployFEUtils", "Example: npx hardhat deployFEUtils --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --passport 0xF4d4F629eDD73680767eb7b509C7C2D1fE551522 --network goerli")
+  .addParam("governance", "Governance Address")
+  .addParam("passport", "Passport Address")
+  .setAction(async function (taskArgs, hre) {
+    const { deployFEUtils } = require("./utils/deployment");
+
+    const ethers = hre.ethers;
+
+    const governanceAddress = taskArgs.governance;
+    const passportAddress = taskArgs.passport;
+
+    const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
+    const passport = await ethers.getContractAt("QuadPassport", passportAddress);
+
+    const feUtils = await deployFEUtils(governance, passport);
+
+    console.log("FE Utils Deployed At:")
+    console.log(feUtils.address)
+  });
