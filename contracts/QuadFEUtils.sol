@@ -15,7 +15,7 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
         // used to prevent logic contract self destruct take over
     }
 
-     /// @dev initializer (constructor)
+    /// @dev initializer (constructor)
     /// @param _governance address of the IQuadGovernance contract
     /// @param _passport address of the IQuadPassport contract
     function initialize(

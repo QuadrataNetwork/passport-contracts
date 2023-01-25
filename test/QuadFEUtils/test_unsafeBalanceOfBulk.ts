@@ -113,4 +113,49 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
     expect(issuedAts[1]).equals(issuedAt);
   });
 
+  it("success - has two different attributes", async () => {
+    const attributes: any = {
+      [ATTRIBUTE_DID]: formatBytes32String("did:quad:helloworld"),
+      [ATTRIBUTE_AML]: formatBytes32String("1"),
+      [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+      [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+    };
+
+    const issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+
+    await setAttributes(
+      deployer,
+      deployer,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    );
+
+    await setAttributes(
+      deployer,
+      issuerA,
+      passport,
+      attributes,
+      verifiedAt,
+      issuedAt,
+      MINT_PRICE
+    );
+
+    const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML"), id("COUNTRY")]);
+    expect(attributeNames.length == 4).equals(true)
+    expect(issuers.length == 4).equals(true)
+    expect(issuedAts.length == 4).equals(true)
+
+    expect(attributeNames[0]).equals(ATTRIBUTE_AML);
+    expect(issuers[0]).equals(deployer.address);
+    expect(issuedAts[0]).equals(issuedAt);
+
+    expect(attributeNames[2]).equals(ATTRIBUTE_COUNTRY);
+    expect(issuers[2]).equals(deployer.address);
+    expect(issuedAts[2]).equals(issuedAt);
+  });
+
 });
