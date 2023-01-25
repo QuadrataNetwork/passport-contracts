@@ -15,7 +15,7 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
         // used to prevent logic contract self destruct take over
     }
 
-    /// @dev initializer (constructor)
+    /// @dev initialize the contract
     /// @param _governance address of the IQuadGovernance contract
     /// @param _passport address of the IQuadPassport contract
     function initialize(
@@ -47,7 +47,7 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
             attributeLength += attributes.length;
         }
 
-        // allocate arrays
+        // allocate arrays and set length
         attributeNames = new bytes32[](attributeLength);
         issuers = new address[](attributeLength);
         issuedAts = new uint256[](attributeLength);
@@ -67,7 +67,7 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
     }
 
 
-    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @dev Allow an authorized GOVERNANCE_ROLE to upgrade the logic contract
     function _authorizeUpgrade(address) override internal view {
         require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
