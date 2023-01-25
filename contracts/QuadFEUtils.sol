@@ -47,12 +47,13 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
             attributeLength += attributes.length;
         }
 
-        // second pass fill arrays
+        // allocate arrays
         attributeNames = new bytes32[](attributeLength);
         issuers = new address[](attributeLength);
         issuedAts = new uint256[](attributeLength);
         uint256 attributeIndex;
 
+        // second pass fill arrays
         for(uint256 i = 0; i < _attributes.length; i++) {
             IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attributes[i]);
             attributeLength += attributes.length;
@@ -66,6 +67,7 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
     }
 
 
+    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
     function _authorizeUpgrade(address) override internal view {
         require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
