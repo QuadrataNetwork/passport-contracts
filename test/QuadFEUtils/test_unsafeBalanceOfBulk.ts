@@ -157,5 +157,4 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
     expect(issuers[2]).equals(deployer.address);
     expect(issuedAts[2]).equals(issuedAt);
   });
-
 });

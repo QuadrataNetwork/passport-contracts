@@ -11,4 +11,4 @@ import {deployFEUtils} from "../../utils/deployment"
     console.log("FE Utils Deployed At:")
     console.log(feUtils.address)
 
-})()
+})();

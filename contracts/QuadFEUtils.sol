@@ -72,4 +72,20 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
         require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 
+
+    /// @dev set the governance contract
+    /// @param _governance address of the IQuadGovernance contract
+    function setGovernance(address _governance) external {
+        require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        require(_governance != address(0), "GOVERNANCE_ADDRESS_ZERO");
+        governance = IAccessControlUpgradeable(_governance);
+    }
+
+    /// @dev set the passport contract
+    /// @param _passport address of the IQuadPassport contract
+    function setPassport(address _passport) external {
+        require(governance.hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+        require(_passport != address(0), "PASSPORT_ADDRESS_ZERO");
+        passport = IQuadPassport(_passport);
+    }
 }
