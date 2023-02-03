@@ -61,6 +61,14 @@ const config = {
           : [],
       chainId: 44787,
     },
+    avax_testnet: {
+      url: "https://ava-testnet.public.blastapi.io/ext/bc/C/rpc",
+      accounts:
+        process.env.TESTNET_PRIVATE_KEY_2 !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY_2]
+          : [],
+      chainId: 43113,
+    },
     mainnet: {
       url: process.env.MAINNET_URI || "",
       accounts:
