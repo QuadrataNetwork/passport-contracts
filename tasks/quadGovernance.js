@@ -1,5 +1,16 @@
 const { task } = require("hardhat/config");
 
+const recursiveRetry = async (func, ...args) => {
+    try {
+        return await func(...args);
+    } catch (e) {
+        console.log("failed to execute " + func.name + " due to " + e.toString());
+        console.log("retrying in 5ish seconds");
+        let wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        await wait(4000 + Math.random() * 2000);
+        return await recursiveRetry(func, ...args);
+    }
+}
 
 task("addIssuer", "npx hardhat addIssuer --issuer <address> --governance <address> --network <network_name>")
     .addParam("issuer", "<address>")
@@ -8,22 +19,11 @@ task("addIssuer", "npx hardhat addIssuer --issuer <address> --governance <addres
         const ethers = hre.ethers;
         const issuerAddress = taskArgs.issuer;
         const governanceAddress = taskArgs.governance;
-        const addIssuerRetry = async () => {
-            try {
-                const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
-                await governance.addIssuer(issuerAddress, issuerAddress);
-                console.log("added " + issuerAddress + " on network " + hre.network.name);
-            } catch (e) {
-                console.log("failed to add " + issuerAddress + " due to " + e.toString());
-                console.log("retrying in 5ish seconds");
-                let wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-                await wait(4000 + Math.random() * 2000);
-                await addIssuerRetry();
-            }
-        }
-
-        await addIssuerRetry();
+        const governance = await recursiveRetry(ethers.getContractAt, "QuadGovernance", governanceAddress);
+        await recursiveRetry(governance.addIssuer, issuerAddress, issuerAddress);
+        console.log("added " + issuerAddress + " on network " + hre.network.name);
     });
+
 
 task("addIssuers", "npx hardhat addIssuers --issuers <address,address,...> --governance <address> --network <network_name>")
     .addParam("issuers", "<address,address,...>")
