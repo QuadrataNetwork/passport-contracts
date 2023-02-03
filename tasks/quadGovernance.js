@@ -1,23 +1,20 @@
 const { task } = require("hardhat/config");
 
 
-task("addIssuer", "Example: npx hardhat addIssuer --issuer <address> --governance <address> --network goerli")
-    .addParam("issuer", "Issuer Address")
-    .addParam("governance", "Governance Address")
+task("addIssuer", "npx hardhat addIssuer --issuer <address> --governance <address> --network <network_name>")
+    .addParam("issuer", "<address>")
+    .addParam("governance", "<address>")
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
-
         const issuerAddress = taskArgs.issuer;
         const governanceAddress = taskArgs.governance;
-
-        const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
-
         const addIssuerRetry = async () => {
             try {
+                const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
                 await governance.addIssuer(issuerAddress, issuerAddress);
-                console.log("added " + issuerAddress)
+                console.log("added " + issuerAddress + " on network " + hre.network.name);
             } catch (e) {
-                console.log("failed to add" + issuerAddress);
+                console.log("failed to add " + issuerAddress + " due to " + e.toString());
                 console.log("retrying in 5ish seconds");
                 let wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
                 await wait(4000 + Math.random() * 2000);
@@ -28,29 +25,21 @@ task("addIssuer", "Example: npx hardhat addIssuer --issuer <address> --governanc
         await addIssuerRetry();
     });
 
-task("addIssuers", "Example: npx hardhat addIssuers --issuers <address,address,...> --governance <address> --network goerli")
-    .addParam("issuers", "Issuer Addresses")
-    .addParam("governance", "Governance Address")
+task("addIssuers", "npx hardhat addIssuers --issuers <address,address,...> --governance <address> --network <network_name>")
+    .addParam("issuers", "<address,address,...>")
+    .addParam("governance", "<address>")
     .setAction(async function (taskArgs, hre) {
-        const ethers = hre.ethers;
 
         const issuerAddresses = taskArgs.issuers.split(",");
         const governanceAddress = taskArgs.governance;
 
-        const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
-
-        const promises = [];
-
         for (const issuerAddress of issuerAddresses) {
             await hre.run("addIssuer", { issuer: issuerAddress, governance: governanceAddress });
         }
-
-        await Promise.all(promises);
-
     });
 
-task("getIssuers", "Example: npx hardhat getIssuers --governance <address> --network <network_name>")
-    .addParam("governance", "Governance Address")
+task("getIssuers", "npx hardhat getIssuers --governance <address> --network <network_name>")
+    .addParam("governance", "<address>")
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
 

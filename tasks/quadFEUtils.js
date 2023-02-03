@@ -1,9 +1,9 @@
 const { task } =  require("hardhat/config");
 
 
-task("deployFEUtils", "Example: npx hardhat deployFEUtils --governance <address> --passport <address> --network goerli")
-  .addParam("governance", "Governance Address")
-  .addParam("passport", "Passport Address")
+task("deployFEUtils", "npx hardhat deployFEUtils --governance <address> --passport <address> --network <network_name>")
+  .addParam("governance", "<address>")
+  .addParam("passport", "<address>")
   .setAction(async function (taskArgs, hre) {
     const { deployFEUtils } = require("./utils/deployment");
 
