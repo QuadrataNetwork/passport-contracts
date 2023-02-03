@@ -69,6 +69,38 @@ const config = {
           : [],
       chainId: 43113,
     },
+    bsc_testnet: {
+      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      accounts:
+        process.env.TESTNET_PRIVATE_KEY !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY]
+          : [],
+      chainId: 97,
+    },
+    arbitrum_goerli: {
+      url: "https://arb-goerli.g.alchemy.com/v2/demo",
+      accounts:
+        process.env.TESTNET_PRIVATE_KEY !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY]
+          : [],
+      chainId: 421613,
+    },
+    optimism_goerli: {
+      url: "https://opt-goerli.g.alchemy.com/v2/demo",
+      accounts:
+        process.env.TESTNET_PRIVATE_KEY !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY]
+          : [],
+      chainId: 420,
+    },
+    fantom_testnet: {
+      url: "https://rpc.ankr.com/fantom_testnet",
+      accounts:
+        process.env.TESTNET_PRIVATE_KEY !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY]
+          : [],
+      chainId: 4002,
+    },
     mainnet: {
       url: process.env.MAINNET_URI || "",
       accounts:
@@ -170,7 +202,10 @@ task("addIssuers", "Example: npx hardhat addIssuers --issuers 0x696969696943441b
 
     const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
 
+    const promises = [];
+
     for (const issuerAddress of issuerAddresses) {
+
       const addIssuerRetry = async () => {
         try {
           await governance.addIssuer(issuerAddress, issuerAddress);
@@ -181,8 +216,11 @@ task("addIssuers", "Example: npx hardhat addIssuers --issuers 0x696969696943441b
           setTimeout(addIssuerRetry, 4000 + Math.random() * 2000);
         }
       }
-      await addIssuerRetry();
+
+      promises.push(addIssuerRetry());
     }
+
+    await Promise.all(promises);
 
   });
 
@@ -199,3 +237,17 @@ task("getIssuers", "Example: npx hardhat getIssuers --governance 0x863db2c1A4344
 
     console.log(issuers);
   });
+
+  /*
+
+  // usage for getting all issuers for all testnets
+
+  npx hardhat getIssuers --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli
+  npx hardhat getIssuers --governance 0xC1fcC7790291FF3D9DC378bfA16047eC3002a83a --network avax_testnet
+  npx hardhat getIssuers --governance 0xCF6bA3a3d18bA1e35A41db79B3dBF2F6023F6071 --network bsc_testnet
+  npx hardhat getIssuers --governance 0x2B212B47Faf2040cA4782e812048F5aE8ad5Fa2f --network celo_testnet
+  npx hardhat getIssuers --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network arbitrum_goerli
+  npx hardhat getIssuers --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network optimism_goerli
+  npx hardhat getIssuers --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network fantom_testnet
+
+  */
