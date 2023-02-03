@@ -1,16 +1,6 @@
-const { task } = require("hardhat/config");
+import { task } from "hardhat/config";
+import { recursiveRetry } from "../utils/retries";
 
-const recursiveRetry = async (func, ...args) => {
-    try {
-        return await func(...args);
-    } catch (e) {
-        console.log("failed to execute " + func.name + " due to " + e.toString());
-        console.log("retrying in 5ish seconds");
-        let wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-        await wait(4000 + Math.random() * 2000);
-        return await recursiveRetry(func, ...args);
-    }
-}
 
 task("addIssuer", "npx hardhat addIssuer --issuer <address> --governance <address> --network <network_name>")
     .addParam("issuer", "<address>")
