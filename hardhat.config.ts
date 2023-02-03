@@ -162,7 +162,7 @@ task("addIssuers", "Example: npx hardhat addIssuers --issuers 0x696969696943441b
 
     const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
 
-    issuerAddresses.forEach(async (issuerAddress: string) => {
+    for (const issuerAddress of issuerAddresses) {
       const addIssuerRetry = async () => {
         try {
           await governance.addIssuer(issuerAddress, issuerAddress);
@@ -174,7 +174,8 @@ task("addIssuers", "Example: npx hardhat addIssuers --issuers 0x696969696943441b
         }
       }
       await addIssuerRetry();
-    })
+    }
+
   });
 
 task("getIssuers", "Example: npx hardhat getIssuers --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli")
