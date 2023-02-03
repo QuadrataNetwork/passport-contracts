@@ -11,7 +11,7 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
+describe("QuadFEUtils.attributeMetadata", async () => {
   let passport: Contract; // eslint-disable-line no-unused-vars
   let governance: Contract; // eslint-disable-line no-unused-vars
   let feUtils: Contract; // eslint-disable-line no-unused-vars
@@ -32,7 +32,7 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
   });
 
   it("success - isEmpty", async () => {
-    const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML")]);
+    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML")]);
     expect(attributeNames.length == 0).equals(true)
     expect(issuers.length == 0).equals(true)
     expect(issuedAts.length == 0).equals(true)
@@ -59,7 +59,7 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
       MINT_PRICE
     );
 
-    const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML")]);
+    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML")]);
     expect(attributeNames.length == 1).equals(true)
     expect(issuers.length == 1).equals(true)
     expect(issuedAts.length == 1).equals(true)
@@ -99,7 +99,7 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
       MINT_PRICE
     );
 
-    const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML")]);
+    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML")]);
     expect(attributeNames.length == 2).equals(true)
     expect(issuers.length == 2).equals(true)
     expect(issuedAts.length == 2).equals(true)
@@ -144,7 +144,7 @@ describe("QuadFEUtils.unsafeGetBalanceOfBulk", async () => {
       MINT_PRICE
     );
 
-    const {attributeNames, issuers, issuedAts} = await feUtils.unsafeGetBalanceOfBulk(deployer.address, [id("AML"), id("COUNTRY")]);
+    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML"), id("COUNTRY")]);
     expect(attributeNames.length == 4).equals(true)
     expect(issuers.length == 4).equals(true)
     expect(issuedAts.length == 4).equals(true)

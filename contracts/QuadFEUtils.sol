@@ -29,13 +29,13 @@ contract QuadFEUtils is IQuadFEUtils, UUPSUpgradeable, QuadFEUtilsStore {
         passport = IQuadPassport(_passport);
     }
 
-    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @dev Allow users to grab all the metadata for a given attribute(s)
     /// @param _account address of user
     /// @param _attributes attributes to get respective non-value data from
     /// @return attributeNames list of attribute names encoded as keccack256("AML") for example
     /// @return issuers list of issuers for the attribute[i]
     /// @return issuedAts list of epochs for the attribute[i]
-    function unsafeGetBalanceOfBulk(
+    function attributeMetadata(
         address _account,
         bytes32[] memory _attributes
     ) public view override returns (bytes32[] memory attributeNames, address[] memory issuers, uint256[] memory issuedAts) {

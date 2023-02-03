@@ -9,6 +9,7 @@ import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
+import { run } from "hardhat";
 
 require('dotenv').config({ path: require('find-config')('.env') })
 
@@ -47,10 +48,18 @@ const config = {
     goerli: {
       url: process.env.GOERLI_URI || "",
       accounts:
-        process.env.GOERLI_PRIVATE_KEY !== undefined
-          ? [process.env.GOERLI_PRIVATE_KEY]
+        process.env.TESTNET_PRIVATE_KEY_2 !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY_2]
           : [],
       chainId: 5,
+    },
+    celo_testnet: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts:
+        process.env.TESTNET_PRIVATE_KEY_2 !== undefined
+          ? [process.env.TESTNET_PRIVATE_KEY_2]
+          : [],
+      chainId: 44787,
     },
     mainnet: {
       url: process.env.MAINNET_URI || "",
@@ -115,4 +124,69 @@ task("deployFEUtils", "Example: npx hardhat deployFEUtils --governance 0x863db2c
 
     console.log("FE Utils Deployed At:")
     console.log(feUtils.address)
+  });
+
+task("addIssuer", "Example: npx hardhat addIssuer --issuer 0x696969696943441bbAB7f34740d0d62e21e678A4b --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli")
+  .addParam("issuer", "Issuer Address")
+  .addParam("governance", "Governance Address")
+  .setAction(async function (taskArgs, hre) {
+    const ethers = hre.ethers;
+
+    const issuerAddress = taskArgs.issuer;
+    const governanceAddress = taskArgs.governance;
+
+    const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
+
+    const addIssuerRetry = async () => {
+      try {
+        await governance.addIssuer(issuerAddress, issuerAddress);
+        console.log("Issuer Added");
+      } catch (e) {
+        console.log(e);
+        console.log("retrying in 5ish seconds");
+        setTimeout(addIssuerRetry, 4000 + Math.random() * 2000);
+      }
+    }
+
+    await addIssuerRetry();
+  });
+
+task("addIssuers", "Example: npx hardhat addIssuers --issuers 0x696969696943441bbAB7f34740d0d62e21e678A4b,0x696969696943441bbAB7f34740d0d62e21e678A4b --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli")
+  .addParam("issuers", "Issuer Addresses")
+  .addParam("governance", "Governance Address")
+  .setAction(async function (taskArgs, hre) {
+    const ethers = hre.ethers;
+
+    const issuerAddresses = taskArgs.issuers.split(",");
+    const governanceAddress = taskArgs.governance;
+
+    const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
+
+    issuerAddresses.forEach(async (issuerAddress: string) => {
+      const addIssuerRetry = async () => {
+        try {
+          await governance.addIssuer(issuerAddress, issuerAddress);
+          console.log("added " + issuerAddress)
+        } catch (e) {
+          console.log("failed to add" + e);
+          console.log("retrying in 5ish seconds");
+          setTimeout(addIssuerRetry, 4000 + Math.random() * 2000);
+        }
+      }
+      await addIssuerRetry();
+    })
+  });
+
+task("getIssuers", "Example: npx hardhat getIssuers --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli")
+  .addParam("governance", "Governance Address")
+  .setAction(async function (taskArgs, hre) {
+    const ethers = hre.ethers;
+
+    const governanceAddress = taskArgs.governance;
+
+    const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
+
+    const issuers = await governance.getIssuers();
+
+    console.log(issuers);
   });
