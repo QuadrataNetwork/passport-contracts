@@ -14,6 +14,7 @@ require('dotenv').config({ path: require('find-config')('.env') })
 // Tasks
 import "./scripts/tasks/quadFEUtils.ts";
 import "./scripts/tasks/quadGovernance.ts";
+import "./scripts/tasks/deployTasks.ts";
 
 
 const config = {
