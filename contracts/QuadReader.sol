@@ -198,9 +198,9 @@ import "./storage/QuadReaderStore.sol";
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
 
-        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute memory attr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
-        uint256 fee = (attrs.length > 0 && attrs[0].value == keccak256("TRUE"))
+        uint256 fee = (attr.value == keccak256("TRUE"))
             ? governance.pricePerBusinessAttributeFixed(_attribute)
             : governance.pricePerAttributeFixed(_attribute);
 
@@ -215,10 +215,10 @@ import "./storage/QuadReaderStore.sol";
         address _account,
         bytes32[] calldata _attributes
     ) public override view returns(uint256) {
-        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute memory attr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
         uint256 fee;
-        bool isBusiness = (attrs.length > 0 && attrs[0].value == keccak256("TRUE")) ? true : false;
+        bool isBusiness = (attr.value == keccak256("TRUE")) ? true : false;
 
         for (uint256 i = 0; i < _attributes.length; i++) {
             require(governance.eligibleAttributes(_attributes[i])

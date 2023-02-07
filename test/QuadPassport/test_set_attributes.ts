@@ -83,7 +83,7 @@ describe("QuadPassport.setAttributes", async () => {
   describe("QuadPassport.setAttributes (success)", async () => {
     beforeEach(async () => {});
 
-    it("setAttributes (Single Attribute)", async () => {
+    it.only("setAttributes (Single Attribute)", async () => {
       const attributes: any = {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };

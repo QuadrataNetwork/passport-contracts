@@ -108,22 +108,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did, _issuer),
                 _config.did,
-                _issuer,
                 _config.verifiedAt);
         }
 
-        for (uint256 i = 0; i < _config.attrKeys.length; i++) {
+        for (uint256 i = 0; i < _config.attrTypes.length; i++) {
             require(governance.getIssuerAttributePermission(_issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
             require(_config.attrTypes[i] != ATTRIBUTE_DID, "ISSUER_UPDATED_DID");
 
-            // Verify attrKeys computation
-            // _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did, _issuer);
             _writeAttrToStorage(
                 _computeAttrKey(_account, _config.attrTypes[i], _config.did, _issuer),
                 _config.attrValues[i],
-                _issuer,
                 _config.verifiedAt);
-
         }
 
         if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
@@ -147,12 +142,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Internal function that writes the attribute value and issuer position to storage
     /// @param _attrKey attribute key (i.e. keccak256(address, keccak256("AML")))
     /// @param _attrValue attribute value
-    /// @param _issuer address of issuer who verified attribute
     /// @param _verifiedAt timestamp of when attribute was verified at
     function _writeAttrToStorage(
         bytes32 _attrKey,
         bytes32 _attrValue,
-        address _issuer,
         uint256 _verifiedAt
     ) internal {
         Attribute memory attr = Attribute({
@@ -174,7 +167,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
-    ) internal returns(address) {
+    ) internal view returns(address) {
         require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
@@ -225,14 +218,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
         if (governance.eligibleAttributesByDID(_attribute)){
             if (_did == bytes32(0)) {
-                address[] memory issuers = governance.getIssuers();
-                // Find DID attested by other issuers
-                for (uint256 i = 0; i < issuers.length; i++) {
-                    Attribute memory did = _attributesv2[keccak256(abi.encode(_account, ATTRIBUTE_DID, issuers[i]))];
-                    if (did.value != bytes32(0)) {
-                        _did = did.value;
-                        break;
-                    }
+                Attribute memory did = attribute(_account, ATTRIBUTE_DID);
+                if (did.value != bytes32(0)) {
+                    _did = did.value;
                 }
             }
             require(_did != bytes32(0), "MISSING_DID");
@@ -312,7 +300,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
     }
 
-    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @dev Allow an authorized readers to get all attribute information about a passport holder
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @return value of attribute from issuer
@@ -326,17 +314,58 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
-        bytes32 attrKey;
-        if (governance.eligibleAttributes(_attribute)) {
-            attrKey = keccak256(abi.encode(_account, _attribute));
-        } else {
-            Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-            if (dIDAttrs.length == 0 || dIDAttrs[0].value == bytes32(0))
-                return new Attribute[](0);
-            attrKey = keccak256(abi.encode(dIDAttrs[0].value, _attribute));
+        address[] memory issuers = governance.getIssuers();
+        uint256 counter = 0;
+        for (uint256 i = 0; i < issuers.length; i++) {
+            bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0), issuers[i]);
+            Attribute memory attr = _attributesv2[attrKey];
+            if (attr.epoch != uint256(0)) {
+                counter += 1;
+            }
         }
 
-        return _attributes[attrKey];
+        Attribute[] memory attrs = new Attribute[](counter);
+        if (counter > 0) {
+            uint256 j;
+            for (uint256 i = 0; i < issuers.length; i++) {
+                bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0), issuers[i]);
+                Attribute memory attr = _attributesv2[attrKey];
+                attr.issuer = issuers[i];
+                if (attr.epoch != uint256(0)) {
+                    attrs[j] = attr;
+                    j += 1;
+                }
+            }
+        }
+
+        return attrs;
+    }
+
+
+    /// @dev Allow an authorized readers to get one attribute information about a passport holder
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return value of attribute from issuer
+    function attribute(
+        address _account,
+        bytes32 _attribute
+    ) public view override returns (Attribute memory) {
+        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+
+        require(governance.eligibleAttributes(_attribute)
+            || governance.eligibleAttributesByDID(_attribute),
+            "ATTRIBUTE_NOT_ELIGIBLE"
+        );
+        address[] memory issuers = governance.getIssuers();
+        for (uint256 i = 0; i < issuers.length; i++) {
+            bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0), issuers[i]);
+            Attribute memory attr = _attributesv2[attrKey];
+            if (attr.epoch != uint256(0)) {
+                return attr;
+            }
+        }
+
+        return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
     }
 
     /// @dev Admin function to set the new pending Governance address
