@@ -83,7 +83,97 @@ task("setAttributePermissions", "npx hardhat setAttributePermissions --issuers <
             }
         }
     });
+
+task("setEligibleAttribute", "npx hardhat setEligibleAttribute --attribute <string> --eligible <boolean> --governance <address) --network <network_name>")
+    .addParam("attribute", "sets the attribute")
+    .addParam("eligible", "sets the eligible flag")
+    .addParam("governance", "sets the governance address")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const attribute = taskArgs.attribute;
+        const eligible = taskArgs.eligible;
+        const governanceAddress = taskArgs.governance;
+
+        const governance = await recursiveRetry(ethers.getContractAt, "QuadGovernance", governanceAddress);
+        await recursiveRetry(governance.setEligibleAttribute, id(attribute), eligible);
+        console.log("set " + attribute + " eligibility to " + eligible + " on network " + hre.network.name);
+    });
+
+task("setEligibleAttributes", "npx hardhat setEligibleAttributes --attributes <string,string,...> --eligible <boolean> --governance <address) --network <network_name>")
+    .addParam("attributes", "sets the attributes")
+    .addParam("eligible", "sets the eligible flag")
+    .addParam("governance", "sets the governance address")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const attributeNames = taskArgs.attributes.split(",");
+        const eligible = taskArgs.eligible;
+        const governanceAddress = taskArgs.governance;
+
+        for (const attributeName of attributeNames) {
+            await hre.run("setEligibleAttribute", {
+                attribute: attributeName,
+                eligible: eligible,
+                governance: governanceAddress
+            });
+        }
+    });
+
+task("setEligibleAttributeByDID", "npx hardhat setEligibleAttributeByDID --attribute <string> --eligible <boolean> --governance <address> --network <network_name>")
+    .addParam("attribute", "sets the attribute")
+    .addParam("eligible", "sets the eligible flag")
+    .addParam("governance", "sets the governance address")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const attribute = taskArgs.attribute;
+        const eligible = taskArgs.eligible;
+        const governanceAddress = taskArgs.governance;
+
+        const governance = await recursiveRetry(ethers.getContractAt, "QuadGovernance", governanceAddress);
+        await recursiveRetry(governance.setEligibleAttributeByDID, id(attribute), eligible);
+        console.log("set " + attribute + " eligibility by DID to " + eligible + " on network " + hre.network.name);
+    });
+
+task("setEligibleAttributesByDID", "npx hardhat setEligibleAttributesByDID --attributes <string,string,...> --eligible <boolean> --governance <address> --network <network_name>")
+    .addParam("attributes", "sets the attributes")
+    .addParam("eligible", "sets the eligible flag")
+    .addParam("governance", "sets the governance address")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const attributeNames = taskArgs.attributes.split(",");
+        const eligible = taskArgs.eligible;
+        const governanceAddress = taskArgs.governance;
+
+        for (const attributeName of attributeNames) {
+            await hre.run("setEligibleAttributeByDID", {
+                attribute: attributeName,
+                eligible: eligible,
+                governance: governanceAddress
+            });
+        }
+    });
+
 /*
+// usage for setting all attribute eligibility for all testnets (account level)
+(copy and paste all of the following into terminal)
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network mumbai
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0xC1fcC7790291FF3D9DC378bfA16047eC3002a83a --network avax_testnet
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0xCF6bA3a3d18bA1e35A41db79B3dBF2F6023F6071 --network bsc_testnet
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0x2B212B47Faf2040cA4782e812048F5aE8ad5Fa2f --network celo_testnet
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network arbitrum_goerli
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network optimism_goerli
+npx hardhat setEligibleAttributes --attributes COUNTRY,IS_BUSINESS,CRED_PROTOCOL_SCORE --eligible true --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network fantom_testnet
+
+// usage for setting all attribute eligibility for all testnets (did level)
+(copy and paste all of the following into terminal)
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network goerli
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0x863db2c1A43441bbAB7f34740d0d62e21e678A4b --network mumbai
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0xC1fcC7790291FF3D9DC378bfA16047eC3002a83a --network avax_testnet
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0xCF6bA3a3d18bA1e35A41db79B3dBF2F6023F6071 --network bsc_testnet
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0x2B212B47Faf2040cA4782e812048F5aE8ad5Fa2f --network celo_testnet
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network arbitrum_goerli
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network optimism_goerli
+npx hardhat setEligibleAttributesByDID --attributes AML,IS_ACCREDITITED_INVESTOR_US,IS_QUALIFIEDPURCHASER_US --eligible true --governance 0x82F5a215f29089429C634d686103D297b85d4e2a --network fantom_testnet
 
 // usage for setting all attributes for all issuers for all testnets
 (copy and paste all of the following into terminal)
