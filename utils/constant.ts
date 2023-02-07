@@ -18,6 +18,8 @@ export const ATTRIBUTE_COUNTRY = ethers.utils.id("COUNTRY");
 export const ATTRIBUTE_DID = ethers.utils.id("DID");
 export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
 export const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id("CRED_PROTOCOL_SCORE")
+export const ATTRIBUTE_IS_ACCREDITITED_INVESTOR_US = ethers.utils.id("IS_ACCREDITITED_INVESTOR_US")
+export const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id("IS_QUALIFIEDPURCHASER_US")
 export const TOKEN_ID = 1;
 
 export const ALL_ROLES = [

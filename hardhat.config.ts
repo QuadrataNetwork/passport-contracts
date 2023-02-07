@@ -82,7 +82,7 @@ const config = {
       chainId: 97,
     },
     arbitrum_goerli: {
-      url: "https://arb-goerli.g.alchemy.com/v2/demo",
+      url: "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
           ? [process.env.TESTNET_DEPLOY_KEY]
@@ -90,7 +90,7 @@ const config = {
       chainId: 421613,
     },
     optimism_goerli: {
-      url: "https://opt-goerli.g.alchemy.com/v2/demo",
+      url: "https://goerli.optimism.io",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
           ? [process.env.TESTNET_DEPLOY_KEY]

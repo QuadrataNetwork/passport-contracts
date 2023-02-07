@@ -27,6 +27,7 @@ task("setNonce", "npx hardhat setNonce --nonce <number> --network <network_name>
     });
 
 
+// TODO: finish implementing this
 task("deployTestnet", "npx hardhat deployTestnet --nonce <number> --network <network_name>")
     .addParam("nonce", "sets the nonce for the deployer")
     .setAction(async function (taskArgs, hre) {
