@@ -3,12 +3,7 @@ import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 
-const {
-  ATTRIBUTE_DID,
-  ATTRIBUTE_AML,
-  TOKEN_ID,
-  HARDHAT_CHAIN_ID,
-} = require("../../utils/constant.ts");
+const { ATTRIBUTE_DID, ATTRIBUTE_AML } = require("../../utils/constant.ts");
 
 const { signSetAttributes, signAccount } = require("./signature.ts");
 
@@ -42,25 +37,10 @@ export const setAttributesBulk = async (
         : ethers.constants.HashZero;
 
     Object.keys(attributes).forEach((k, i) => {
-      let attrKey;
       if (k === ATTRIBUTE_AML) {
         expect(ATTRIBUTE_DID in attributes).to.equal(true);
-        attrKey = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(
-            ["bytes32", "bytes32"],
-            [opts.oldDid || did, k]
-          )
-        );
-      } else {
-        attrKey = ethers.utils.keccak256(
-          ethers.utils.defaultAbiCoder.encode(
-            ["address", "bytes32"],
-            [account.address, k]
-          )
-        );
       }
       if (opts.attemptUpdateDid || k !== ATTRIBUTE_DID) {
-        attrKeys.push(attrKey);
         attrValues.push(attributes[k]);
         attrTypes.push(k);
       }

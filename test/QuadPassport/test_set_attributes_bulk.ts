@@ -83,7 +83,7 @@ describe("QuadPassport.setAttributes", async () => {
   describe("QuadPassport.setAttributes (success)", async () => {
     beforeEach(async () => {});
 
-    it.only("setAttributesBulk (Single Attribute)", async () => {
+    it("setAttributesBulk (Single Attribute)", async () => {
       const attributes1: any = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
         [ATTRIBUTE_AML]: formatBytes32String("1"),
@@ -227,26 +227,10 @@ describe("QuadPassport.setAttributes", async () => {
       // Deep Copy to avoid mutating the object
       attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {
-        let attrKey;
         if (k === ATTRIBUTE_AML) {
           expect(ATTRIBUTE_DID in attributesCopy).to.equal(true);
-          did = attributes[ATTRIBUTE_DID];
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["bytes32", "bytes32"],
-              [did, k]
-            )
-          );
-        } else {
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["address", "bytes32"],
-              [minterA.address, k]
-            )
-          );
         }
         if (k !== ATTRIBUTE_DID) {
-          attrKeys.push(attrKey);
           attrValues.push(attributesCopy[k]);
           attrTypes.push(k);
         }

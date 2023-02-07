@@ -233,6 +233,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Burn your Quadrata passport
     /// @dev Only owner of the passport
     function burnPassports() external override whenNotPaused {
+        // TO FIX
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
 
@@ -254,6 +255,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     function burnPassportsIssuer(
         address _account
     ) external override whenNotPaused {
+        // TO FIX
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
 
         bool isEmpty = true;
@@ -315,9 +317,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
         address[] memory issuers = governance.getIssuers();
+        Attribute memory did;
+        if (governance.eligibleAttributesByDID(_attribute))
+            did = attribute(_account, ATTRIBUTE_DID);
         uint256 counter = 0;
+        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0), issuers[i]);
+            if (governance.eligibleAttributesByDID(_attribute))
+                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+            else
+                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
                 counter += 1;
@@ -328,7 +337,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (counter > 0) {
             uint256 j;
             for (uint256 i = 0; i < issuers.length; i++) {
-                bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0), issuers[i]);
+                if (governance.eligibleAttributesByDID(_attribute))
+                    attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+                else
+                    attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
                 Attribute memory attr = _attributesv2[attrKey];
                 attr.issuer = issuers[i];
                 if (attr.epoch != uint256(0)) {
@@ -356,9 +368,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
+        Attribute memory did;
+        if (governance.eligibleAttributesByDID(_attribute))
+            did = attribute(_account, ATTRIBUTE_DID);
         address[] memory issuers = governance.getIssuers();
+        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            bytes32 attrKey = _computeAttrKey(_account, _attribute, bytes32(0), issuers[i]);
+            if (governance.eligibleAttributesByDID(_attribute))
+                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+            else
+                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
+
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
                 return attr;

@@ -456,26 +456,10 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       // Deep Copy to avoid mutating the object
       const attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {
-        let attrKey;
         if (k === ATTRIBUTE_AML) {
           expect(ATTRIBUTE_DID in attributesCopy).to.equal(true);
-          did = attributes[ATTRIBUTE_DID];
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["bytes32", "bytes32"],
-              [did, k]
-            )
-          );
-        } else {
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["address", "bytes32"],
-              [businessPassport.address, k]
-            )
-          );
         }
         if (k !== ATTRIBUTE_DID) {
-          attrKeys.push(attrKey);
           attrValues.push(attributesCopy[k]);
           attrTypes.push(k);
         }
