@@ -3,11 +3,7 @@ import { keccak256 } from "ethers/lib/utils";
 const { ethers } = require("hardhat");
 const { Signer, DataHexString } = require("ethers");
 
-const {
-  ATTRIBUTE_AML,
-  DIGEST_TO_SIGN,
-  HARDHAT_CHAIN_ID,
-} = require("../../utils/constant.ts");
+const { DIGEST_TO_SIGN, HARDHAT_CHAIN_ID } = require("../../utils/constant.ts");
 
 export const signMessage = async (
   signer: typeof Signer,
@@ -40,20 +36,6 @@ export const signSetAttributes = async (
   const attrValues: string[] = [];
 
   Object.keys(attributes).forEach((k, i) => {
-    let attrKey;
-    if (k === ATTRIBUTE_AML) {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [did, k])
-      );
-    } else {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["address", "bytes32"],
-          [account.address, k]
-        )
-      );
-    }
-    attrKeys.push(attrKey);
     attrValues.push(attributes[k]);
   });
 

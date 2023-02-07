@@ -83,9 +83,11 @@ describe("QuadPassport.setAttributes", async () => {
   describe("QuadPassport.setAttributes (success)", async () => {
     beforeEach(async () => {});
 
-    it("setAttributesBulk (Single Attribute)", async () => {
+    it.only("setAttributesBulk (Single Attribute)", async () => {
       const attributes1: any = {
-        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: formatBytes32String("1"),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
       };
       await setAttributesBulk(
         passport,

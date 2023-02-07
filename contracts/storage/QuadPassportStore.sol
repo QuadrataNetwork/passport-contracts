@@ -17,13 +17,14 @@ contract QuadPassportStore is IQuadPassportStore, QuadConstant {
     string public symbol;
     string public name;
 
-    // Key could be:
-    // 1) keccak256(userAddress, keccak256(attrType))
-    // 2) keccak256(DID, keccak256(attrType))
+    // @deprecated (_attributesv2 should be used instead)
     mapping(bytes32 => Attribute[]) internal _attributes;
 
-    // Key could be:
-    // 1) keccak256(keccak256(userAddress, keccak256(attrType)), issuer)
-    // 1) keccak256(keccak256(DID, keccak256(attrType)), issuer)
+    // @deprecated
     mapping(bytes32 => uint256) internal _position;
+
+    // Key could be:
+    // 1) keccak256(userAddress, keccak256(attrType), issuerAddress)
+    // 2) keccak256(DID, keccak256(attrType), issuerAddress)
+    mapping(bytes32 => Attribute) internal _attributesv2;
 }
