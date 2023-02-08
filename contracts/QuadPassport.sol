@@ -233,20 +233,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Burn your Quadrata passport
     /// @dev Only owner of the passport
     function burnPassports() external override whenNotPaused {
-        // TO FIX
+        address account = _msgSender();
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-            bytes32 attributeType = governance.eligibleAttributesArray(i);
-
-            bytes32 attrKey = keccak256(abi.encode(_msgSender(), attributeType));
-
-            IQuadPassportStore.Attribute[] storage attrs = _attributes[attrKey];
-
-            for(uint256 j = attrs.length; j > 0; j--){
-                _position[keccak256(abi.encode(attrKey, attrs[j-1].issuer))] = 0;
-                attrs.pop();
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+                bytes32 attributeType = governance.eligibleAttributesArray(i);
+                address issuer = governance.getIssuers()[j];
+                bytes32 attrKey = attributeKey(account, attributeType, issuer);
+                delete _attributesv2[attrKey];
             }
         }
-        _burnPassports(_msgSender());
+        _burnPassports(account);
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
@@ -255,40 +251,32 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     function burnPassportsIssuer(
         address _account
     ) external override whenNotPaused {
-        // TO FIX
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
+        address issuer = _msgSender();
 
         bool isEmpty = true;
 
-        // only delete attributes from issuer
+        // first pass only delete attributes from issuer
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            bytes32 attrKey = keccak256(abi.encode(_account, attributeType));
-            uint256 position = _position[keccak256(abi.encode(attrKey, _msgSender()))];
-            Attribute[] storage attrs = _attributes[attrKey];
-            if (position > 0) {
-
-                // Swap last attribute position with position of attribute to delete before calling pop()
-                Attribute memory attrToDelete = attrs[position-1];
-                Attribute memory attrToSwap = attrs[attrs.length-1];
-
-                _position[keccak256(abi.encode(attrKey, attrToSwap.issuer))] = position;
-                _position[keccak256(abi.encode(attrKey, attrToDelete.issuer))] = 0;
-
-                attrs[position-1] = attrToSwap;
-
-                attrs.pop();
-
-            }
-            if (attrs.length > 0) {
-                isEmpty = false;
+            bytes32 attrKey = attributeKey(_account, attributeType, issuer);
+            delete _attributesv2[attrKey];
+            // second pass check if account still has attributes from other issuers
+            for(uint256 j = 0; isEmpty && j < governance.getIssuersLength(); j++) {
+                address otherIssuer = governance.getIssuers()[j];
+                if (otherIssuer != issuer) {
+                    attrKey = attributeKey(_account, attributeType, otherIssuer);
+                    if (_attributesv2[attrKey].value != bytes32(0)) {
+                        isEmpty = false;
+                    }
+                }
             }
         }
 
         if (isEmpty){
             _burnPassports(_account);
         }
-        emit BurnPassportsIssuer(_msgSender(), _account);
+        emit BurnPassportsIssuer(issuer, _account);
     }
 
     /// @dev Loop through all eligible token ids and burn passports if they exist
