@@ -30,6 +30,12 @@ interface IQuadPassport is IQuadSoulbound {
         bytes calldata _sigIssuer
     ) external payable;
 
+    function attributeMetadata(
+        address _account,
+        bytes32[] memory _attributes
+    ) external view returns (bytes32[] memory attributeTypes, address[] memory issuers, uint256[] memory issuedAts);
+
+
     function burnPassports() external;
 
     function burnPassportsIssuer(address _account) external;

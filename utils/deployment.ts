@@ -232,26 +232,6 @@ export const deployGovernance = async (
   return governance;
 };
 
-export const deployFEUtils = async (
-  governance: Contract,
-  passport: Contract,
-  feUtilsAddress: string = ""
-  ): Promise<Contract> => {
-  if (feUtilsAddress !== "") {
-    return await ethers.getContractAt("QuadFEUtils", feUtilsAddress);
-  }
-  const QuadFEUtils = await ethers.getContractFactory("QuadFEUtils");
-  const feUtils = await upgrades.deployProxy(
-    QuadFEUtils,
-    [governance.address, passport.address], {
-    initializer: "initialize",
-    kind: "uups",
-    unsafeAllow: ["constructor"],
-  });
-  await feUtils.deployed();
-  return feUtils;
-};
-
 export const deployReader = async (
   governance: Contract,
   passport: Contract,

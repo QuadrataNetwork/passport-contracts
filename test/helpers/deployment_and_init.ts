@@ -3,7 +3,7 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { READER_ROLE } from "../../utils/constant";
 
-const { deployQuadrata, deployFEUtils } = require("../../utils/deployment.ts");
+const { deployQuadrata } = require("../../utils/deployment.ts");
 
 const {
   ATTRIBUTE_DID,
@@ -20,7 +20,7 @@ export const deployPassportEcosystem = async (
   treasury: SignerWithAddress,
   issuerTreasuries: SignerWithAddress[]
 ): Promise<
-  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any, Promise<Contract>]
+  [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any]
 > => {
   const issuersToAdd: any[] = [];
   for (let i = 0; i < issuers.length; i++) {
@@ -47,10 +47,6 @@ export const deployPassportEcosystem = async (
     tokenIds,
     false
   );
-  // Deploy FEUtils
-  const feUtils = await deployFEUtils(governance, passport)
-  // add fe utils to have reader role
-  await governance.connect(admin).grantRole(READER_ROLE, feUtils.address)
 
   // Revoke Deployer Role
   await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address);
@@ -69,5 +65,5 @@ export const deployPassportEcosystem = async (
   await mockbusiness.deployed();
 
 
-  return [governance, passport, reader, defi, mockbusiness, feUtils];
+  return [governance, passport, reader, defi, mockbusiness];
 };

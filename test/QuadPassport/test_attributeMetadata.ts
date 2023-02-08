@@ -11,10 +11,9 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-describe("QuadFEUtils.attributeMetadata", async () => {
+describe("QuadPassport.attributeMetadata", async () => {
   let passport: Contract; // eslint-disable-line no-unused-vars
   let governance: Contract; // eslint-disable-line no-unused-vars
-  let feUtils: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress; // eslint-disable-line no-unused-vars
   let issuerA: SignerWithAddress; // eslint-disable-line no-unused-vars
   let issuerB: SignerWithAddress; // eslint-disable-line no-unused-vars
@@ -22,7 +21,7 @@ describe("QuadFEUtils.attributeMetadata", async () => {
   beforeEach(async () => {
     [deployer, issuerA, issuerB] =  await ethers.getSigners();
     let reader, defi, mockbusiness;
-    [governance, passport,reader, defi, mockbusiness, feUtils] = await deployPassportEcosystem(
+    [governance, passport,reader, defi, mockbusiness] = await deployPassportEcosystem(
       deployer,
       [deployer, issuerA, issuerB],
       deployer,
@@ -32,7 +31,7 @@ describe("QuadFEUtils.attributeMetadata", async () => {
   });
 
   it("success - isEmpty", async () => {
-    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML")]);
+    const {attributeNames, issuers, issuedAts} = await passport.attributeMetadata(deployer.address, [id("AML")]);
     expect(attributeNames.length == 0).equals(true)
     expect(issuers.length == 0).equals(true)
     expect(issuedAts.length == 0).equals(true)
@@ -59,7 +58,7 @@ describe("QuadFEUtils.attributeMetadata", async () => {
       MINT_PRICE
     );
 
-    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML")]);
+    const {attributeNames, issuers, issuedAts} = await passport.attributeMetadata(deployer.address, [id("AML")]);
     expect(attributeNames.length == 1).equals(true)
     expect(issuers.length == 1).equals(true)
     expect(issuedAts.length == 1).equals(true)
@@ -99,7 +98,7 @@ describe("QuadFEUtils.attributeMetadata", async () => {
       MINT_PRICE
     );
 
-    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML")]);
+    const {attributeNames, issuers, issuedAts} = await passport.attributeMetadata(deployer.address, [id("AML")]);
     expect(attributeNames.length == 2).equals(true)
     expect(issuers.length == 2).equals(true)
     expect(issuedAts.length == 2).equals(true)
@@ -144,7 +143,7 @@ describe("QuadFEUtils.attributeMetadata", async () => {
       MINT_PRICE
     );
 
-    const {attributeNames, issuers, issuedAts} = await feUtils.attributeMetadata(deployer.address, [id("AML"), id("COUNTRY")]);
+    const {attributeNames, issuers, issuedAts} = await passport.attributeMetadata(deployer.address, [id("AML"), id("COUNTRY")]);
     expect(attributeNames.length == 4).equals(true)
     expect(issuers.length == 4).equals(true)
     expect(issuedAts.length == 4).equals(true)

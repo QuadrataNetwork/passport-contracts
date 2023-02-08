@@ -12,7 +12,6 @@ import "@nomiclabs/hardhat-ethers";
 require('dotenv').config({ path: require('find-config')('.env') })
 
 // Tasks
-import "./scripts/tasks/quadFEUtils.ts";
 import "./scripts/tasks/quadGovernance.ts";
 import "./scripts/tasks/deployTasks.ts";
 
@@ -25,7 +24,7 @@ const config = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10000,
+            runs: 1000,
           },
         },
       },

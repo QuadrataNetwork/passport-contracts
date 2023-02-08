@@ -321,13 +321,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (governance.eligibleAttributesByDID(_attribute))
             did = attribute(_account, ATTRIBUTE_DID);
         uint256 counter = 0;
-        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            if (governance.eligibleAttributesByDID(_attribute))
-                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
-            else
-                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
-            Attribute memory attr = _attributesv2[attrKey];
+            Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
             if (attr.epoch != uint256(0)) {
                 counter += 1;
             }
@@ -337,11 +332,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (counter > 0) {
             uint256 j;
             for (uint256 i = 0; i < issuers.length; i++) {
-                if (governance.eligibleAttributesByDID(_attribute))
-                    attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
-                else
-                    attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
-                Attribute memory attr = _attributesv2[attrKey];
+                Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
                 attr.issuer = issuers[i];
                 if (attr.epoch != uint256(0)) {
                     attrs[j] = attr;
@@ -372,20 +363,23 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (governance.eligibleAttributesByDID(_attribute))
             did = attribute(_account, ATTRIBUTE_DID);
         address[] memory issuers = governance.getIssuers();
-        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            if (governance.eligibleAttributesByDID(_attribute))
-                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
-            else
-                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
-
-            Attribute memory attr = _attributesv2[attrKey];
+            Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
             if (attr.epoch != uint256(0)) {
                 return attr;
             }
         }
 
         return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
+    }
+
+    function attributeKey(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) public view returns (bytes32) {
+        bytes32 did = governance.eligibleAttributesByDID(_attribute) ? _attributesv2[keccak256(abi.encode(_account, ATTRIBUTE_DID, _issuer))].value : bytes32(0);
+        return did != bytes32(0) ? keccak256(abi.encode(did, _attribute, _issuer)) : keccak256(abi.encode(_account, _attribute, _issuer));
     }
 
     /// @dev Admin function to set the new pending Governance address
@@ -398,6 +392,51 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         pendingGovernance = _governanceContract;
         emit SetPendingGovernance(pendingGovernance);
     }
+
+    /// @dev Allow users to grab all the metadata for a given attribute(s)
+    /// @param _account address of user
+    /// @param _attributes attributes to get respective non-value data from
+    /// @return attributeNames list of attribute names encoded as keccack256("AML") for example
+    /// @return issuers list of issuers for the attribute[i]
+    /// @return issuedAts list of epochs for the attribute[i]
+    function attributeMetadata(
+        address _account,
+        bytes32[] memory _attributes
+    ) public view override returns (bytes32[] memory attributeNames, address[] memory issuers, uint256[] memory issuedAts) {
+
+        // first pass calculate length
+        uint256 attributeLength;
+        for(uint256 i = 0; i < _attributes.length; i++) {
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+                bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
+                IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
+                if (attribute.epoch != uint256(0)) {
+                    attributeLength += 1;
+                }
+            }
+        }
+
+        // allocate arrays and set length
+        attributeNames = new bytes32[](attributeLength);
+        issuers = new address[](attributeLength);
+        issuedAts = new uint256[](attributeLength);
+        uint256 attributeIndex;
+
+        // second pass fill arrays
+        for(uint256 i = 0; i < _attributes.length; i++) {
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+                bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
+                IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
+                if (attribute.epoch != uint256(0)) {
+                    attributeNames[attributeIndex] = _attributes[i];
+                    issuers[attributeIndex] = governance.getIssuers()[j];
+                    issuedAts[attributeIndex] = attribute.epoch;
+                    attributeIndex++;
+                }
+            }
+        }
+    }
+
 
     /// @dev Withdraw to an issuer's treasury
     /// @notice Restricted behind a TimelockController
