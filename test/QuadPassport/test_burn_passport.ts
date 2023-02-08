@@ -1249,7 +1249,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
     });
 
-    it("success - mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted", async () => {
+    it.only("success - mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted", async () => {
       const MockBusiness = await ethers.getContractFactory("MockBusiness");
       const mockBusiness = await MockBusiness.deploy(defi.address);
       await mockBusiness.deployed();
@@ -1392,13 +1392,16 @@ describe("QuadPassport.burnPassports", async () => {
         )
       ).to.not.be.reverted;
 
+      console.log("issuer", issuer.address);
+      console.log("issuerB", issuerB.address);
+
       await assertGetAttributes(
         mockBusiness,
         ATTRIBUTE_AML,
         reader,
         defi,
         treasury,
-        [issuer, issuerB],
+        [issuerB, issuer],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
         true

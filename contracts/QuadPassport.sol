@@ -292,7 +292,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
     }
 
-    /// @dev Allow an authorized readers to get all attribute information about a passport holder
+   /// @dev Allow an authorized readers to get all attribute information about a passport holder
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @return value of attribute from issuer
@@ -307,9 +307,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
         address[] memory issuers = governance.getIssuers();
+        Attribute memory did;
+        if (governance.eligibleAttributesByDID(_attribute))
+            did = attribute(_account, ATTRIBUTE_DID);
         uint256 counter = 0;
+        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
+            if (governance.eligibleAttributesByDID(_attribute))
+                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+            else
+                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
+            Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
                 counter += 1;
             }
@@ -319,7 +327,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (counter > 0) {
             uint256 j;
             for (uint256 i = 0; i < issuers.length; i++) {
-                Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
+                if (governance.eligibleAttributesByDID(_attribute))
+                    attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+                else
+                    attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
+                Attribute memory attr = _attributesv2[attrKey];
                 attr.issuer = issuers[i];
                 if (attr.epoch != uint256(0)) {
                     attrs[j] = attr;
@@ -350,8 +362,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (governance.eligibleAttributesByDID(_attribute))
             did = attribute(_account, ATTRIBUTE_DID);
         address[] memory issuers = governance.getIssuers();
+        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
+            if (governance.eligibleAttributesByDID(_attribute))
+                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+            else
+                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
+
+            Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
                 return attr;
             }
@@ -359,6 +377,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
     }
+
 
     /// @dev Allow an a user to generate a key for an attribute
     /// @param _account address of user

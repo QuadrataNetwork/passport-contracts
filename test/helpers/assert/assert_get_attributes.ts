@@ -154,7 +154,9 @@ export const assertGetAttributesEvents = async (
     if (numberOfAttrs !== 0) {
       feeIssuer = queryFee.mul(ISSUER_SPLIT).div(100).div(numberOfAttrs);
     }
+    console.log(receipt.events)
     expect(receipt.events.length).to.equal(numberOfAttrs + 2);
+    console.log(numberOfAttrs)
     for (let i = 0; i < numberOfAttrs; i++) {
       const event = receipt.events[i];
       expect(event.event).to.equal("QueryFeeReceipt");
