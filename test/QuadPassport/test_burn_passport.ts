@@ -1392,9 +1392,6 @@ describe("QuadPassport.burnPassports", async () => {
         )
       ).to.not.be.reverted;
 
-      console.log("issuer", issuer.address);
-      console.log("issuerB", issuerB.address);
-
       await assertGetAttributes(
         mockBusiness,
         ATTRIBUTE_AML,
