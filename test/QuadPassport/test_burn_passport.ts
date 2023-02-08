@@ -1249,7 +1249,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
     });
 
-    it.only("success - mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted", async () => {
+    it("success - mint 2 passports for business, delete issuerA, burn, assert only account level items were deleted", async () => {
       const MockBusiness = await ethers.getContractFactory("MockBusiness");
       const mockBusiness = await MockBusiness.deploy(defi.address);
       await mockBusiness.deployed();
