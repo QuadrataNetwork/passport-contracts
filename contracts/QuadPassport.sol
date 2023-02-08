@@ -9,12 +9,13 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./storage/QuadPassportStore.sol";
+import "./storage/QuadPassportStoreV2.sol";
 import "./QuadSoulbound.sol";
 
 /// @title Quadrata Web3 Identity Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice This represents a Quadrata NFT Passport
-contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStore {
+contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStoreV2 {
 
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
@@ -230,14 +231,15 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         revert("ATTRIBUTE_NOT_ELIGIBLE");
     }
 
-    /// @notice Burn your Quadrata passport
+    /// @notice Burn your Quadrata passport and preserve did level attributes
     /// @dev Only owner of the passport
     function burnPassports() external override whenNotPaused {
         address account = _msgSender();
+        address[] memory issuers = governance.getAllIssuers();
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+            for(uint256 j = 0; j < issuers.length; j++) {
                 bytes32 attributeType = governance.eligibleAttributesArray(i);
-                address issuer = governance.getIssuers()[j];
+                address issuer = issuers[j];
                 bytes32 attrKey = attributeKey(account, attributeType, issuer);
                 delete _attributesv2[attrKey];
             }
@@ -253,17 +255,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) external override whenNotPaused {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
         address issuer = _msgSender();
-
+        address[] memory allIssuers = governance.getAllIssuers();
         bool isEmpty = true;
 
-        // first pass only delete attributes from issuer
+        // surface pass only delete attributes from issuer
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
             bytes32 attrKey = attributeKey(_account, attributeType, issuer);
             delete _attributesv2[attrKey];
-            // second pass check if account still has attributes from other issuers
-            for(uint256 j = 0; isEmpty && j < governance.getIssuersLength(); j++) {
-                address otherIssuer = governance.getIssuers()[j];
+            // second depth checks if account still has attributes from other issuers
+            for(uint256 j = 0; isEmpty && j < allIssuers.length; j++) {
+                address otherIssuer = allIssuers[j];
                 if (otherIssuer != issuer) {
                     attrKey = attributeKey(_account, attributeType, otherIssuer);
                     if (_attributesv2[attrKey].value != bytes32(0)) {
@@ -305,9 +307,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
         address[] memory issuers = governance.getIssuers();
-        Attribute memory did;
-        if (governance.eligibleAttributesByDID(_attribute))
-            did = attribute(_account, ATTRIBUTE_DID);
         uint256 counter = 0;
         for (uint256 i = 0; i < issuers.length; i++) {
             Attribute memory attr = _attributesv2[attributeKey(_account, _attribute, issuers[i])];
@@ -361,6 +360,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
     }
 
+    /// @dev Allow an a user to generate a key for an attribute
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @param _issuer address of issuer
+    /// @return key for attribute
     function attributeKey(
         address _account,
         bytes32 _attribute,
