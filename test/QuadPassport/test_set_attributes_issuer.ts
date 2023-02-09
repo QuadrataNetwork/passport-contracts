@@ -46,13 +46,13 @@ describe("QuadPassport.setAttributesIssuer", async () => {
     mockReader: SignerWithAddress;
 
   let issuedAt: number, verifiedAt: number;
-  const zeroFee = ethers.utils.parseEther("0");
-  const attributes: any = {
+  let attributes: any = {
     [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
   };
+  const zeroFee = ethers.utils.parseEther("0");
 
   beforeEach(async () => {
     [
@@ -453,7 +453,12 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       attrTypes = [];
 
       let did = attributes[ATTRIBUTE_DID];
-
+      attributes = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: formatBytes32String("1"),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
       // Deep Copy to avoid mutating the object
       const attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {

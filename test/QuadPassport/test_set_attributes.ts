@@ -47,7 +47,7 @@ describe("QuadPassport.setAttributes", async () => {
     mockReader: SignerWithAddress;
 
   let issuedAt: number, verifiedAt: number;
-  const attributes: any = {
+  let attributes: any = {
     [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
@@ -429,7 +429,7 @@ describe("QuadPassport.setAttributes", async () => {
   // ******************************************************************************* //
   // ******************************************************************************* //
 
-  describe("QuadPassport.setAttributes (ALL ERRORS)", async () => {
+  describe.only("QuadPassport.setAttributes (ALL ERRORS)", async () => {
     let attrKeys: any,
       attrValues: any,
       attrTypes: any,
@@ -441,11 +441,19 @@ describe("QuadPassport.setAttributes", async () => {
       attributesCopy: any;
 
     beforeEach(async () => {
+
       attrKeys = [];
       attrValues = [];
       attrTypes = [];
 
       let did = formatBytes32String("0");
+
+      attributes = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: formatBytes32String("1"),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
 
       // Deep Copy to avoid mutating the object
       attributesCopy = Object.assign({}, attributes);
@@ -858,7 +866,6 @@ describe("QuadPassport.setAttributes", async () => {
         passport.address,
         chainId
       );
-      console.log(attributes)
 
       attrTypes.push(id("wrong"));
       await expect(
