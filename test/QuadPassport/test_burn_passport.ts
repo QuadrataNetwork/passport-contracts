@@ -1780,7 +1780,7 @@ describe("QuadPassport.burnPassports", async () => {
         reader,
         defi,
         treasury,
-        [issuer, issuerB],
+        [issuerB, issuer],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
       );

@@ -199,12 +199,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
 
-        // TODO: Can we remove since we have expiry
-        //require(!_usedSigHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
-
-        // TODO: Can we remove since we have expiry
-        //_usedSigHashes[issuerMintHash] = true;
-
         return issuer;
     }
 

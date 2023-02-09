@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { formatBytes32String, id } from "ethers/lib/utils";
@@ -72,8 +72,9 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    // set issued at to current block timestamp
+    issuedAt = await ethers.provider.getBlock("latest").then((block) => block.timestamp) - 100;
+    verifiedAt = issuedAt;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
@@ -1227,4 +1228,11 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("ISSUER_ATTR_PERMISSION_INVALID");
     });
   });
+
+    // clean up test state and reset hardhat network
+    after(async () => {
+      await network.provider.request({
+        method: "hardhat_reset",
+      });
+    });
 });
