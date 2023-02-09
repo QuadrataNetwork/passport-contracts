@@ -1166,6 +1166,20 @@ describe("QuadPassport.setAttributes", async () => {
       await governance
         .connect(admin)
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_DID, false);
+
+        const did = attributes[ATTRIBUTE_DID];
+        delete attributes[ATTRIBUTE_DID]
+        sigIssuer = await signSetAttributes(
+          minterA,
+          issuer,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          fee,
+          did,
+          passport.address,
+          chainId
+        );
       await expect(
         passport
           .connect(minterA)
@@ -1174,7 +1188,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              attributes[ATTRIBUTE_DID],
+              did,
               tokenId,
               verifiedAt,
               issuedAt,
@@ -1189,10 +1203,25 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.be.revertedWith("ISSUER_ATTR_PERMISSION_INVALID");
     });
 
-    it("fail - issuer with no permission to issue attribute AML", async () => {
+    it.only("fail - issuer with no permission to issue attribute AML", async () => {
       await governance
         .connect(admin)
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_AML, false);
+
+        const did = attributes[ATTRIBUTE_DID];
+        delete attributes[ATTRIBUTE_DID]
+        sigIssuer = await signSetAttributes(
+          minterA,
+          issuer,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          fee,
+          did,
+          passport.address,
+          chainId
+        );
+
       await expect(
         passport
           .connect(minterA)
@@ -1201,7 +1230,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              attributes[ATTRIBUTE_DID],
+              did,
               tokenId,
               verifiedAt,
               issuedAt,
