@@ -511,6 +511,23 @@ describe("QuadPassport.setAttributes", async () => {
       const noMint = 0;
       await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
+      const did = attributes[ATTRIBUTE_DID];
+      //remove first key-value mapping in attributes
+      delete attributes[ATTRIBUTE_DID]
+
+      // create issuer sig for the following attributes
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
+
       await passport
         .connect(minterA)
         .setAttributes(
@@ -518,7 +535,7 @@ describe("QuadPassport.setAttributes", async () => {
             attrKeys,
             attrValues,
             attrTypes,
-            attributes[ATTRIBUTE_DID],
+            did,
             noMint,
             verifiedAt,
             issuedAt,
@@ -545,6 +562,10 @@ describe("QuadPassport.setAttributes", async () => {
         [attributes],
         [verifiedAt]
       );
+
+      // add DID back to attributes
+      attributes[ATTRIBUTE_DID] = did;
+
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_DID,
@@ -603,7 +624,7 @@ describe("QuadPassport.setAttributes", async () => {
 
     });
 
-    it("fail - same wallet but diff DID)", async () => {
+    it.only("fail - same wallet but diff DID)", async () => {
       await setAttributes(
         minterA,
         issuer,

@@ -1016,6 +1016,31 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         .connect(admin)
         .setEligibleTokenId(wrongTokenId, true, "");
 
+      const did = attributes[ATTRIBUTE_DID];
+      //remove first key-value mapping in attributes
+      delete attributes[ATTRIBUTE_DID]
+
+      // create issuer sig for the following attributes
+      sigIssuer = await signSetAttributes(
+        businessPassport,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
+
+      // set attrValues to values of attributes
+      attrValues = Object.values(attributes)
+      attrTypes = [
+        ATTRIBUTE_AML,
+        ATTRIBUTE_COUNTRY,
+        ATTRIBUTE_IS_BUSINESS,
+      ]
+
       await passport
         .connect(issuer)
         .setAttributesIssuer(
@@ -1024,7 +1049,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             attrKeys,
             attrValues,
             attrTypes,
-            attributes[ATTRIBUTE_DID],
+            did,
             wrongTokenId,
             verifiedAt,
             issuedAt,
