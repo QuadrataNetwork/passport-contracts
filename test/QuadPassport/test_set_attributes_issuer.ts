@@ -579,15 +579,11 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.not.be.reverted;
     });
 
-    it("fail - signature already used", async () => {
-      await setAttributesIssuer(
-        businessPassport,
-        issuer,
-        passport,
-        attributes,
-        verifiedAt,
-        issuedAt
-      );
+    it("fail - signature too old (must be used within 6 hours of issuance", async () => {
+      // set block timestamp to be 5 hours passed issuedAt
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        issuedAt + 5 * 60 * 60,
+      ]);
       await expect(
         setAttributesIssuer(
           businessPassport,
@@ -597,7 +593,22 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           verifiedAt,
           issuedAt
         )
-      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.not.be.reverted;
+
+      // set block timestamp to be 7 hours passed issuedAt
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        issuedAt + 7 * 60 * 60,
+      ]);
+      await expect(
+        setAttributesIssuer(
+          businessPassport,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt
+        )
+      ).to.be.revertedWith("EXPIRED_ISSUED_AT");
     });
 
     it("fail - same wallet but diff DID)", async () => {

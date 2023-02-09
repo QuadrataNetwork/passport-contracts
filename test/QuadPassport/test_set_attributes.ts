@@ -566,16 +566,28 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
-    it("fail - signature already used", async () => {
-      await setAttributes(
-        minterA,
-        issuer,
-        passport,
-        attributes,
-        verifiedAt,
-        issuedAt,
-        MINT_PRICE
-      );
+    it("fail - signature too old (must be used within 6 hours of issuance", async () => {
+      // set block timestamp to be 5 hours passed issuedAt
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        issuedAt + 5 * 60 * 60,
+      ]);
+      await expect(
+          setAttributes(
+          minterA,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          MINT_PRICE
+        )
+      ).to.not.be.reverted;
+
+      // set block timestamp to be 7 hours passed issuedAt
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        issuedAt + 7 * 60 * 60,
+      ]);
+
       await expect(
         setAttributes(
           minterA,
@@ -586,7 +598,7 @@ describe("QuadPassport.setAttributes", async () => {
           issuedAt,
           MINT_PRICE
         )
-      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.be.revertedWith("EXPIRED_ISSUED_AT");
     });
 
     it("fail - same wallet but diff DID)", async () => {

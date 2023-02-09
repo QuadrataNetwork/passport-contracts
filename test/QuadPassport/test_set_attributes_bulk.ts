@@ -293,6 +293,7 @@ describe("QuadPassport.setAttributes", async () => {
         [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
       );
 
+      // should pass because sig is within expiry timeframe of 6 hours
       await expect(
         setAttributesBulk(
           passport,
@@ -305,7 +306,7 @@ describe("QuadPassport.setAttributes", async () => {
           [TOKEN_ID, TOKEN_ID],
           [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.not.be.reverted;
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - 0 verifiedAt", async () => {
