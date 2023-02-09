@@ -429,7 +429,7 @@ describe("QuadPassport.setAttributes", async () => {
   // ******************************************************************************* //
   // ******************************************************************************* //
 
-  describe.only("QuadPassport.setAttributes (ALL ERRORS)", async () => {
+  describe("QuadPassport.setAttributes (ALL ERRORS)", async () => {
     let attrKeys: any,
       attrValues: any,
       attrTypes: any,

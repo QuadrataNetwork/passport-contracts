@@ -452,13 +452,13 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       attrValues = [];
       attrTypes = [];
 
-      let did = attributes[ATTRIBUTE_DID];
       attributes = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
         [ATTRIBUTE_AML]: formatBytes32String("1"),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
+      let did = attributes[ATTRIBUTE_DID];
       // Deep Copy to avoid mutating the object
       const attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {
@@ -1067,7 +1067,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         );
     });
 
-    it("success - with no mint with tokenId = 0", async () => {
+    it.only("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
       await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
