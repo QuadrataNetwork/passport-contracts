@@ -1067,7 +1067,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         );
     });
 
-    it.only("success - with no mint with tokenId = 0", async () => {
+    it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
       await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
