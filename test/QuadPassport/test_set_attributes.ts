@@ -1203,7 +1203,7 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.be.revertedWith("ISSUER_ATTR_PERMISSION_INVALID");
     });
 
-    it.only("fail - issuer with no permission to issue attribute AML", async () => {
+    it("fail - issuer with no permission to issue attribute AML", async () => {
       await governance
         .connect(admin)
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_AML, false);

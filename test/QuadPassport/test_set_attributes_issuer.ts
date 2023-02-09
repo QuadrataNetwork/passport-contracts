@@ -757,8 +757,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_FEE");
     });
 
-    it("fail - attrKeys.length != attrValues.length", async () => {
-      attrKeys.push(id("wrong"));
+    it("fail - attrTypes.length != attrValues.length", async () => {
+      attrTypes.push(id("wrong"));
       await expect(
         passport
           .connect(issuer)
@@ -1066,6 +1066,20 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       const noMint = 0;
       await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
+      const did = attributes[ATTRIBUTE_DID];
+      delete attributes[ATTRIBUTE_DID]
+      sigIssuer = await signSetAttributes(
+        businessPassport,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
+
       await passport
         .connect(issuer)
         .setAttributesIssuer(
@@ -1074,7 +1088,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             attrKeys,
             attrValues,
             attrTypes,
-            attributes[ATTRIBUTE_DID],
+            did,
             noMint,
             verifiedAt,
             issuedAt,
@@ -1100,6 +1114,9 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [attributes],
         [verifiedAt]
       );
+      // add DID back to attributes
+      attributes[ATTRIBUTE_DID] = did;
+
       await assertGetAttributes(
         businessPassport,
         ATTRIBUTE_DID,

@@ -74,8 +74,8 @@ describe("QuadPassport.setAttributes", async () => {
       [issuerTreasury, issuerTreasury2]
     );
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 10000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 10000;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
@@ -366,6 +366,20 @@ describe("QuadPassport.setAttributes", async () => {
 
     it("fail - invalid fee", async () => {
       const wrongFee = fee.sub(1);
+      const did = attributes[ATTRIBUTE_DID];
+        delete attributes[ATTRIBUTE_DID]
+        sigIssuer = await signSetAttributes(
+          minterA,
+          issuer,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          fee,
+          did,
+          passport.address,
+          chainId
+        );
+        attributes[ATTRIBUTE_DID] = did;
       await expect(
         passport
           .connect(minterA)
