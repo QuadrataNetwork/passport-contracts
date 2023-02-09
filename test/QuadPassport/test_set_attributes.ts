@@ -625,6 +625,9 @@ describe("QuadPassport.setAttributes", async () => {
     });
 
     it.only("fail - same wallet but diff DID)", async () => {
+
+      console.log(attributes)
+
       await setAttributes(
         minterA,
         issuer,
@@ -641,6 +644,8 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
+
+      console.log(attributeByIssuer2)
 
       await expect(
         setAttributes(

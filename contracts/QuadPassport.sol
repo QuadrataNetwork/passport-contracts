@@ -105,7 +105,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         // Handle DID
         if(_config.did != bytes32(0)){
             require(governance.getIssuerAttributePermission(_issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
-            _validateDid(_account, _config.did, _issuer);
+            _validateDid(_account, _config.did);
             _writeAttrToStorage(
                 _computeAttrKey(_account, ATTRIBUTE_DID, _config.did, _issuer),
                 _config.did,
@@ -131,12 +131,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @notice Internal function that validates supplied DID on updates do not change
     /// @param _account address of entity being attested to
     /// @param _did new DID value
-    /// @param _issuer address of the issuer
-    function _validateDid(address _account, bytes32 _did, address _issuer) internal view {
-        bytes32 attrKey = _computeAttrKey(_account, ATTRIBUTE_DID, _did, _issuer);
-        Attribute memory did = _attributesv2[attrKey];
-        if (did.value != bytes32(0)){
-            require(did.value == _did, "INVALID_DID");
+    function _validateDid(address _account, bytes32 _did) internal view {
+        // check if DID is already set from issuers
+        address[] memory issuers = governance.getIssuers();
+        for(uint256 i = 0; i < issuers.length; i++) {
+            address issuer = issuers[i];
+            bytes32 attrKey = keccak256(abi.encode(_account, ATTRIBUTE_DID, issuer));
+            bytes32 possibleDid = _attributesv2[attrKey].value;
+            if(possibleDid != bytes32(0)) {
+                require(possibleDid == _did, "INVALID_DID");
+            }
+
         }
     }
 
