@@ -82,7 +82,7 @@ describe("QuadPassport.setAttributes", async () => {
   });
 
   describe("QuadPassport.setAttributes (success)", async () => {
-    beforeEach(async () => {});
+    beforeEach(async () => { });
 
     it("setAttributes (Single Attribute)", async () => {
       const attributes: any = {
@@ -486,26 +486,26 @@ describe("QuadPassport.setAttributes", async () => {
         .connect(admin)
         .setEligibleTokenId(wrongTokenId, true, "");
 
-        // attributes has too many key-value mappings (including did)
-        // in order for sig to pass verification
-        // we must sign the attributes without the did
+      // attributes has too many key-value mappings (including did)
+      // in order for sig to pass verification
+      // we must sign the attributes without the did
 
-        const did = attributes[ATTRIBUTE_DID];
-        //remove first key-value mapping in attributes
-        delete attributes[ATTRIBUTE_DID]
+      const did = attributes[ATTRIBUTE_DID];
+      //remove first key-value mapping in attributes
+      delete attributes[ATTRIBUTE_DID]
 
-        // create issuer sig for the following attributes
-        sigIssuer = await signSetAttributes(
-          minterA,
-          issuer,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          fee,
-          did,
-          passport.address,
-          chainId
-        );
+      // create issuer sig for the following attributes
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
 
       await passport
         .connect(minterA)
@@ -615,7 +615,7 @@ describe("QuadPassport.setAttributes", async () => {
         issuedAt + 5 * 60 * 60,
       ]);
       await expect(
-          setAttributes(
+        setAttributes(
           minterA,
           issuer,
           passport,
@@ -844,8 +844,23 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("fail - attrKeys.length != attrValues.length", async () => {
-      attrKeys.push(id("wrong"));
+    it("fail - attrTypes.length != attrValues.length", async () => {
+      const did = attributes[ATTRIBUTE_DID];
+      delete attributes[ATTRIBUTE_DID]
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
+      console.log(attributes)
+
+      attrTypes.push(id("wrong"));
       await expect(
         passport
           .connect(minterA)
@@ -854,7 +869,7 @@ describe("QuadPassport.setAttributes", async () => {
               attrKeys,
               attrValues,
               attrTypes,
-              attributes[ATTRIBUTE_DID],
+              did,
               tokenId,
               verifiedAt,
               issuedAt,
