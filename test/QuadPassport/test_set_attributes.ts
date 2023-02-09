@@ -486,14 +486,35 @@ describe("QuadPassport.setAttributes", async () => {
         .connect(admin)
         .setEligibleTokenId(wrongTokenId, true, "");
 
+        // attributes has too many key-value mappings (including did)
+        // in order for sig to pass verification
+        // we must sign the attributes without the did
+
+        const did = attributes[ATTRIBUTE_DID];
+        //remove first key-value mapping in attributes
+        delete attributes[ATTRIBUTE_DID]
+
+        // create issuer sig for the following attributes
+        sigIssuer = await signSetAttributes(
+          minterA,
+          issuer,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          fee,
+          did,
+          passport.address,
+          chainId
+        );
+
       await passport
         .connect(minterA)
         .setAttributes(
           [
-            attrKeys,
-            attrValues,
-            attrTypes,
-            attributes[ATTRIBUTE_DID],
+            attrKeys, // empty
+            attrValues, // [COUNTRY, IS_BUSINESS, AML]
+            attrTypes, // [ATTRIBUTE_COUNTRY, ATTRIBUTE_IS_BUSINESS, ATTRIBUTE_AML]
+            did,
             wrongTokenId,
             verifiedAt,
             issuedAt,
@@ -624,9 +645,7 @@ describe("QuadPassport.setAttributes", async () => {
 
     });
 
-    it.only("fail - same wallet but diff DID)", async () => {
-
-      console.log(attributes)
+    it("fail - same wallet but diff DID)", async () => {
 
       await setAttributes(
         minterA,
@@ -644,8 +663,6 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
-
-      console.log(attributeByIssuer2)
 
       await expect(
         setAttributes(
