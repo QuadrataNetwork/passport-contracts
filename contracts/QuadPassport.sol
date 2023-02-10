@@ -401,6 +401,23 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         emit SetPendingGovernance(pendingGovernance);
     }
 
+    function _attributeLength(
+        address _account,
+        bytes32[] memory _attribute
+    ) internal view returns (uint256) {
+        uint256 attributeLength;
+        for(uint256 i = 0; i < _attribute.length; i++) {
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+                bytes32 attKey = attributeKey(_account, _attribute[i], governance.getIssuers()[j]);
+                IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
+                if (attribute.epoch != uint256(0)) {
+                    attributeLength += 1;
+                }
+            }
+        }
+        return attributeLength;
+    }
+
     /// @dev Allow users to grab all the metadata for a given attribute(s)
     /// @param _account address of user
     /// @param _attributes attributes to get respective non-value data from
@@ -412,17 +429,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32[] memory _attributes
     ) public view override returns (bytes32[] memory attributeNames, address[] memory issuers, uint256[] memory issuedAts) {
 
-        // first pass calculate length
-        uint256 attributeLength;
-        for(uint256 i = 0; i < _attributes.length; i++) {
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
-                IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
-                if (attribute.epoch != uint256(0)) {
-                    attributeLength += 1;
-                }
-            }
-        }
+        uint256 attributeLength = _attributeLength(_account, _attributes);
 
         // allocate arrays and set length
         attributeNames = new bytes32[](attributeLength);
@@ -435,11 +442,35 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
                 bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
                 IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
-                if (attribute.epoch != uint256(0)) {
+                if (attribute.epoch != 0) {
                     attributeNames[attributeIndex] = _attributes[i];
                     issuers[attributeIndex] = governance.getIssuers()[j];
                     issuedAts[attributeIndex] = attribute.epoch;
                     attributeIndex++;
+                }
+            }
+        }
+    }
+
+    /// @dev Allow users to grab all existences for a given attribute(s)
+    /// @param _account address of user
+    /// @param _attributes attributes to get respective bool data from
+    /// @return existences list of bools for the attribute[i]
+    function attributeExists(
+        address _account,
+        bytes32[] memory _attributes
+    ) public view returns(bool[] memory existences) {
+
+        // allocate array and set length
+        existences = new bool[](_attributes.length);
+
+        for(uint256 i = 0; i < _attributes.length; i++) {
+            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
+                bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
+                // set existence to true if attribute exists
+                if (_attributesv2[attKey].epoch != 0) {
+                    existences[i] = true;
+                    break;
                 }
             }
         }
