@@ -5,9 +5,9 @@ import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
 
-describe('migrateToV3Storage', () => {
+describe.skip('migrateToV3Storage', () => {
 
-    it('should migrate to v3 storage [ETH MAINNET]', async () => {
+    it('should migrate to v3 storage [ETH MAINNET fork]', async () => {
         // fork mainnet eth
         await network.provider.request({
             method: "hardhat_reset",
