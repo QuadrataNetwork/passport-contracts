@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { hexZeroPad } from "ethers/lib/utils";
+import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
 
 describe('migrateToV3Storage', () => {
 
@@ -63,6 +63,37 @@ describe('migrateToV3Storage', () => {
         // send some ETH to timelockSigner
         const signers = await ethers.getSigners();
 
+        // divide accounts into chunks of 5
+        const chunks = [];
+        for (let i = 0; i < accounts.length; i += 5) {
+            chunks.push(accounts.slice(i, i + 5));
+        }
+
+        // check that the storage is not migrated
+        const queryFeeBulk = await quadReader.connect(signers[0]).queryFeeBulk(accounts[0], eligibleAttributes);
+
+        // read all attributes in all accounts pre-migration
+        const premigrationAttributes: any = {};
+        for (let account of chunks[0]) {
+            const attributes = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
+                value: queryFeeBulk,
+            });
+
+            // iterate over attributes and eligibleAttributes
+            expect(attributes.length).to.be.equal(eligibleAttributes.length);
+            for(let i = 0; i < attributes.length; i++) {
+                const attribute = attributes[i];
+                const eligibleAttribute = eligibleAttributes[i];
+                const { value, epoch, issuer } = attribute;
+
+                premigrationAttributes[defaultAbiCoder.encode(["address", "bytes32"], [account, eligibleAttribute])] = {
+                    value,
+                    epoch,
+                    issuer,
+                }
+            }
+        }
+
         // perform upgrade to QuadPassport
         const QuadPassport = await ethers.getContractFactory("QuadPassport");
         const quadPassportUpgraded = await QuadPassport.deploy();
@@ -75,15 +106,6 @@ describe('migrateToV3Storage', () => {
             value: 0,
             data: executeRawFunctionData,
         });
-
-        // divide accounts into chunks of 5
-        const chunks = [];
-        for (let i = 0; i < accounts.length; i += 5) {
-            chunks.push(accounts.slice(i, i + 5));
-        }
-
-        // check that the storage is not migrated
-        const queryFeeBulk = await quadReader.connect(signers[0]).queryFeeBulk(accounts[0], eligibleAttributes);
 
         // ensure all attributes in all accounts are falsy
         for (let account of chunks[0]) {
@@ -120,15 +142,30 @@ describe('migrateToV3Storage', () => {
 
 
 
-        // ensure all attributes in all accounts are updated
+        // ensure all attributes in all accounts are equal to premigrationAttributes
         for (let account of chunks[0]) {
             const attributes = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
                 value: queryFeeBulk,
             });
-            attributes.forEach((attribute: any) => {
+            for(let i = 0; i < attributes.length; i++) {
+                const attribute = attributes[i];
+                const eligibleAttribute = eligibleAttributes[i];
                 const { value, epoch, issuer } = attribute;
-                console.log(value, epoch.toString(), issuer);
-            });
+                const key = defaultAbiCoder.encode(["address", "bytes32"], [account, eligibleAttribute]);
+                expect(value).to.be.equal(premigrationAttributes[key].value);
+                expect(epoch).to.be.equal(premigrationAttributes[key].epoch);
+                expect(issuer).to.be.equal(premigrationAttributes[key].issuer);
+
+                console.log("account", account, "is equal to premigrationAttributes")
+                console.log("\t -premigrationAttributes: value, ", premigrationAttributes[key].value)
+                console.log("\t -premigrationAttributes: epoch, ", premigrationAttributes[key].epoch)
+                console.log("\t -premigrationAttributes: issuer, ", premigrationAttributes[key].issuer)
+                console.log("\t -attributes: value, ", value)
+                console.log("\t -attributes: epoch, ", epoch)
+                console.log("\t -attributes: issuer, ", issuer)
+
+                console.log("----------------------------------")
+            };
         }
 
     });
