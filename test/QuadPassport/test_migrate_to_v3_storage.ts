@@ -122,10 +122,10 @@ describe('migrateToV3Storage', () => {
 
         // ensure all attributes in all accounts are updated
         for (let account of chunks[0]) {
-            const account0init = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
+            const attributes = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
                 value: queryFeeBulk,
             });
-            account0init.forEach((attribute: any) => {
+            attributes.forEach((attribute: any) => {
                 const { value, epoch, issuer } = attribute;
                 console.log(value, epoch.toString(), issuer);
             });
