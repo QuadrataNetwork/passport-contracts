@@ -55,8 +55,10 @@ describe.skip('migrateToV3Storage', () => {
             const { args } = logs[log];
             const { from, to, id, value } = args as any;
             if (from === constants.AddressZero) {
-                // could be more optimized if we check that the user did not burn
                 accounts.push(to);
+            }
+            if(to === constants.AddressZero) {
+                delete accounts[accounts.indexOf(from)];
             }
         }
 
