@@ -350,28 +350,18 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32 _attribute
     ) public view override returns (Attribute memory) {
         require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
-        Attribute memory did;
-        if (governance.eligibleAttributesByDID(_attribute))
-            did = attribute(_account, ATTRIBUTE_DID);
         address[] memory issuers = governance.getIssuers();
-        bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            if (governance.eligibleAttributesByDID(_attribute))
-                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
-            else
-                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
-
+            bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
                 return attr;
             }
         }
-
         return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
     }
 
