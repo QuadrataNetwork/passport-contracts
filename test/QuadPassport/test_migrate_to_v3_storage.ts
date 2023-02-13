@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
 import { ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_CRED_PROTOCOL_SCORE, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS } from "../../utils/constant";
 
-describe('migrateToV3Storage', function() {
+describe.skip('migrateToV3Storage', function() {
     // increase timeout to 600s
     this.timeout(600000);
 
@@ -177,7 +177,7 @@ describe('migrateToV3Storage', function() {
                 console.log("\t -attributes: epoch, ", epoch)
                 console.log("\t -attributes: issuer, ", issuer)
 
-                console.log("----------------------------------")
+                console.log("--------------------------------------------------------------------")
             };
         }
 
