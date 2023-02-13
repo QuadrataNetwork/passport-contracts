@@ -210,7 +210,17 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
                 revokeRole(ISSUER_ROLE, _issuer);
 
-                _deletedIssuers.push(_issuer);
+                // check if deletedIssuer already exists
+                bool deletedIssuerExist = false;
+                for(uint256 j = 0; j < _deletedIssuers.length; j++) {
+                    if(_deletedIssuers[j] == _issuer) {
+                        deletedIssuerExist = true;
+                        break;
+                    }
+                }
+                if(!deletedIssuerExist) {
+                    _deletedIssuers.push(_issuer);
+                }
 
                 emit IssuerDeleted(_issuer);
                 return;
