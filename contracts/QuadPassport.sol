@@ -579,6 +579,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             for(uint256 j = 0; j < _accounts.length; j++) {
                 address account = _accounts[j];
                 bytes32 attrKeyv1;
+
                 if(governance.eligibleAttributesByDID(eligibleAttribute)) {
                     Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
                     require(did.length > 0, "INVALID_DID");
@@ -592,7 +593,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 // loop over attributes and write to _attributesv2
                 for(uint256 k = 0; k < attributesV1.length; k++) {
                     Attribute memory attributeV1 = attributesV1[k];
-                    bytes32 attKey = attributeKey(account, eligibleAttribute, attributeV1.issuer);
+                    bytes32 attKey;
+                    if(governance.eligibleAttributesByDID(eligibleAttribute)) {
+                        Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
+                        attKey = keccak256(abi.encode(did[0].value, eligibleAttribute, attributeV1.issuer));
+                    } else {
+                        attKey = keccak256(abi.encode(account, eligibleAttribute, attributeV1.issuer));
+                    }
+
                     _attributesv2[attKey] = IQuadPassportStore.Attribute({
                         value: attributeV1.value,
                         epoch: attributeV1.epoch,
