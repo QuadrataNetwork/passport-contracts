@@ -11,6 +11,10 @@ contract NonDelegateProxy {
         bytes calldata _functionData
     ) external payable {
         (bool called,) = _target.call(_functionData);
-        require(called, "EXECUTION_FAILED");
+        console.log("called: %s", called);
+        if(!called) {
+            console.log("EXECUTION_FAILED in NonDelegateProxy.executeRaw()");
+            console.log("TARGET REVERTED FOR UNKNOWN REASON");
+        }
     }
 }

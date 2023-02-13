@@ -4,8 +4,11 @@ import { ethers, upgrades } from "hardhat";
 import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
+import { ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_CRED_PROTOCOL_SCORE, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS } from "../../utils/constant";
 
-describe.skip('migrateToV3Storage', () => {
+describe('migrateToV3Storage', function() {
+    // increase timeout to 600s
+    this.timeout(600000);
 
     it('should migrate to v3 storage [ETH MAINNET fork]', async () => {
         // fork mainnet eth
@@ -38,12 +41,17 @@ describe.skip('migrateToV3Storage', () => {
 
         // get eligible attributes from QuadGovernance
         const quadGovernance = await ethers.getContractAt("QuadGovernance", "0xBfa59A31b379A62304327386bC2b03096D7695B3");
-        const eligibleAttributes: any = [];
+
+        const eligibleAttributes: any = [ATTRIBUTE_AML];
         const eligibleAttributesLength = await quadGovernance.getEligibleAttributesLength();
         for (let i = 0; i < eligibleAttributesLength; i++) {
             const attribute = await quadGovernance.eligibleAttributesArray(i);
             eligibleAttributes.push(attribute);
         }
+        expect(eligibleAttributes.length).to.be.equals(5) // includes AML, DID, COUNTRY, CRED_PROTOCOL_SCORE, IS_BUSINESS
+        // test that DID is listed after AML
+        expect(eligibleAttributes.indexOf(ATTRIBUTE_DID) > eligibleAttributes.indexOf(ATTRIBUTE_AML)).to.be.true;
+
         const quadPassport = await ethers.getContractAt("QuadPassport", "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d");
         const quadReader = await ethers.getContractAt("QuadReader", "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
 
@@ -92,6 +100,8 @@ describe.skip('migrateToV3Storage', () => {
                     value,
                     epoch,
                     issuer,
+                    account,
+                    eligibleAttribute,
                 }
             }
         }
@@ -109,7 +119,7 @@ describe.skip('migrateToV3Storage', () => {
             data: executeRawFunctionData,
         });
 
-        // ensure all attributes in all accounts are falsy
+        // ensure all account level attributes in all accounts are falsy
         for (let account of chunks[0]) {
             const account0init = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
                 value: queryFeeBulk,
@@ -128,15 +138,16 @@ describe.skip('migrateToV3Storage', () => {
         // check timelock has governance role
         expect(await quadGovernance.hasRole(await quadGovernance.GOVERNANCE_ROLE(), timelockAddress)).to.be.true;
 
-
         for (let chunk of chunks.slice(0, 1)) {
             // signer calls custom timelock which calls migrate function
-            const migrateAttributesFunctionData = quadPassport.interface.encodeFunctionData("migrateAttributes", [chunk]);
+            const migrateAttributesFunctionData = quadPassport.interface.encodeFunctionData("migrateAttributes", [chunk, eligibleAttributes]);
             executeRawFunctionData = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadPassport.address, migrateAttributesFunctionData]);
+            // send tx with max gas limit
             await signers[1].sendTransaction({
                 to: timelockAddress,
                 value: 0,
                 data: executeRawFunctionData,
+                gasLimit: 15000000,
             });
 
             console.log("migrated chunk", chunk)

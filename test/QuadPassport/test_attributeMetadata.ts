@@ -11,7 +11,7 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-describe("QuadPassport.attributeMetadata/attributeExists", async () => {
+describe("QuadPassport.attributeMetadata/attributesExist", async () => {
   let passport: Contract; // eslint-disable-line no-unused-vars
   let governance: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress; // eslint-disable-line no-unused-vars
@@ -36,7 +36,7 @@ describe("QuadPassport.attributeMetadata/attributeExists", async () => {
     expect(issuers.length == 0).equals(true)
     expect(issuedAts.length == 0).equals(true)
 
-    var existences = await passport.attributeExists(deployer.address, [id("AML"), id("DID"), id("COUNTRY"), id("IS_BUSINESS")]);
+    var existences = await passport.attributesExist(deployer.address, [id("AML"), id("DID"), id("COUNTRY"), id("IS_BUSINESS")]);
     expect(existences.length == 4).equals(true)
     expect(existences[0]).equals(false);
     expect(existences[1]).equals(false);
@@ -73,7 +73,7 @@ describe("QuadPassport.attributeMetadata/attributeExists", async () => {
     expect(issuers[0]).equals(deployer.address);
     expect(issuedAts[0]).equals(issuedAt);
 
-    var existences = await passport.attributeExists(deployer.address, [id("AML"), id("DID"), id("COUNTRY")]);
+    var existences = await passport.attributesExist(deployer.address, [id("AML"), id("DID"), id("COUNTRY")]);
     expect(existences.length == 3).equals(true)
     expect(existences[0]).equals(true);
     expect(existences[1]).equals(true);
@@ -124,7 +124,7 @@ describe("QuadPassport.attributeMetadata/attributeExists", async () => {
     expect(issuers[1]).equals(issuerA.address);
     expect(issuedAts[1]).equals(issuedAt);
 
-    var existences = await passport.attributeExists(deployer.address, [id("AML"), id("DID"), id("COUNTRY"), id("IS_BUSINESS"), id("BAD")]);
+    var existences = await passport.attributesExist(deployer.address, [id("AML"), id("DID"), id("COUNTRY"), id("IS_BUSINESS"), id("BAD")]);
     expect(existences.length == 5).equals(true)
 
     expect(existences[0]).equals(true);
@@ -177,7 +177,7 @@ describe("QuadPassport.attributeMetadata/attributeExists", async () => {
     expect(issuers[2]).equals(deployer.address);
     expect(issuedAts[2]).equals(issuedAt);
 
-    var existences = await passport.attributeExists(deployer.address, [id("AML"), id("DID"), id("COUNTRY"), id("IS_BUSINESS"), id("BAD")]);
+    var existences = await passport.attributesExist(deployer.address, [id("AML"), id("DID"), id("COUNTRY"), id("IS_BUSINESS"), id("BAD")]);
     expect(existences.length == 5).equals(true)
     expect(existences[0]).equals(true);
     expect(existences[1]).equals(true);

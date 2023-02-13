@@ -401,6 +401,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         emit SetPendingGovernance(pendingGovernance);
     }
 
+    /// @dev Gets the count of attestations for the given attribute(s)
+    /// @param _account address of user
+    /// @param _attribute attribute to get the counts from
+    /// @return count of attestations for the given attribute(s)
     function _attributeLength(
         address _account,
         bytes32[] memory _attribute
@@ -456,7 +460,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @param _account address of user
     /// @param _attributes attributes to get respective bool data from
     /// @return existences list of bools for the attribute[i]
-    function attributeExists(
+    function attributesExist(
         address _account,
         bytes32[] memory _attributes
     ) public view returns(bool[] memory existences) {
@@ -559,7 +563,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @dev Migrate _attributes to _attributesv2
     /// @param _accounts list of accounts to migrate
-    function migrateAttributes(address[] calldata _accounts) external {
+    /// @param _eligibleAttributes list of eligible attributes to migrate
+    function migrateAttributes(address[] calldata _accounts, bytes32[] calldata _eligibleAttributes) external {
         // check sender has governance role
         require(
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
@@ -567,21 +572,23 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         );
 
         // loop over all attributes by did/account
-        uint256 eligibleAttributesLength = governance.getEligibleAttributesLength();
-        for(uint256 i = 0; i < eligibleAttributesLength; i++) {
-            bytes32 eligibleAttribute = governance.eligibleAttributesArray(i);
+        for(uint256 i = 0; i < _eligibleAttributes.length; i++) {
+            bytes32 eligibleAttribute = _eligibleAttributes[i];
+
             // loop over all accounts
             for(uint256 j = 0; j < _accounts.length; j++) {
                 address account = _accounts[j];
                 bytes32 attrKeyv1;
                 if(governance.eligibleAttributesByDID(eligibleAttribute)) {
-                    Attribute[] memory did = _attributes[keccak256(abi.encode(account, eligibleAttribute))];
+                    Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
                     require(did.length > 0, "INVALID_DID");
+                    require(did[0].value != bytes32(0), "NULL_DID");
                     attrKeyv1 = keccak256(abi.encode(did[0].value, eligibleAttribute));
                 } else {
                     attrKeyv1 = keccak256(abi.encode(account, eligibleAttribute));
                 }
                 Attribute[] memory attributesV1 = _attributes[attrKeyv1];
+
                 // loop over attributes and write to _attributesv2
                 for(uint256 k = 0; k < attributesV1.length; k++) {
                     Attribute memory attributeV1 = attributesV1[k];
@@ -589,14 +596,12 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                     _attributesv2[attKey] = IQuadPassportStore.Attribute({
                         value: attributeV1.value,
                         epoch: attributeV1.epoch,
-                        issuer: attributeV1.issuer
+                        issuer: address(0)
                     });
                 }
-
                 delete _attributes[attrKeyv1];
 
             }
         }
-
     }
 }
