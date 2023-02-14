@@ -44,19 +44,20 @@ import "./storage/QuadReaderStore.sol";
 
         attributes = passport.attributes(_account, _attribute);
         uint256 fee = queryFee(_account, _attribute);
-        require(msg.value == fee, "INVALID_QUERY_FEE");
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(msg.value == fee || hasPreapproval, "INVALID_QUERY_FEE");
         if (fee > 0) {
             uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
             for (uint256 i = 0; i < attributes.length; i++) {
                 emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
             }
             emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
-        } else {
-            if(governance.preapproval(msg.sender)) {
-                emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
-            }
         }
-        emit QueryEvent(_account, msg.sender, _attribute);
+        if(hasPreapproval) {
+            emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
+        } else {
+            emit QueryEvent(_account, msg.sender, _attribute);
+        }
     }
 
     /// @notice Retrieve all attestations for a specific attribute being issued about a wallet (Legacy verson)
@@ -77,7 +78,8 @@ import "./storage/QuadReaderStore.sol";
         issuers = new address[](attributes.length);
 
         uint256 fee = queryFee(_account, _attribute);
-        require(msg.value == fee, "INVALID_QUERY_FEE");
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(msg.value == fee || hasPreapproval, "INVALID_QUERY_FEE");
 
         uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
 
@@ -87,17 +89,20 @@ import "./storage/QuadReaderStore.sol";
                 epochs[i] = attributes[i].epoch;
                 issuers[i] = attributes[i].issuer;
 
-                if (feeIssuer > 0) {
+                if (feeIssuer > 0 && !hasPreapproval) {
                     emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
                 }
             }
-            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
-        } else {
-            if(governance.preapproval(msg.sender)) {
-                emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
+            if(!hasPreapproval) {
+                emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
             }
         }
-        emit QueryEvent(_account, msg.sender, _attribute);
+
+        if(hasPreapproval) {
+            emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
+        } else {
+            emit QueryEvent(_account, msg.sender, _attribute);
+        }
     }
 
     /// @notice Retrieve all attestations for a batch of attributes being issued about a wallet
@@ -117,31 +122,34 @@ import "./storage/QuadReaderStore.sol";
         uint256 totalFee;
         uint256 totalFeeIssuer;
         uint256 attrFee;
+        bool hasPreapproval = governance.preapproval(msg.sender);
 
-        if(!governance.preapproval(msg.sender)) {
-            for (uint256 i = 0; i < _attributes.length; i++) {
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            if(!hasPreapproval) {
                 attrFee = isBusiness
                     ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
                     : governance.pricePerAttributeFixed(_attributes[i]);
                 totalFee += attrFee;
-                IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
+            }
+            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 
-                if (attrs.length > 0) {
-                    attributes[i] = attrs[0];
-                    if (attrFee > 0) {
-                        uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-                        totalFeeIssuer += feeIssuer;
-                        emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
-                    }
+            if (attrs.length > 0) {
+                attributes[i] = attrs[0];
+                if (attrFee > 0 && !hasPreapproval) {
+                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                    totalFeeIssuer += feeIssuer;
+                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
                 }
             }
-            require(msg.value == totalFee, " INVALID_QUERY_FEE");
-            if (totalFee > 0) {
-                emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
-            }
-            emit QueryBulkEvent(_account, msg.sender, _attributes);
-        } else {
+        }
+        require(msg.value == totalFee, " INVALID_QUERY_FEE");
+        if (totalFee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        }
+        if(hasPreapproval) {
             emit PreapprovalQueryBulkEvent(_account, msg.sender, _attributes);
+        } else {
+            emit QueryBulkEvent(_account, msg.sender, _attributes);
         }
 
         return attributes;
@@ -170,30 +178,33 @@ import "./storage/QuadReaderStore.sol";
         uint256 totalFee;
         uint256 totalFeeIssuer;
         uint256 attrFee;
+        bool hasPreapproval = governance.preapproval(msg.sender);
 
-        if(!governance.preapproval(msg.sender)) {
-            for (uint256 i = 0; i < _attributes.length; i++) {
+        for (uint256 i = 0; i < _attributes.length; i++) {
+            if(!hasPreapproval) {
                 attrFee = isBusiness
-                    ? governance.pricePerBusinessAttributeFixed(_attributes[i])
+                    ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
                     : governance.pricePerAttributeFixed(_attributes[i]);
                 totalFee += attrFee;
-                IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
-                if (attrs.length > 0) {
-                    values[i] = attrs[0].value;
-                    epochs[i] = attrs[0].epoch;
-                    issuers[i] = attrs[0].issuer;
+            }
+            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
+            if (attrs.length > 0) {
+                values[i] = attrs[0].value;
+                epochs[i] = attrs[0].epoch;
+                issuers[i] = attrs[0].issuer;
 
-                    if (attrFee > 0) {
-                        uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-                        totalFeeIssuer += feeIssuer;
-                        emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
-                    }
+                if (attrFee > 0 && !hasPreapproval) {
+                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
+                    totalFeeIssuer += feeIssuer;
+                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
                 }
             }
-            require(msg.value == totalFee," INVALID_QUERY_FEE");
-            if (totalFee > 0) {
-                emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
-            }
+        }
+        require(msg.value == totalFee," INVALID_QUERY_FEE");
+        if (totalFee > 0) {
+            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+        }
+        if(!hasPreapproval) {
             emit QueryBulkEvent(_account, msg.sender, _attributes);
         } else {
             emit PreapprovalQueryBulkEvent(_account, msg.sender, _attributes);
