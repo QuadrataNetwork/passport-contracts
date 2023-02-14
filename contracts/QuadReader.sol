@@ -197,6 +197,9 @@ import "./storage/QuadReaderStore.sol";
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
+        if(governance.preapproval(msg.sender)) {
+            return 0;
+        }
 
         IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
@@ -225,9 +228,12 @@ import "./storage/QuadReaderStore.sol";
                 || governance.eligibleAttributesByDID(_attributes[i]),
                 "ATTRIBUTE_NOT_ELIGIBLE"
             );
-            fee += isBusiness
-                ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
-                : governance.pricePerAttributeFixed(_attributes[i]);
+
+            if(!governance.preapproval(msg.sender)) {
+                fee += isBusiness
+                    ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
+                    : governance.pricePerAttributeFixed(_attributes[i]);
+            }
         }
 
         return fee;
