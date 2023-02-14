@@ -124,7 +124,7 @@ import "./storage/QuadReaderStore.sol";
 
             if (attrs.length > 0) {
                 attributes[i] = attrs[0];
-                if (attrFee > 0 && !hasPreapproval) {
+                if (attrFee > 0) {
                     uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
                     totalFeeIssuer += feeIssuer;
                     emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
@@ -178,7 +178,7 @@ import "./storage/QuadReaderStore.sol";
                 epochs[i] = attrs[0].epoch;
                 issuers[i] = attrs[0].issuer;
 
-                if (attrFee > 0 && !hasPreapproval) {
+                if (attrFee > 0) {
                     uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
                     totalFeeIssuer += feeIssuer;
                     emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
