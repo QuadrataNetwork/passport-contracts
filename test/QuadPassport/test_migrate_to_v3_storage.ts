@@ -160,6 +160,8 @@ describe.skip('migrateToV3Storage', function() {
             const attributes = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
                 value: queryFeeBulk,
             });
+            // assert that attributes is not empty
+            expect(attributes.length).to.be.equal(eligibleAttributes.length);
             for(let i = 0; i < attributes.length; i++) {
                 const attribute = attributes[i];
                 const eligibleAttribute = eligibleAttributes[i];
