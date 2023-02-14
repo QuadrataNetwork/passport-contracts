@@ -53,11 +53,7 @@ import "./storage/QuadReaderStore.sol";
             }
             emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
         }
-        if(governance.preapproval(msg.sender)) {
-            emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
-        } else {
-            emit QueryEvent(_account, msg.sender, _attribute);
-        }
+        emit QueryEvent(_account, msg.sender, _attribute);
     }
 
     /// @notice Retrieve all attestations for a specific attribute being issued about a wallet (Legacy verson)
@@ -78,10 +74,9 @@ import "./storage/QuadReaderStore.sol";
         issuers = new address[](attributes.length);
 
         uint256 fee = queryFee(_account, _attribute);
-        bool hasPreapproval = governance.preapproval(msg.sender);
         require(msg.value == fee, "INVALID_QUERY_FEE");
 
-        uint256 feeIssuer = hasPreapproval ? 0 : attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
+        uint256 feeIssuer = governance.preapproval(msg.sender) ? 0 : attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
 
         for (uint256 i = 0; i < attributes.length; i++) {
             values[i] = attributes[i].value;
@@ -96,11 +91,7 @@ import "./storage/QuadReaderStore.sol";
             emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
         }
 
-        if(!hasPreapproval) {
-            emit QueryEvent(_account, msg.sender, _attribute);
-        } else {
-            emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
-        }
+        emit QueryEvent(_account, msg.sender, _attribute);
     }
 
     /// @notice Retrieve all attestations for a batch of attributes being issued about a wallet
@@ -144,11 +135,7 @@ import "./storage/QuadReaderStore.sol";
         if (totalFee > 0) {
             emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
         }
-        if(hasPreapproval) {
-            emit PreapprovalQueryBulkEvent(_account, msg.sender, _attributes);
-        } else {
-            emit QueryBulkEvent(_account, msg.sender, _attributes);
-        }
+        emit QueryBulkEvent(_account, msg.sender, _attributes);
 
         return attributes;
     }
@@ -202,11 +189,7 @@ import "./storage/QuadReaderStore.sol";
         if (totalFee > 0) {
             emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
         }
-        if(!hasPreapproval) {
-            emit QueryBulkEvent(_account, msg.sender, _attributes);
-        } else {
-            emit PreapprovalQueryBulkEvent(_account, msg.sender, _attributes);
-        }
+        emit QueryBulkEvent(_account, msg.sender, _attributes);
     }
 
 
