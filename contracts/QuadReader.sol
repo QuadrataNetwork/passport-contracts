@@ -93,7 +93,7 @@ import "./storage/QuadReaderStore.sol";
                     emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
                 }
             }
-            if(!hasPreapproval) {
+            if(fee > 0 && !hasPreapproval) {
                 emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
             }
         }
