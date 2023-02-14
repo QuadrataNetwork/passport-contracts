@@ -375,7 +375,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         bytes32 _attribute,
         address _issuer
-    ) public view returns (bytes32) {
+    ) public view override returns (bytes32) {
         bytes32 did = governance.eligibleAttributesByDID(_attribute) ? _attributesv2[keccak256(abi.encode(_account, ATTRIBUTE_DID, _issuer))].value : bytes32(0);
         return did != bytes32(0) ? keccak256(abi.encode(did, _attribute, _issuer)) : keccak256(abi.encode(_account, _attribute, _issuer));
     }
@@ -453,7 +453,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     function attributesExist(
         address _account,
         bytes32[] memory _attributes
-    ) public view returns(bool[] memory existences) {
+    ) public view override returns(bool[] memory existences) {
 
         // allocate array and set length
         existences = new bool[](_attributes.length);
