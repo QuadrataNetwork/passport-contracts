@@ -83,25 +83,23 @@ import "./storage/QuadReaderStore.sol";
 
         uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
 
-        if (fee > 0) {
-            for (uint256 i = 0; i < attributes.length; i++) {
-                values[i] = attributes[i].value;
-                epochs[i] = attributes[i].epoch;
-                issuers[i] = attributes[i].issuer;
+        for (uint256 i = 0; i < attributes.length; i++) {
+            values[i] = attributes[i].value;
+            epochs[i] = attributes[i].epoch;
+            issuers[i] = attributes[i].issuer;
 
-                if (feeIssuer > 0 && !hasPreapproval) {
-                    emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
-                }
-            }
-            if(fee > 0 && !hasPreapproval) {
-                emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
+            if (feeIssuer > 0 && !hasPreapproval) {
+                emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
             }
         }
+        if (fee > 0 && !hasPreapproval) {
+            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
+        }
 
-        if(hasPreapproval) {
-            emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
-        } else {
+        if(!hasPreapproval) {
             emit QueryEvent(_account, msg.sender, _attribute);
+        } else {
+            emit PreapprovalQueryEvent(_account, msg.sender, _attribute);
         }
     }
 
