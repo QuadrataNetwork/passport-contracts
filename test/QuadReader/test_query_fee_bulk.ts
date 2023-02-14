@@ -119,6 +119,14 @@ describe("QuadReader.queryFeeBulk", async () => {
       ).to.equal(totalFee);
     });
 
+    it("success - fee 0 when preapproved", async () => {
+      await governance.connect(admin).setPreapprovals([minterA.address], [true]);
+
+      expect(
+        await reader.connect(minterA).queryFeeBulk(minterA.address, Object.keys(attributes))
+      ).to.equal(ethers.utils.parseEther("0"));
+    });
+
     it("fail - governance incorrectly set", async () => {
       const newGovernance = await deployGovernance();
       await newGovernance.grantRole(GOVERNANCE_ROLE, admin.address);

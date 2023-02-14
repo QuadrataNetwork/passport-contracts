@@ -178,6 +178,35 @@ describe("QuadReader.getAttributesBulk", async () => {
       );
     });
 
+    it("success - all callers have preapproval", async () => {
+
+      // convert ethers.getSigners() to addresses
+      const addresses = await Promise.all(
+        (await ethers.getSigners()).map((signer) => signer.getAddress())
+      );
+      // create boolean array matching lenght of addresses
+      const preapprovals = new Array(addresses.length).fill(true);
+
+      await governance.connect(admin).setPreapprovals(addresses, preapprovals);
+      await governance.connect(admin).setPreapprovals([defi.address, businessPassport.address], [true, true]);
+
+      await assertGetAttributesBulk(
+        minterA,
+        [
+          ATTRIBUTE_AML,
+          ATTRIBUTE_COUNTRY,
+          ATTRIBUTE_DID,
+          ATTRIBUTE_IS_BUSINESS,
+        ],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+    });
+
     it("success no passport", async () => {
       // No issuers & no existing attestation for account
       await assertGetAttributesBulk(

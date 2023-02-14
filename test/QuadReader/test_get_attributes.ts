@@ -125,6 +125,60 @@ describe("QuadReader.getAttributes", async () => {
       );
     });
 
+    it("success - all callers have preapproval" , async () => {
+
+      // convert ethers.getSigners() to addresses
+      const addresses = await Promise.all(
+        (await ethers.getSigners()).map((signer) => signer.getAddress())
+      );
+      // create boolean array matching lenght of addresses
+      const preapprovals = new Array(addresses.length).fill(true);
+
+      await governance.connect(admin).setPreapprovals(addresses, preapprovals);
+      await governance.connect(admin).setPreapprovals([defi.address, businessPassport.address], [true, true]);
+
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+    });
+
     it("success with 2 issuers", async () => {
       const attrIssuers2 = {
         [ATTRIBUTE_DID]: attributes[ATTRIBUTE_DID],
