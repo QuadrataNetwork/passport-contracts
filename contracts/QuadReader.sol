@@ -103,8 +103,8 @@ import "./storage/QuadReaderStore.sol";
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
 
         IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
-        IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
-        bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
+        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
+        bool isBusiness = (businessAttr.value == keccak256("TRUE")) ? true : false;
 
         uint256 totalFee;
         uint256 totalFeeIssuer;
@@ -152,8 +152,8 @@ import "./storage/QuadReaderStore.sol";
         values = new bytes32[](_attributes.length);
         epochs = new uint256[](_attributes.length);
         issuers = new address[](_attributes.length);
-        IQuadPassportStore.Attribute[] memory businessAttrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
-        bool isBusiness = (businessAttrs.length > 0 && businessAttrs[0].value == keccak256("TRUE")) ? true : false;
+        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
+        bool isBusiness = (businessAttr.value == keccak256("TRUE")) ? true : false;
 
         uint256 totalFee;
         uint256 totalFeeIssuer;
@@ -198,9 +198,9 @@ import "./storage/QuadReaderStore.sol";
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
 
-        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
-        uint256 fee = (attrs.length > 0 && attrs[0].value == keccak256("TRUE"))
+        uint256 fee = (businessAttr.value == keccak256("TRUE"))
             ? governance.pricePerBusinessAttributeFixed(_attribute)
             : governance.pricePerAttributeFixed(_attribute);
 
@@ -215,10 +215,10 @@ import "./storage/QuadReaderStore.sol";
         address _account,
         bytes32[] calldata _attributes
     ) public override view returns(uint256) {
-        IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, ATTRIBUTE_IS_BUSINESS);
+        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
         uint256 fee;
-        bool isBusiness = (attrs.length > 0 && attrs[0].value == keccak256("TRUE")) ? true : false;
+        bool isBusiness = (businessAttr.value == keccak256("TRUE")) ? true : false;
 
         for (uint256 i = 0; i < _attributes.length; i++) {
             require(governance.eligibleAttributes(_attributes[i])
@@ -248,35 +248,6 @@ import "./storage/QuadReaderStore.sol";
     /// @return the amount of existing attributes
     function balancePerAttribute(address _account, bytes32 _attribute) public view returns(uint256) {
        return passport.attributes(_account, _attribute).length;
-    }
-
-    /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
-    /// @param _account account getting requested for attributes
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @param _issuer address of issuer
-    /// @return boolean
-    function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) public view override returns(bool) {
-        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
-        for (uint256 i = 0; i < attributes.length; i++) {
-            if (attributes[i].issuer == _issuer){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /// @dev Returns the latest epoch about an attribute attested
-    /// @param _account account getting requested for attributes
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @return the latest epoch about an attribute attested
-    function latestEpoch(address _account, bytes32 _attribute) public view override returns(uint256) {
-        uint256 latest;
-        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
-        for (uint256 i = 0; i < attributes.length; i++) {
-            if (attributes[i].epoch > latest)
-                latest = attributes[i].epoch;
-        }
-        return latest;
     }
 
     /// @dev Withdraw to  an issuer's treasury or the Quadrata treasury

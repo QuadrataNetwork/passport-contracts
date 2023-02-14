@@ -9,21 +9,12 @@ import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
+require('dotenv').config({ path: require('find-config')('.env') })
 
-dotenv.config();
+// Tasks
+import "./scripts/tasks/quadGovernance.ts";
+import "./scripts/tasks/deployTasks.ts";
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
 
 const config = {
   solidity: {
@@ -33,7 +24,7 @@ const config = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 10000,
+            runs: 0,
           },
         },
       },
@@ -42,7 +33,7 @@ const config = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 0,
           },
         },
       },
@@ -52,18 +43,66 @@ const config = {
     mumbai: {
       url: process.env.MUMBAI_URI || "",
       accounts:
-        process.env.MUMBAI_PRIVATE_KEY !== undefined
-          ? [process.env.MUMBAI_PRIVATE_KEY]
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 80001,
     },
     goerli: {
       url: process.env.GOERLI_URI || "",
       accounts:
-        process.env.GOERLI_PRIVATE_KEY !== undefined
-          ? [process.env.GOERLI_PRIVATE_KEY]
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 5,
+    },
+    celo_testnet: {
+      url: "https://alfajores-forno.celo-testnet.org",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY_2 !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY_2]
+          : [],
+      chainId: 44787,
+    },
+    avax_testnet: {
+      url: "https://ava-testnet.public.blastapi.io/ext/bc/C/rpc",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY_2 !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY_2]
+          : [],
+      chainId: 43113,
+    },
+    bsc_testnet: {
+      url: "https://data-seed-prebsc-2-s3.binance.org:8545",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 97,
+    },
+    arbitrum_goerli: {
+      url: "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 421613,
+    },
+    optimism_goerli: {
+      url: "https://goerli.optimism.io",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 420,
+    },
+    fantom_testnet: {
+      url: "https://rpc.ankr.com/fantom_testnet",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 4002,
     },
     mainnet: {
       url: process.env.MAINNET_URI || "",
@@ -108,3 +147,4 @@ const config = {
 };
 
 export default config;
+

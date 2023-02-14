@@ -67,7 +67,11 @@ interface IQuadGovernance {
 
     function getIssuersLength() external view returns (uint256);
 
+    function getAllIssuersLength() external view returns (uint256);
+
     function getIssuers() external view returns (address[] memory);
+
+    function getAllIssuers() external view returns (address[] memory);
 
     function issuers(uint256) external view returns(address);
 

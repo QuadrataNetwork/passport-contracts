@@ -74,8 +74,8 @@ describe("QuadPassport.setAttributes", async () => {
       [issuerTreasury, issuerTreasury2]
     );
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 10000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 10000;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
@@ -85,7 +85,9 @@ describe("QuadPassport.setAttributes", async () => {
 
     it("setAttributesBulk (Single Attribute)", async () => {
       const attributes1: any = {
-        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: formatBytes32String("1"),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
       };
       await setAttributesBulk(
         passport,
@@ -225,26 +227,10 @@ describe("QuadPassport.setAttributes", async () => {
       // Deep Copy to avoid mutating the object
       attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {
-        let attrKey;
         if (k === ATTRIBUTE_AML) {
           expect(ATTRIBUTE_DID in attributesCopy).to.equal(true);
-          did = attributes[ATTRIBUTE_DID];
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["bytes32", "bytes32"],
-              [did, k]
-            )
-          );
-        } else {
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["address", "bytes32"],
-              [minterA.address, k]
-            )
-          );
         }
         if (k !== ATTRIBUTE_DID) {
-          attrKeys.push(attrKey);
           attrValues.push(attributesCopy[k]);
           attrTypes.push(k);
         }
@@ -307,6 +293,7 @@ describe("QuadPassport.setAttributes", async () => {
         [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
       );
 
+      // should pass because sig is within expiry timeframe of 6 hours
       await expect(
         setAttributesBulk(
           passport,
@@ -319,7 +306,7 @@ describe("QuadPassport.setAttributes", async () => {
           [TOKEN_ID, TOKEN_ID],
           [HARDHAT_CHAIN_ID, HARDHAT_CHAIN_ID]
         )
-      ).to.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.not.be.reverted;
     });
 
     it("setAttributesBulk (Multiple Attributes, Diff Issuers - 0 verifiedAt", async () => {
@@ -379,6 +366,20 @@ describe("QuadPassport.setAttributes", async () => {
 
     it("fail - invalid fee", async () => {
       const wrongFee = fee.sub(1);
+      const did = attributes[ATTRIBUTE_DID];
+        delete attributes[ATTRIBUTE_DID]
+        sigIssuer = await signSetAttributes(
+          minterA,
+          issuer,
+          attributes,
+          verifiedAt,
+          issuedAt,
+          fee,
+          did,
+          passport.address,
+          chainId
+        );
+        attributes[ATTRIBUTE_DID] = did;
       await expect(
         passport
           .connect(minterA)

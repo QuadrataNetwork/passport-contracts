@@ -30,6 +30,22 @@ interface IQuadPassport is IQuadSoulbound {
         bytes calldata _sigIssuer
     ) external payable;
 
+    function attributeKey(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) external view returns (bytes32);
+
+    function attributeMetadata(
+        address _account,
+        bytes32[] memory _attributes
+    ) external view returns (bytes32[] memory attributeTypes, address[] memory issuers, uint256[] memory issuedAts);
+
+    function attributesExist(
+        address _account,
+        bytes32[] memory _attributes
+    ) external view returns (bool[] memory);
+
     function burnPassports() external;
 
     function burnPassportsIssuer(address _account) external;
@@ -37,6 +53,8 @@ interface IQuadPassport is IQuadSoulbound {
     function setGovernance(address _governanceContract) external;
 
     function acceptGovernance() external;
+
+    function attribute(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute memory);
 
     function attributes(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute[] memory);
 

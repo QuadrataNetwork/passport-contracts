@@ -36,25 +36,10 @@ export const setAttributes = async (
       : ethers.constants.HashZero;
 
   Object.keys(attributes).forEach((k, i) => {
-    let attrKey;
     if (k === ATTRIBUTE_AML) {
       expect(ATTRIBUTE_DID in attributes).to.equal(true);
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["bytes32", "bytes32"],
-          [opts.oldDid || did, k]
-        )
-      );
-    } else {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["address", "bytes32"],
-          [account.address, k]
-        )
-      );
     }
     if (opts.attemptUpdateDid || k !== ATTRIBUTE_DID) {
-      attrKeys.push(attrKey);
       attrValues.push(attributes[k]);
       attrTypes.push(k);
     }

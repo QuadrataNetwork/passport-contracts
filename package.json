@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@defi-wonderland/smock": "^2.0.7",
-    "@openzeppelin/contracts-upgradeable": "^4.3.2"
+    "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "find-config": "^1.0.0"
   }
 }

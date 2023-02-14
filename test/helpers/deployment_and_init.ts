@@ -1,6 +1,7 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
+import { READER_ROLE } from "../../utils/constant";
 
 const { deployQuadrata } = require("../../utils/deployment.ts");
 
@@ -62,6 +63,7 @@ export const deployPassportEcosystem = async (
   const MockBusiness = await ethers.getContractFactory("MockBusiness");
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
+
 
   return [governance, passport, reader, defi, mockbusiness];
 };

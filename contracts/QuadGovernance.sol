@@ -7,11 +7,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./storage/QuadGovernanceStore.sol";
+import "./storage/QuadGovernanceStoreV2.sol";
 
 /// @title Governance Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All admin functions to govern the QuadPassport contract
-contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
+contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStoreV2 {
 
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
@@ -209,6 +210,18 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
                 revokeRole(ISSUER_ROLE, _issuer);
 
+                // check if deletedIssuer already exists
+                bool deletedIssuerExist = false;
+                for(uint256 j = 0; j < _deletedIssuers.length; j++) {
+                    if(_deletedIssuers[j] == _issuer) {
+                        deletedIssuerExist = true;
+                        break;
+                    }
+                }
+                if(!deletedIssuerExist) {
+                    _deletedIssuers.push(_issuer);
+                }
+
                 emit IssuerDeleted(_issuer);
                 return;
             }
@@ -325,10 +338,27 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         return _issuers.length;
     }
 
+    /// @dev Get the length of _issuers array and _deletedIssuers array
+    /// @return total number of _issuers and _deletedIssuers
+    function getAllIssuersLength() override public view returns (uint256) {
+        return _issuers.length + _deletedIssuers.length;
+    }
+
     /// @dev Get the _issuers array
     /// @return list of issuers
     function getIssuers() override public view returns (address[] memory) {
         return _issuers;
+    }
+
+    function getAllIssuers() override public view returns (address[] memory) {
+        address[] memory allIssuers = new address[](getAllIssuersLength());
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            allIssuers[i] = _issuers[i];
+        }
+        for(uint256 i = 0; i < _deletedIssuers.length; i++) {
+            allIssuers[i + _issuers.length] = _deletedIssuers[i];
+        }
+        return allIssuers;
     }
 
     /// @dev Get the status of an issuer
