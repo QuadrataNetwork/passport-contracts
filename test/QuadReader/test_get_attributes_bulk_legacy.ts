@@ -66,8 +66,8 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
