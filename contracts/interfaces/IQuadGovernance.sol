@@ -58,8 +58,6 @@ interface IQuadGovernance {
 
     function eligibleAttributesArray(uint256) external view returns(bytes32);
 
-    function setPreapproval(address, bool) external;
-
     function setPreapprovals(address[] calldata, bool[] calldata) external;
 
     function preapproval(address) external view returns(bool);

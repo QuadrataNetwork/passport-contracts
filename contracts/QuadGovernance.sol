@@ -125,17 +125,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
-    /// @dev Set the approval status for a user. If true, the user can query any attribute without paying in the current transaction
-    /// @notice Restricted behind a TimelockController
-    /// @param _account address of the user
-    /// @param _status approval status of the user
-    function setPreapproval(address _account, bool _status) override external {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_preapprovals[_account] != _status, "PREAPPROVED_STATUS_ALREADY_SET");
-
-        _preapprovals[_account] = _status;
-        emit PreapprovalUpdated(_account, _status);
-    }
 
     /// @dev Set the approval status for multiple users. If true, the users can query any attribute without paying in the current transaction
     /// @notice Restricted behind a TimelockController. Array lengths must be equal
