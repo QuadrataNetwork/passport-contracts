@@ -318,6 +318,8 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes calldata _flashSig
     ) public override returns(bool) {
 
+        require(governance.preapproval(msg.sender), "NOT_PREAPPROVED");
+
         // check that threshold was false
         bytes32 extractionHash = keccak256(abi.encode(_account, _attribute, _epoch, _threshold, _secret, false, block.chainid));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
