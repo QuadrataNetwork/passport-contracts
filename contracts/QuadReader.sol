@@ -76,7 +76,7 @@ import "./storage/QuadReaderStore.sol";
         uint256 fee = queryFee(_account, _attribute);
         require(msg.value == fee, "INVALID_QUERY_FEE");
 
-        uint256 feeIssuer = governance.preapproval(msg.sender) ? 0 : attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
+        uint256 feeIssuer = governance.preapproval(msg.sender) || attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
 
         for (uint256 i = 0; i < attributes.length; i++) {
             values[i] = attributes[i].value;
