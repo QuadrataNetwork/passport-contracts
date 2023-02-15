@@ -3,18 +3,19 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadReaderStore.sol";
+import "./storage/QuadReaderStoreV2.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
 
- contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStoreV2 {
     constructor() initializer {
         // used to prevent logic contract self destruct take over
     }
@@ -31,6 +32,7 @@ import "./storage/QuadReaderStore.sol";
 
         governance = IQuadGovernance(_governance);
         passport = IQuadPassport(_passport);
+        _secret = keccak256(address(this).code);
     }
 
     /// @notice Retrieve all attestations for a specific attribute being issued about a wallet
@@ -306,5 +308,34 @@ import "./storage/QuadReaderStore.sol";
 
     function _authorizeUpgrade(address) internal view override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+    }
+
+    function flashQuery(
+        address _account,
+        bytes32 _attribute,
+        uint256 _epoch,
+        uint256 _threshold,
+        bytes calldata _flashSig
+    ) public override returns(bool) {
+
+        // check that threshold was false
+        bytes32 extractionHash = keccak256(abi.encode(_account, _attribute, _epoch, _threshold, _secret, false, block.chainid));
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
+        address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
+        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            _flashSigs[extractionHash] = true;
+            return false;
+        }
+
+        // check that threshold was true
+        extractionHash = keccak256(abi.encode(_account, _attribute, _epoch, _threshold, _secret, true, block.chainid));
+        signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
+        signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
+        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            _flashSigs[extractionHash] = true;
+            return true;
+        }
+
+        revert("INVALID_ISSUER_OR_PARAMS");
     }
  }

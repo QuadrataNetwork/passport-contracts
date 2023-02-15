@@ -8,6 +8,7 @@ interface IQuadReader {
     event QueryBulkEvent(address indexed _account, address indexed _caller, bytes32[] _attributes);
     event QueryFeeReceipt(address indexed _receiver, uint256 _fee);
     event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee);
+    event FlashSigUsed(bytes32 indexed _flashSig);
 
     function queryFee(
         address _account,
@@ -38,4 +39,12 @@ interface IQuadReader {
     function balanceOf(address _account, bytes32 _attribute) external view returns(uint256);
 
     function withdraw(address payable _to, uint256 _amount) external;
+
+    function flashQuery(
+        address _account,
+        bytes32 _attribute,
+        uint256 _epoch,
+        uint256 _threshold,
+        bytes calldata _flashSig
+    ) external returns(bool);
 }
