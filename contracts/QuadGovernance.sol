@@ -125,6 +125,22 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
     }
 
+
+    /// @dev Set the approval status for multiple users. If true, the users can query any attribute without paying in the current transaction
+    /// @notice Restricted behind a TimelockController. Array lengths must be equal
+    /// @param _accounts addresses of the users
+    /// @param _statuses approval status of the users
+    function setPreapprovals(address[] calldata _accounts, bool[] calldata _statuses) override external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_accounts.length == _statuses.length, "ARRAY_LENGTH_MISMATCH");
+
+        for (uint256 i = 0; i < _accounts.length; i++) {
+            require(_preapprovals[_accounts[i]] != _statuses[i], "PREAPPROVED_STATUS_ALREADY_SET");
+            _preapprovals[_accounts[i]] = _statuses[i];
+            emit PreapprovalUpdated(_accounts[i], _statuses[i]);
+        }
+    }
+
     /// @dev Set the price for querying a single attribute after owning a passport
     /// @notice Restricted behind a TimelockController
     /// @param _attribute keccak256 of the attribute name (ex: keccak256("COUNTRY"))
@@ -262,6 +278,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit IssuerAttributePermission(_issuer, _attribute, _permission);
     }
 
+
+
     function _authorizeUpgrade(address) override internal view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
@@ -394,6 +412,13 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @return issuer treasury
     function issuersTreasury(address _issuer) override public view returns (address) {
         return _issuerTreasury[_issuer];
+    }
+
+    /// @dev Get the approval status of an account
+    /// @param _account address of the account
+    /// @return approval status
+    function preapproval(address _account) override public view returns (bool) {
+        return _preapprovals[_account];
     }
 }
 

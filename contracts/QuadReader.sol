@@ -45,6 +45,7 @@ import "./storage/QuadReaderStore.sol";
         attributes = passport.attributes(_account, _attribute);
         uint256 fee = queryFee(_account, _attribute);
         require(msg.value == fee, "INVALID_QUERY_FEE");
+
         if (fee > 0) {
             uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
             for (uint256 i = 0; i < attributes.length; i++) {
@@ -75,7 +76,7 @@ import "./storage/QuadReaderStore.sol";
         uint256 fee = queryFee(_account, _attribute);
         require(msg.value == fee, "INVALID_QUERY_FEE");
 
-        uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
+        uint256 feeIssuer = governance.preapproval(msg.sender) || attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
 
         for (uint256 i = 0; i < attributes.length; i++) {
             values[i] = attributes[i].value;
@@ -89,6 +90,7 @@ import "./storage/QuadReaderStore.sol";
         if (fee > 0) {
             emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
         }
+
         emit QueryEvent(_account, msg.sender, _attribute);
     }
 
@@ -109,12 +111,15 @@ import "./storage/QuadReaderStore.sol";
         uint256 totalFee;
         uint256 totalFeeIssuer;
         uint256 attrFee;
+        bool hasPreapproval = governance.preapproval(msg.sender);
 
         for (uint256 i = 0; i < _attributes.length; i++) {
-            attrFee = isBusiness
-                ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
-                : governance.pricePerAttributeFixed(_attributes[i]);
-            totalFee += attrFee;
+            if(!hasPreapproval) {
+                attrFee = isBusiness
+                    ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
+                    : governance.pricePerAttributeFixed(_attributes[i]);
+                totalFee += attrFee;
+            }
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
 
             if (attrs.length > 0) {
@@ -158,12 +163,15 @@ import "./storage/QuadReaderStore.sol";
         uint256 totalFee;
         uint256 totalFeeIssuer;
         uint256 attrFee;
+        bool hasPreapproval = governance.preapproval(msg.sender);
 
         for (uint256 i = 0; i < _attributes.length; i++) {
-            attrFee = isBusiness
-                ? governance.pricePerBusinessAttributeFixed(_attributes[i])
-                : governance.pricePerAttributeFixed(_attributes[i]);
-            totalFee += attrFee;
+            if(!hasPreapproval) {
+                attrFee = isBusiness
+                    ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
+                    : governance.pricePerAttributeFixed(_attributes[i]);
+                totalFee += attrFee;
+            }
             IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
             if (attrs.length > 0) {
                 values[i] = attrs[0].value;
@@ -197,6 +205,9 @@ import "./storage/QuadReaderStore.sol";
             || governance.eligibleAttributesByDID(_attribute),
             "ATTRIBUTE_NOT_ELIGIBLE"
         );
+        if(governance.preapproval(msg.sender)) {
+            return 0;
+        }
 
         IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
@@ -215,6 +226,9 @@ import "./storage/QuadReaderStore.sol";
         address _account,
         bytes32[] calldata _attributes
     ) public override view returns(uint256) {
+        if(governance.preapproval(msg.sender)) {
+            return 0;
+        }
         IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
 
         uint256 fee;
@@ -225,6 +239,7 @@ import "./storage/QuadReaderStore.sol";
                 || governance.eligibleAttributesByDID(_attributes[i]),
                 "ATTRIBUTE_NOT_ELIGIBLE"
             );
+
             fee += isBusiness
                 ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
                 : governance.pricePerAttributeFixed(_attributes[i]);

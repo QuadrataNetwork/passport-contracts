@@ -52,8 +52,8 @@ describe("QuadPassport.attributeMetadata/attributesExist", async () => {
       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
     };
 
-    const issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    const issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       deployer,
@@ -88,8 +88,8 @@ describe("QuadPassport.attributeMetadata/attributesExist", async () => {
       [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
     };
 
-    const issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    const issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       deployer,
@@ -141,8 +141,8 @@ describe("QuadPassport.attributeMetadata/attributesExist", async () => {
       [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     };
 
-    const issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    const issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    const verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       deployer,

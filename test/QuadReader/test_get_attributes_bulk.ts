@@ -66,8 +66,8 @@ describe("QuadReader.getAttributesBulk", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -175,6 +175,35 @@ describe("QuadReader.getAttributesBulk", async () => {
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
+      );
+    });
+
+    it("success - all callers have preapproval", async () => {
+
+      // convert ethers.getSigners() to addresses
+      const addresses = await Promise.all(
+        (await ethers.getSigners()).map((signer) => signer.getAddress())
+      );
+      // create boolean array matching lenght of addresses
+      const preapprovals = new Array(addresses.length).fill(true);
+
+      await governance.connect(admin).setPreapprovals(addresses, preapprovals);
+      await governance.connect(admin).setPreapprovals([defi.address, businessPassport.address], [true, true]);
+
+      await assertGetAttributesBulk(
+        minterA,
+        [
+          ATTRIBUTE_AML,
+          ATTRIBUTE_COUNTRY,
+          ATTRIBUTE_DID,
+          ATTRIBUTE_IS_BUSINESS,
+        ],
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
       );
     });
 

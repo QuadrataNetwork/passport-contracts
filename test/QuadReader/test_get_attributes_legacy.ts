@@ -67,8 +67,8 @@ describe("QuadReader.getAttributesLegacy", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -340,6 +340,60 @@ describe("QuadReader.getAttributesLegacy", async () => {
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
+      );
+    });
+
+    it("success - all callers have preapproval" , async () => {
+
+      // convert ethers.getSigners() to addresses
+      const addresses = await Promise.all(
+        (await ethers.getSigners()).map((signer) => signer.getAddress())
+      );
+      // create boolean array matching lenght of addresses
+      const preapprovals = new Array(addresses.length).fill(true);
+
+      await governance.connect(admin).setPreapprovals(addresses, preapprovals);
+      await governance.connect(admin).setPreapprovals([defi.address, businessPassport.address], [true, true]);
+
+      await assertGetAttributesLegacy(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributesLegacy(
+        minterA,
+        ATTRIBUTE_IS_BUSINESS,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributesLegacy(
+        minterA,
+        ATTRIBUTE_AML,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      );
+      await assertGetAttributesLegacy(
+        minterA,
+        ATTRIBUTE_DID,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
       );
     });
 

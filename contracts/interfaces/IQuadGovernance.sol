@@ -16,6 +16,7 @@ interface IQuadGovernance {
     event PassportAddressUpdated(address indexed _oldAddress, address indexed _address);
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdated(address indexed _oldAddress, address indexed _address);
+    event PreapprovalUpdated(address indexed _account, bool _status);
 
     function setTreasury(address _treasury) external;
 
@@ -56,6 +57,10 @@ interface IQuadGovernance {
     function eligibleAttributesByDID(bytes32) external view returns(bool);
 
     function eligibleAttributesArray(uint256) external view returns(bytes32);
+
+    function setPreapprovals(address[] calldata, bool[] calldata) external;
+
+    function preapproval(address) external view returns(bool);
 
     function pricePerAttributeFixed(bytes32) external view returns(uint256);
 

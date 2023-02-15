@@ -67,8 +67,8 @@ describe("QuadReader.queryFee", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -107,6 +107,14 @@ describe("QuadReader.queryFee", async () => {
         expect(
           await reader.queryFee(businessPassport.address, attrType)
         ).to.equal(PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType]);
+      });
+    });
+
+    it("success - fee 0 when preapproved", async () => {
+      await governance.connect(admin).setPreapprovals([minterA.address], [true]);
+
+      Object.keys(attributes).forEach(async (attrType) => {
+        expect(await reader.queryFee(minterA.address, attrType)).to.equal(0);
       });
     });
 

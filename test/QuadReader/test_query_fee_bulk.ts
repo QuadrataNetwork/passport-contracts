@@ -67,8 +67,8 @@ describe("QuadReader.queryFeeBulk", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -117,6 +117,14 @@ describe("QuadReader.queryFeeBulk", async () => {
           Object.keys(attributes)
         )
       ).to.equal(totalFee);
+    });
+
+    it("success - fee 0 when preapproved", async () => {
+      await governance.connect(admin).setPreapprovals([minterA.address], [true]);
+
+      expect(
+        await reader.connect(minterA).queryFeeBulk(minterA.address, Object.keys(attributes))
+      ).to.equal(ethers.utils.parseEther("0"));
     });
 
     it("fail - governance incorrectly set", async () => {

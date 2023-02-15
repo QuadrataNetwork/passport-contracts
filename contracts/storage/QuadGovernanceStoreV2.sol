@@ -8,4 +8,6 @@ contract QuadGovernanceStoreV2 is QuadGovernanceStore {
 
     address[] internal _deletedIssuers;
 
+    mapping(address => bool) internal _preapprovals;
+
 }
