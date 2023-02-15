@@ -323,6 +323,7 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            require(!_flashSigs[extractionHash], "ALREADY_SIGNED");
             _flashSigs[extractionHash] = true;
             return false;
         }
@@ -332,6 +333,7 @@ import "./storage/QuadReaderStoreV2.sol";
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            require(!_flashSigs[extractionHash], "ALREADY_SIGNED");
             _flashSigs[extractionHash] = true;
             return true;
         }
