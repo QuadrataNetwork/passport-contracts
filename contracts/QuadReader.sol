@@ -327,6 +327,7 @@ import "./storage/QuadReaderStoreV2.sol";
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
             require(!_flashSigs[extractionHash], "ALREADY_SIGNED");
             _flashSigs[extractionHash] = true;
+            emit FlashSigUsed(extractionHash);
             return false;
         }
 
@@ -337,6 +338,7 @@ import "./storage/QuadReaderStoreV2.sol";
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
             require(!_flashSigs[extractionHash], "ALREADY_SIGNED");
             _flashSigs[extractionHash] = true;
+            emit FlashSigUsed(extractionHash);
             return true;
         }
 
