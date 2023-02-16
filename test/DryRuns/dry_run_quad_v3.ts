@@ -197,5 +197,24 @@ describe.only("Dry Run Quad V3", () => {
         const results2 = await reader.callStatic.getAttributes(users[0].address, ATTRIBUTE_IS_BUSINESS);
         expect(results2[0].value).equals(id("FALSE"));
         expect(results2[1].value).equals(id("FALSE"));
+
+        const results3 = await reader.callStatic.getAttribute(users[0].address, ATTRIBUTE_COUNTRY);
+        expect(results3.value).equals(id("UK"));
+
+        const results4 = await reader.callStatic.getAttributesLegacy(users[0].address, ATTRIBUTE_IS_BUSINESS);
+        expect(results4[0][0]).equals(id("FALSE"));
+        expect(results4[0][1]).equals(id("FALSE"));
+
+        const results5 = await reader.callStatic.getAttributesBulkLegacy(users[0].address, [
+            ATTRIBUTE_IS_BUSINESS,
+            ATTRIBUTE_COUNTRY,
+            ATTRIBUTE_AML,
+            ATTRIBUTE_DID
+        ]);
+
+        expect(results5[0][0]).equals(id("FALSE"));
+        expect(results5[0][1]).equals(id("UK"));
+        expect(results5[0][2]).equals(hexZeroPad("0x03", 32));
+        expect(results5[0][3]).equals(formatBytes32String("hello:world:candy:land"));
     });
 });
