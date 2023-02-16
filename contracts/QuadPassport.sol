@@ -23,13 +23,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @dev initializer (constructor)
     /// @param _governanceContract address of the IQuadGovernance contract
     function initialize(
-        address _governanceContract,
-        address _readerContract
+        address _governanceContract
     ) public initializer {
         require(_governanceContract != address(0), "GOVERNANCE_ADDRESS_ZERO");
-        require(_readerContract != address(0), "READER_ADDRESS_ZERO");
         governance = IQuadGovernance(_governanceContract);
-        reader = IQuadReader(_readerContract);
         name = "Quadrata Passport";
         symbol = "QP";
     }
@@ -547,6 +544,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
             "INVALID_ADMIN"
         );
+    }
+
+    function setQuadReader(IQuadReader _reader) external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
+            "INVALID_ADMIN"
+        );
+        reader = _reader;
     }
 
     /// @dev Migrate _attributes to _attributesv2

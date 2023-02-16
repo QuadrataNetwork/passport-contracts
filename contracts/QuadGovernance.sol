@@ -417,8 +417,9 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @dev Get the approval status of an account
     /// @param _account address of the account
     /// @return approval status
-    function preapproval(address _account) override public view returns (bool) {
+    function preapproval(address _account) override virtual public view returns (bool) {
         return _preapprovals[_account];
     }
+
 }
 
