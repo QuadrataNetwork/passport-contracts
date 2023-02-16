@@ -87,12 +87,12 @@ describe("QuadReader", async () => {
   describe("calculate Gas - 1 issuer | 4 attributes", async () => {
     const attributeToQuery = [ATTRIBUTE_DID, ATTRIBUTE_COUNTRY, ATTRIBUTE_AML];
 
-    it.only("getAttribute", async () => {
+    it("getAttribute", async () => {
       const attribute = attributeToQuery[0];
       await reader.connect(minterA).getAttribute(minterA.address, attribute);
     });
 
-    it.only("getAttributes", async () => {
+    it("getAttributes", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader
         .connect(minterA)
@@ -102,7 +102,7 @@ describe("QuadReader", async () => {
       });
     });
 
-    it.only("getAttributesLegacy", async () => {
+    it("getAttributesLegacy", async () => {
       const attribute = attributeToQuery[0];
       await reader
         .connect(minterA)
@@ -111,7 +111,7 @@ describe("QuadReader", async () => {
         });
     });
 
-    it.only("getAttributesBulkLegacy", async () => {
+    it("getAttributesBulkLegacy", async () => {
       await reader
         .connect(minterA)
         .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
@@ -119,7 +119,7 @@ describe("QuadReader", async () => {
         });
     });
 
-    it.only("getAttributesBulk", async () => {
+    it("getAttributesBulk", async () => {
       await reader
         .connect(minterA)
         .getAttributesBulk(minterA.address, attributeToQuery, {
@@ -127,7 +127,7 @@ describe("QuadReader", async () => {
         });
     });
 
-    it.only("getAttributesBulk (DeFi)", async () => {
+    it("getAttributesBulk (DeFi)", async () => {
       await defi
         .connect(minterA)
         .depositBulk(minterA.address, attributeToQuery, {
