@@ -150,7 +150,6 @@ import "./storage/QuadReaderStore.sol";
     }
 
     /// @dev stub for compatibility with older versions
-
     function queryFeeBulk(
         address,
         bytes32[] calldata
