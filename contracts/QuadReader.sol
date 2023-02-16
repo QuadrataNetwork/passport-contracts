@@ -350,6 +350,6 @@ import "./storage/QuadReaderStoreV2.sol";
 
     function setUniqueness() external override {
         require(_uniqueness == bytes32(0), "UNIQUENESS_ALREADY_SET");
-        _uniqueness = keccak256(abi.encodePacked(blockhash(block.number - 69), block.timestamp, block.difficulty, block.coinbase, block.gaslimit, block.number, block.timestamp));
+        _uniqueness = keccak256(abi.encode(blockhash(block.number - 69), block.timestamp, block.difficulty, block.coinbase, block.gaslimit, block.number, block.timestamp));
     }
  }
