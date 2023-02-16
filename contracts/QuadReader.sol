@@ -42,7 +42,7 @@ import "./storage/QuadReaderStore.sol";
     ) external payable override returns(IQuadPassportStore.Attribute memory attribute) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         bool hasPreapproval = governance.preapproval(msg.sender);
-        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+        require(hasPreapproval, "SENDER_NOT_AUTHORIZED");
 
         attribute = passport.attribute(_account, _attribute);
         emit QueryEvent(_account, msg.sender, _attribute);
@@ -57,7 +57,7 @@ import "./storage/QuadReaderStore.sol";
     ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         bool hasPreapproval = governance.preapproval(msg.sender);
-        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+        require(hasPreapproval, "SENDER_NOT_AUTHORIZED");
 
         attributes = passport.attributes(_account, _attribute);
         emit QueryEvent(_account, msg.sender, _attribute);
@@ -75,7 +75,7 @@ import "./storage/QuadReaderStore.sol";
     ) public payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         bool hasPreapproval = governance.preapproval(msg.sender);
-        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+        require(hasPreapproval, "SENDER_NOT_AUTHORIZED");
 
         IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
         values = new bytes32[](attributes.length);
@@ -100,7 +100,7 @@ import "./storage/QuadReaderStore.sol";
     ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         bool hasPreapproval = governance.preapproval(msg.sender);
-        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+        require(hasPreapproval, "SENDER_NOT_AUTHORIZED");
 
         attributes = new IQuadPassportStore.Attribute[](_attributes.length);
 
@@ -124,7 +124,7 @@ import "./storage/QuadReaderStore.sol";
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
         bool hasPreapproval = governance.preapproval(msg.sender);
-        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+        require(hasPreapproval, "SENDER_NOT_AUTHORIZED");
 
         values = new bytes32[](_attributes.length);
         epochs = new uint256[](_attributes.length);
@@ -141,59 +141,21 @@ import "./storage/QuadReaderStore.sol";
     }
 
 
-    /// @dev Calculate the amount of $ETH required to call `getAttributes`
-    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @param _account account getting requested for attributes
-    /// @return the amount of $ETH necessary to query the attribute
+    /// @dev stub for compatibility with older versions
     function queryFee(
-        address _account,
-        bytes32 _attribute
+        address,
+        bytes32
     ) public override view returns(uint256) {
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
-        if(governance.preapproval(msg.sender)) {
-            return 0;
-        }
-
-        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
-
-        uint256 fee = (businessAttr.value == keccak256("TRUE"))
-            ? governance.pricePerBusinessAttributeFixed(_attribute)
-            : governance.pricePerAttributeFixed(_attribute);
-
-        return fee;
+        return 0;
     }
 
-    /// @dev Calculate the amount of $ETH required to call `getAttributesBulk`
-    /// @param _attributes Array of keccak256 of the attribute type (ex: keccak256("COUNTRY"))
-    /// @param _account account getting requested for attributes
-    /// @return the amount of $ETH necessary to query the attribute
+    /// @dev stub for compatibility with older versions
+
     function queryFeeBulk(
-        address _account,
-        bytes32[] calldata _attributes
+        address,
+        bytes32[] calldata
     ) public override view returns(uint256) {
-        if(governance.preapproval(msg.sender)) {
-            return 0;
-        }
-        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
-
-        uint256 fee;
-        bool isBusiness = (businessAttr.value == keccak256("TRUE")) ? true : false;
-
-        for (uint256 i = 0; i < _attributes.length; i++) {
-            require(governance.eligibleAttributes(_attributes[i])
-                || governance.eligibleAttributesByDID(_attributes[i]),
-                "ATTRIBUTE_NOT_ELIGIBLE"
-            );
-
-            fee += isBusiness
-                ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
-                : governance.pricePerAttributeFixed(_attributes[i]);
-        }
-
-        return fee;
+       return 0;
     }
 
 
