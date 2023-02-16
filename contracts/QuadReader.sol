@@ -33,6 +33,21 @@ import "./storage/QuadReaderStore.sol";
         passport = IQuadPassport(_passport);
     }
 
+    /// @notice Retrieve a single attribute being issued about a wallet
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return attribute Attribute struct (values, verifiedAt, issuer)
+    function getAttribute(
+        address _account, bytes32 _attribute
+    ) external payable override returns(IQuadPassportStore.Attribute memory attribute) {
+        require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+
+        attribute = passport.attribute(_account, _attribute);
+        emit QueryEvent(_account, msg.sender, _attribute);
+    }
+
     /// @notice Retrieve all attestations for a specific attribute being issued about a wallet
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
@@ -41,18 +56,10 @@ import "./storage/QuadReaderStore.sol";
         address _account, bytes32 _attribute
     ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
 
         attributes = passport.attributes(_account, _attribute);
-        uint256 fee = queryFee(_account, _attribute);
-        require(msg.value == fee, "INVALID_QUERY_FEE");
-
-        if (fee > 0) {
-            uint256 feeIssuer = attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
-            for (uint256 i = 0; i < attributes.length; i++) {
-                emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
-            }
-            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
-        }
         emit QueryEvent(_account, msg.sender, _attribute);
     }
 
@@ -67,30 +74,19 @@ import "./storage/QuadReaderStore.sol";
         address _account, bytes32 _attribute
     ) public payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
 
         IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
         values = new bytes32[](attributes.length);
         epochs = new uint256[](attributes.length);
         issuers = new address[](attributes.length);
 
-        uint256 fee = queryFee(_account, _attribute);
-        require(msg.value == fee, "INVALID_QUERY_FEE");
-
-        uint256 feeIssuer = governance.preapproval(msg.sender) || attributes.length == 0 ? 0 : (fee * governance.revSplitIssuer() / 1e2) / attributes.length;
-
         for (uint256 i = 0; i < attributes.length; i++) {
             values[i] = attributes[i].value;
             epochs[i] = attributes[i].epoch;
             issuers[i] = attributes[i].issuer;
-
-            if (feeIssuer > 0) {
-                emit QueryFeeReceipt(attributes[i].issuer, feeIssuer);
-            }
         }
-        if (fee > 0) {
-            emit QueryFeeReceipt(governance.treasury(), fee - feeIssuer * attributes.length);
-        }
-
         emit QueryEvent(_account, msg.sender, _attribute);
     }
 
@@ -101,43 +97,17 @@ import "./storage/QuadReaderStore.sol";
     /// @return attributes array of Attributes struct (values, verifiedAt, issuer)
     function getAttributesBulk(
         address _account, bytes32[] calldata _attributes
-    ) external payable override returns(IQuadPassportStore.Attribute[] memory) {
+    ) external payable override returns(IQuadPassportStore.Attribute[] memory attributes) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-
-        IQuadPassportStore.Attribute[] memory attributes = new IQuadPassportStore.Attribute[](_attributes.length);
-        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
-        bool isBusiness = (businessAttr.value == keccak256("TRUE")) ? true : false;
-
-        uint256 totalFee;
-        uint256 totalFeeIssuer;
-        uint256 attrFee;
         bool hasPreapproval = governance.preapproval(msg.sender);
+        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
+
+        attributes = new IQuadPassportStore.Attribute[](_attributes.length);
 
         for (uint256 i = 0; i < _attributes.length; i++) {
-            if(!hasPreapproval) {
-                attrFee = isBusiness
-                    ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
-                    : governance.pricePerAttributeFixed(_attributes[i]);
-                totalFee += attrFee;
-            }
-            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
-
-            if (attrs.length > 0) {
-                attributes[i] = attrs[0];
-                if (attrFee > 0) {
-                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-                    totalFeeIssuer += feeIssuer;
-                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
-                }
-            }
-        }
-        require(msg.value == totalFee, " INVALID_QUERY_FEE");
-        if (totalFee > 0) {
-            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
+            attributes[i] = passport.attribute(_account, _attributes[i]);
         }
         emit QueryBulkEvent(_account, msg.sender, _attributes);
-
-        return attributes;
     }
 
 
@@ -153,41 +123,19 @@ import "./storage/QuadReaderStore.sol";
         address _account, bytes32[] calldata _attributes
     ) external payable override returns(bytes32[] memory values, uint256[] memory epochs, address[] memory issuers) {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(hasPreapproval, "CONTRACT_NOT_AUTHORIZED");
 
         values = new bytes32[](_attributes.length);
         epochs = new uint256[](_attributes.length);
         issuers = new address[](_attributes.length);
-        IQuadPassportStore.Attribute memory businessAttr = passport.attribute(_account, ATTRIBUTE_IS_BUSINESS);
-        bool isBusiness = (businessAttr.value == keccak256("TRUE")) ? true : false;
-
-        uint256 totalFee;
-        uint256 totalFeeIssuer;
-        uint256 attrFee;
-        bool hasPreapproval = governance.preapproval(msg.sender);
 
         for (uint256 i = 0; i < _attributes.length; i++) {
-            if(!hasPreapproval) {
-                attrFee = isBusiness
-                    ?  governance.pricePerBusinessAttributeFixed(_attributes[i])
-                    : governance.pricePerAttributeFixed(_attributes[i]);
-                totalFee += attrFee;
-            }
-            IQuadPassportStore.Attribute[] memory attrs = passport.attributes(_account, _attributes[i]);
-            if (attrs.length > 0) {
-                values[i] = attrs[0].value;
-                epochs[i] = attrs[0].epoch;
-                issuers[i] = attrs[0].issuer;
+            IQuadPassportStore.Attribute memory attr = passport.attribute(_account, _attributes[i]);
+                values[i] = attr.value;
+                epochs[i] = attr.epoch;
+                issuers[i] = attr.issuer;
 
-                if (attrFee > 0) {
-                    uint256 feeIssuer = attrFee * governance.revSplitIssuer() / 1e2;
-                    totalFeeIssuer += feeIssuer;
-                    emit QueryFeeReceipt(attrs[0].issuer, feeIssuer);
-                }
-            }
-        }
-        require(msg.value == totalFee," INVALID_QUERY_FEE");
-        if (totalFee > 0) {
-            emit QueryFeeReceipt(governance.treasury(), totalFee - totalFeeIssuer);
         }
         emit QueryBulkEvent(_account, msg.sender, _attributes);
     }

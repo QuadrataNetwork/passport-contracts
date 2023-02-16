@@ -19,6 +19,10 @@ interface IQuadReader {
         bytes32[] calldata _attributes
     ) external view returns(uint256);
 
+    function getAttribute(
+        address _account, bytes32 _attribute
+    ) external payable returns(QuadPassportStore.Attribute memory attribute);
+
     function getAttributes(
         address _account, bytes32 _attribute
     ) external payable returns(QuadPassportStore.Attribute[] memory attributes);

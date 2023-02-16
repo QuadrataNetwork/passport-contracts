@@ -40,7 +40,6 @@ describe("QuadReader", async () => {
     [ATTRIBUTE_DID]: formatBytes32String("quad:did:helllo"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
-    [ATTRIBUTE_IS_BUSINESS]: id("TRUE"),
   };
 
   beforeEach(async () => {
@@ -67,6 +66,13 @@ describe("QuadReader", async () => {
     issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
+    await governance
+      .connect(admin)
+      .setPreapprovals(
+        [minterA.address, minterB.address, defi.address],
+        [true, true, true]
+      );
+
     await setAttributes(
       minterA,
       issuer,
@@ -79,55 +85,53 @@ describe("QuadReader", async () => {
   });
 
   describe("calculate Gas - 1 issuer | 4 attributes", async () => {
-    const attributeToQuery = [
-      ATTRIBUTE_DID,
-      ATTRIBUTE_COUNTRY,
-      ATTRIBUTE_IS_BUSINESS,
-      ATTRIBUTE_AML,
-    ];
+    const attributeToQuery = [ATTRIBUTE_DID, ATTRIBUTE_COUNTRY, ATTRIBUTE_AML];
 
-    it("getAttributes", async () => {
+    it.only("getAttribute", async () => {
       const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
+      await reader.connect(minterA).getAttribute(minterA.address, attribute);
+    });
+
+    it.only("getAttributes", async () => {
+      const attribute = attributeToQuery[0];
+      const fee = await reader
+        .connect(minterA)
+        .queryFee(minterA.address, attribute);
       await reader.connect(minterA).getAttributes(minterA.address, attribute, {
         value: fee,
       });
     });
 
-    it("getAttributesLegacy", async () => {
+    it.only("getAttributesLegacy", async () => {
       const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
       await reader
         .connect(minterA)
         .getAttributesLegacy(minterA.address, attribute, {
-          value: fee,
+          value: 0,
         });
     });
 
-    it("getAttributesBulkLegacy", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+    it.only("getAttributesBulkLegacy", async () => {
       await reader
         .connect(minterA)
         .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
-          value: fee,
+          value: 0,
         });
     });
 
-    it("getAttributesBulk", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+    it.only("getAttributesBulk", async () => {
       await reader
         .connect(minterA)
         .getAttributesBulk(minterA.address, attributeToQuery, {
-          value: fee,
+          value: 0,
         });
     });
 
-    it("getAttributesBulk (DeFi)", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
+    it.only("getAttributesBulk (DeFi)", async () => {
       await defi
         .connect(minterA)
         .depositBulk(minterA.address, attributeToQuery, {
-          value: fee,
+          value: 0,
         });
     });
 

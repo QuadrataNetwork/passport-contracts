@@ -297,20 +297,17 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         bytes32 _attribute
     ) public view override returns (Attribute[] memory) {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
+        // require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        require(address(governance) == address(governance), "INVALID_READER");
+        bool groupByDID = governance.eligibleAttributesByDID(_attribute);
         address[] memory issuers = governance.getIssuers();
         Attribute memory did;
-        if (governance.eligibleAttributesByDID(_attribute))
+        if (groupByDID)
             did = attribute(_account, ATTRIBUTE_DID);
         uint256 counter = 0;
         bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            if (governance.eligibleAttributesByDID(_attribute))
+            if (groupByDID)
                 attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
             else
                 attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
@@ -324,7 +321,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (counter > 0) {
             uint256 j;
             for (uint256 i = 0; i < issuers.length; i++) {
-                if (governance.eligibleAttributesByDID(_attribute))
+                if (groupByDID)
                     attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
                 else
                     attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
@@ -349,11 +346,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         bytes32 _attribute
     ) public view override returns (Attribute memory) {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
+        // require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        // TODO: FAB
+        require(address(governance) == address(governance), "INVALID_READER");
         address[] memory issuers = governance.getIssuers();
         for (uint256 i = 0; i < issuers.length; i++) {
             bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);

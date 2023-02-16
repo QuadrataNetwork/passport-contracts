@@ -9,12 +9,11 @@ import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
-require('dotenv').config({ path: require('find-config')('.env') })
+require("dotenv").config({ path: require("find-config")(".env") });
 
 // Tasks
 import "./scripts/tasks/quadGovernance.ts";
 import "./scripts/tasks/deployTasks.ts";
-
 
 const config = {
   solidity: {
@@ -24,7 +23,7 @@ const config = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 0,
+            runs: 100,
           },
         },
       },
@@ -33,7 +32,7 @@ const config = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 0,
+            runs: 100,
           },
         },
       },
@@ -147,4 +146,3 @@ const config = {
 };
 
 export default config;
-
