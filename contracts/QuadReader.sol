@@ -32,7 +32,6 @@ import "./storage/QuadReaderStoreV2.sol";
 
         governance = IQuadGovernance(_governance);
         passport = IQuadPassport(_passport);
-        _secret = keccak256(address(this).code);
     }
 
     /// @notice Retrieve all attestations for a specific attribute being issued about a wallet
@@ -310,38 +309,47 @@ import "./storage/QuadReaderStoreV2.sol";
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
 
-    function flashQuery(
+    /// @dev Returns if a user's data is greater than or equal to (GTE) a certain threshold
+    /// @param _account user whose data is being checked
+    /// @param _sender must be preapproved and autherized to perform query
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
+    /// @param _epoch epoch of the data
+    /// @param _threshold threshold to compare the data to
+    /// @param _flashSig signature of the flash query
+    /// @return true if the data is GTE to the threshold, false otherwise
+    function getFlashAttributeGTE(
         address _account,
+        address _sender,
         bytes32 _attribute,
         uint256 _epoch,
         uint256 _threshold,
         bytes calldata _flashSig
     ) public override returns(bool) {
-
         require(governance.preapproval(msg.sender), "NOT_PREAPPROVED");
 
-        // check that threshold was false
-        bytes32 extractionHash = keccak256(abi.encode(_account, _attribute, _epoch, _threshold, _secret, false, block.chainid));
+        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, false, block.chainid));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            require(!_flashSigs[extractionHash], "ALREADY_SIGNED");
-            _flashSigs[extractionHash] = true;
-            emit FlashSigUsed(extractionHash);
+            require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
+            emit FLashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, false);
             return false;
         }
 
-        // check that threshold was true
-        extractionHash = keccak256(abi.encode(_account, _attribute, _epoch, _threshold, _secret, true, block.chainid));
+        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, true, block.chainid));
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            require(!_flashSigs[extractionHash], "ALREADY_SIGNED");
-            _flashSigs[extractionHash] = true;
-            emit FlashSigUsed(extractionHash);
+            require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
+            emit FLashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, true);
             return true;
         }
 
         revert("INVALID_ISSUER_OR_PARAMS");
+    }
+
+    function setUniqueness() external override {
+        require(_uniqueness == bytes32(0), "UNIQUENESS_ALREADY_SET");
+        _uniqueness = keccak256(abi.encodePacked(blockhash(block.number - 69), block.timestamp, block.difficulty, block.coinbase, block.gaslimit, block.number, block.timestamp));
     }
  }
