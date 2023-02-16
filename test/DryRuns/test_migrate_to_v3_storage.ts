@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
 import { ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_CRED_PROTOCOL_SCORE, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS } from "../../utils/constant";
 
-describe.skip('migrateToV3Storage', function() {
+describe.only('migrateToV3Storage', function() {
     // increase timeout to 600s
     this.timeout(600000);
 
@@ -119,6 +119,46 @@ describe.skip('migrateToV3Storage', function() {
             data: executeRawFunctionData,
         });
 
+        // perform upgrade to QuadReader
+        const QuadReader = await ethers.getContractFactory("QuadReader");
+        const quadReaderUpgraded = await QuadReader.deploy();
+        await quadReaderUpgraded.deployed();
+
+        const upgradeToFunctionData2 = quadReader.interface.encodeFunctionData("upgradeTo", [quadReaderUpgraded.address]);
+        var executeRawFunctionData2 = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadReader.address, upgradeToFunctionData2]);
+        await signers[1].sendTransaction({
+            to: timelockAddress,
+            value: 0,
+            data: executeRawFunctionData2,
+        });
+
+        // perform upgrade to QuadGovernance
+        const QuadGovernance = await ethers.getContractFactory("QuadGovernanceTestnet");
+        const quadGovernanceUpgraded = await QuadGovernance.deploy();
+        await quadGovernanceUpgraded.deployed();
+
+        const upgradeToFunctionData3 = quadGovernance.interface.encodeFunctionData("upgradeTo", [quadGovernanceUpgraded.address]);
+        var executeRawFunctionData3 = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadGovernance.address, upgradeToFunctionData3]);
+        await signers[1].sendTransaction({
+            to: timelockAddress,
+            value: 0,
+            data: executeRawFunctionData3,
+        });
+
+        console.log("upgradeTo functions executed for QuadPassport, QuadReader and QuadGovernance")
+
+        // setQuadReader address in QuadPassport
+        const setQuadReaderFunctionData = quadPassportUpgraded.interface.encodeFunctionData("setQuadReader", [quadReader.address]);
+        var executeRawFunctionData4 = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadPassport.address, setQuadReaderFunctionData]);
+        await signers[1].sendTransaction({
+            to: timelockAddress,
+            value: 0,
+            data: executeRawFunctionData4,
+        });
+
+        console.log("setQuadReader function executed for QuadPassport")
+
+
         // ensure all account level attributes in all accounts are falsy
         for (let account of chunks[0]) {
             const account0init = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
@@ -169,7 +209,7 @@ describe.skip('migrateToV3Storage', function() {
                 const key = defaultAbiCoder.encode(["address", "bytes32"], [account, eligibleAttribute]);
                 expect(value).to.be.equal(premigrationAttributes[key].value);
                 expect(epoch).to.be.equal(premigrationAttributes[key].epoch);
-                expect(issuer).to.be.equal(premigrationAttributes[key].issuer);
+                expect(issuer).to.be.equal(constants.AddressZero);
 
                 console.log("account", account, "is equal to premigrationAttributes")
                 console.log("\t -premigrationAttributes: value, ", premigrationAttributes[key].value)
