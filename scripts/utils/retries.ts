@@ -9,13 +9,10 @@ interface ErrorHandling {
 }
 
 
-export const recursiveRetry = async (func: (...args: any) => any, ...args: any): Promise<any>  => {
+export const recursiveRetry = async (func: (...args: any) => any, ...args: any): Promise<any> => {
     try {
-        try {
-            return await func(...args);
-        } finally {
-            console.log("executed " + func.name + " successfully");
-        }
+        console.log("executing..." + func.name);
+        return await func(...args);
     } catch (e: any) {
         console.log("failed to execute " + func.name + " due to " + e.toString());
         console.log("retrying in 5ish seconds");
@@ -23,7 +20,7 @@ export const recursiveRetry = async (func: (...args: any) => any, ...args: any):
         await wait(4000 + Math.random() * 2000);
 
         // magage error handling for recursion path
-        if(e.toString().includes("cannot estimate gas") || e.toString().includes("UNPREDICTABLE_GAS_LIMIT")) {
+        if (e.toString().includes("cannot estimate gas") || e.toString().includes("UNPREDICTABLE_GAS_LIMIT")) {
             // dispatch to recursiveRetryErrorHandling
             return await recursiveRetryErrorHandling(func, {
                 gasLimit: parseUnits("0.001", "gwei"), // a million gas will cover our largest transaction
@@ -34,9 +31,9 @@ export const recursiveRetry = async (func: (...args: any) => any, ...args: any):
     }
 }
 
-export const recursiveRetryErrorHandling = async (func: (...args: any) => any, errorHandling: ErrorHandling, ...args: any): Promise<any>  => {
+export const recursiveRetryErrorHandling = async (func: (...args: any) => any, errorHandling: ErrorHandling, ...args: any): Promise<any> => {
     try {
-        if(errorHandling.gasLimit) {
+        if (errorHandling.gasLimit) {
             return await func(...args, {
                 gasLimit: errorHandling.gasLimit,
             });
@@ -50,7 +47,7 @@ export const recursiveRetryErrorHandling = async (func: (...args: any) => any, e
         await wait(4000 + Math.random() * 2000);
 
         // magage error handling for recursion path
-        if(e.toString().includes("cannot estimate gas") || e.toString().includes("UNPREDICTABLE_GAS_LIMIT")) {
+        if (e.toString().includes("cannot estimate gas") || e.toString().includes("UNPREDICTABLE_GAS_LIMIT")) {
             var gasLimit = errorHandling.gasLimit;
             // increase gas limit by 50%
             gasLimit = gasLimit.mul(3).div(2);
@@ -61,7 +58,7 @@ export const recursiveRetryErrorHandling = async (func: (...args: any) => any, e
                 gasLimit: gasLimit,
             }, ...args);
 
-        } else if(e.toString().includes("exceeds block gas limit") || e.toString().includes("> current max gas")) {
+        } else if (e.toString().includes("exceeds block gas limit") || e.toString().includes("> current max gas")) {
 
             // parse out the 2 numbers from the error message
             const gasLimitString = e.toString().match(/\d+/g);
@@ -80,7 +77,7 @@ export const recursiveRetryErrorHandling = async (func: (...args: any) => any, e
     }
 }
 
-export const recursiveRetryIncreamentNonce = async (signer: SignerWithAddress): Promise<any>  => {
+export const recursiveRetryIncreamentNonce = async (signer: SignerWithAddress): Promise<any> => {
     try {
         return await signer.sendTransaction({
             to: signer.address,

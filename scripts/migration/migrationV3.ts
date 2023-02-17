@@ -11,8 +11,8 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         const ethers = hre.ethers;
         const passportAddr = taskArgs.passport;
         const governanceAddr = taskArgs.governance;
-        const startBlock = taskArgs.startBlock;
-        const endBlock = taskArgs.endBlock;
+        const startBlock = parseInt(taskArgs.startBlock);
+        const endBlock = parseInt(taskArgs.endBlock);
         const ATTRIBUTE_AML = ethers.utils.id("AML");
         const ATTRIBUTE_COUNTRY = ethers.utils.id("COUNTRY");
         const ATTRIBUTE_DID = ethers.utils.id("DID");
@@ -20,8 +20,8 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id("CRED_PROTOCOL_SCORE")
         const ATTRIBUTE_IS_ACCREDITITED_INVESTOR_US = ethers.utils.id("IS_ACCREDITITED_INVESTOR_US")
         const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id("IS_QUALIFIEDPURCHASER_US")
-        const quadPassport = await recursiveRetry(ethers.getContractAt, "QuadPassport", passportAddr);
 
+        const quadPassport = await recursiveRetry(ethers.getContractAt, "QuadPassport", passportAddr);
         const quadGovernance = await recursiveRetry(async () => {
             return await ethers.getContractAt("QuadGovernance", governanceAddr);
         });
@@ -37,8 +37,6 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             eligibleAttributes.push(attribute);
         }
 
-        console.log("finished getting eligible attributes")
-
         expect(eligibleAttributes.length).to.be.equals(5) // includes AML, DID, COUNTRY, CRED_PROTOCOL_SCORE, IS_BUSINESS
         expect(eligibleAttributes.includes(ATTRIBUTE_AML)).to.be.true; // AML is eligible
         expect(eligibleAttributes.includes(ATTRIBUTE_COUNTRY)).to.be.true; // COUNTRY is eligible
@@ -46,8 +44,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         expect(eligibleAttributes.includes(ATTRIBUTE_CRED_PROTOCOL_SCORE)).to.be.true; // CRED_PROTOCOL_SCORE is eligible
         expect(eligibleAttributes.includes(ATTRIBUTE_IS_BUSINESS)).to.be.true; // IS_BUSINESS is eligible
 
-        console.log("finished checking eligible attributes")
-
+        console.log("running migration across block interval [", startBlock,",", endBlock,"]")
         // read TransferSingle event from QuadPassport
         const filter = quadPassport.filters.TransferSingle(null, null, null, null, null);
         const logs = await quadPassport.queryFilter(filter, startBlock, endBlock);
@@ -81,7 +78,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
                     to: quadPassport.address,
                     value: 0,
                     data: migrateAttributesFunctionData,
-                    gasLimit: 150000000,
+                    gasLimit: 1500000,
                     maxFeePerGas: ethers.utils.parseUnits("20", "gwei"),
 
                 });
