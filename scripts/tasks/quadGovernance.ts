@@ -1,5 +1,6 @@
 import { id } from "ethers/lib/utils";
 import { task } from "hardhat/config";
+import { deployGovernance } from "../../utils/deployment";
 import { recursiveRetry } from "../utils/retries";
 
 
@@ -150,6 +151,26 @@ task("setEligibleAttributesByDID", "npx hardhat setEligibleAttributesByDID --att
                 governance: governanceAddress
             });
         }
+    });
+
+task("getPreapprovalFunctionData", "npx hardhat getPreapprovalFunctionData --addresses <address,address,...> --statuses <boolean,boolean,...>")
+    .addParam("addresses", "sets the addresses")
+    .addParam("statuses", "sets the statuses")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const addresses = taskArgs.addresses.split(",");
+        const statuses = taskArgs.statuses.split(",");
+        // return error if network is not hardhat
+        if (hre.network.name != "hardhat") {
+            console.log("getPreapprovalFunctionData can only be run on hardhat network");
+            return;
+        }
+        const QuadGovernance = await ethers.getContractFactory("QuadGovernance");
+        const governance = await QuadGovernance.deploy();
+        await governance.deployed();
+
+        const functionData = governance.interface.encodeFunctionData("setPreapprovals", [addresses, statuses]);
+        console.log(functionData);
     });
 
 /*
