@@ -4,7 +4,7 @@ import { task } from "hardhat/config";
 import { recursiveRetry, recursiveRetryIncreamentNonce } from "../utils/retries";
 
 const increamentNonceUntil = async (deployer: SignerWithAddress, nonceDelta: any) => {
-    for(let i = 0; i < nonceDelta; i++) {
+    for (let i = 0; i < nonceDelta; i++) {
         console.log("increamenting nonce " + (i + 1) + " of " + nonceDelta + " times");
         await recursiveRetryIncreamentNonce(deployer);
     }
@@ -22,7 +22,7 @@ task("setNonce", "npx hardhat setNonce --nonce <number> --network <network_name>
         console.log("Nonce of Deployer: " + currentNonce.toString());
 
         const nonceDelta = nonce - currentNonce;
-        if(nonceDelta < 0) throw new Error("Nonce is too low");
+        if (nonceDelta < 0) throw new Error("Nonce is too low");
         await increamentNonceUntil(deployer, nonceDelta);
     });
 
@@ -33,6 +33,15 @@ task("deployTestnet", "npx hardhat deployTestnet --nonce <number> --network <net
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
         const nonce = taskArgs.nonce;
-        await hre.run("setNonce", {nonce: nonce});
+        await hre.run("setNonce", { nonce: nonce });
     });
 
+
+
+task("getCurrentBlock", "npx hardhat getCurrentBlock --network <network_name>")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const blockNumber = await recursiveRetry(ethers.provider.getBlockNumber);
+        console.log("Current Block Number: " + blockNumber.toString());
+    }
+    );

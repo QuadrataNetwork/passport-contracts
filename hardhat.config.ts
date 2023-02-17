@@ -15,6 +15,7 @@ require("dotenv").config({ path: require("find-config")(".env") });
 import "./scripts/tasks/quadGovernance.ts";
 import "./scripts/tasks/deployTasks.ts";
 import "./scripts/tasks/quadPassport.ts";
+import "./scripts/migration/migrationV3.ts"
 
 const config = {
   solidity: {

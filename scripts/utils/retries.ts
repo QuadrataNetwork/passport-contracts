@@ -11,7 +11,11 @@ interface ErrorHandling {
 
 export const recursiveRetry = async (func: (...args: any) => any, ...args: any): Promise<any>  => {
     try {
-        return await func(...args);
+        try {
+            return await func(...args);
+        } finally {
+            console.log("executed " + func.name + " successfully");
+        }
     } catch (e: any) {
         console.log("failed to execute " + func.name + " due to " + e.toString());
         console.log("retrying in 5ish seconds");
