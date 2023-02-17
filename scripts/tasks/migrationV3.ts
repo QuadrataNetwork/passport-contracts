@@ -2,6 +2,7 @@ import { expect } from "chai";
 import { recursiveRetry } from "../utils/retries";
 import { task } from "hardhat/config";
 
+
 task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <address> --startBlock <number> --endBlock <number> --network <network>")
     .addParam("passport", "QuadPassport proxy address")
     .addParam("governance", "Governance proxy address")
