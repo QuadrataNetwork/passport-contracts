@@ -110,8 +110,10 @@ describe.only('migrateToV3Storage', function() {
         const QuadPassport = await ethers.getContractFactory("QuadPassport");
         const quadPassportUpgraded = await QuadPassport.deploy();
         await quadPassportUpgraded.deployed();
+        // setQuadReader address in QuadPassport
+        const setQuadReaderFunctionData = quadPassportUpgraded.interface.encodeFunctionData("setQuadReader", [quadReader.address]);
 
-        const upgradeToFunctionData = quadPassport.interface.encodeFunctionData("upgradeTo", [quadPassportUpgraded.address]);
+        const upgradeToFunctionData = quadPassport.interface.encodeFunctionData("upgradeToAndCall", [quadPassportUpgraded.address, setQuadReaderFunctionData]);
         var executeRawFunctionData = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadPassport.address, upgradeToFunctionData]);
         await signers[1].sendTransaction({
             to: timelockAddress,
@@ -153,17 +155,6 @@ describe.only('migrateToV3Storage', function() {
         });
 
         console.log("upgradeTo functions executed for QuadPassport, QuadReader and QuadGovernance")
-
-        // setQuadReader address in QuadPassport
-        const setQuadReaderFunctionData = quadPassportUpgraded.interface.encodeFunctionData("setQuadReader", [quadReader.address]);
-        var executeRawFunctionData4 = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadPassport.address, setQuadReaderFunctionData]);
-        await signers[1].sendTransaction({
-            to: timelockAddress,
-            value: 0,
-            data: executeRawFunctionData4,
-        });
-
-        console.log("setQuadReader function executed for QuadPassport")
 
 
         // ensure all account level attributes in all accounts are falsy
