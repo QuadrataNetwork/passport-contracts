@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { constants } from "ethers";
+import { hexZeroPad } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import { ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_CRED_PROTOCOL_SCORE, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS } from "../../utils/constant";
 import { recursiveRetry } from "../utils/retries";
@@ -64,8 +65,17 @@ import { recursiveRetry } from "../utils/retries";
     // perform upgrade to QuadGovernance
     const QuadGovernance = await recursiveRetry(ethers.getContractFactory, "QuadGovernanceTestnet");
     const quadGovernanceUpgraded = await recursiveRetry(QuadGovernance.deploy);
+    const mockAddresses = [
+        '0x5501CC22Be0F12381489D0980f20f872e1E6bfb9',
+        '0xffE462ed723275eF8E7655C4883e8cD428826669',
+        '0x8337B2AEDa4Dfff0d520003747aAC061c9f74f0E',
+        '0x4E553a07054C1ADa5b30ED84F3179886eA1d4144',
+        '0x4D749Ecb07a68f230b23da84399de63Df7E63d53'
+    ]
+    const trueStatuses = mockAddresses.map(() => true);
+    const setPreapprovalsFunctionData = quadGovernanceUpgraded.interface.encodeFunctionData("setPreapprovals", [mockAddresses, trueStatuses]);
     await recursiveRetry(quadGovernanceUpgraded.deployed);
-    await recursiveRetry(quadGovernance.upgradeTo, quadGovernanceUpgraded.address);
+    await recursiveRetry(quadGovernance.upgradeToAndCall, quadGovernanceUpgraded.address, setPreapprovalsFunctionData);
     console.log("upgradeTo functions executed for QuadPassport, QuadReader and QuadGovernance")
 
     // setQuadReader address in QuadPassport

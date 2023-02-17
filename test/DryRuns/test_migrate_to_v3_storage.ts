@@ -232,10 +232,11 @@ describe.only('migrateToV3Storage', function() {
 
         // check that all mockAddress are not preapproved
         const mockAddresses = [
-            hexZeroPad("0x0010", 20),
-            hexZeroPad("0x0020", 20),
-            hexZeroPad("0x0030", 20),
-            hexZeroPad("0x0040", 20),
+            '0x5501CC22Be0F12381489D0980f20f872e1E6bfb9',
+            '0xffE462ed723275eF8E7655C4883e8cD428826669',
+            '0x8337B2AEDa4Dfff0d520003747aAC061c9f74f0E',
+            '0x4E553a07054C1ADa5b30ED84F3179886eA1d4144',
+            '0x4D749Ecb07a68f230b23da84399de63Df7E63d53'
         ]
 
         for (let mockAddress of mockAddresses) {
