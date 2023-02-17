@@ -11,7 +11,7 @@ task("getSetReaderFunctionData", "npx hardhat getSetReaderFunctionData --reader 
         const address = taskArgs.reader;
         // return error if network is not hardhat
         if (hre.network.name != "hardhat") {
-            console.log("getPreapprovalFunctionData can only be run on hardhat network");
+            console.log("getSetReaderFunctionData can only be run on hardhat network");
             return;
         }
         const QuadPassport = await ethers.getContractFactory("QuadPassport");
