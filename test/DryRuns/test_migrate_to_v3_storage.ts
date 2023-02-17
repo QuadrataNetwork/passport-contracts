@@ -6,7 +6,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
 import { ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_CRED_PROTOCOL_SCORE, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS } from "../../utils/constant";
 
-describe('migrateToV3Storage', function() {
+describe.only('migrateToV3Storage', function() {
     // increase timeout to 600s
     this.timeout(600000);
 
@@ -133,16 +133,23 @@ describe('migrateToV3Storage', function() {
         });
 
         // perform upgrade to QuadGovernance
-        const QuadGovernance = await ethers.getContractFactory("QuadGovernanceTestnet");
+        const QuadGovernance = await ethers.getContractFactory("QuadGovernance");
         const quadGovernanceUpgraded = await QuadGovernance.deploy();
         await quadGovernanceUpgraded.deployed();
 
-        const upgradeToFunctionData3 = quadGovernance.interface.encodeFunctionData("upgradeTo", [quadGovernanceUpgraded.address]);
+        const signersAddresses = await Promise.all(signers.map((signer) => signer.getAddress()));
+        const trueStatuses = signersAddresses.map(() => true);
+
+        const setPreapprovalsFunctionData = quadGovernanceUpgraded.interface.encodeFunctionData("setPreapprovals", [signersAddresses, trueStatuses]);
+        expect(signersAddresses.length).to.be.equals(trueStatuses.length);
+
+        const upgradeToFunctionData3 = quadGovernance.interface.encodeFunctionData("upgradeToAndCall", [quadGovernanceUpgraded.address, setPreapprovalsFunctionData]);
         var executeRawFunctionData3 = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadGovernance.address, upgradeToFunctionData3]);
         await signers[1].sendTransaction({
             to: timelockAddress,
             value: 0,
             data: executeRawFunctionData3,
+            gasLimit: 15000000,
         });
 
         console.log("upgradeTo functions executed for QuadPassport, QuadReader and QuadGovernance")
@@ -221,6 +228,23 @@ describe('migrateToV3Storage', function() {
 
                 console.log("--------------------------------------------------------------------")
             };
+        }
+
+        // check that all mockAddress are not preapproved
+        const mockAddresses = [
+            hexZeroPad("0x0010", 20),
+            hexZeroPad("0x0020", 20),
+            hexZeroPad("0x0030", 20),
+            hexZeroPad("0x0040", 20),
+        ]
+
+        for (let mockAddress of mockAddresses) {
+            expect(await quadGovernance.preapproval(mockAddress)).to.be.false;
+        }
+
+        // check all signers are preapproved
+        for (let signer of signers) {
+            expect(await quadGovernance.preapproval(await signer.getAddress())).to.be.true;
         }
 
     });
