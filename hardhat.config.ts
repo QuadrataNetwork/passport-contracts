@@ -16,6 +16,7 @@ import "./scripts/tasks/quadGovernance.ts";
 import "./scripts/tasks/deployTasks.ts";
 import "./scripts/tasks/quadPassport.ts";
 import "./scripts/tasks/migrationV3.ts"
+import "./scripts/tasks/quadReader.ts"
 
 const config = {
   solidity: {
