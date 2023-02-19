@@ -10,7 +10,7 @@ import { deployGovernance, deployPassport, deployReader } from "../../utils/depl
 
 
 
-describe.only("Dry Run Quad V3", () => {
+describe("Dry Run Quad V3", () => {
 
     let passport: Contract;
     let governance: Contract;
