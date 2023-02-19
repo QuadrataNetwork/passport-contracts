@@ -52,6 +52,7 @@ export const assertGetAttributesBulkLegacyStatic = async (
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
 ) => {
+
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
   expect(expectedIssuers.length).to.equal(expectedVerifiedAt.length);

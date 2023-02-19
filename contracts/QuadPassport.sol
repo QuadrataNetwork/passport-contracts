@@ -351,6 +351,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
+                attr.issuer = issuers[i];
                 return attr;
             }
         }
