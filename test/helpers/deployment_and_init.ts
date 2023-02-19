@@ -64,6 +64,12 @@ export const deployPassportEcosystem = async (
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
 
+  // let all signers be preapproved
+  const signerAddresses = signers.map((signer) => signer.address);
+  signerAddresses.push(defi.address);
+  signerAddresses.push(mockbusiness.address);
+  const preapprovalStatuses = signerAddresses.map((address) => true);
+  await governance.connect(admin).setPreapprovals(signerAddresses, preapprovalStatuses);
 
   return [governance, passport, reader, defi, mockbusiness];
 };
