@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { formatEther, parseEther } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { recursiveRetry } from "../utils/retries";
 
@@ -47,12 +48,18 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
 
         const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
 
+        // print balance of signer of reader
+        const signer = quadReader.signer.address;
+        const balance = await ethers.provider.getBalance(signer);
+        console.log("signer: " + signer + " has balance: " + formatEther(balance.toString()));
+
         for (var i = 0; i < accounts.length; i++) {
             for(var j = 0; j < attributes.length; j++) {
                 const attribute = attributes[j];
                 const account = accounts[i];
                 const results1 = await recursiveRetry(async () => {
                     const queryFee = await quadReader.callStatic.queryFee(account, ethers.utils.id(attribute), { blockTag: startBlock });
+                    expect(balance.gt(queryFee)).to.be.true;
                     return await quadReader.callStatic.getAttributes(account, ethers.utils.id(attribute), {
                         value: queryFee,
                         blockTag: startBlock
@@ -63,10 +70,19 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
                     return await quadReader.callStatic.getAttributes(account, ethers.utils.id(attribute), { blockTag: endBlock });
                 });
 
-                expect(results1.length).to.equal(results2.length);
+                try {
+                    expect(results1.length).to.equal(results2.length);
+                } catch (e) {
+                    console.log("account: " + account);
+                    console.log("attribute: " + attribute);
+                    console.log("results1.length: " + results1.length);
+                    console.log("results2.length: " + results2.length);
+                    throw e;
+                }
                 for (var k = 0; k < results1.length; k++) {
                     const { value: value1 } = results1[k];
                     const { value: value2 } = results2[k];
+                    console.log("comparing " + value1 + " and " + value2);
                     expect(value1).to.equal(value2);
                 }
             }

@@ -61,17 +61,13 @@ const main = async () => {
         const {value: credProtocolScore} = results[3];
         const {value: isBusiness} = results[4];
 
-
-
-        if(aml !== hexZeroPad("0x0", 32)) {
-            console.log("account: ", account);
-            console.log("aml: ", aml, attributeEligibleByDID[ATTRIBUTE_AML]);
-            console.log("did: ", did, attributeEligibleByDID[ATTRIBUTE_DID]);
-            console.log("country: ", country, attributeEligibleByDID[ATTRIBUTE_COUNTRY]);
-            console.log("credProtocolScore: ", credProtocolScore, attributeEligibleByDID[ATTRIBUTE_CRED_PROTOCOL_SCORE]);
-            console.log("isBusiness: ", isBusiness, attributeEligibleByDID[ATTRIBUTE_IS_BUSINESS]);
-            console.log("====================================");
-        }
+        console.log("account: ", account);
+        console.log("aml: ", aml, attributeEligibleByDID[ATTRIBUTE_AML]);
+        console.log("did: ", did, attributeEligibleByDID[ATTRIBUTE_DID]);
+        console.log("country: ", country, attributeEligibleByDID[ATTRIBUTE_COUNTRY]);
+        console.log("credProtocolScore: ", credProtocolScore, attributeEligibleByDID[ATTRIBUTE_CRED_PROTOCOL_SCORE]);
+        console.log("isBusiness: ", isBusiness, attributeEligibleByDID[ATTRIBUTE_IS_BUSINESS]);
+        console.log("====================================");
     }
 
 }
