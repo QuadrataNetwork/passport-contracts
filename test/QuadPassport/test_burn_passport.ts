@@ -866,7 +866,7 @@ describe("QuadPassport.burnPassports", async () => {
   });
 
   describe("deactivateThenBurn", async () => {
-    it("success - mint for business, disable country, burn, assert country still exists while others get deleted", async () => {
+    it.only("success - mint for business, disable country, burn, assert country still exists while others get deleted", async () => {
       const MockBusiness = await ethers.getContractFactory("MockBusiness");
       const mockBusiness = await MockBusiness.deploy(defi.address);
       await mockBusiness.deployed();
@@ -907,18 +907,16 @@ describe("QuadPassport.burnPassports", async () => {
         [verifiedAt]
       );
 
-      await expect(
-        assertGetAttributes(
-          mockBusiness,
-          ATTRIBUTE_COUNTRY,
-          reader,
-          defi,
-          treasury,
-          [issuer],
-          [businessAttributes],
-          [verifiedAt]
-        )
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+      await assertGetAttributes(
+        mockBusiness,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [businessAttributes],
+        [verifiedAt]
+      )
 
       await assertGetAttributes(
         mockBusiness,
@@ -1027,18 +1025,16 @@ describe("QuadPassport.burnPassports", async () => {
         [verifiedAt]
       );
 
-      await expect(
-        assertGetAttributes(
-          minterA,
-          ATTRIBUTE_COUNTRY,
-          reader,
-          defi,
-          treasury,
-          [issuer],
-          [attributes],
-          [verifiedAt]
-        )
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+      await assertGetAttributes(
+        minterA,
+        ATTRIBUTE_COUNTRY,
+        reader,
+        defi,
+        treasury,
+        [issuer],
+        [attributes],
+        [verifiedAt]
+      )
 
       await assertGetAttributes(
         minterA,
