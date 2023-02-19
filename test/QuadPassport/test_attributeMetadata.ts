@@ -25,7 +25,7 @@ describe("QuadPassport.attributeMetadata/attributesExist", async () => {
       deployer,
       [deployer, issuerA, issuerB],
       deployer,
-      [deployer, issuerA, issuerB]
+      [deployer, issuerA, issuerB],
     );
 
   });
