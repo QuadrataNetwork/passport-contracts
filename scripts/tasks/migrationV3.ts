@@ -77,7 +77,6 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
                 currChunkIndex++;
                 continue;
             }
-            const migrateAttributesFunctionData = quadPassport.interface.encodeFunctionData("migrateAttributes", [chunk, eligibleAttributes]);
             await recursiveRetry(async () => {
                 console.log("attempting to migrate chunk", chunk, "working on", currChunkIndex, "of", chunkLength, "chunks...");
                 const tx = await quadPassport.migrateAttributes(chunk, eligibleAttributes, {
