@@ -98,7 +98,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
 
             })
             currChunkIndex++;
-            console.log(chunkIndex + " was migrated successfully")
+            console.log(currChunkIndex + " was migrated successfully")
         }
     });
 
