@@ -3,17 +3,19 @@ import { recursiveRetry } from "../utils/retries";
 import { task } from "hardhat/config";
 
 
-task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <address> --startBlock <number> --endBlock <number> --network <network>")
+task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <address> --startBlock <number> --endBlock <number> --chunkIndex <number> --network <network>")
     .addParam("passport", "QuadPassport proxy address")
     .addParam("governance", "Governance proxy address")
     .addParam("startBlock", "start block number")
     .addParam("endBlock", "end block number")
+    .addParam("chunkIndex", "chunk index, pass 0 for first chunk, if transaction fails, pass the chunk index of the last successful chunk")
     .setAction(async (taskArgs, hre) => {
         const ethers = hre.ethers;
         const passportAddr = taskArgs.passport;
         const governanceAddr = taskArgs.governance;
         const startBlock = parseInt(taskArgs.startBlock);
         const endBlock = parseInt(taskArgs.endBlock);
+        const chunkIndex = parseInt(taskArgs.chunkIndex);
         const ATTRIBUTE_AML = ethers.utils.id("AML");
         const ATTRIBUTE_COUNTRY = ethers.utils.id("COUNTRY");
         const ATTRIBUTE_DID = ethers.utils.id("DID");
@@ -67,10 +69,14 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             chunks.push(accounts.slice(i, i + 5));
         }
         const chunkLength = chunks.length;
-        var chunkIndex = 0;
+        var currChunkIndex = 0;
 
         const admin = (await ethers.getSigners())[0];
         for (let chunk of chunks) {
+            if (currChunkIndex < chunkIndex) {
+                currChunkIndex++;
+                continue;
+            }
             const migrateAttributesFunctionData = quadPassport.interface.encodeFunctionData("migrateAttributes", [chunk, eligibleAttributes]);
             await recursiveRetry(async () => {
                 console.log("attempting to migrate chunk", chunk, "loading", chunkIndex, "of", chunkLength, "chunks");
@@ -95,7 +101,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
                 }
 
             })
-            chunkIndex++;
+            currChunkIndex++;
             console.log("migrated chunk", chunk, "loading", chunkIndex, "of", chunkLength, "chunks")
         }
     });
