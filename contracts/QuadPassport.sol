@@ -572,8 +572,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
                 if(governance.eligibleAttributesByDID(eligibleAttribute)) {
                     Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
-                    require(did.length > 0, "INVALID_DID");
-                    require(did[0].value != bytes32(0), "NULL_DID");
+                    if(did.length == 0) {
+                        continue;
+                    }
                     attrKeyv1 = keccak256(abi.encode(did[0].value, eligibleAttribute));
                 } else {
                     attrKeyv1 = keccak256(abi.encode(account, eligibleAttribute));

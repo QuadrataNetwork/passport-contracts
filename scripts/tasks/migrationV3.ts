@@ -45,7 +45,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         expect(eligibleAttributes.includes(ATTRIBUTE_CRED_PROTOCOL_SCORE)).to.be.true; // CRED_PROTOCOL_SCORE is eligible
         expect(eligibleAttributes.includes(ATTRIBUTE_IS_BUSINESS)).to.be.true; // IS_BUSINESS is eligible
 
-        console.log("running migration across block interval [", startBlock,",", endBlock,"]")
+        console.log("running migration across block interval [", startBlock, ",", endBlock, "]")
         // read TransferSingle event from QuadPassport
         const filter = quadPassport.filters.TransferSingle(null, null, null, null, null);
         const logs = await quadPassport.queryFilter(filter, startBlock, endBlock);
@@ -75,14 +75,25 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             await recursiveRetry(async () => {
                 console.log("attempting to migrate chunk", chunk, "loading", chunkIndex, "of", chunkLength, "chunks");
                 // send transaction to QuadPassport with max gas fee of 20 gwei
-                await admin.sendTransaction({
+                const tx = await admin.sendTransaction({
                     to: quadPassport.address,
                     value: 0,
                     data: migrateAttributesFunctionData,
                     gasLimit: 1500000,
                     maxFeePerGas: ethers.utils.parseUnits("20", "gwei"),
+                })
+                // wait for transaction to be mined
+                const metaData = await tx.wait();
 
-                });
+                // check if transaction was successful
+                if (metaData.status === 0) {
+                    // print revert reason
+                    const receipt = await ethers.provider.getTransactionReceipt(tx.hash);
+                    const reason = ethers.utils.toUtf8String(receipt.logs[0].data);
+                    const errorMessage = "transaction reverted: " + reason;
+                    throw new Error(errorMessage);
+                }
+
             })
             chunkIndex++;
             console.log("migrated chunk", chunk, "loading", chunkIndex, "of", chunkLength, "chunks")
@@ -111,7 +122,7 @@ task("upgradeV3", "npx hardhat upgradeV3 --passport <address> --reader <address>
         const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id("IS_QUALIFIEDPURCHASER_US")
 
 
-        if(mode !== "mainnet" && mode !== "testnet") {
+        if (mode !== "mainnet" && mode !== "testnet") {
             console.log("mode must be either mainnet or testnet");
             return;
         }
@@ -186,7 +197,9 @@ task("upgradeV3", "npx hardhat upgradeV3 --passport <address> --reader <address>
         });
         const setQuadReaderFunctionData = quadPassportUpgraded.interface.encodeFunctionData("setQuadReader", [quadReader.address]);
         await recursiveRetry(async () => {
-            return await quadPassport.connect(admin).upgradeToAndCall(quadPassportUpgraded.address, setQuadReaderFunctionData);
+            const tx = await quadPassport.connect(admin).upgradeToAndCall(quadPassportUpgraded.address, setQuadReaderFunctionData);
+            await tx.wait();
+            console.log("POINTED QUAD PASSPORT TO LOGIC AT: ", quadPassportUpgraded.address);
         });
 
         // perform upgrade to QuadReader
@@ -200,7 +213,9 @@ task("upgradeV3", "npx hardhat upgradeV3 --passport <address> --reader <address>
             await quadReaderUpgraded.deployed();
         });
         await recursiveRetry(async () => {
-            await quadReader.connect(admin).upgradeTo(quadReaderUpgraded.address);
+            const tx = await quadReader.connect(admin).upgradeTo(quadReaderUpgraded.address);
+            await tx.wait();
+            console.log("POINTED QUAD READER TO LOGIC AT: ", quadReaderUpgraded.address);
         });
 
         // perform upgrade to QuadGovernance
@@ -217,7 +232,9 @@ task("upgradeV3", "npx hardhat upgradeV3 --passport <address> --reader <address>
             await quadGovernanceUpgraded.deployed();
         });
         await recursiveRetry(async () => {
-            await quadGovernance.connect(admin).upgradeToAndCall(quadGovernanceUpgraded.address, setPreapprovalsFunctionData)
+            const tx = await quadGovernance.connect(admin).upgradeToAndCall(quadGovernanceUpgraded.address, setPreapprovalsFunctionData)
+            await tx.wait();
+            console.log("POINTED QUAD GOVERNANCE TO LOGIC AT: ", quadGovernanceUpgraded.address);
         });
         console.log("upgradeTo and upgradeToAndCall functions executed for QuadPassport, QuadReader and QuadGovernance")
     });

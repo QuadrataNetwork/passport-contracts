@@ -4,19 +4,25 @@ import { recursiveRetry } from "../utils/retries";
 
 
 
-task("getAttributes", "npx hardhat getAttributes --reader <address> --account <address> --attribute <string>")
+task("getAttributes", "npx hardhat getAttributes --reader <address> --account <address> --attribute <string> --blockNumber <number> ")
     .addParam("reader", "sets the address for reader")
     .addParam("account", "sets the address for account")
     .addParam("attribute", "sets the attribute")
+    .addParam("blockNumber", "sets the block number")
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
         const readerAddress = taskArgs.reader;
         const accountAddress = taskArgs.account;
         const attribute = taskArgs.attribute;
+        const blockNumber = parseInt(taskArgs.blockNumber);
 
         const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
         const results = await recursiveRetry(async () => {
-            return await quadReader.callStatic.getAttributes(accountAddress, ethers.utils.id(attribute));
+            const queryFee = await quadReader.callStatic.queryFee(accountAddress, ethers.utils.id(attribute), { blockTag: blockNumber });
+            return await quadReader.callStatic.getAttributes(accountAddress, ethers.utils.id(attribute), {
+                value: queryFee,
+                blockTag: blockNumber
+            });
         });
         console.log(attribute + " attributes: " + results.length)
         for (var i = 0; i < results.length; i++) {
