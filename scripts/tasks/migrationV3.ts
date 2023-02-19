@@ -65,8 +65,8 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
 
         // divide accounts into chunks of 5
         const chunks = [];
-        for (let i = 0; i < accounts.length; i += 5) {
-            chunks.push(accounts.slice(i, i + 5));
+        for (let i = 0; i < accounts.length; i += 3) {
+            chunks.push(accounts.slice(i, i + 3));
         }
         const chunkLength = chunks.length;
         var currChunkIndex = 0;
@@ -80,8 +80,8 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             await recursiveRetry(async () => {
                 console.log("attempting to migrate chunk", chunk, "working on", currChunkIndex, "of", chunkLength, "chunks...");
                 const tx = await quadPassport.migrateAttributes(chunk, eligibleAttributes, {
-                    gasLimit: 1500000,
-                    maxFeePerGas: ethers.utils.parseUnits("20", "gwei"),
+                    gasLimit: 3500000,
+                    maxFeePerGas: ethers.utils.parseUnits("30", "gwei"),
                 });
                 // wait for transaction to be mined
                 console.log("waiting for transaction to be mined...")
