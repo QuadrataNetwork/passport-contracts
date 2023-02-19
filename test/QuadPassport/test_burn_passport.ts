@@ -866,7 +866,7 @@ describe("QuadPassport.burnPassports", async () => {
   });
 
   describe("deactivateThenBurn", async () => {
-    it.only("success - mint for business, disable country, burn, assert country still exists while others get deleted", async () => {
+    it("success - mint for business, disable country, burn, assert country still exists while others get deleted", async () => {
       const MockBusiness = await ethers.getContractFactory("MockBusiness");
       const mockBusiness = await MockBusiness.deploy(defi.address);
       await mockBusiness.deployed();
