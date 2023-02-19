@@ -79,16 +79,13 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             }
             const migrateAttributesFunctionData = quadPassport.interface.encodeFunctionData("migrateAttributes", [chunk, eligibleAttributes]);
             await recursiveRetry(async () => {
-                console.log("attempting to migrate chunk", chunk, "loading", chunkIndex, "of", chunkLength, "chunks");
-                // send transaction to QuadPassport with max gas fee of 20 gwei
-                const tx = await admin.sendTransaction({
-                    to: quadPassport.address,
-                    value: 0,
-                    data: migrateAttributesFunctionData,
+                console.log("attempting to migrate chunk", chunk, "working on", currChunkIndex, "of", chunkLength, "chunks...");
+                const tx = await quadPassport.migrateAttributes(chunk, eligibleAttributes, {
                     gasLimit: 1500000,
                     maxFeePerGas: ethers.utils.parseUnits("20", "gwei"),
-                })
+                });
                 // wait for transaction to be mined
+                console.log("waiting for transaction to be mined...")
                 const metaData = await tx.wait();
 
                 // check if transaction was successful
@@ -102,7 +99,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
 
             })
             currChunkIndex++;
-            console.log("migrated chunk", chunk, "loading", chunkIndex, "of", chunkLength, "chunks")
+            console.log(chunkIndex + " was migrated successfully")
         }
     });
 
