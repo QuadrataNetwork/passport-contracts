@@ -117,5 +117,7 @@ task("getAllQueries", "npx hardhat getAllQueries --reader <address>")
         }
 
         // pretty print the callers
-        console.log("callers: " + Array.from(callers).join(", "));
+        console.log("------------------callers-----------------");
+        console.log(Array.from(callers).join(","));
+        console.log("------------------------------------------");
     });
