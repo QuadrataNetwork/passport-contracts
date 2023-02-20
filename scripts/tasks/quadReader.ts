@@ -90,3 +90,32 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
 
 
     });
+
+task("getAllQueries", "npx hardhat getAllQueries --reader <address>")
+    .addParam("reader", "sets the address for reader")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const readerAddress = taskArgs.reader;
+
+        const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
+
+        var filter = quadReader.filters.QueryBulkEvent(null, null, null);
+        var logs = await quadReader.queryFilter(filter, 0, "latest");
+        // create a Set of all callers
+        const callers = new Set();
+        for (const log in logs) {
+            const { args } = logs[log];
+            const { _caller } = args as any;
+            callers.add(_caller);
+        }
+        filter = quadReader.filters.QueryEvent(null, null, null);
+        logs = await quadReader.queryFilter(filter, 0, "latest");
+        for (const log in logs) {
+            const { args } = logs[log];
+            const { _caller } = args as any;
+            callers.add(_caller);
+        }
+
+        // pretty print the callers
+        console.log("callers: " + Array.from(callers).join(", "));
+    });
