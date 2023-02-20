@@ -373,6 +373,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         return did != bytes32(0) ? keccak256(abi.encode(did, _attribute, _issuer)) : keccak256(abi.encode(_account, _attribute, _issuer));
     }
 
+    function attributeByIssuer(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) public view override returns (Attribute memory) {
+        require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        bytes32 attrKey = attributeKey(_account, _attribute, _issuer);
+        return _attributesv2[attrKey];
+    }
+
     /// @dev Admin function to set the new pending Governance address
     /// @notice Restricted behind a TimelockController
     /// @param _governanceContract contract address of IQuadGovernance

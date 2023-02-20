@@ -140,6 +140,17 @@ import "./storage/QuadReaderStore.sol";
         emit QueryBulkEvent(_account, msg.sender, _attributes);
     }
 
+    function getAttributeByIssuer(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) external payable returns(IQuadPassportStore.Attribute memory attribute) {
+        bool hasPreapproval = governance.preapproval(msg.sender);
+        require(hasPreapproval, "SENDER_NOT_AUTHORIZED");
+        attribute = passport.attributeByIssuer(_account, _attribute, _issuer);
+        emit QueryEvent(_account, msg.sender, _attribute);
+    }
+
 
     /// @dev stub for compatibility with older versions
     function queryFee(
