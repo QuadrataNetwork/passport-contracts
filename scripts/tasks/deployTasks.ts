@@ -43,5 +43,18 @@ task("getCurrentBlock", "npx hardhat getCurrentBlock --network <network_name>")
         const ethers = hre.ethers;
         const blockNumber = await recursiveRetry(ethers.provider.getBlockNumber);
         console.log("Current Block Number: " + blockNumber.toString());
-    }
-    );
+    });
+
+task("getCode", "npx hardhat getCode --addresses <address,address,...> --network <network_name>")
+    .addParam("addresses", "sets the addresses")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const addresses = taskArgs.addresses.split(",");
+        for (var i = 0; i < addresses.length; i++) {
+            const address = addresses[i];
+            const code = await recursiveRetry(ethers.provider.getCode, address);
+            console.log("----------", address ,"----------");
+            console.log("code: " + code.substring(0, 10) + "..." + code.substring(code.length - 10, code.length));
+            console.log("------------------------------------------------------")
+        }
+    });
