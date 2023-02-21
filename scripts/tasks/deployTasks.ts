@@ -62,3 +62,10 @@ task("getCode", "npx hardhat getCode --addresses <address,address,...> --network
             }
         }
     });
+
+task("getSignerAddress", "npx hardhat getSignerAddress --network <network_name>")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const deployer = (await ethers.getSigners())[0]
+        console.log("Signer Address: " + deployer.address);
+    });
