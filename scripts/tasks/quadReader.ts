@@ -91,13 +91,13 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
 
     });
 
-task("getAllQueries", "npx hardhat getAllQueries --reader <address> --start-block <number>")
+task("getAllQueries", "npx hardhat getAllQueries --reader <address> --startBlock <number>")
     .addParam("reader", "sets the address for reader")
-    .addParam("start-block", "sets the start block")
+    .addParam("startBlock", "sets the start block")
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
         const readerAddress = taskArgs.reader;
-        const startBlock = parseInt(taskArgs["start-block"]);
+        const startBlock = parseInt(taskArgs.startBlock);
 
         const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
 
