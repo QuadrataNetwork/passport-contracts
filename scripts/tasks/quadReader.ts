@@ -54,7 +54,7 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
         console.log("signer: " + signer + " has balance: " + formatEther(balance.toString()));
 
         for (var i = 0; i < accounts.length; i++) {
-            for(var j = 0; j < attributes.length; j++) {
+            for (var j = 0; j < attributes.length; j++) {
                 const attribute = attributes[j];
                 const account = accounts[i];
                 const results1 = await recursiveRetry(async () => {
@@ -91,33 +91,58 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
 
     });
 
-task("getAllQueries", "npx hardhat getAllQueries --reader <address>")
+task("getAllQueries", "npx hardhat getAllQueries --reader <address> --start-block <number>")
     .addParam("reader", "sets the address for reader")
+    .addParam("start-block", "sets the start block")
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
         const readerAddress = taskArgs.reader;
+        const startBlock = parseInt(taskArgs["start-block"]);
 
         const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
 
-        var filter = quadReader.filters.QueryBulkEvent(null, null, null);
-        var logs = await quadReader.queryFilter(filter, 0, "latest");
-        // create a Set of all callers
+        // get current block number
+        const currentBlockNumber = await ethers.provider.getBlockNumber();
+        console.log("current block number: " + currentBlockNumber);
         const callers = new Set();
-        for (const log in logs) {
-            const { args } = logs[log];
-            const { _caller } = args as any;
-            callers.add(_caller);
-        }
-        filter = quadReader.filters.QueryEvent(null, null, null);
-        logs = await quadReader.queryFilter(filter, 0, "latest");
-        for (const log in logs) {
-            const { args } = logs[log];
-            const { _caller } = args as any;
-            callers.add(_caller);
+        // create a Set of all callers
+        // create map of callers to event count
+        const callerToEventCount = new Map();
+        const stepSize = 100000;
+
+        for (var i = startBlock; i < currentBlockNumber; i += stepSize) {
+            var filter = quadReader.filters.QueryBulkEvent(null, null, null);
+            var logs = await recursiveRetry(async () => {
+                return await quadReader.queryFilter(filter, i, i + stepSize);
+            }) as any;
+            for (const log in logs) {
+                const { args } = logs[log];
+                const { _caller } = args as any;
+                callers.add(_caller);
+                callerToEventCount.set(_caller, (callerToEventCount.get(_caller) || 0) + 1);
+            }
+
+            filter = quadReader.filters.QueryEvent(null, null, null);
+            logs = await recursiveRetry(async () => {
+                return await quadReader.queryFilter(filter, i, i + stepSize);
+            }) as any;
+
+            for (const log in logs) {
+                const { args } = logs[log];
+                const { _caller } = args as any;
+                callers.add(_caller);
+                callerToEventCount.set(_caller, (callerToEventCount.get(_caller) || 0) + 1);
+            }
+
+            // print percentage complete out of 100
+            console.log("progress: " + Math.floor((i / currentBlockNumber) * 100) + "%");
         }
 
         // pretty print the callers
-        console.log("------------------callers-----------------");
-        console.log(Array.from(callers).join(","));
+        // print event count for each caller
+        console.log("------------------callers' event count-----------------");
+        for (const caller of callers) {
+            console.log(caller + ": " + callerToEventCount.get(caller));
+        }
         console.log("------------------------------------------");
     });
