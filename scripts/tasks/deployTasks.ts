@@ -50,11 +50,15 @@ task("getCode", "npx hardhat getCode --addresses <address,address,...> --network
     .setAction(async function (taskArgs, hre) {
         const ethers = hre.ethers;
         const addresses = taskArgs.addresses.split(",");
+
         for (var i = 0; i < addresses.length; i++) {
             const address = addresses[i];
-            const code = await recursiveRetry(ethers.provider.getCode, address);
-            console.log("----------", address ,"----------");
-            console.log("code: " + code.substring(0, 10) + "..." + code.substring(code.length - 10, code.length));
-            console.log("------------------------------------------------------")
+            console.log(`-------------${address}-------------`)
+            const code = await ethers.provider.getCode(address);
+            if(code.length > 2) {
+                console.log(`contract contructor address: 0x${code.slice(-40)}`);
+            } else {
+                console.log("account is not a contract")
+            }
         }
     });
