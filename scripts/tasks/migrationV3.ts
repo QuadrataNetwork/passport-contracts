@@ -21,8 +21,6 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         const ATTRIBUTE_DID = ethers.utils.id("DID");
         const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
         const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id("CRED_PROTOCOL_SCORE")
-        const ATTRIBUTE_IS_ACCREDITITED_INVESTOR_US = ethers.utils.id("IS_ACCREDITITED_INVESTOR_US")
-        const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id("IS_QUALIFIEDPURCHASER_US")
 
         const quadPassport = await recursiveRetry(ethers.getContractAt, "QuadPassport", passportAddr);
         const quadGovernance = await recursiveRetry(async () => {
@@ -120,8 +118,6 @@ task("upgradeV3", "npx hardhat upgradeV3 --passport <address> --reader <address>
         const ATTRIBUTE_DID = ethers.utils.id("DID");
         const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
         const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id("CRED_PROTOCOL_SCORE")
-        const ATTRIBUTE_IS_ACCREDITITED_INVESTOR_US = ethers.utils.id("IS_ACCREDITITED_INVESTOR_US")
-        const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id("IS_QUALIFIEDPURCHASER_US")
 
 
         if (mode !== "mainnet" && mode !== "testnet") {
