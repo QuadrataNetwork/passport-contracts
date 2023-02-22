@@ -28,7 +28,10 @@ describe("QuadGovernance.setPreapprovals()", function () {
             admin,
             [issuer1],
             treasury,
-            [issuerTreasury1]
+            [issuerTreasury1],
+            {
+                skipPreapproval: true,
+            }
         );
 
     });

@@ -84,6 +84,8 @@ describe("QuadReader.getAttributes", async () => {
     await testContract.deployed();
     await testContract.setReader(reader.address);
     expect(await testContract.reader()).equals(reader.address);
+
+    await governance.connect(admin).setPreapprovals([testContract.address], [true]);
   });
 
   describe("TestQuadrata - 1 issuer / 1 attributes", async () => {

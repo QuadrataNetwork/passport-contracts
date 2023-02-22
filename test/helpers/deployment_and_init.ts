@@ -18,7 +18,8 @@ export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
   issuers: SignerWithAddress[],
   treasury: SignerWithAddress,
-  issuerTreasuries: SignerWithAddress[]
+  issuerTreasuries: SignerWithAddress[],
+  opts: any = {}
 ): Promise<
   [Promise<Contract>, Promise<Contract>, Promise<Contract>, any, any]
 > => {
@@ -48,12 +49,6 @@ export const deployPassportEcosystem = async (
     false
   );
 
-  // Revoke Deployer Role
-  await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address);
-  await governance
-    .connect(admin)
-    .revokeRole(DEFAULT_ADMIN_ROLE, deployer.address);
-
   // Deploy DeFi
   const DeFi = await ethers.getContractFactory("DeFi");
   const defi = await DeFi.deploy(passport.address, reader.address);
@@ -64,6 +59,20 @@ export const deployPassportEcosystem = async (
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
 
+  // let all signers be preapproved
+  if(!opts.skipPreapproval) {
+    const signerAddresses = signers.map((signer) => signer.address);
+    signerAddresses.push(defi.address);
+    signerAddresses.push(mockbusiness.address);
+    const preapprovalStatuses = signerAddresses.map((address) => true);
+    await governance.connect(admin).setPreapprovals(signerAddresses, preapprovalStatuses);
+  }
+
+  // Revoke Deployer Role
+  await governance.connect(admin).revokeRole(GOVERNANCE_ROLE, deployer.address);
+  await governance
+    .connect(admin)
+    .revokeRole(DEFAULT_ADMIN_ROLE, deployer.address);
 
   return [governance, passport, reader, defi, mockbusiness];
 };

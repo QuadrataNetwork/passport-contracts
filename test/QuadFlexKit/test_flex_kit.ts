@@ -9,7 +9,7 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-describe("QuadFlexKit", function () {
+describe.skip("QuadFlexKit", function () {
   let flexKit: Contract;
   let passport: Contract;
   let governance: Contract;

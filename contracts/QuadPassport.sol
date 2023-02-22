@@ -297,20 +297,16 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         bytes32 _attribute
     ) public view override returns (Attribute[] memory) {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
+        require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        bool groupByDID = governance.eligibleAttributesByDID(_attribute);
         address[] memory issuers = governance.getIssuers();
         Attribute memory did;
-        if (governance.eligibleAttributesByDID(_attribute))
+        if (groupByDID)
             did = attribute(_account, ATTRIBUTE_DID);
         uint256 counter = 0;
         bytes32 attrKey;
         for (uint256 i = 0; i < issuers.length; i++) {
-            if (governance.eligibleAttributesByDID(_attribute))
+            if (groupByDID)
                 attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
             else
                 attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
@@ -324,7 +320,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (counter > 0) {
             uint256 j;
             for (uint256 i = 0; i < issuers.length; i++) {
-                if (governance.eligibleAttributesByDID(_attribute))
+                if (groupByDID)
                     attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
                 else
                     attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
@@ -349,16 +345,13 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         bytes32 _attribute
     ) public view override returns (Attribute memory) {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
+        require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
         address[] memory issuers = governance.getIssuers();
         for (uint256 i = 0; i < issuers.length; i++) {
             bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
+                attr.issuer = issuers[i];
                 return attr;
             }
         }
@@ -551,6 +544,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         );
     }
 
+    function setQuadReader(IQuadReader _reader) external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
+            "INVALID_ADMIN"
+        );
+        reader = _reader;
+    }
+
     /// @dev Migrate _attributes to _attributesv2
     /// @param _accounts list of accounts to migrate
     /// @param _eligibleAttributes list of eligible attributes to migrate
@@ -572,8 +573,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
                 if(governance.eligibleAttributesByDID(eligibleAttribute)) {
                     Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
-                    require(did.length > 0, "INVALID_DID");
-                    require(did[0].value != bytes32(0), "NULL_DID");
+                    if(did.length == 0) {
+                        continue;
+                    }
                     attrKeyv1 = keccak256(abi.encode(did[0].value, eligibleAttribute));
                 } else {
                     attrKeyv1 = keccak256(abi.encode(account, eligibleAttribute));
@@ -583,6 +585,12 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 // loop over attributes and write to _attributesv2
                 for(uint256 k = 0; k < attributesV1.length; k++) {
                     Attribute memory attributeV1 = attributesV1[k];
+
+                    // skip writing if value is default value
+                    if(attributeV1.value == bytes32(0)) {
+                        continue;
+                    }
+
                     bytes32 attKey;
                     if(governance.eligibleAttributesByDID(eligibleAttribute)) {
                         Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
@@ -590,6 +598,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                     } else {
                         attKey = keccak256(abi.encode(account, eligibleAttribute, attributeV1.issuer));
                     }
+
 
                     _attributesv2[attKey] = IQuadPassportStore.Attribute({
                         value: attributeV1.value,
