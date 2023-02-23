@@ -127,16 +127,6 @@ describe("QuadReader.getAttributes", async () => {
 
     it("success - all callers have preapproval" , async () => {
 
-      // convert ethers.getSigners() to addresses
-      const addresses = await Promise.all(
-        (await ethers.getSigners()).map((signer) => signer.getAddress())
-      );
-      // create boolean array matching lenght of addresses
-      const preapprovals = new Array(addresses.length).fill(true);
-
-      await governance.connect(admin).setPreapprovals(addresses, preapprovals);
-      await governance.connect(admin).setPreapprovals([defi.address, businessPassport.address], [true, true]);
-
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_COUNTRY,
@@ -755,7 +745,7 @@ describe("QuadReader.getAttributes", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - not eligible attributes", async () => {
+    it("sucess - non-eligible attributes may be queried", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
@@ -764,16 +754,16 @@ describe("QuadReader.getAttributes", async () => {
         reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
           value: queryFee,
         })
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+      ).to.not.be.reverted;
     });
 
-    it("fail - wrong query Fee", async () => {
+    it("success - wrong query Fee can be accepted as a donation", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
         reader.getAttributes(minterA.address, ATTRIBUTE_COUNTRY, {
           value: queryFee.sub(1),
         })
-      ).to.revertedWith("INVALID_QUERY_FEE");
+      ).to.not.be.revertedWith("INVALID_QUERY_FEE");
     });
   });
 });

@@ -173,6 +173,21 @@ task("getPreapprovalFunctionData", "npx hardhat getPreapprovalFunctionData --add
         console.log(functionData);
     });
 
+task("revokeRole", "npx hardhat revokeRole --role <string> --address <address> --governance <address> --network <network_name>")
+    .addParam("role", "sets the role")
+    .addParam("address", "sets the address")
+    .addParam("governance", "sets the governance address")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const role = taskArgs.role;
+        const address = taskArgs.address;
+        const governanceAddress = taskArgs.governance;
+
+        const governance = await recursiveRetry(ethers.getContractAt, "QuadGovernance", governanceAddress);
+        await recursiveRetry(governance.revokeRole, id(role), address);
+        console.log("revoked " + role + " role from " + address + " on network " + hre.network.name);
+    });
+
 /*
 // usage for setting all attribute eligibility for all testnets (account level)
 (copy and paste all of the following into terminal)

@@ -351,6 +351,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
+                attr.issuer = issuers[i];
                 return attr;
             }
         }
@@ -572,8 +573,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
                 if(governance.eligibleAttributesByDID(eligibleAttribute)) {
                     Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
-                    require(did.length > 0, "INVALID_DID");
-                    require(did[0].value != bytes32(0), "NULL_DID");
+                    if(did.length == 0) {
+                        continue;
+                    }
                     attrKeyv1 = keccak256(abi.encode(did[0].value, eligibleAttribute));
                 } else {
                     attrKeyv1 = keccak256(abi.encode(account, eligibleAttribute));
@@ -583,6 +585,12 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 // loop over attributes and write to _attributesv2
                 for(uint256 k = 0; k < attributesV1.length; k++) {
                     Attribute memory attributeV1 = attributesV1[k];
+
+                    // skip writing if value is default value
+                    if(attributeV1.value == bytes32(0)) {
+                        continue;
+                    }
+
                     bytes32 attKey;
                     if(governance.eligibleAttributesByDID(eligibleAttribute)) {
                         Attribute[] memory did = _attributes[keccak256(abi.encode(account, ATTRIBUTE_DID))];
@@ -590,6 +598,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                     } else {
                         attKey = keccak256(abi.encode(account, eligibleAttribute, attributeV1.issuer));
                     }
+
 
                     _attributesv2[attKey] = IQuadPassportStore.Attribute({
                         value: attributeV1.value,

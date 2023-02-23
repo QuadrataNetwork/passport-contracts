@@ -66,13 +66,6 @@ describe("QuadReader", async () => {
     issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
     verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
-    await governance
-      .connect(admin)
-      .setPreapprovals(
-        [minterA.address, minterB.address, defi.address],
-        [true, true, true]
-      );
-
     await setAttributes(
       minterA,
       issuer,
