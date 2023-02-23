@@ -2,6 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+import { keccak256 } from "ethers/lib/utils";
+import { ATTRIBUTE_TU_CREDIT_SCORE } from "../../utils/constant";
 
 const {
   deployPassportEcosystem,
@@ -32,5 +34,31 @@ describe('Flash attributes', () => {
     });
 
     it('success - autherized dapp can flash attributes', async () => {
+        const now = Date.now();
+        const hash = keccak256(
+            ethers.utils.defaultAbiCoder.encode([
+                "address",
+                "address",
+                "bytes32",
+                "uint256",
+                "uint256",
+            ], [
+                user.address,
+                admin.address,
+                ATTRIBUTE_TU_CREDIT_SCORE,
+                now,
+                400,
+            ])
+        )
+        const sig = await issuerA.signMessage(hash);
+
+        await reader.getFlashAttributeGTE(
+            user.address,
+            admin.address,
+            ATTRIBUTE_TU_CREDIT_SCORE,
+            now,
+            400,
+            sig
+        );
     });
 });
