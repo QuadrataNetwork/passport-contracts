@@ -39,7 +39,6 @@ describe('Flash attributes', () => {
 
     it('success - autherized dapp can flash attributes', async () => {
         const now = 3429834;
-        console.log(chainId);
         const hash = keccak256(
             ethers.utils.defaultAbiCoder.encode([
                 "address",
@@ -61,9 +60,7 @@ describe('Flash attributes', () => {
                 chainId
             ])
         )
-        console.log("hash: ", hash);
         const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
-        console.log(issuerA.address)
 
         await reader.connect(admin).getFlashAttributeGTE(
             user.address,
