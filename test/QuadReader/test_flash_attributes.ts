@@ -62,7 +62,8 @@ describe('Flash attributes', () => {
             ])
         )
         console.log("hash: ", hash);
-        const sig = await issuerA.signMessage(hash);
+        const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+        console.log(issuerA.address)
 
         await reader.connect(admin).getFlashAttributeGTE(
             user.address,
