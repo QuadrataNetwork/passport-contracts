@@ -11,6 +11,8 @@ import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
 import "./storage/QuadReaderStoreV2.sol";
 
+import "hardhat/console.sol";
+
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
@@ -237,6 +239,7 @@ import "./storage/QuadReaderStoreV2.sol";
         require(governance.preapproval(msg.sender), "NOT_PREAPPROVED");
 
         bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, false, block.chainid));
+        console.logBytes32(extractionHash);
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
