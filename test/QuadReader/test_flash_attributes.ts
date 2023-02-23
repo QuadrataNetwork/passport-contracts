@@ -1,8 +1,11 @@
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { Contract } from "ethers";
+import { expect } from "chai";
 import { ethers } from "hardhat";
-import { READER_ROLE } from "../../utils/constant";
-import { deployPassportEcosystem } from '../helpers/deployment_and_init';
+import { Contract } from "ethers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
+
+const {
+  deployPassportEcosystem,
+} = require("../helpers/deployment_and_init.ts");
 
 
 describe('Flash attributes', () => {
@@ -22,7 +25,7 @@ describe('Flash attributes', () => {
 
     beforeEach(async () => {
         [admin, transUnion, treasury, user, issuerA, issuerB] = await ethers.getSigners();
-        const [governance, passport, reader] = await deployPassportEcosystem(admin, [issuerA, issuerB], treasury, [issuerA, issuerB]);
+        [governance, passport, reader] = await deployPassportEcosystem(admin, [issuerA, issuerB], treasury, [issuerA, issuerB]);
 
         const CreditUser = await ethers.getContractFactory("CreditUser");
         creditUser = await CreditUser.deploy(reader.address);
@@ -30,5 +33,4 @@ describe('Flash attributes', () => {
 
     it('success - autherized dapp can flash attributes', async () => {
     });
-
 });
