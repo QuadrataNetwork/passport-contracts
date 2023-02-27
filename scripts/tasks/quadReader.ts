@@ -108,10 +108,10 @@ task("getAllQueries", "npx hardhat getAllQueries --reader <address> --startBlock
         // create a Set of all callers
         // create map of callers to event count
         const callerToEventCount = new Map();
-        const stepSize = 100000;
+        const stepSize = 1000000;
 
         for (var i = startBlock; i < currentBlockNumber; i += stepSize) {
-            var filter = quadReader.filters.QueryBulkEvent(null, null, null);
+            var filter = quadReader.filters.QueryBulkEvent();
             var logs = await recursiveRetry(async () => {
                 return await quadReader.queryFilter(filter, i, i + stepSize);
             }) as any;
@@ -122,7 +122,7 @@ task("getAllQueries", "npx hardhat getAllQueries --reader <address> --startBlock
                 callerToEventCount.set(_caller, (callerToEventCount.get(_caller) || 0) + 1);
             }
 
-            filter = quadReader.filters.QueryEvent(null, null, null);
+            filter = quadReader.filters.QueryEvent();
             logs = await recursiveRetry(async () => {
                 return await quadReader.queryFilter(filter, i, i + stepSize);
             }) as any;
@@ -136,6 +136,11 @@ task("getAllQueries", "npx hardhat getAllQueries --reader <address> --startBlock
 
             // print percentage complete out of 100
             console.log("progress: " + Math.floor((i / currentBlockNumber) * 100) + "%");
+            console.log("------------------callers' event count-----------------");
+            for (const caller of callers) {
+                console.log(caller + ": " + callerToEventCount.get(caller));
+            }
+            console.log("------------------------------------------");
         }
 
         // pretty print the callers
