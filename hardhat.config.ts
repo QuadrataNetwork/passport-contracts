@@ -106,6 +106,14 @@ const config = {
           : [],
       chainId: 4002,
     },
+    insti_testnet: {
+      url: process.env.AVAX_SUBNET_URI || "",
+      accounts:
+        process.env.AVAX_SUBNET_DEPLOY_KEY !== undefined
+          ? [process.env.AVAX_SUBNET_DEPLOY_KEY]
+          : [],
+      chainId: 424242,
+    },
     mainnet: {
       url: process.env.MAINNET_URI || "",
       accounts:
