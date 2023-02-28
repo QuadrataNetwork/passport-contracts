@@ -85,6 +85,24 @@ task("setAttributePermissions", "npx hardhat setAttributePermissions --issuers <
         }
     });
 
+task("getIssuerAttributePermissions", "npx hardhat getIssuerAttributePermissions --issuer <address> --attributes <string,string,...> --governance <address> --network <network_name>")
+    .addParam("issuer", "sets the issuer address")
+    .addParam("attributes", "sets the attributes for all issuers")
+    .addParam("governance", "sets the governance address")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const issuerAddress = taskArgs.issuer;
+        const attributeNames = taskArgs.attributes.split(",");
+        const governanceAddress = taskArgs.governance;
+
+        const governance = await recursiveRetry(ethers.getContractAt, "QuadGovernance", governanceAddress);
+
+        for (const attributeName of attributeNames) {
+            const permission = await recursiveRetry(governance.getIssuerAttributePermission, issuerAddress, id(attributeName));
+            console.log(attributeName + " permission for " + issuerAddress + " is " + permission);
+        }
+    });
+
 task("setEligibleAttribute", "npx hardhat setEligibleAttribute --attribute <string> --eligible <boolean> --governance <address) --network <network_name>")
     .addParam("attribute", "sets the attribute")
     .addParam("eligible", "sets the eligible flag")

@@ -1,4 +1,4 @@
-import { id } from "ethers/lib/utils";
+import { hexZeroPad, id } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { deployGovernance } from "../../utils/deployment";
 import { recursiveRetry } from "../utils/retries";
@@ -45,4 +45,126 @@ task("getAllMinters", "npx hardhat getAllMinters --passport <address>")
         }
         const csv = accounts.join(",");
         console.log(csv);
+    });
+
+
+task("setAttributes", "npx hardhat setAttributes --passport <address> --account <address> --did <bytes32> --attributes <string,string,...> --values <string,string,...> --network <network>")
+    .addParam("passport", "sets the address for reader")
+    .addParam("account", "sets the address for account")
+    .addParam("did", "sets the did")
+    .addParam("attributes", "sets the attributes")
+    .addParam("values", "sets the values")
+    .setAction(async function (taskArgs, hre) {
+        const { DIGEST_TO_SIGN } = require("../../utils/constant");
+
+        const ethers = hre.ethers;
+        const passportAddress = taskArgs.passport;
+        const minter = taskArgs.account;
+        const did = id(taskArgs.did);
+        const attributes = taskArgs.attributes.split(",");
+        const hashedAttributes = attributes.map((attribute: string) => id(attribute));
+        const values = taskArgs.values.split(",");
+        const chainId = hre.network.config.chainId;
+
+
+        const passport = await ethers.getContractAt("QuadPassport", passportAddress);
+        console.log("Setting attributes for", minter, "with did", did, "on chain", chainId, "with attributes", attributes, "and values", values, "on passport", passportAddress);
+
+        const governanceAddress = await passport.governance();
+        const governance = await ethers.getContractAt("QuadGovernance", governanceAddress);
+
+        const signers = await ethers.getSigners();
+        const admin = signers[0];
+        const issuer = signers[1];
+
+        const attrKeys = hashedAttributes;
+        console.log("attrKeys", attrKeys)
+        console.log("assert attrKeys are valid attributes")
+        for(const attrKey of attrKeys) {
+            const eligibilityByDid = await governance.eligibleAttributesByDID(attrKey);
+            const eligibility = await governance.eligibleAttributes(attrKey);
+            console.log("attrKey", attrKey, "eligibleByDid", eligibilityByDid, "eligible", eligibility);
+            const issuerHasPermission = await governance.getIssuerAttributePermission(issuer.address, attrKey);
+            console.log("issuerHasPermission", issuerHasPermission);
+        }
+        const attrValues = [];
+        for (var i = 0; i < hashedAttributes.length; i++) {
+            if (hashedAttributes[i] === id("AML")) {
+                // append AML has hex with 32 bytes
+                const formattedAML = hexZeroPad(ethers.BigNumber.from(values[i]).toHexString(), 32);
+                attrValues.push(formattedAML);
+                console.log("AML", formattedAML);
+            } else if (hashedAttributes[i] === id("DID")) {
+                console.log("No need to hash DID again");
+                attrValues.push(did);
+                continue;
+            } else {
+                console.log("Hashing", values[i], "of type", attributes[i])
+                attrValues.push(id(values[i]));
+            }
+        }
+
+        // get block timestamp
+        const block = await ethers.provider.getBlock("latest");
+        const timestamp = block.timestamp;
+
+        // set verrifiedAt and issuedAt to 1 hour ago
+        const verifiedAt = timestamp - 3600;
+        const issuedAt = timestamp - 3600;
+
+        const hash = ethers.utils.keccak256(
+            ethers.utils.defaultAbiCoder.encode(
+                [
+                    "address",
+                    "bytes32[]",
+                    "bytes32[]",
+                    "bytes32",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "address",
+                ],
+                [
+                    minter,
+                    attrKeys,
+                    attrValues,
+                    did,
+                    verifiedAt,
+                    issuedAt,
+                    0,
+                    chainId,
+                    passportAddress,
+                ]
+            )
+        );
+
+        const sigIssuer = await issuer.signMessage(ethers.utils.arrayify(hash));
+        const sigAccount = await admin.signMessage(DIGEST_TO_SIGN);
+
+        const tx = await passport
+            .connect(issuer)
+            .setAttributesIssuer(
+                minter,
+                [
+                    attrKeys,
+                    attrValues,
+                    attrKeys,
+                    did,
+                    1,
+                    verifiedAt,
+                    issuedAt,
+                    0,
+                ],
+                sigIssuer,
+                {
+                    value: 0,
+                    gasLimit: 8000000,
+                }
+            )
+
+        // wait for status to be mined
+        console.log("Waiting for transaction to be mined");
+        const receipt = await tx.wait();
+        console.log(receipt);
     });
