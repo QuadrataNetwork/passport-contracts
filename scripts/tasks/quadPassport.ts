@@ -55,17 +55,15 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
     .addParam("attributes", "sets the attributes")
     .addParam("values", "sets the values")
     .setAction(async function (taskArgs, hre) {
-        const { DIGEST_TO_SIGN } = require("../../utils/constant");
 
         const ethers = hre.ethers;
         const passportAddress = taskArgs.passport;
         const minter = taskArgs.account;
         const did = id(taskArgs.did);
         const attributes = taskArgs.attributes.split(",");
-        const hashedAttributes = attributes.map((attribute: string) => id(attribute));
+        const attrTypes: any = attributes.map((attribute: string) => id(attribute));
         const values = taskArgs.values.split(",");
         const chainId = hre.network.config.chainId;
-
 
         const passport = await ethers.getContractAt("QuadPassport", passportAddress);
         console.log("Setting attributes for", minter, "with did", did, "on chain", chainId, "with attributes", attributes, "and values", values, "on passport", passportAddress);
@@ -77,32 +75,39 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
         const admin = signers[0];
         const issuer = signers[1];
 
-        const attrKeys = hashedAttributes;
-        console.log("attrKeys", attrKeys)
-        console.log("assert attrKeys are valid attributes")
-        for(const attrKey of attrKeys) {
+        for (const attrKey of attrTypes) {
             const eligibilityByDid = await governance.eligibleAttributesByDID(attrKey);
             const eligibility = await governance.eligibleAttributes(attrKey);
             console.log("attrKey", attrKey, "eligibleByDid", eligibilityByDid, "eligible", eligibility);
             const issuerHasPermission = await governance.getIssuerAttributePermission(issuer.address, attrKey);
             console.log("issuerHasPermission", issuerHasPermission);
         }
-        const attrValues = [];
-        for (var i = 0; i < hashedAttributes.length; i++) {
-            if (hashedAttributes[i] === id("AML")) {
+        const attrValues: any = [];
+        const attrKeys: any = [];
+        for (var i = 0; i < attrTypes.length; i++) {
+            if (attrTypes[i] === id("AML")) {
                 // append AML has hex with 32 bytes
                 const formattedAML = hexZeroPad(ethers.BigNumber.from(values[i]).toHexString(), 32);
-                attrValues.push(formattedAML);
                 console.log("AML", formattedAML);
-            } else if (hashedAttributes[i] === id("DID")) {
-                console.log("No need to hash DID again");
-                attrValues.push(did);
-                continue;
+
+                attrValues.push(formattedAML);
+                attrKeys.push(ethers.utils.keccak256(
+                    ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [did, attrTypes[i]])
+                ));
             } else {
                 console.log("Hashing", values[i], "of type", attributes[i])
+
                 attrValues.push(id(values[i]));
+                attrKeys.push(ethers.utils.keccak256(
+                    ethers.utils.defaultAbiCoder.encode(["address", "bytes32"], [minter, attrTypes[i]])
+                ));
             }
         }
+
+
+        console.log("attrTypes", attrTypes);
+        console.log("attrKeys", attrKeys);
+        console.log("attrValues", attrValues);
 
         // get block timestamp
         const block = await ethers.provider.getBlock("latest");
@@ -140,7 +145,6 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
         );
 
         const sigIssuer = await issuer.signMessage(ethers.utils.arrayify(hash));
-        const sigAccount = await admin.signMessage(DIGEST_TO_SIGN);
 
         const tx = await passport
             .connect(issuer)
@@ -149,7 +153,7 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
                 [
                     attrKeys,
                     attrValues,
-                    attrKeys,
+                    attrTypes,
                     did,
                     1,
                     verifiedAt,
