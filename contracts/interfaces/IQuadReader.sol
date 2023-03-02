@@ -42,4 +42,6 @@ interface IQuadReader {
     function balanceOf(address _account, bytes32 _attribute) external view returns(uint256);
 
     function withdraw(address payable _to, uint256 _amount) external;
+
+    function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) external view returns(bool);
 }

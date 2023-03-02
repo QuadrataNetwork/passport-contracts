@@ -216,4 +216,19 @@ import "./storage/QuadReaderStore.sol";
     function _authorizeUpgrade(address) internal view override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
     }
+
+    /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
+    /// @param _account account getting requested for attributes
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
+    /// @param _issuer address of issuer
+    /// @return boolean
+    function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) public view override returns(bool) {
+        IQuadPassportStore.Attribute[] memory attributes = passport.attributes(_account, _attribute);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            if (attributes[i].issuer == _issuer){
+                return true;
+            }
+        }
+        return false;
+    }
  }
