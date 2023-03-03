@@ -49,6 +49,8 @@ const getAttributesV2AsSlots = (addressOrDIDType: any, addressOrDIDValue: any, a
     const attributeTypes = [
         "COUNTRY",
         "AML",
+        "IS_BUSINESS",
+        "DID"
     ];
 
     for (const account of accounts) {
