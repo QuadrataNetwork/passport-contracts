@@ -262,10 +262,11 @@ task("upgradeReader", "npx hardhat upgradeReader --reader <address>")
         const quadReaderUpgraded = await recursiveRetry(async () => {
             return await QuadReader.deploy();
         });
-        console.log("logic deployed at: ", quadReaderUpgraded.address);
+        console.log("attempting to deploy logic at: ", quadReaderUpgraded.address)
         await recursiveRetry(async () => {
             await quadReaderUpgraded.deployed();
         });
+        console.log("logic deployed at: ", quadReaderUpgraded.address)
         await recursiveRetry(async () => {
             const tx = await quadReader.connect(admin).upgradeTo(quadReaderUpgraded.address);
             await tx.wait();

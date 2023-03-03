@@ -1,4 +1,4 @@
-import { id } from "ethers/lib/utils";
+import { hexZeroPad, id } from "ethers/lib/utils";
 import { task } from "hardhat/config";
 import { deployGovernance } from "../../utils/deployment";
 import { recursiveRetry } from "../utils/retries";
