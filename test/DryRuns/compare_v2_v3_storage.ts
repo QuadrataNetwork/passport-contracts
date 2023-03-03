@@ -16,30 +16,8 @@ const getAttributesLengthV2Slot = (addressOrDIDType: any, addressOrDIDValue: any
     return attributeArrPtr;
 }
 
-const getAttributesLengthV3Slot = (mapKey: any) => {
-    const attributeArrPtr = keccak256(defaultAbiCoder.encode(["bytes32", "uint256"], [mapKey, 304]))
-    return attributeArrPtr;
-}
-
 const getAttributesV2AsSlots = (addressOrDIDType: any, addressOrDIDValue: any, attribute: any, length: any) => {
     const attributeArrPtr = getAttributesLengthV2Slot(addressOrDIDType, addressOrDIDValue, attribute)
-    const p = ethers.BigNumber.from(keccak256(attributeArrPtr));
-
-    const slots = []
-    for (var i = p; i < p.add(ethers.BigNumber.from(length).mul(3));) {
-        slots.push({
-            valueSlot: i.toHexString(),
-            epochSlot: i.add(1).toHexString(),
-            issuerSlot: i.add(2).toHexString()
-        })
-        i = i.add(3)
-    }
-
-    return slots;
-}
-
-const getAttributesV3AsSlots = (mapKey: any, length: any) => {
-    const attributeArrPtr = getAttributesLengthV3Slot(mapKey)
     const p = ethers.BigNumber.from(keccak256(attributeArrPtr));
 
     const slots = []
@@ -68,12 +46,13 @@ const getAttributesV3AsSlots = (mapKey: any, length: any) => {
 
 
     const premigrationBlock = 39892040;
-    const attributeType = "IS_BUSINESS";
+    const attributeTypes = [
+        "COUNTRY",
+        "AML",
+    ];
 
     for (const account of accounts) {
         console.log("getting v2 attributes for " + account);
-        const addressOrDIDType = "address";
-        const addressOrDIDValue = account;
 
         var v2User: any = {
             value: "0x",
@@ -86,42 +65,63 @@ const getAttributesV3AsSlots = (mapKey: any, length: any) => {
             issuer: "0x"
         };
 
-        const lengthSlot = getAttributesLengthV2Slot(addressOrDIDType, addressOrDIDValue, attributeType);
-        const length = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", lengthSlot, premigrationBlock);
+        var didValue: any = {}
 
-        const attributeSlots = getAttributesV2AsSlots(addressOrDIDType, addressOrDIDValue, attributeType, length);
+        for (const attributeType of attributeTypes) {
+            if(attributeType === "AML") {
+                const didLengthSlot = getAttributesLengthV2Slot("address", account, "DID");
+                const didLength = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", didLengthSlot, premigrationBlock);
+                const didAttributeSlots = getAttributesV2AsSlots("address", account, "DID", didLength);
 
+                for (const attribute of didAttributeSlots) {
+                    const value = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.valueSlot, premigrationBlock);
+                    const epoch = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.epochSlot, premigrationBlock);
+                    const issuer = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.issuerSlot, premigrationBlock);
+                    didValue = {
+                        value,
+                        epoch,
+                        issuer
+                    }
+                    break;
+                }
 
-        for (const attribute of attributeSlots) {
-            const value = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.valueSlot, premigrationBlock);
-            const epoch = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.epochSlot, premigrationBlock);
-            const issuer = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.issuerSlot, premigrationBlock);
-
-            v2User = {
-                value,
-                epoch,
-                issuer
             }
 
-            break;
-        }
+            const lengthSlot = getAttributesLengthV2Slot(!didValue.value ? "address" : "bytes32", !didValue.value ? account : didValue.value, attributeType);
+            const length = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", lengthSlot, premigrationBlock);
+            const attributeSlots = getAttributesV2AsSlots(!didValue.value ? "address" : "bytes32", !didValue.value ? account : didValue.value, attributeType, length);
 
-        console.log("getting v3 attributes for " + account);
-        const reader = await ethers.getContractAt("QuadReader", "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
-        const result = await reader.callStatic.getAttributes(addressOrDIDValue, ethers.utils.id(attributeType));
-        if (result.length !== 0) {
-            v3User = {
-                value: result[0][0],
-                epoch: hexZeroPad(result[0][1].toHexString(), 32),
-                issuer: hexZeroPad(result[0][2], 32)
+            for (const attribute of attributeSlots) {
+                const value = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.valueSlot, premigrationBlock);
+                const epoch = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.epochSlot, premigrationBlock);
+                const issuer = await ethers.provider.getStorageAt("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d", attribute.issuerSlot, premigrationBlock);
+                v2User = {
+                    value,
+                    epoch,
+                    issuer
+                }
+                break;
             }
+
+            console.log("getting v3 attributes for " + account);
+            const reader = await ethers.getContractAt("QuadReader", "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
+            const result = await reader.callStatic.getAttributes(account, ethers.utils.id(attributeType));
+            if (result.length !== 0) {
+                v3User = {
+                    value: result[0][0],
+                    epoch: hexZeroPad(result[0][1].toHexString(), 32),
+                    issuer: hexZeroPad(result[0][2], 32)
+                }
+            }
+
+            console.log("attributeType: " + attributeType)
+            console.log("v2user: " + JSON.stringify(v2User, null, 2));
+            console.log("v3user: " + JSON.stringify(v3User, null, 2));
+
+            expect(v2User.value).equals(v3User.value);
+            expect(v2User.epoch === v3User.epoch).equals(true);
+            expect(v2User.issuer.toLocaleLowerCase()).equals(v3User.issuer.toLocaleLowerCase());
+
         }
-
-        console.log("v2user: " + JSON.stringify(v2User, null, 2));
-        console.log("v3user: " + JSON.stringify(v3User, null, 2));
-
-        expect(v2User.value).equals(v3User.value);
-        expect(v2User.epoch === v3User.epoch).equals(true);
-        expect(v2User.issuer.toLocaleLowerCase()).equals(v3User.issuer.toLocaleLowerCase());
     }
 })()
