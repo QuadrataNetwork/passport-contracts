@@ -122,12 +122,6 @@ const config = {
           : [],
       chainId: 137,
     },
-
-    hardhat: {
-      forking: {
-        url: process.env.POLYGON_URI || "",
-      }
-    },
   },
   gasReporter: {
     enabled: true,
