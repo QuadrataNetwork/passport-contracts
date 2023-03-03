@@ -3,10 +3,10 @@ import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import { constants, Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-import { defaultAbiCoder, hexZeroPad } from "ethers/lib/utils";
+import { defaultAbiCoder, hexZeroPad, parseUnits } from "ethers/lib/utils";
 import { ATTRIBUTE_AML, ATTRIBUTE_COUNTRY, ATTRIBUTE_CRED_PROTOCOL_SCORE, ATTRIBUTE_DID, ATTRIBUTE_IS_BUSINESS } from "../../utils/constant";
 
-describe.skip('migrateToV3Storage', function() {
+describe.only('migrateToV3Storage', function() {
     // increase timeout to 600s
     this.timeout(600000);
 
@@ -73,18 +73,19 @@ describe.skip('migrateToV3Storage', function() {
         // send some ETH to timelockSigner
         const signers = await ethers.getSigners();
 
-        // divide accounts into chunks of 5
+        // divide accounts into chunks of 100
         const chunks = [];
-        for (let i = 0; i < accounts.length; i += 5) {
-            chunks.push(accounts.slice(i, i + 5));
+        for (let i = 0; i < accounts.length; i += 100) {
+            chunks.push(accounts.slice(i, i + 100));
         }
 
         // check that the storage is not migrated
         const queryFeeBulk = await quadReader.connect(signers[0]).queryFeeBulk(accounts[0], eligibleAttributes);
-
+        console.log("executing bulk query")
         // read all attributes in all accounts pre-migration
         const premigrationAttributes: any = {};
         for (let account of chunks[0]) {
+            console.log("performing bulk query for account: ", account)
             const attributes = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
                 value: queryFeeBulk,
             });
@@ -158,7 +159,7 @@ describe.skip('migrateToV3Storage', function() {
 
 
         // ensure all account level attributes in all accounts are falsy
-        for (let account of chunks[0]) {
+       /* for (let account of chunks[0]) {
             const account0init = await quadReader.connect(signers[0]).callStatic.getAttributesBulk(account, eligibleAttributes, {
                 value: queryFeeBulk,
             });
@@ -170,13 +171,13 @@ describe.skip('migrateToV3Storage', function() {
             });
 
             console.log("account", account, "is falsy")
-        }
+        }*/
 
 
         // check timelock has governance role
         expect(await quadGovernance.hasRole(await quadGovernance.GOVERNANCE_ROLE(), timelockAddress)).to.be.true;
 
-        for (let chunk of chunks.slice(0, 1)) {
+        for (let chunk of chunks) {
             // signer calls custom timelock which calls migrate function
             const migrateAttributesFunctionData = quadPassport.interface.encodeFunctionData("migrateAttributes", [chunk, eligibleAttributes]);
             executeRawFunctionData = nonDelegateProxy.interface.encodeFunctionData("executeRaw", [quadPassport.address, migrateAttributesFunctionData]);
@@ -185,11 +186,16 @@ describe.skip('migrateToV3Storage', function() {
                 to: timelockAddress,
                 value: 0,
                 data: executeRawFunctionData,
-                gasLimit: 15000000,
+                gasLimit: 30000000,
             });
 
             // wait for tx to be mined
             const metaData = await tx.wait();
+
+            const cumulativeGasUsed = metaData.cumulativeGasUsed;
+
+            // convert culmulativeGasUsed to eth by multiplying by 50 gwei
+            console.log("gas used", cumulativeGasUsed.toString(), "eth", ethers.utils.formatEther(cumulativeGasUsed.mul(parseUnits("50", "gwei"))));
 
             // check that the tx was successful
             expect(metaData.status).to.be.equal(1);

@@ -49,7 +49,7 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         // read TransferSingle event from QuadPassport
         const filter = quadPassport.filters.TransferSingle(null, null, null, null, null);
         const logs = await quadPassport.queryFilter(filter, startBlock, endBlock);
-        const accounts = [];
+        var accounts = [];
         for (const log in logs) {
             const { args } = logs[log];
             const { from, to, id, value } = args as any;
@@ -61,10 +61,15 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             }
         }
 
-        // divide accounts into chunks of 5
+        // remove empty accounts
+        accounts = accounts.filter((account) => {
+            return account !== undefined;
+        });
+
+        // divide accounts into chunks of 100
         const chunks = [];
-        for (let i = 0; i < accounts.length; i += 3) {
-            chunks.push(accounts.slice(i, i + 3));
+        for (let i = 0; i < accounts.length; i += 100) {
+            chunks.push(accounts.slice(i, i + 100));
         }
         const chunkLength = chunks.length;
         var currChunkIndex = 0;
@@ -78,10 +83,11 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
             await recursiveRetry(async () => {
                 console.log("attempting to migrate chunk", chunk, "working on", currChunkIndex, "of", chunkLength, "chunks...");
                 const tx = await quadPassport.migrateAttributes(chunk, eligibleAttributes, {
-                    gasLimit: 3500000,
-                    maxFeePerGas: ethers.utils.parseUnits("30", "gwei"),
+                    gasLimit: 30000000,
+                    maxFeePerGas: ethers.utils.parseUnits("200", "gwei"),
                 });
                 // wait for transaction to be mined
+                console.log("tx hash: ", tx.hash)
                 console.log("waiting for transaction to be mined...")
                 const metaData = await tx.wait();
 
@@ -235,4 +241,34 @@ task("upgradeV3", "npx hardhat upgradeV3 --passport <address> --reader <address>
             console.log("POINTED QUAD GOVERNANCE TO LOGIC AT: ", quadGovernanceUpgraded.address);
         });
         console.log("upgradeTo and upgradeToAndCall functions executed for QuadPassport, QuadReader and QuadGovernance")
+    });
+
+task("upgradeReader", "npx hardhat upgradeReader --reader <address>")
+    .addParam("reader", "address of the QuadReader contract")
+    .setAction(async (taskArgs, hre) => {
+        const ethers = hre.ethers;
+        const reader = taskArgs.reader;
+
+        const admin = (await ethers.getSigners())[0];
+        console.log("admin address: ", admin.address);
+
+        const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", reader);
+        console.log("getting QuadReader contract at: ", quadReader.address);
+
+        const QuadReader = await recursiveRetry(async () => {
+            return await ethers.getContractFactory("QuadReader");
+        });
+
+        const quadReaderUpgraded = await recursiveRetry(async () => {
+            return await QuadReader.deploy();
+        });
+        console.log("logic deployed at: ", quadReaderUpgraded.address);
+        await recursiveRetry(async () => {
+            await quadReaderUpgraded.deployed();
+        });
+        await recursiveRetry(async () => {
+            const tx = await quadReader.connect(admin).upgradeTo(quadReaderUpgraded.address);
+            await tx.wait();
+            console.log("POINTED QUAD READER TO LOGIC AT: ", quadReaderUpgraded.address);
+        });
     });

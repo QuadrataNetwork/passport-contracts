@@ -117,8 +117,8 @@ const config = {
     polygon: {
       url: process.env.POLYGON_URI || "",
       accounts:
-        process.env.POLYGON_PRIVATE_KEY !== undefined
-          ? [process.env.POLYGON_PRIVATE_KEY]
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 137,
     },
