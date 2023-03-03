@@ -173,3 +173,36 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
         const receipt = await tx.wait();
         console.log(receipt);
     });
+
+
+task("getAllMintersByTokenIds", "npx hardhat getAllMintersByTokenIds --passport <address> --tokenIds <string,string,...>")
+    .addParam("passport", "sets the address for passport")
+    .addParam("tokenIds", "sets the tokenIds")
+    .setAction(async function (taskArgs, hre) {
+
+        const ethers = hre.ethers;
+        const passportAddress = taskArgs.passport;
+        const tokenIds = taskArgs.tokenIds.split(",");
+        const passport = await ethers.getContractAt("QuadPassport", passportAddress);
+
+        const filter = passport.filters.TransferSingle(null, null, null, null, null);
+        const logs = await passport.queryFilter(filter, 0, "latest");
+        const accounts = [];
+        for (const log in logs) {
+            const { args } = logs[log];
+            const { from, to, id, value } = args as any;
+            // continue if tokenId is not in tokenIds
+            if (!tokenIds.includes(id.toString())) {
+                continue;
+            }
+            if (from === ethers.constants.AddressZero) {
+                accounts.push(to);
+            }
+            if (to === ethers.constants.AddressZero) {
+                delete accounts[accounts.indexOf(from)];
+            }
+        }
+        const csv = accounts.join(",");
+        console.log("length", accounts.length);
+        console.log(csv);
+    });

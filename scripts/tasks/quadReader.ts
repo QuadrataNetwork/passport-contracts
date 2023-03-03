@@ -151,3 +151,63 @@ task("getAllQueries", "npx hardhat getAllQueries --reader <address> --startBlock
         }
         console.log("------------------------------------------");
     });
+
+task("getAllAccountsQueried", "npx hardhat getAllAccountsQueried --reader <address> --startBlock <number>")
+    .addParam("reader", "sets the address for reader")
+    .addParam("startBlock", "sets the start block")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const readerAddress = taskArgs.reader;
+        const startBlock = parseInt(taskArgs.startBlock);
+
+        const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
+
+        // get current block number
+        const currentBlockNumber = await ethers.provider.getBlockNumber();
+        console.log("current block number: " + currentBlockNumber);
+        const accountsQueried = new Set();
+        // create a Set of all callers
+        // create map of callers to event count
+        const accountsQueriedEventCount = new Map();
+        const stepSize = 100000;
+        for (var i = startBlock; i < currentBlockNumber; i += stepSize) {
+            var filter = quadReader.filters.QueryBulkEvent(null, null, null);
+            var logs = await recursiveRetry(async () => {
+                return await quadReader.queryFilter(filter, i, i + stepSize);
+            }) as any;
+            for (const log in logs) {
+                const { args } = logs[log];
+                const { _account } = args as any;
+                accountsQueried.add(_account);
+                accountsQueriedEventCount.set(_account, (accountsQueriedEventCount.get(_account) || 0) + 1);
+            }
+
+            filter = quadReader.filters.QueryEvent(null, null, null);
+            logs = await recursiveRetry(async () => {
+                return await quadReader.queryFilter(filter, i, i + stepSize);
+            }) as any;
+
+            for (const log in logs) {
+                const { args } = logs[log];
+                const { _account } = args as any;
+                accountsQueried.add(_account);
+                accountsQueriedEventCount.set(_account, (accountsQueriedEventCount.get(_account) || 0) + 1);
+            }
+
+            // print percentage complete out of 100
+            console.log("progress: " + Math.floor((i / currentBlockNumber) * 100) + "%");
+        }
+
+        // pretty print the callers
+        // print event count for each caller
+        console.log("------------------accounts' queried event count-----------------");
+        for (const account of accountsQueried) {
+            console.log(account + ": " + accountsQueriedEventCount.get(account));
+        }
+        console.log("------------------------------------------");
+
+        // print all accounts queried as a joined string csv
+        console.log("------------------accounts' queried-----------------");
+        console.log(Array.from(accountsQueried).join(","));
+        console.log("------------------------------------------");
+    });

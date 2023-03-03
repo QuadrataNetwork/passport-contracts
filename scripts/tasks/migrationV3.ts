@@ -45,21 +45,9 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
         expect(eligibleAttributes.includes(ATTRIBUTE_CRED_PROTOCOL_SCORE)).to.be.true; // CRED_PROTOCOL_SCORE is eligible
         expect(eligibleAttributes.includes(ATTRIBUTE_IS_BUSINESS)).to.be.true; // IS_BUSINESS is eligible
 
-        console.log("running migration across block interval [", startBlock, ",", endBlock, "]")
-        // read TransferSingle event from QuadPassport
-        const filter = quadPassport.filters.TransferSingle(null, null, null, null, null);
-        const logs = await quadPassport.queryFilter(filter, startBlock, endBlock);
-        var accounts = [];
-        for (const log in logs) {
-            const { args } = logs[log];
-            const { from, to, id, value } = args as any;
-            if (from === ethers.constants.AddressZero) {
-                accounts.push(to);
-            }
-            if (to === ethers.constants.AddressZero) {
-                delete accounts[accounts.indexOf(from)];
-            }
-        }
+        var accounts = ["0x87F6d5Cc3c65D06130f6861129aaae325309Ff85","0xeD5D581f603799E388A96e243D020D0f498bF71c","0xf593e16Fe4BB969818859b618CE148BBb04Cb366","0xF6E8bC89739b576927Fa8e5fEA37806990F34936","0x1051Cf2fF8D2AFf445aFdC0f2144A28A86D6d781","0x785de3aC19F26e22e029605e407E728c1660714F","0x2C3C070ec5da505ed68F3BCA91dE961dB837F52b","0xDDdE8021114889a8FAc4ABd21E3ED300Ca91b496","0x6A3de25fbCCb30e265dffaD8c507C5Ee429b0C0B","0x347775a4dc31813Cd31528fA6D2fC2a367300656","0xB7c0b1a9592780868af195Bbd574076b3E005DD1","0x18EAD99008825C959f128D4AAAdD340f0cAd1922","0x084B8d9c0834F5b905c17bc447C909a897B4BD85","0x856f3Ba82D948d7A3C61A1d5204bB8c160A19dA8","0x286C229170BE05FeA608D39bA6E2548AcA553423","0x3142aC4045eD8B02ae5FFD7b84242674b7162515","0x782D931e522eDBa8b4Cc6d3701CF53360E6a1a7f","0xa43527599BcA4C6fF070A96916FAFe2657F3d53f","0xD696a5fA12ab423Ea65fA84D35E105FB185E0511","0x12DA2D03D71485a629E8d28FE2F9188A62deF189","0xDd0CB7B7ccaAdC9540079A807ae0F871b0297dB3","0x8CD1960C18D13503D62E47EC8EA7FbF19A7b4d47","0xDcb9D10109bF58578dF7Ad9093CdD1B775A24b75","0x1eb4aC0CD307aB4c7dB6c25a78029E035670ac95","0x5AD7Ee21c2088f0091fAA5Ca97E9e985e2B7cbA5","0xB802f2e0E43438Bdf64Ee736F135f94ee071C087","0x97563a0299822a624062c01ADB0A6098e07497b0","0x896dd79e289c38de49f7D1d661A1f8DE9d5c5093","0x3bAe075c8728a976E69e6F2E45e9682D1BA063d2","0xbf9a4eCC4151f28C03100bA2C0555a3D3e439e69","0x4e172Ea6873b2b2cb3f41b796dd5364Ecc13cd75","0xa2EeEa10a9a116b5ec77fa3A12d580A7265ECE9D","0x49Aba39Fc04566399DBB227b884196c58EaEfdC6","0x743D89a62248B787a23C663894B8cd36Ac2049Ec","0x3F23388b021C0f418853e2011D53097290258517"];
+
+        console.log("migration accounts: ", accounts.length, "accounts")
 
         // remove empty accounts
         accounts = accounts.filter((account) => {
@@ -84,8 +72,8 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
                 console.log("attempting to migrate chunk", chunk, "working on", currChunkIndex, "of", chunkLength, "chunks...");
                 const tx = await quadPassport.migrateAttributes(chunk, eligibleAttributes, {
                     gasLimit: 30000000,
-                    maxFeePerGas: ethers.utils.parseUnits("1000", "gwei"),
-                    maxPriorityFeePerGas: ethers.utils.parseUnits("1000", "gwei"),
+                    maxFeePerGas: ethers.utils.parseUnits("40", "gwei"),
+                    maxPriorityFeePerGas: ethers.utils.parseUnits("40", "gwei"),
                 });
                 // wait for transaction to be mined
                 console.log("tx hash: ", tx.hash)
