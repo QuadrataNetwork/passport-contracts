@@ -84,10 +84,12 @@ task("migrateV3", "npx hardhat migrateV3 --passport <address> --governance <addr
                 console.log("attempting to migrate chunk", chunk, "working on", currChunkIndex, "of", chunkLength, "chunks...");
                 const tx = await quadPassport.migrateAttributes(chunk, eligibleAttributes, {
                     gasLimit: 30000000,
-                    maxFeePerGas: ethers.utils.parseUnits("200", "gwei"),
+                    maxFeePerGas: ethers.utils.parseUnits("1000", "gwei"),
+                    maxPriorityFeePerGas: ethers.utils.parseUnits("1000", "gwei"),
                 });
                 // wait for transaction to be mined
                 console.log("tx hash: ", tx.hash)
+                console.log("nonce: ", tx.nonce)
                 console.log("waiting for transaction to be mined...")
                 const metaData = await tx.wait();
 
@@ -260,15 +262,22 @@ task("upgradeReader", "npx hardhat upgradeReader --reader <address>")
         });
 
         const quadReaderUpgraded = await recursiveRetry(async () => {
-            return await QuadReader.deploy();
+            return await QuadReader.deploy({
+                maxFeePerGas: ethers.utils.parseUnits("2000", "gwei"),
+                maxPriorityFeePerGas: ethers.utils.parseUnits("2000", "gwei")
+            });
         });
+        console.log(quadReaderUpgraded)
         console.log("attempting to deploy logic at: ", quadReaderUpgraded.address)
         await recursiveRetry(async () => {
             await quadReaderUpgraded.deployed();
         });
         console.log("logic deployed at: ", quadReaderUpgraded.address)
         await recursiveRetry(async () => {
-            const tx = await quadReader.connect(admin).upgradeTo(quadReaderUpgraded.address);
+            const tx = await quadReader.connect(admin).upgradeTo(quadReaderUpgraded.address,{
+                maxFeePerGas: ethers.utils.parseUnits("2000", "gwei"),
+                maxPriorityFeePerGas: ethers.utils.parseUnits("2000", "gwei")
+            });
             await tx.wait();
             console.log("POINTED QUAD READER TO LOGIC AT: ", quadReaderUpgraded.address);
         });
