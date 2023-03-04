@@ -599,7 +599,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                         attKey = keccak256(abi.encode(account, eligibleAttribute, attributeV1.issuer));
                     }
 
-
                     _attributesv2[attKey] = IQuadPassportStore.Attribute({
                         value: attributeV1.value,
                         epoch: attributeV1.epoch,

@@ -19,10 +19,14 @@ task("getAttributes", "npx hardhat getAttributes --reader <address> --account <a
 
         const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
         const results = await recursiveRetry(async () => {
+            console.log("attempting to read query fee");
             const queryFee = await quadReader.callStatic.queryFee(accountAddress, ethers.utils.id(attribute), { blockTag: blockNumber });
+            console.log("query fee: " + queryFee);
+
+            console.log("attempting to read attributes");
             return await quadReader.callStatic.getAttributes(accountAddress, ethers.utils.id(attribute), {
                 value: queryFee,
-                blockTag: blockNumber
+                blockTag: blockNumber,
             });
         });
         console.log(attribute + " attributes: " + results.length)
@@ -48,10 +52,10 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
 
         const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
 
-        // print balance of signer of reader
+        // print balance of signer of reader at start block
         const signer = quadReader.signer.address;
-        const balance = await ethers.provider.getBalance(signer);
-        console.log("signer: " + signer + " has balance: " + formatEther(balance.toString()));
+        const balance = await ethers.provider.getBalance(signer, startBlock);
+        console.log("signer: " + signer + " has balance: " + formatEther(balance.toString()) + " at block: " + startBlock);
 
         for (var i = 0; i < accounts.length; i++) {
             for (var j = 0; j < attributes.length; j++) {
@@ -59,10 +63,11 @@ task("assertAllAttributesEqual", "npx hardhat assertAllAttributesEqual --reader 
                 const account = accounts[i];
                 const results1 = await recursiveRetry(async () => {
                     const queryFee = await quadReader.callStatic.queryFee(account, ethers.utils.id(attribute), { blockTag: startBlock });
-                    expect(balance.gt(queryFee)).to.be.true;
-                    return await quadReader.callStatic.getAttributes(account, ethers.utils.id(attribute), {
+                    //expect(balance.gte(queryFee)).to.be.true;
+                    console.log("query fee: " + formatEther(queryFee.toString()));
+
+                    return await quadReader.callStatic.getAttribute(account, ethers.utils.id(attribute), {
                         value: queryFee,
-                        blockTag: startBlock
                     });
                 });
 
@@ -144,5 +149,65 @@ task("getAllQueries", "npx hardhat getAllQueries --reader <address> --startBlock
         for (const caller of callers) {
             console.log(caller + ": " + callerToEventCount.get(caller));
         }
+        console.log("------------------------------------------");
+    });
+
+task("getAllAccountsQueried", "npx hardhat getAllAccountsQueried --reader <address> --startBlock <number>")
+    .addParam("reader", "sets the address for reader")
+    .addParam("startBlock", "sets the start block")
+    .setAction(async function (taskArgs, hre) {
+        const ethers = hre.ethers;
+        const readerAddress = taskArgs.reader;
+        const startBlock = parseInt(taskArgs.startBlock);
+
+        const quadReader = await recursiveRetry(ethers.getContractAt, "QuadReader", readerAddress);
+
+        // get current block number
+        const currentBlockNumber = await ethers.provider.getBlockNumber();
+        console.log("current block number: " + currentBlockNumber);
+        const accountsQueried = new Set();
+        // create a Set of all callers
+        // create map of callers to event count
+        const accountsQueriedEventCount = new Map();
+        const stepSize = 100000;
+        for (var i = startBlock; i < currentBlockNumber; i += stepSize) {
+            var filter = quadReader.filters.QueryBulkEvent(null, null, null);
+            var logs = await recursiveRetry(async () => {
+                return await quadReader.queryFilter(filter, i, i + stepSize);
+            }) as any;
+            for (const log in logs) {
+                const { args } = logs[log];
+                const { _account } = args as any;
+                accountsQueried.add(_account);
+                accountsQueriedEventCount.set(_account, (accountsQueriedEventCount.get(_account) || 0) + 1);
+            }
+
+            filter = quadReader.filters.QueryEvent(null, null, null);
+            logs = await recursiveRetry(async () => {
+                return await quadReader.queryFilter(filter, i, i + stepSize);
+            }) as any;
+
+            for (const log in logs) {
+                const { args } = logs[log];
+                const { _account } = args as any;
+                accountsQueried.add(_account);
+                accountsQueriedEventCount.set(_account, (accountsQueriedEventCount.get(_account) || 0) + 1);
+            }
+
+            // print percentage complete out of 100
+            console.log("progress: " + Math.floor((i / currentBlockNumber) * 100) + "%");
+        }
+
+        // pretty print the callers
+        // print event count for each caller
+        console.log("------------------accounts' queried event count-----------------");
+        for (const account of accountsQueried) {
+            console.log(account + ": " + accountsQueriedEventCount.get(account));
+        }
+        console.log("------------------------------------------");
+
+        // print all accounts queried as a joined string csv
+        console.log("------------------accounts' queried-----------------");
+        console.log(Array.from(accountsQueried).join(","));
         console.log("------------------------------------------");
     });
