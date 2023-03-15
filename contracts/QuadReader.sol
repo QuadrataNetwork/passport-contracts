@@ -222,7 +222,7 @@ import "./storage/QuadReaderStoreV2.sol";
     /// @param _account user whose data is being checked
     /// @param _sender must be preapproved and autherized to perform query
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
-    /// @param _epoch epoch of the data
+    /// @param _issuedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
     /// @param _flashSig signature of the flash query
     /// @return true if the data is GTE to the threshold, false otherwise
@@ -230,7 +230,7 @@ import "./storage/QuadReaderStoreV2.sol";
         address _account,
         address _sender,
         bytes32 _attribute,
-        uint256 _epoch,
+        uint256 _issuedAt,
         uint256 _threshold,
         bytes calldata _flashSig
     ) public override returns(bool) {
@@ -238,20 +238,20 @@ import "./storage/QuadReaderStoreV2.sol";
         require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
 
         // Check if issuer signed over false value
-        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, false, block.chainid));
+        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, false, block.chainid));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            emit FlashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, false);
+            emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, false);
             return false;
         }
 
         // Check if issuer signed over true value
-        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, true, block.chainid));
+        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, true, block.chainid));
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            emit FlashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, true);
+            emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, true);
             return true;
         }
 
