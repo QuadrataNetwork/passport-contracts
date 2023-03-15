@@ -52,6 +52,11 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
     .addParam("passport", "sets the address for reader")
     .addParam("account", "sets the address for account")
     .addParam("did", "sets the did")
+task("setAttributes", "npx hardhat setAttributes --passport <address> --account <address> --did <bytes32> --raw <flag> --attributes <string,string,...> --values <string,string,...> --network <network>")
+    .addParam("passport", "sets the address for reader")
+    .addParam("account", "sets the address for account")
+    .addParam("did", "sets the did")
+    .addFlag("raw", "sets the raw flag")
     .addParam("attributes", "sets the attributes")
     .addParam("values", "sets the values")
     .setAction(async function (taskArgs, hre) {
@@ -59,7 +64,7 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
         const ethers = hre.ethers;
         const passportAddress = taskArgs.passport;
         const minter = taskArgs.account;
-        const did = id(taskArgs.did);
+        const did = !taskArgs.raw ? id(taskArgs.did) : taskArgs.did;
         const attributes = taskArgs.attributes.split(",");
         const attrTypes: any = attributes.map((attribute: string) => id(attribute));
         const values = taskArgs.values.split(",");
@@ -171,4 +176,36 @@ task("setAttributes", "npx hardhat setAttributes --passport <address> --account 
         console.log("Waiting for transaction to be mined");
         const receipt = await tx.wait();
         console.log(receipt);
+    });
+
+task("getAllMintersByTokenIds", "npx hardhat getAllMintersByTokenIds --passport <address> --tokenIds <string,string,...>")
+    .addParam("passport", "sets the address for passport")
+    .addParam("tokenIds", "sets the tokenIds")
+    .setAction(async function (taskArgs, hre) {
+
+        const ethers = hre.ethers;
+        const passportAddress = taskArgs.passport;
+        const tokenIds = taskArgs.tokenIds.split(",");
+        const passport = await ethers.getContractAt("QuadPassport", passportAddress);
+
+        const filter = passport.filters.TransferSingle(null, null, null, null, null);
+        const logs = await passport.queryFilter(filter, 0, "latest");
+        const accounts = [];
+        for (const log in logs) {
+            const { args } = logs[log];
+            const { from, to, id, value } = args as any;
+            // continue if tokenId is not in tokenIds
+            if (!tokenIds.includes(id.toString())) {
+                continue;
+            }
+            if (from === ethers.constants.AddressZero) {
+                accounts.push(to);
+            }
+            if (to === ethers.constants.AddressZero) {
+                delete accounts[accounts.indexOf(from)];
+            }
+        }
+        const csv = accounts.join(",");
+        console.log("length", accounts.length);
+        console.log(csv);
     });

@@ -54,4 +54,6 @@ interface IQuadReader {
         uint256 _threshold,
         bytes calldata _flashSig
     ) external returns(bool);
+
+    function hasPassportByIssuer(address _account, bytes32 _attribute, address _issuer) external view returns(bool);
 }
