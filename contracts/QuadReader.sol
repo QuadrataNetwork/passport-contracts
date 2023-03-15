@@ -235,22 +235,23 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes calldata _flashSig
     ) public override returns(bool) {
         require(governance.preapproval(msg.sender), "NOT_PREAPPROVED");
+        require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
 
+        // Check if issuer signed over false value
         bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, false, block.chainid));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
-            emit FLashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, false);
+            emit FlashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, false);
             return false;
         }
 
+        // Check if issuer signed over true value
         extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _epoch, _threshold, _uniqueness, true, block.chainid));
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
-            emit FLashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, true);
+            emit FlashQueryEvent(_account, _sender, _attribute, _epoch, _threshold, true);
             return true;
         }
 
