@@ -69,7 +69,7 @@ export const TOKEN_IDS = [
 ];
 
 // Careful - this doesn't work for Contract Deployment today
-export const MAX_GAS_FEE = ethers.utils.parseUnits("4.1337", "gwei");
+export const MAX_GAS_FEE = ethers.utils.parseUnits("70.1337", "gwei");
 
 export const ISSUERS = [
   {
