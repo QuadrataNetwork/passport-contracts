@@ -30,7 +30,7 @@ export const deployQuadrata = async (
 ) => {
   // Deploy QuadGovernance
   const governance = await recursiveRetry(async () => {
-    return await deployGovernance(governanceAddress);
+    return await deployGovernance(governanceAddress, useGovTestMock);
   });
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
   // Deploy QuadPassport
