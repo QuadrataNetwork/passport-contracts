@@ -10,7 +10,7 @@ const {
 const {
   ATTRIBUTE_DID,
   ATTRIBUTE_COUNTRY,
-  ATTRIBUTE_IS_BUSINESS,
+  ATTRIBUTE_CRED_PROTOCOL_SCORE,
   ATTRIBUTE_AML,
 } = require("../../utils/constant.ts");
 
@@ -81,7 +81,7 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
     });
 
     it("succeed (turn false)", async () => {
-      expect(await governance.getEligibleAttributesLength()).to.equal(3);
+      expect(await governance.getEligibleAttributesLength()).to.equal(4);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -105,14 +105,14 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
       expect(await governance.eligibleAttributesArray(0)).to.equal(
         ATTRIBUTE_DID
       );
-      expect(await governance.eligibleAttributesArray(1)).to.not.equal(
-        ATTRIBUTE_COUNTRY
+      expect(await governance.eligibleAttributesArray(1)).to.equal(
+        ATTRIBUTE_CRED_PROTOCOL_SCORE
       );
-      expect(await governance.getEligibleAttributesLength()).to.equal(2);
+      expect(await governance.getEligibleAttributesLength()).to.equal(3);
     });
 
     it("succeed (turn false  - first element)", async () => {
-      expect(await governance.getEligibleAttributesLength()).to.equal(3);
+      expect(await governance.getEligibleAttributesLength()).to.equal(4);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
@@ -135,18 +135,18 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
         true
       );
       expect(await governance.eligibleAttributesArray(0)).to.equal(
-        ATTRIBUTE_IS_BUSINESS
+        ATTRIBUTE_CRED_PROTOCOL_SCORE
       );
-      expect(await governance.getEligibleAttributesLength()).to.equal(2);
+      expect(await governance.getEligibleAttributesLength()).to.equal(3);
     });
 
     it("succeed (getEligibleAttributesLength)", async () => {
-      expect(await governance.getEligibleAttributesLength()).to.equal(3);
+      expect(await governance.getEligibleAttributesLength()).to.equal(4);
       const newAttribute = ethers.utils.id("CREDIT");
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)
       );
-      expect(await governance.getEligibleAttributesLength()).to.equal(4);
+      expect(await governance.getEligibleAttributesLength()).to.equal(5);
     });
 
     it("fail (not admin)", async () => {
