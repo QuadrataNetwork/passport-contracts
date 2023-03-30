@@ -343,9 +343,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
       );
     });
 
-    it("success - all callers have preapproval" , async () => {
-
-
+    it("success - all callers have preapproval", async () => {
       await assertGetAttributesLegacy(
         minterA,
         ATTRIBUTE_COUNTRY,
@@ -766,7 +764,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
         reader.getAttributesLegacy(minterA.address, ATTRIBUTE_COUNTRY, {
-          value: queryFee.sub(1),
+          value: queryFee.add(1),
         })
       ).to.not.be.reverted;
     });
