@@ -25,7 +25,8 @@ export const deployQuadrata = async (
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
   governanceAddress: string = "",
   passportAddress: string = "",
-  readerAddress: string = ""
+  readerAddress: string = "",
+  useGovTestMock: boolean = false
 ) => {
   // Deploy QuadGovernance
   const governance = await recursiveRetry(async () => {
@@ -246,12 +247,16 @@ export const deployPassport = async (
 };
 
 export const deployGovernance = async (
-  governanceAddress: string = ""
+  governanceAddress: string = "",
+  useGovTestMock: boolean = false
 ): Promise<Contract> => {
   if (governanceAddress !== "") {
     return await ethers.getContractAt("QuadGovernance", governanceAddress);
   }
-  const QuadGovernance = await ethers.getContractFactory("QuadGovernance");
+  const contractName = useGovTestMock
+    ? "QuadGovernanceTestnet"
+    : "QuadGovernance";
+  const QuadGovernance = await ethers.getContractFactory(contractName);
   const governance = await recursiveRetry(async () => {
     return await upgrades.deployProxy(QuadGovernance, [], {
       initializer: "initialize",
