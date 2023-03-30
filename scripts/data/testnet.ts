@@ -86,7 +86,7 @@ export const ISSUERS = [
 
   {
     wallet: getAddress("0x19c6525E6927554e311Cd83491d34623fF04605a"), // Quadrata Sandbox
-    treasury: getAddress("0xf36F155486299eCAff2D4F5160ed5114C1f66000"),
+    treasury: getAddress("0x19c6525E6927554e311Cd83491d34623fF04605a"),
     attributesPermission: [
       ATTRIBUTE_DID,
       ATTRIBUTE_AML,

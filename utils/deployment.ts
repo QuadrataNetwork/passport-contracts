@@ -8,6 +8,8 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
+  PRICE_PER_ATTRIBUTES,
+  PRICE_PER_BUSINESS_ATTRIBUTES,
   READER_ROLE,
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
@@ -183,6 +185,35 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose) console.log(`[QuadGovernance] setRevSplitIssuer with 50`);
   });
+
+  // Set Query Fee
+  const attributeTypes = [ATTRIBUTE_DID, ATTRIBUTE_AML, ATTRIBUTE_COUNTRY];
+
+  for (const attr of attributeTypes) {
+    await recursiveRetry(async () => {
+      const tx = await governance.setAttributePriceFixed(
+        attr,
+        PRICE_PER_ATTRIBUTES[network.chainId][attr],
+        { maxFeePerGas }
+      );
+      await tx.wait();
+    });
+
+    await recursiveRetry(async () => {
+      const tx = await governance.setBusinessAttributePriceFixed(
+        attr,
+        PRICE_PER_BUSINESS_ATTRIBUTES[network.chainId][attr],
+        { maxFeePerGas }
+      );
+      await tx.wait();
+    });
+  }
+  if (verbose)
+    console.log(`[QuadGovernance] setAttributePriceFixed for all attributes`);
+  if (verbose)
+    console.log(
+      `[QuadGovernance] setBusinessAttributePriceFixed for all attributes`
+    );
 
   // Set QuadReader as READER_ROLE
   await recursiveRetry(async () => {

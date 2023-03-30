@@ -17,9 +17,15 @@ export const ATTRIBUTE_AML = ethers.utils.id("AML");
 export const ATTRIBUTE_COUNTRY = ethers.utils.id("COUNTRY");
 export const ATTRIBUTE_DID = ethers.utils.id("DID");
 export const ATTRIBUTE_IS_BUSINESS = ethers.utils.id("IS_BUSINESS");
-export const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id("CRED_PROTOCOL_SCORE")
-export const ATTRIBUTE_IS_ACCREDITITED_INVESTOR_US = ethers.utils.id("IS_ACCREDITITED_INVESTOR_US")
-export const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id("IS_QUALIFIEDPURCHASER_US")
+export const ATTRIBUTE_CRED_PROTOCOL_SCORE = ethers.utils.id(
+  "CRED_PROTOCOL_SCORE"
+);
+export const ATTRIBUTE_IS_ACCREDITITED_INVESTOR_US = ethers.utils.id(
+  "IS_ACCREDITITED_INVESTOR_US"
+);
+export const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id(
+  "IS_QUALIFIEDPURCHASER_US"
+);
 export const TOKEN_ID = 1;
 
 export const ALL_ROLES = [
@@ -66,36 +72,35 @@ export const NETWORK_IDS = {
 export const HARDHAT_CHAIN_ID = 31337;
 
 export const PRICE_PER_ATTRIBUTES_ETH = {
-  [ATTRIBUTE_AML]: parseEther("0.0012"),
-  [ATTRIBUTE_COUNTRY]: parseEther("0.0012"),
-  [ATTRIBUTE_DID]: parseEther("0.0012"),
+  [ATTRIBUTE_AML]: parseEther("0"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0"),
+  [ATTRIBUTE_DID]: parseEther("0"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
-  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0.0012"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_ETH = {
-  [ATTRIBUTE_AML]: parseEther("0.015"),
-  [ATTRIBUTE_COUNTRY]: parseEther("0.015"),
-  [ATTRIBUTE_DID]: parseEther("0.015"),
+  [ATTRIBUTE_AML]: parseEther("0"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0"),
+  [ATTRIBUTE_DID]: parseEther("0"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
-  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0.015"),
-
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0"),
 };
 
 export const PRICE_PER_ATTRIBUTES_MATIC = {
-  [ATTRIBUTE_AML]: parseEther("2"),
-  [ATTRIBUTE_COUNTRY]: parseEther("2"),
-  [ATTRIBUTE_DID]: parseEther("2"),
+  [ATTRIBUTE_AML]: parseEther("0"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0"),
+  [ATTRIBUTE_DID]: parseEther("0"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
-  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther(".5"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0"),
 };
 
 export const PRICE_PER_BUSINESS_ATTRIBUTES_MATIC = {
-  [ATTRIBUTE_AML]: parseEther("25"),
-  [ATTRIBUTE_COUNTRY]: parseEther("25"),
-  [ATTRIBUTE_DID]: parseEther("25"),
+  [ATTRIBUTE_AML]: parseEther("0"),
+  [ATTRIBUTE_COUNTRY]: parseEther("0"),
+  [ATTRIBUTE_DID]: parseEther("0"),
   [ATTRIBUTE_IS_BUSINESS]: parseEther("0"),
-  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("6"),
+  [ATTRIBUTE_CRED_PROTOCOL_SCORE]: parseEther("0"),
 };
 
 export const PRICE_PER_ATTRIBUTES = {
@@ -114,7 +119,7 @@ export const PRICE_PER_BUSINESS_ATTRIBUTES = {
   [HARDHAT_CHAIN_ID]: PRICE_PER_BUSINESS_ATTRIBUTES_ETH,
 };
 
-export const MINT_PRICE = parseEther("0.003");
+export const MINT_PRICE = parseEther("0");
 export const ISSUER_SPLIT = 50;
 
 export const DIGEST_TO_SIGN =
