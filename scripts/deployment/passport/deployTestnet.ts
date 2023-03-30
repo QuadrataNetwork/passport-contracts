@@ -49,7 +49,6 @@ const {
   const multisigPerNetwork = MULTISIG[network.chainId];
 
   const deployer = signers[0];
-
   console.log(`Deployer address: ${deployer.address}`);
 
   const [governance] = await deployQuadrata(
