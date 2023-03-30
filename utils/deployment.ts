@@ -1,5 +1,6 @@
 import { Contract } from "ethers";
 const { ethers, upgrades } = require("hardhat");
+
 import { recursiveRetry } from "../scripts/utils/retries";
 
 const {
@@ -26,8 +27,6 @@ export const deployQuadrata = async (
   passportAddress: string = "",
   readerAddress: string = ""
 ) => {
-  const signers: any = await ethers.getSigners();
-  const network = await signers[0].provider.getNetwork();
   // Deploy QuadGovernance
   const governance = await recursiveRetry(async () => {
     return await deployGovernance(governanceAddress);
@@ -233,12 +232,16 @@ export const deployPassport = async (
     return await ethers.getContractAt("QuadPassport", passportAddress);
   }
   const QuadPassport = await ethers.getContractFactory("QuadPassport");
-  const passport = await upgrades.deployProxy(
-    QuadPassport,
-    [governance.address],
-    { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
-  );
-  await passport.deployed();
+  const passport = await recursiveRetry(async () => {
+    return await upgrades.deployProxy(QuadPassport, [governance.address], {
+      initializer: "initialize",
+      kind: "uups",
+      unsafeAllow: ["constructor"],
+    });
+  });
+  await recursiveRetry(async () => {
+    await passport.deployed();
+  });
   return passport;
 };
 
@@ -249,12 +252,16 @@ export const deployGovernance = async (
     return await ethers.getContractAt("QuadGovernance", governanceAddress);
   }
   const QuadGovernance = await ethers.getContractFactory("QuadGovernance");
-  const governance = await upgrades.deployProxy(QuadGovernance, [], {
-    initializer: "initialize",
-    kind: "uups",
-    unsafeAllow: ["constructor"],
+  const governance = await recursiveRetry(async () => {
+    return await upgrades.deployProxy(QuadGovernance, [], {
+      initializer: "initialize",
+      kind: "uups",
+      unsafeAllow: ["constructor"],
+    });
   });
-  await governance.deployed();
+  await recursiveRetry(async () => {
+    await governance.deployed();
+  });
   return governance;
 };
 
@@ -267,12 +274,16 @@ export const deployReader = async (
     return await ethers.getContractAt("QuadReader", readerAddress);
   }
   const QuadReader = await ethers.getContractFactory("QuadReader");
-  const reader = await upgrades.deployProxy(
-    QuadReader,
-    [governance.address, passport.address],
-    { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
-  );
-  await reader.deployed();
+  const reader = await recursiveRetry(async () => {
+    return await upgrades.deployProxy(
+      QuadReader,
+      [governance.address, passport.address],
+      { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
+    );
+  });
+  await recursiveRetry(async () => {
+    await reader.deployed();
+  });
   return reader;
 };
 
