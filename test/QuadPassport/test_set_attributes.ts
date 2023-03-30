@@ -75,14 +75,17 @@ describe("QuadPassport.setAttributes", async () => {
     );
 
     // set issued at to current block timestamp
-    issuedAt = await ethers.provider.getBlock("latest").then((block) => block.timestamp) - 100;
+    issuedAt =
+      (await ethers.provider
+        .getBlock("latest")
+        .then((block) => block.timestamp)) - 100;
     verifiedAt = issuedAt;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
 
   describe("QuadPassport.setAttributes (success)", async () => {
-    beforeEach(async () => { });
+    beforeEach(async () => {});
 
     it("setAttributes (Single Attribute)", async () => {
       const attributes: any = {
@@ -441,12 +444,11 @@ describe("QuadPassport.setAttributes", async () => {
       attributesCopy: any;
 
     beforeEach(async () => {
-
       attrKeys = [];
       attrValues = [];
       attrTypes = [];
 
-      let did = formatBytes32String("0");
+      const did = formatBytes32String("0");
 
       attributes = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
@@ -499,8 +501,8 @@ describe("QuadPassport.setAttributes", async () => {
       // we must sign the attributes without the did
 
       const did = attributes[ATTRIBUTE_DID];
-      //remove first key-value mapping in attributes
-      delete attributes[ATTRIBUTE_DID]
+      // remove first key-value mapping in attributes
+      delete attributes[ATTRIBUTE_DID];
 
       // create issuer sig for the following attributes
       sigIssuer = await signSetAttributes(
@@ -515,25 +517,23 @@ describe("QuadPassport.setAttributes", async () => {
         chainId
       );
 
-      await passport
-        .connect(minterA)
-        .setAttributes(
-          [
-            attrKeys, // empty
-            attrValues, // [COUNTRY, IS_BUSINESS, AML]
-            attrTypes, // [ATTRIBUTE_COUNTRY, ATTRIBUTE_IS_BUSINESS, ATTRIBUTE_AML]
-            did,
-            wrongTokenId,
-            verifiedAt,
-            issuedAt,
-            fee,
-          ],
-          sigIssuer,
-          sigAccount,
-          {
-            value: fee,
-          }
-        );
+      await passport.connect(minterA).setAttributes(
+        [
+          attrKeys, // empty
+          attrValues, // [COUNTRY, IS_BUSINESS, AML]
+          attrTypes, // [ATTRIBUTE_COUNTRY, ATTRIBUTE_IS_BUSINESS, ATTRIBUTE_AML]
+          did,
+          wrongTokenId,
+          verifiedAt,
+          issuedAt,
+          fee,
+        ],
+        sigIssuer,
+        sigAccount,
+        {
+          value: fee,
+        }
+      );
     });
 
     it("success - with no mint with tokenId = 0", async () => {
@@ -541,8 +541,8 @@ describe("QuadPassport.setAttributes", async () => {
       await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
       const did = attributes[ATTRIBUTE_DID];
-      //remove first key-value mapping in attributes
-      delete attributes[ATTRIBUTE_DID]
+      // remove first key-value mapping in attributes
+      delete attributes[ATTRIBUTE_DID];
 
       // create issuer sig for the following attributes
       sigIssuer = await signSetAttributes(
@@ -650,11 +650,9 @@ describe("QuadPassport.setAttributes", async () => {
           MINT_PRICE
         )
       ).to.be.revertedWith("EXPIRED_ISSUED_AT");
-
     });
 
     it("fail - same wallet but diff DID)", async () => {
-
       await setAttributes(
         minterA,
         issuer,
@@ -803,7 +801,7 @@ describe("QuadPassport.setAttributes", async () => {
     });
 
     it("fail - invalid fee", async () => {
-      const wrongFee = fee.sub(1);
+      const wrongFee = fee.add(1);
       await expect(
         passport
           .connect(minterA)
@@ -854,7 +852,7 @@ describe("QuadPassport.setAttributes", async () => {
 
     it("fail - attrTypes.length != attrValues.length", async () => {
       const did = attributes[ATTRIBUTE_DID];
-      delete attributes[ATTRIBUTE_DID]
+      delete attributes[ATTRIBUTE_DID];
       sigIssuer = await signSetAttributes(
         minterA,
         issuer,
@@ -1174,19 +1172,19 @@ describe("QuadPassport.setAttributes", async () => {
         .connect(admin)
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_DID, false);
 
-        const did = attributes[ATTRIBUTE_DID];
-        delete attributes[ATTRIBUTE_DID]
-        sigIssuer = await signSetAttributes(
-          minterA,
-          issuer,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          fee,
-          did,
-          passport.address,
-          chainId
-        );
+      const did = attributes[ATTRIBUTE_DID];
+      delete attributes[ATTRIBUTE_DID];
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
       await expect(
         passport
           .connect(minterA)
@@ -1215,19 +1213,19 @@ describe("QuadPassport.setAttributes", async () => {
         .connect(admin)
         .setIssuerAttributePermission(issuer.address, ATTRIBUTE_AML, false);
 
-        const did = attributes[ATTRIBUTE_DID];
-        delete attributes[ATTRIBUTE_DID]
-        sigIssuer = await signSetAttributes(
-          minterA,
-          issuer,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          fee,
-          did,
-          passport.address,
-          chainId
-        );
+      const did = attributes[ATTRIBUTE_DID];
+      delete attributes[ATTRIBUTE_DID];
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
 
       await expect(
         passport

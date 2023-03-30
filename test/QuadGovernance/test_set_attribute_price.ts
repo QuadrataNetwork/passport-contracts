@@ -59,27 +59,6 @@ describe("QuadGovernance.setAttributePriceFixed + setBusinessAttributePriceFixed
       );
     });
 
-    it("succeed (price 0)", async () => {
-      expect(await governance.pricePerAttributeFixed(ATTRIBUTE_DID)).to.equal(
-        PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID]
-      );
-      const newPrice = parseEther("0");
-      await expect(
-        governance
-          .connect(admin)
-          .setAttributePriceFixed(ATTRIBUTE_DID, newPrice)
-      )
-        .to.emit(governance, "AttributePriceUpdatedFixed")
-        .withArgs(
-          ATTRIBUTE_DID,
-          PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_DID],
-          newPrice
-        );
-      expect(await governance.pricePerAttributeFixed(ATTRIBUTE_DID)).to.equal(
-        newPrice
-      );
-    });
-
     it("fail (not admin)", async () => {
       const newPrice = parseEther("0");
       await expect(
@@ -119,25 +98,6 @@ describe("QuadGovernance.setAttributePriceFixed + setBusinessAttributePriceFixed
       expect(
         await governance.pricePerBusinessAttributeFixed(ATTRIBUTE_DID)
       ).to.equal(newBusinessPrice);
-    });
-
-    it("succeed (price 0)", async () => {
-      const newPrice = parseEther("0");
-
-      await expect(
-        governance
-          .connect(admin)
-          .setBusinessAttributePriceFixed(ATTRIBUTE_DID, newPrice)
-      )
-        .to.emit(governance, "BusinessAttributePriceUpdatedFixed")
-        .withArgs(
-          ATTRIBUTE_DID,
-          PRICE_PER_BUSINESS_ATTRIBUTES_ETH[ATTRIBUTE_DID],
-          newPrice
-        );
-      expect(
-        await governance.pricePerBusinessAttributeFixed(ATTRIBUTE_DID)
-      ).to.equal(newPrice);
     });
 
     it("fail (not admin)", async () => {

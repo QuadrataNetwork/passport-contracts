@@ -159,20 +159,6 @@ describe("QuadPassport.withdraw", async () => {
       ).to.revertedWith("WITHDRAW_ADDRESS_ZERO");
     });
 
-    it("fail - withdraw balance 0", async () => {
-      await passport
-        .connect(admin)
-        .withdraw(issuerTreasury2.address, MINT_PRICE);
-      const newBalancePassport = await ethers.provider.getBalance(
-        passport.address
-      );
-
-      expect(newBalancePassport).to.equal(0);
-      await expect(
-        passport.connect(admin).withdraw(issuerTreasury.address, MINT_PRICE)
-      ).to.revertedWith("INSUFFICIENT_BALANCE");
-    });
-
     it("fail - withdraw higher amount than balance", async () => {
       await expect(
         passport

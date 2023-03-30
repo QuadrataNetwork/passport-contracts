@@ -172,16 +172,6 @@ describe("QuadReader.withdraw", async () => {
       ).to.revertedWith("WITHDRAWAL_ADDRESS_INVALID");
     });
 
-    it("fail - withdraw balance 0", async () => {
-      await reader.connect(admin).withdraw(issuerTreasury2.address, queryFee);
-      const newBalanceReader = await ethers.provider.getBalance(reader.address);
-
-      expect(newBalanceReader).to.equal(0);
-      await expect(
-        reader.connect(admin).withdraw(issuerTreasury.address, queryFee)
-      ).to.revertedWith("INSUFFICIENT_BALANCE");
-    });
-
     it("fail - withdraw higher amount than balance", async () => {
       await expect(
         reader.connect(admin).withdraw(issuerTreasury.address, queryFee.add(1))

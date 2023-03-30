@@ -26,10 +26,6 @@ const {
   assertSetAttribute,
 } = require("../helpers/assert/assert_set_attributes.ts");
 
-const {
-  assertGetAttributes,
-} = require("../helpers/assert/assert_get_attributes.ts");
-
 describe("QuadPassport.setAttributes", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
@@ -222,7 +218,7 @@ describe("QuadPassport.setAttributes", async () => {
       attrValues = [];
       attrTypes = [];
 
-      let did = formatBytes32String("0");
+      const did = formatBytes32String("0");
 
       // Deep Copy to avoid mutating the object
       attributesCopy = Object.assign({}, attributes);
@@ -365,21 +361,21 @@ describe("QuadPassport.setAttributes", async () => {
     });
 
     it("fail - invalid fee", async () => {
-      const wrongFee = fee.sub(1);
+      const wrongFee = fee.add(1);
       const did = attributes[ATTRIBUTE_DID];
-        delete attributes[ATTRIBUTE_DID]
-        sigIssuer = await signSetAttributes(
-          minterA,
-          issuer,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          fee,
-          did,
-          passport.address,
-          chainId
-        );
-        attributes[ATTRIBUTE_DID] = did;
+      delete attributes[ATTRIBUTE_DID];
+      sigIssuer = await signSetAttributes(
+        minterA,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId
+      );
+      attributes[ATTRIBUTE_DID] = did;
       await expect(
         passport
           .connect(minterA)

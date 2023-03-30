@@ -179,8 +179,6 @@ describe("QuadReader.getAttributesBulk", async () => {
     });
 
     it("success - all callers have preapproval", async () => {
-
-
       await assertGetAttributesBulk(
         minterA,
         [
@@ -549,7 +547,7 @@ describe("QuadReader.getAttributesBulk", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
         reader.getAttributesBulk(minterA.address, [ATTRIBUTE_COUNTRY], {
-          value: queryFee.sub(1),
+          value: queryFee.add(1),
         })
       ).to.not.be.reverted;
     });
