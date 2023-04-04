@@ -1,6 +1,5 @@
 import * as dotenv from "dotenv";
 
-import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
@@ -10,13 +9,6 @@ import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
 require("dotenv").config({ path: require("find-config")(".env") });
-
-// Tasks
-import "./scripts/tasks/quadGovernance.ts";
-import "./scripts/tasks/deployTasks.ts";
-import "./scripts/tasks/quadPassport.ts";
-import "./scripts/tasks/migrationV3.ts"
-import "./scripts/tasks/quadReader.ts"
 
 const config = {
   solidity: {
@@ -61,16 +53,16 @@ const config = {
     celo_testnet: {
       url: "https://alfajores-forno.celo-testnet.org",
       accounts:
-        process.env.TESTNET_DEPLOY_KEY_2 !== undefined
-          ? [process.env.TESTNET_DEPLOY_KEY_2]
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 44787,
     },
     avax_testnet: {
       url: "https://ava-testnet.public.blastapi.io/ext/bc/C/rpc",
       accounts:
-        process.env.TESTNET_DEPLOY_KEY_2 !== undefined
-          ? [process.env.TESTNET_DEPLOY_KEY_2]
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 43113,
     },

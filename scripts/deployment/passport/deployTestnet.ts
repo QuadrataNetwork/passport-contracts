@@ -49,7 +49,6 @@ const {
   const multisigPerNetwork = MULTISIG[network.chainId];
 
   const deployer = signers[0];
-
   console.log(`Deployer address: ${deployer.address}`);
 
   const [governance] = await deployQuadrata(
@@ -59,7 +58,11 @@ const {
     multisigPerNetwork,
     TOKEN_IDS,
     true, // Verbose = true,
-    MAX_GAS_FEE
+    MAX_GAS_FEE,
+    "",
+    "",
+    "",
+    true // useGovTestMock = true
   );
 
   let tx = await governance
