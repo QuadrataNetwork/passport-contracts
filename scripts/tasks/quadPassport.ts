@@ -48,10 +48,6 @@ task("getAllMinters", "npx hardhat getAllMinters --passport <address>")
     });
 
 
-task("setAttributes", "npx hardhat setAttributes --passport <address> --account <address> --did <bytes32> --attributes <string,string,...> --values <string,string,...> --network <network>")
-    .addParam("passport", "sets the address for reader")
-    .addParam("account", "sets the address for account")
-    .addParam("did", "sets the did")
 task("setAttributes", "npx hardhat setAttributes --passport <address> --account <address> --did <bytes32> --raw <flag> --attributes <string,string,...> --values <string,string,...> --network <network>")
     .addParam("passport", "sets the address for reader")
     .addParam("account", "sets the address for account")
