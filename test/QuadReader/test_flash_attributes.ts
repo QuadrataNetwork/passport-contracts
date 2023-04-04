@@ -19,14 +19,13 @@ describe('Flash attributes', () => {
     let chainId: number;
 
     let admin: SignerWithAddress,
-        transUnion: SignerWithAddress,
         treasury: SignerWithAddress,
         user: SignerWithAddress,
         issuerA: SignerWithAddress,
         issuerB: SignerWithAddress;
 
     beforeEach(async () => {
-        [admin, transUnion, treasury, user, issuerA, issuerB] = await ethers.getSigners();
+        [admin, treasury, user, issuerA, issuerB] = await ethers.getSigners();
         [governance, passport, reader] = await deployPassportEcosystem(admin, [issuerA, issuerB], treasury, [issuerA, issuerB]);
 
         chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
