@@ -14,7 +14,6 @@ import "./storage/QuadReaderStoreV2.sol";
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
-
  contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStoreV2 {
     constructor() initializer {
         // used to prevent logic contract self destruct take over

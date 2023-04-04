@@ -11,7 +11,6 @@ const {
 
 
 describe('Flash attributes', () => {
-
     let reader: Contract;
     let passport: Contract;
     let governance: Contract;
@@ -50,13 +49,13 @@ describe('Flash attributes', () => {
                 now,
                 400,
                 hexZeroPad("0x", 32),
-                utils.keccak256(utils.toUtf8Bytes("FALSE")),
+                utils.keccak256(utils.toUtf8Bytes("TRUE")),
                 chainId
             ])
         )
         const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
 
-        await reader.connect(admin).getFlashAttributeGTE(
+        const resp = await reader.connect(admin).callStatic.getFlashAttributeGTE(
             user.address,
             admin.address,
             ATTRIBUTE_TU_CREDIT_SCORE,
@@ -64,5 +63,6 @@ describe('Flash attributes', () => {
             400,
             sig
         );
+        expect(resp).to.equal(true);
     });
 });
