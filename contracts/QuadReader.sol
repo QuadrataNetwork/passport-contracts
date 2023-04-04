@@ -261,6 +261,7 @@ import "./storage/QuadReaderStoreV2.sol";
     function setUniqueness() external override {
         require(_uniqueness == bytes32(0), "UNIQUENESS_ALREADY_SET");
         _uniqueness = keccak256(abi.encode(blockhash(block.number - 69), block.timestamp, block.difficulty, block.coinbase, block.gaslimit, block.number, block.timestamp));
+    }
 
     /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
     /// @param _account account getting requested for attributes
