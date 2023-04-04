@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract } from "ethers";
+import { Contract, utils } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { hexZeroPad, keccak256 } from "ethers/lib/utils";
 import { ATTRIBUTE_TU_CREDIT_SCORE } from "../../utils/constant";
@@ -37,7 +37,7 @@ describe('Flash attributes', () => {
         chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
     });
 
-    it('success - autherized dapp can flash attributes', async () => {
+    it('success - authorized dapp can flash attributes', async () => {
         const now = 3429834;
         const hash = keccak256(
             ethers.utils.defaultAbiCoder.encode([
@@ -47,7 +47,7 @@ describe('Flash attributes', () => {
                 "uint256",
                 "uint256",
                 "bytes32",
-                "bool",
+                "bytes32",
                 "uint256"
             ], [
                 user.address,
@@ -56,7 +56,7 @@ describe('Flash attributes', () => {
                 now,
                 400,
                 hexZeroPad("0x", 32),
-                false,
+                utils.keccak256(utils.toUtf8Bytes("FALSE")),
                 chainId
             ])
         )

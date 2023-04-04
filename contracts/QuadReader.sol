@@ -220,7 +220,7 @@ import "./storage/QuadReaderStoreV2.sol";
 
     /// @dev Returns if a user's data is greater than or equal to (GTE) a certain threshold
     /// @param _account user whose data is being checked
-    /// @param _sender must be preapproved and autherized to perform query
+    /// @param _sender must be preapproved and authorized to perform query
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
     /// @param _issuedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
