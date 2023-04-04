@@ -238,7 +238,7 @@ import "./storage/QuadReaderStoreV2.sol";
         require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
 
         // Check if issuer signed over false value
-        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, false, block.chainid));
+        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, keccak256('FALSE'), block.chainid));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
@@ -247,7 +247,7 @@ import "./storage/QuadReaderStoreV2.sol";
         }
 
         // Check if issuer signed over true value
-        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, true, block.chainid));
+        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness,  keccak256('TRUE'), block.chainid));
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
