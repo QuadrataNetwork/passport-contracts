@@ -106,11 +106,6 @@ const config = {
           : [],
       chainId: 4002,
     },
-    insti_testnet: {
-      url: process.env.AVAX_SUBNET_URI || "",
-      accounts: [process.env.AVAX_SUBNET_DEPLOY_KEY, process.env.SANDBOX_ISSUER_KEY_1],
-      chainId: 424242,
-    },
     mainnet: {
       url: process.env.MAINNET_URI || "",
       accounts:
@@ -126,21 +121,6 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 137,
-    },
-    hardhat: {
-      forking: {
-        url: process.env.AVAX_SUBNET_URI || "",
-      },
-      accounts: [
-        {
-          privateKey: process.env.AVAX_SUBNET_DEPLOY_KEY || "",
-          balance: "100000000000000000000000000",
-        },
-        {
-          privateKey: process.env.SANDBOX_ISSUER_KEY_1 || "",
-          balance: "100000000000000000000000000",
-        },
-      ],
     },
   },
   gasReporter: {
