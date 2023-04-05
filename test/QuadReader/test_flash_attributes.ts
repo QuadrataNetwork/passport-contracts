@@ -29,40 +29,77 @@ describe('Flash attributes', () => {
 
         chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
     });
+    describe('getFlashAttributeGTE', () => {
+        it('authorizes when dapp signs over TRUE', async () => {
+            const now = 3429834;
+            const hash = keccak256(
+                ethers.utils.defaultAbiCoder.encode([
+                    "address",
+                    "address",
+                    "bytes32",
+                    "uint256",
+                    "uint256",
+                    "bytes32",
+                    "bytes32",
+                    "uint256"
+                ], [
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    hexZeroPad("0x", 32),
+                    utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                    chainId
+                ])
+            )
+            const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+            expect(
+                await reader.connect(admin).callStatic.getFlashAttributeGTE(
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    sig)
+            ).to.equal(true);
+        });
 
-    it('success - authorized dapp can flash attributes', async () => {
-        const now = 3429834;
-        const hash = keccak256(
-            ethers.utils.defaultAbiCoder.encode([
-                "address",
-                "address",
-                "bytes32",
-                "uint256",
-                "uint256",
-                "bytes32",
-                "bytes32",
-                "uint256"
-            ], [
-                user.address,
-                admin.address,
-                ATTRIBUTE_TU_CREDIT_SCORE,
-                now,
-                400,
-                hexZeroPad("0x", 32),
-                utils.keccak256(utils.toUtf8Bytes("TRUE")),
-                chainId
-            ])
-        )
-        const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+        it('authorizes when dapp signs over FALSE', async () => {
+            const now = 3429834;
+            const hash = keccak256(
+                ethers.utils.defaultAbiCoder.encode([
+                    "address",
+                    "address",
+                    "bytes32",
+                    "uint256",
+                    "uint256",
+                    "bytes32",
+                    "bytes32",
+                    "uint256"
+                ], [
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    hexZeroPad("0x", 32),
+                    utils.keccak256(utils.toUtf8Bytes("FALSE")),
+                    chainId
+                ])
+            )
+            const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+            expect(
+                await reader.connect(admin).callStatic.getFlashAttributeGTE(
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    sig)
+            ).to.equal(false);
+        });
 
-        const resp = await reader.connect(admin).callStatic.getFlashAttributeGTE(
-            user.address,
-            admin.address,
-            ATTRIBUTE_TU_CREDIT_SCORE,
-            now,
-            400,
-            sig
-        );
-        expect(resp).to.equal(true);
     });
+
 });
