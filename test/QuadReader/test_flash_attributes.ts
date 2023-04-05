@@ -32,6 +32,7 @@ describe('Flash attributes', () => {
     describe('getFlashAttributeGTE', () => {
         it('authorizes when dapp signs over TRUE', async () => {
             const now = 3429834;
+            const fee = 0;
             const hash = keccak256(
                 ethers.utils.defaultAbiCoder.encode([
                     "address",
@@ -40,6 +41,7 @@ describe('Flash attributes', () => {
                     "uint256",
                     "uint256",
                     "bytes32",
+                    "uint256",
                     "bytes32",
                     "uint256"
                 ], [
@@ -49,6 +51,7 @@ describe('Flash attributes', () => {
                     now,
                     400,
                     hexZeroPad("0x", 32),
+                    fee,
                     utils.keccak256(utils.toUtf8Bytes("TRUE")),
                     chainId
                 ])
@@ -61,12 +64,14 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TU_CREDIT_SCORE,
                     now,
                     400,
+                    fee,
                     sig)
             ).to.equal(true);
         });
 
         it('authorizes when dapp signs over FALSE', async () => {
             const now = 3429834;
+            const fee = 0;
             const hash = keccak256(
                 ethers.utils.defaultAbiCoder.encode([
                     "address",
@@ -75,6 +80,7 @@ describe('Flash attributes', () => {
                     "uint256",
                     "uint256",
                     "bytes32",
+                    "uint256",
                     "bytes32",
                     "uint256"
                 ], [
@@ -84,6 +90,7 @@ describe('Flash attributes', () => {
                     now,
                     400,
                     hexZeroPad("0x", 32),
+                    fee,
                     utils.keccak256(utils.toUtf8Bytes("FALSE")),
                     chainId
                 ])
@@ -96,6 +103,7 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TU_CREDIT_SCORE,
                     now,
                     400,
+                    fee,
                     sig)
             ).to.equal(false);
         });
