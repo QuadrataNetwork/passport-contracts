@@ -243,6 +243,8 @@ import "./storage/QuadReaderStoreV2.sol";
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
             emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, _fee, false);
+            (bool sent,) = signer.call{value: msg.value}("");
+            require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return false;
         }
 
@@ -252,6 +254,8 @@ import "./storage/QuadReaderStoreV2.sol";
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
             emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, _fee, true);
+            (bool sent,) = signer.call{value: msg.value}("");
+            require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return true;
         }
 

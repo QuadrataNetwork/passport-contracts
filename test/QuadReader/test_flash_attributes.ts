@@ -107,7 +107,5 @@ describe('Flash attributes', () => {
                     sig)
             ).to.equal(false);
         });
-
     });
-
 });
