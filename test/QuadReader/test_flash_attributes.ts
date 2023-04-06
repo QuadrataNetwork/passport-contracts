@@ -103,5 +103,55 @@ describe('Flash attributes', () => {
                     sig)
             ).to.equal(false);
         });
+
+        it.only('authorizes when dapp signs over TRUE with a fee', async () => {
+            const now = 3429834;
+            const fee = 100000;
+            const hash = keccak256(
+                ethers.utils.defaultAbiCoder.encode([
+                    "address",
+                    "address",
+                    "bytes32",
+                    "uint256",
+                    "uint256",
+                    "uint256",
+                    "bytes32",
+                    "uint256"
+                ], [
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    fee,
+                    utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                    chainId
+                ])
+            )
+            const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+            expect(
+                await reader.connect(admin).callStatic.getFlashAttributeGTE(
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    fee,
+                    sig, {value: fee})
+            ).to.equal(true);
+
+            const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+            // Actually make the call now instead of callstatic
+            const tx = await reader.connect(admin).getFlashAttributeGTE(
+                user.address,
+                admin.address,
+                ATTRIBUTE_TU_CREDIT_SCORE,
+                now,
+                400,
+                fee,
+                sig, {value: fee});
+            const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+            expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
+        });
     });
 });
