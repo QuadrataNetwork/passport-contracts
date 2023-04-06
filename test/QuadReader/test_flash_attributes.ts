@@ -40,7 +40,6 @@ describe('Flash attributes', () => {
                     "bytes32",
                     "uint256",
                     "uint256",
-                    "bytes32",
                     "uint256",
                     "bytes32",
                     "uint256"
@@ -50,7 +49,6 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TU_CREDIT_SCORE,
                     now,
                     400,
-                    hexZeroPad("0x", 32),
                     fee,
                     utils.keccak256(utils.toUtf8Bytes("TRUE")),
                     chainId
@@ -79,7 +77,6 @@ describe('Flash attributes', () => {
                     "bytes32",
                     "uint256",
                     "uint256",
-                    "bytes32",
                     "uint256",
                     "bytes32",
                     "uint256"
@@ -89,7 +86,6 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TU_CREDIT_SCORE,
                     now,
                     400,
-                    hexZeroPad("0x", 32),
                     fee,
                     utils.keccak256(utils.toUtf8Bytes("FALSE")),
                     chainId

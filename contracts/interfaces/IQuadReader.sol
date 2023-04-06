@@ -44,8 +44,6 @@ interface IQuadReader {
 
     function withdraw(address payable _to, uint256 _amount) external;
 
-    function setUniqueness() external;
-
     function getFlashAttributeGTE(
         address _account,
         address _sender,

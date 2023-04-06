@@ -9,12 +9,12 @@ import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadReaderStoreV2.sol";
+import "./storage/QuadReaderStore.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
- contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStoreV2 {
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
     constructor() initializer {
         // used to prevent logic contract self destruct take over
     }
@@ -238,7 +238,7 @@ import "./storage/QuadReaderStoreV2.sol";
         require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
         require(msg.value == _fee, "INVALID_FEE");
         // Check if issuer signed over false value
-        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, _fee, keccak256('FALSE'), block.chainid));
+        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _fee, keccak256('FALSE'), block.chainid));
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
@@ -249,7 +249,7 @@ import "./storage/QuadReaderStoreV2.sol";
         }
 
         // Check if issuer signed over true value
-        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _uniqueness, _fee, keccak256('TRUE'), block.chainid));
+        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _fee, keccak256('TRUE'), block.chainid));
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
@@ -260,11 +260,6 @@ import "./storage/QuadReaderStoreV2.sol";
         }
 
         revert("INVALID_ISSUER_OR_PARAMS");
-    }
-
-    function setUniqueness() external override {
-        require(_uniqueness == bytes32(0), "UNIQUENESS_ALREADY_SET");
-        _uniqueness = keccak256(abi.encode(blockhash(block.number - 69), block.timestamp, block.difficulty, block.coinbase, block.gaslimit, block.number, block.timestamp));
     }
 
     /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
