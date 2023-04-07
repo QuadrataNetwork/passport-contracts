@@ -17,15 +17,18 @@ describe('Flash attributes', () => {
 
     let chainId: number;
 
-    let admin: SignerWithAddress,
+    let deployer: SignerWithAddress,
+        admin: SignerWithAddress,
         treasury: SignerWithAddress,
         user: SignerWithAddress,
         issuerA: SignerWithAddress,
-        issuerB: SignerWithAddress;
+        issuerATreasury: SignerWithAddress,
+        issuerB: SignerWithAddress,
+        issuerBTreasury: SignerWithAddress;
 
     beforeEach(async () => {
-        [admin, treasury, user, issuerA, issuerB] = await ethers.getSigners();
-        [governance, passport, reader] = await deployPassportEcosystem(admin, [issuerA, issuerB], treasury, [issuerA, issuerB]);
+        [deployer, admin, treasury, user, issuerA, issuerB, issuerATreasury, issuerBTreasury] = await ethers.getSigners();
+        [governance, passport, reader] = await deployPassportEcosystem(admin, [issuerA, issuerB], treasury, [issuerATreasury, issuerBTreasury]);
 
         chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
     });
@@ -66,7 +69,7 @@ describe('Flash attributes', () => {
                         sig)
                 ).to.equal(true);
 
-                const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+                const balanceBefore = await ethers.provider.getBalance(issuerATreasury.address)
 
                 // actually call once and then call a second time
                 await reader.connect(admin).getFlashAttributeGTE(
@@ -77,7 +80,7 @@ describe('Flash attributes', () => {
                     fee,
                     sig)
 
-                const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+                const balanceAfter = await ethers.provider.getBalance(issuerATreasury.address)
                 expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
 
                 await expect(
@@ -126,7 +129,7 @@ describe('Flash attributes', () => {
                         sig)
                 ).to.equal(false);
 
-                const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+                const balanceBefore = await ethers.provider.getBalance(issuerATreasury.address)
 
                 // actually call once and then call a second time
                 await reader.connect(admin).getFlashAttributeGTE(
@@ -137,7 +140,7 @@ describe('Flash attributes', () => {
                     fee,
                     sig)
 
-                const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+                const balanceAfter = await ethers.provider.getBalance(issuerATreasury.address)
                 expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
 
                 await expect(
@@ -186,7 +189,7 @@ describe('Flash attributes', () => {
                         sig, {value: fee})
                 ).to.equal(true);
 
-                const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+                const balanceBefore = await ethers.provider.getBalance(issuerATreasury.address)
                 // Actually make the call now instead of callstatic
                 const tx = await reader.connect(admin).getFlashAttributeGTE(
                     user.address,
@@ -195,7 +198,7 @@ describe('Flash attributes', () => {
                     400,
                     fee,
                     sig, {value: fee});
-                const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+                const balanceAfter = await ethers.provider.getBalance(issuerATreasury.address)
                 expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
 
                 await expect(
@@ -328,6 +331,113 @@ describe('Flash attributes', () => {
                         fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
+            });
+            it('sender is not preapproved', async () => {
+                const now = 3429834;
+                const fee = 0;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+                const randomSigner = ethers.Wallet.createRandom().connect(ethers.provider);
+                await expect(
+                    reader.connect(randomSigner).callStatic.getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.be.revertedWith('SENDER_NOT_AUTHORIZED');
+            });
+            it('attribute is not eligible', async () => {
+                const now = 3429834;
+                const fee = 0;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ethers.utils.id("RANDOM_ATTR"),
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+                await expect(
+                    reader.connect(admin).callStatic.getFlashAttributeGTE(
+                        user.address,
+                        ethers.utils.id("RANDOM_ATTR"),
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.be.revertedWith('INVALID_ATTRIBUTE');
+            });
+            it('issuer does not have permission to sign attribute', async () => {
+                governance.connect(admin).setEligibleAttribute(ethers.utils.id("RANDOM_ATTR"), true)
+                const now = 3429834;
+                const fee = 0;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ethers.utils.id("RANDOM_ATTR"),
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+                await expect(
+                    reader.connect(admin).callStatic.getFlashAttributeGTE(
+                        user.address,
+                        ethers.utils.id("RANDOM_ATTR"),
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.be.revertedWith('INVALID_ISSUER_ATTR_PERMISSION');
             });
         });
     });

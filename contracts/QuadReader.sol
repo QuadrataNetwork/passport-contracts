@@ -271,6 +271,7 @@ import "./storage/QuadReaderStoreV2.sol";
 
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
             require(governance.getIssuerStatus(signer), 'ISSUER_NOT_ACTIVE');
+            require(governance.eligibleAttributes(_attribute), 'INVALID_ATTRIBUTE');
             require(governance.getIssuerAttributePermission(signer, _attribute), 'INVALID_ISSUER_ATTR_PERMISSION');
             require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
