@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { Contract, utils } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { hexZeroPad, keccak256 } from "ethers/lib/utils";
-import { ATTRIBUTE_TU_CREDIT_SCORE } from "../../utils/constant";
+import { ATTRIBUTE_TRANSUNION_CREDIT_SCORE } from "../../utils/constant";
 
 const {
   deployPassportEcosystem,
@@ -46,7 +46,7 @@ describe('Flash attributes', () => {
                 ], [
                     user.address,
                     admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -58,8 +58,7 @@ describe('Flash attributes', () => {
             expect(
                 await reader.connect(admin).callStatic.getFlashAttributeGTE(
                     user.address,
-                    admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -69,8 +68,7 @@ describe('Flash attributes', () => {
             // actually call once and then call a second time
             await reader.connect(admin).getFlashAttributeGTE(
                 user.address,
-                admin.address,
-                ATTRIBUTE_TU_CREDIT_SCORE,
+                ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                 now,
                 400,
                 fee,
@@ -79,8 +77,7 @@ describe('Flash attributes', () => {
             await expect(
                 reader.connect(admin).getFlashAttributeGTE(
                     user.address,
-                    admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -104,7 +101,7 @@ describe('Flash attributes', () => {
                 ], [
                     user.address,
                     admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -116,8 +113,7 @@ describe('Flash attributes', () => {
             expect(
                 await reader.connect(admin).callStatic.getFlashAttributeGTE(
                     user.address,
-                    admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -127,8 +123,7 @@ describe('Flash attributes', () => {
             // actually call once and then call a second time
             await reader.connect(admin).getFlashAttributeGTE(
                 user.address,
-                admin.address,
-                ATTRIBUTE_TU_CREDIT_SCORE,
+                ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                 now,
                 400,
                 fee,
@@ -137,8 +132,7 @@ describe('Flash attributes', () => {
             await expect(
                 reader.connect(admin).getFlashAttributeGTE(
                     user.address,
-                    admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -162,7 +156,7 @@ describe('Flash attributes', () => {
                 ], [
                     user.address,
                     admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -174,8 +168,7 @@ describe('Flash attributes', () => {
             expect(
                 await reader.connect(admin).callStatic.getFlashAttributeGTE(
                     user.address,
-                    admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
@@ -186,8 +179,7 @@ describe('Flash attributes', () => {
             // Actually make the call now instead of callstatic
             const tx = await reader.connect(admin).getFlashAttributeGTE(
                 user.address,
-                admin.address,
-                ATTRIBUTE_TU_CREDIT_SCORE,
+                ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                 now,
                 400,
                 fee,
@@ -198,8 +190,7 @@ describe('Flash attributes', () => {
             await expect(
                 reader.connect(admin).getFlashAttributeGTE(
                     user.address,
-                    admin.address,
-                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,

@@ -46,9 +46,8 @@ interface IQuadReader {
 
     function getFlashAttributeGTE(
         address _account,
-        address _sender,
         bytes32 _attribute,
-        uint256 _epoch,
+        uint256 _issuedAt,
         uint256 _threshold,
         uint256 _fee,
         bytes calldata _flashSig

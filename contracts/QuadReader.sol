@@ -219,15 +219,14 @@ import "./storage/QuadReaderStoreV2.sol";
 
     /// @dev Returns if a user's data is greater than or equal to (GTE) a certain threshold
     /// @param _account user whose data is being checked
-    /// @param _sender must be preapproved and authorized to perform query
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
     /// @param _issuedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
+    /// @param _fee query fee
     /// @param _flashSig signature of the flash query
     /// @return true if the data is GTE to the threshold, false otherwise
     function getFlashAttributeGTE(
         address _account,
-        address _sender,
         bytes32 _attribute,
         uint256 _issuedAt,
         uint256 _threshold,
@@ -235,37 +234,54 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes calldata _flashSig
     ) public payable override returns(bool) {
         require(governance.preapproval(msg.sender), "SENDER_NOT_AUTHORIZED");
-        require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
         require(msg.value == _fee, "INVALID_FEE");
-        // Check if issuer signed over false value
-        bytes32 extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _fee, keccak256('FALSE'), block.chainid));
-        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
-        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-            require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
-            emit FlashQueryEvent(_account, _sender, _attribute, _fee);
-            _usedFlashSigHashes[extractionHash] = true;
-            (bool sent,) = payable(governance.issuersTreasury(signer)).call{value: msg.value}("");
-            require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
+        if (validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('TRUE'))) {
+            return true;
+        }
+        if (validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('FALSE'))) {
             return false;
         }
 
-        // Check if issuer signed over true value
-        extractionHash = keccak256(abi.encode(_account, _sender, _attribute, _issuedAt, _threshold, _fee, keccak256('TRUE'), block.chainid));
-        signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
-        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
-           require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
+        revert("INVALID_ISSUER_OR_PARAMS");
+    }
 
-            emit FlashQueryEvent(_account, _sender, _attribute, _fee);
+    /// @dev Returns true if the signature is valid
+    /// @param _account user whose data is being checked
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
+    /// @param _issuedAt timestamp of whewn data was issued
+    /// @param _threshold threshold to compare the data to
+    /// @param _fee query fee
+    /// @param _flashSig signature of the flash query
+    /// @param _expectedValue value of the flash query
+    /// @return true if the signature is valid
+    function validateFlashAttrSignature(
+        address _account,
+        bytes32 _attribute,
+        uint256 _issuedAt,
+        uint256 _threshold,
+        uint256 _fee,
+        bytes calldata _flashSig,
+        bytes32 _expectedValue
+    ) internal returns(bool) {
+        bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _issuedAt, _threshold, _fee, _expectedValue, block.chainid));
+
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
+        address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
+
+        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            require(governance.getIssuerStatus(signer), 'ISSUER_NOT_ACTIVE');
+            require(governance.getIssuerAttributePermission(signer, _attribute), 'INVALID_ISSUER_ATTR_PERMISSION');
+            require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
+
+            emit FlashQueryEvent(_account, msg.sender, _attribute, _fee);
             _usedFlashSigHashes[extractionHash] = true;
             (bool sent,) = payable(governance.issuersTreasury(signer)).call{value: msg.value}("");
             require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return true;
         }
+        return false;
 
-        revert("INVALID_ISSUER_OR_PARAMS");
     }
 
     /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
