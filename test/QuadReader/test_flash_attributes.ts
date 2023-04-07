@@ -30,7 +30,7 @@ describe('Flash attributes', () => {
         chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
     });
     describe('getFlashAttributeGTE', () => {
-        it('authorizes when dapp signs over TRUE', async () => {
+        it('authorizes once when dapp signs over TRUE', async () => {
             const now = 3429834;
             const fee = 0;
             const hash = keccak256(
@@ -65,9 +65,30 @@ describe('Flash attributes', () => {
                     fee,
                     sig)
             ).to.equal(true);
+
+            // actually call once and then call a second time
+            await reader.connect(admin).getFlashAttributeGTE(
+                user.address,
+                admin.address,
+                ATTRIBUTE_TU_CREDIT_SCORE,
+                now,
+                400,
+                fee,
+                sig)
+
+            await expect(
+                reader.connect(admin).getFlashAttributeGTE(
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    fee,
+                    sig)
+            ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
         });
 
-        it('authorizes when dapp signs over FALSE', async () => {
+        it('authorizes once when dapp signs over FALSE', async () => {
             const now = 3429834;
             const fee = 0;
             const hash = keccak256(
@@ -102,9 +123,30 @@ describe('Flash attributes', () => {
                     fee,
                     sig)
             ).to.equal(false);
+
+            // actually call once and then call a second time
+            await reader.connect(admin).getFlashAttributeGTE(
+                user.address,
+                admin.address,
+                ATTRIBUTE_TU_CREDIT_SCORE,
+                now,
+                400,
+                fee,
+                sig)
+
+            await expect(
+                reader.connect(admin).getFlashAttributeGTE(
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    fee,
+                    sig)
+            ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
         });
 
-        it('authorizes when dapp signs over TRUE with a fee', async () => {
+        it('authorizes once when dapp signs over TRUE with a fee', async () => {
             const now = 3429834;
             const fee = 100000;
             const hash = keccak256(
@@ -152,6 +194,17 @@ describe('Flash attributes', () => {
                 sig, {value: fee});
             const balanceAfter = await ethers.provider.getBalance(issuerA.address)
             expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
+
+            await expect(
+                reader.connect(admin).getFlashAttributeGTE(
+                    user.address,
+                    admin.address,
+                    ATTRIBUTE_TU_CREDIT_SCORE,
+                    now,
+                    400,
+                    fee,
+                    sig, {value: fee})
+            ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
         });
     });
 });
