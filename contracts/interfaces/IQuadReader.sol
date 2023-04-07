@@ -8,7 +8,7 @@ interface IQuadReader {
     event QueryBulkEvent(address indexed _account, address indexed _caller, bytes32[] _attributes);
     event QueryFeeReceipt(address indexed _receiver, uint256 _fee);
     event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee);
-    event FlashQueryEvent(address indexed _account, address indexed _caller, bytes32 _attribute, uint256 _epoch, uint256 _threshold, uint256 _fee, bool _gte);
+    event FlashQueryEvent(address indexed _account, address indexed _caller, bytes32 _attribute, uint256 _fee);
 
     function queryFee(
         address _account,

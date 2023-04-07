@@ -234,7 +234,7 @@ import "./storage/QuadReaderStoreV2.sol";
         uint256 _fee,
         bytes calldata _flashSig
     ) public payable override returns(bool) {
-        require(governance.preapproval(msg.sender), "NOT_PREAPPROVED");
+        require(governance.preapproval(msg.sender), "SENDER_NOT_AUTHORIZED");
         require(_sender == msg.sender, "UNAUTHORIZED_SENDER");
         require(msg.value == _fee, "INVALID_FEE");
         // Check if issuer signed over false value
@@ -244,9 +244,9 @@ import "./storage/QuadReaderStoreV2.sol";
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
             require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
-            emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, _fee, false);
+            emit FlashQueryEvent(_account, _sender, _attribute, _fee);
             _usedFlashSigHashes[extractionHash] = true;
-            (bool sent,) = payable(signer).call{value: msg.value}("");
+            (bool sent,) = payable(governance.issuersTreasury(signer)).call{value: msg.value}("");
             require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return false;
         }
@@ -258,9 +258,9 @@ import "./storage/QuadReaderStoreV2.sol";
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
            require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
-            emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, _fee, true);
+            emit FlashQueryEvent(_account, _sender, _attribute, _fee);
             _usedFlashSigHashes[extractionHash] = true;
-            (bool sent,) = payable(signer).call{value: msg.value}("");
+            (bool sent,) = payable(governance.issuersTreasury(signer)).call{value: msg.value}("");
             require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return true;
         }
