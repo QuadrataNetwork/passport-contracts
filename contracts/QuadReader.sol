@@ -220,7 +220,7 @@ import "./storage/QuadReaderStoreV2.sol";
     /// @dev Returns if a user's data is greater than or equal to (GTE) a certain threshold
     /// @param _account user whose data is being checked
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
-    /// @param _issuedAt timestamp of whewn data was issued
+    /// @param _verifiedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
     /// @param _fee query fee
     /// @param _flashSig signature of the flash query
@@ -228,7 +228,7 @@ import "./storage/QuadReaderStoreV2.sol";
     function getFlashAttributeGTE(
         address _account,
         bytes32 _attribute,
-        uint256 _issuedAt,
+        uint256 _verifiedAt,
         uint256 _threshold,
         uint256 _fee,
         bytes calldata _flashSig
@@ -236,10 +236,10 @@ import "./storage/QuadReaderStoreV2.sol";
         require(governance.preapproval(msg.sender), "SENDER_NOT_AUTHORIZED");
         require(msg.value == _fee, "INVALID_FEE");
 
-        if (_validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('TRUE'))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _fee, _flashSig, keccak256('TRUE'))) {
             return true;
         }
-        if (_validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('FALSE'))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _fee, _flashSig, keccak256('FALSE'))) {
             return false;
         }
 
@@ -249,7 +249,7 @@ import "./storage/QuadReaderStoreV2.sol";
     /// @dev Returns true if the signature is valid
     /// @param _account user whose data is being checked
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
-    /// @param _issuedAt timestamp of whewn data was issued
+    /// @param _verifiedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
     /// @param _fee query fee
     /// @param _flashSig signature of the flash query
@@ -258,13 +258,13 @@ import "./storage/QuadReaderStoreV2.sol";
     function _validateFlashAttrSignature(
         address _account,
         bytes32 _attribute,
-        uint256 _issuedAt,
+        uint256 _verifiedAt,
         uint256 _threshold,
         uint256 _fee,
         bytes calldata _flashSig,
         bytes32 _expectedValue
     ) internal returns(bool) {
-        bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _issuedAt, _threshold, _fee, _expectedValue, block.chainid));
+        bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _verifiedAt, _threshold, _fee, _expectedValue, block.chainid));
         require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
