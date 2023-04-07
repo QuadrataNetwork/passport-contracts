@@ -255,8 +255,80 @@ describe('Flash attributes', () => {
                         fee,
                         sig, {value: fee + fee})
                 ).to.be.revertedWith('INVALID_FEE');
+            });
 
-            })
+            it('is signed by an invalid issuer', async() =>{
+                const now = 3429834;
+                const fee = 100000;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        admin.address,
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await user.signMessage(ethers.utils.arrayify(hash));
+
+                await expect(
+                    reader.connect(user).getFlashAttributeGTE(
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
+            });
+            it('has an invalid account', async () => {
+                const now = 3429834;
+                const fee = 100000;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+
+                await expect(
+                    reader.connect(admin).getFlashAttributeGTE(
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
+            });
         });
     });
 });
