@@ -236,10 +236,10 @@ import "./storage/QuadReaderStoreV2.sol";
         require(governance.preapproval(msg.sender), "SENDER_NOT_AUTHORIZED");
         require(msg.value == _fee, "INVALID_FEE");
 
-        if (validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('TRUE'))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('TRUE'))) {
             return true;
         }
-        if (validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('FALSE'))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _issuedAt, _threshold, _fee, _flashSig, keccak256('FALSE'))) {
             return false;
         }
 
@@ -255,7 +255,7 @@ import "./storage/QuadReaderStoreV2.sol";
     /// @param _flashSig signature of the flash query
     /// @param _expectedValue value of the flash query
     /// @return true if the signature is valid
-    function validateFlashAttrSignature(
+    function _validateFlashAttrSignature(
         address _account,
         bytes32 _attribute,
         uint256 _issuedAt,
@@ -265,6 +265,7 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes32 _expectedValue
     ) internal returns(bool) {
         bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _issuedAt, _threshold, _fee, _expectedValue, block.chainid));
+        require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
@@ -273,7 +274,6 @@ import "./storage/QuadReaderStoreV2.sol";
             require(governance.getIssuerStatus(signer), 'ISSUER_NOT_ACTIVE');
             require(governance.eligibleAttributes(_attribute), 'INVALID_ATTRIBUTE');
             require(governance.getIssuerAttributePermission(signer, _attribute), 'INVALID_ISSUER_ATTR_PERMISSION');
-            require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
             emit FlashQueryEvent(_account, msg.sender, _attribute, _fee);
             _usedFlashSigHashes[extractionHash] = true;

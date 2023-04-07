@@ -11,6 +11,7 @@ const {
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+  ATTRIBUTE_ACCREDITED_INVESTOR_US,
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
 } = require("../../utils/constant.ts");
@@ -35,6 +36,7 @@ export const deployPassportEcosystem = async (
         ATTRIBUTE_COUNTRY,
         ATTRIBUTE_IS_BUSINESS,
         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+        ATTRIBUTE_ACCREDITED_INVESTOR_US,
       ],
     });
   }
