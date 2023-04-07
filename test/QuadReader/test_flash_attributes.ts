@@ -30,172 +30,233 @@ describe('Flash attributes', () => {
         chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
     });
     describe('getFlashAttributeGTE', () => {
-        it('authorizes once when dapp signs over TRUE', async () => {
-            const now = 3429834;
-            const fee = 0;
-            const hash = keccak256(
-                ethers.utils.defaultAbiCoder.encode([
-                    "address",
-                    "address",
-                    "bytes32",
-                    "uint256",
-                    "uint256",
-                    "uint256",
-                    "bytes32",
-                    "uint256"
-                ], [
-                    user.address,
-                    admin.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    utils.keccak256(utils.toUtf8Bytes("TRUE")),
-                    chainId
-                ])
-            )
-            const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
-            expect(
-                await reader.connect(admin).callStatic.getFlashAttributeGTE(
+        describe('success', () => {
+            it('authorizes once when dapp signs over TRUE', async () => {
+                const now = 3429834;
+                const fee = 0;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+                expect(
+                    await reader.connect(admin).callStatic.getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig)
+                ).to.equal(true);
+
+                const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+
+                // actually call once and then call a second time
+                await reader.connect(admin).getFlashAttributeGTE(
                     user.address,
                     ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
                     sig)
-            ).to.equal(true);
 
-            // actually call once and then call a second time
-            await reader.connect(admin).getFlashAttributeGTE(
-                user.address,
-                ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                now,
-                400,
-                fee,
-                sig)
+                const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+                expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
 
-            await expect(
-                reader.connect(admin).getFlashAttributeGTE(
+                await expect(
+                    reader.connect(admin).getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig)
+                ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
+            });
+
+            it('authorizes once when dapp signs over FALSE', async () => {
+                const now = 3429834;
+                const fee = 0;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("FALSE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+                expect(
+                    await reader.connect(admin).callStatic.getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig)
+                ).to.equal(false);
+
+                const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+
+                // actually call once and then call a second time
+                await reader.connect(admin).getFlashAttributeGTE(
                     user.address,
                     ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
                     fee,
                     sig)
-            ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
+
+                const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+                expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
+
+                await expect(
+                    reader.connect(admin).getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig)
+                ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
+            });
+
+            it('authorizes once when dapp signs over TRUE with a fee', async () => {
+                const now = 3429834;
+                const fee = 100000;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
+                expect(
+                    await reader.connect(admin).callStatic.getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.equal(true);
+
+                const balanceBefore = await ethers.provider.getBalance(issuerA.address)
+                // Actually make the call now instead of callstatic
+                const tx = await reader.connect(admin).getFlashAttributeGTE(
+                    user.address,
+                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                    now,
+                    400,
+                    fee,
+                    sig, {value: fee});
+                const balanceAfter = await ethers.provider.getBalance(issuerA.address)
+                expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
+
+                await expect(
+                    reader.connect(admin).getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee})
+                ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
+            });
         });
+        describe('failure', () => {
+            it('has invalid msg.value', async () => {
+                const now = 3429834;
+                const fee = 100000;
+                const hash = keccak256(
+                    ethers.utils.defaultAbiCoder.encode([
+                        "address",
+                        "address",
+                        "bytes32",
+                        "uint256",
+                        "uint256",
+                        "uint256",
+                        "bytes32",
+                        "uint256"
+                    ], [
+                        user.address,
+                        admin.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
+                        chainId
+                    ])
+                )
+                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
 
-        it('authorizes once when dapp signs over FALSE', async () => {
-            const now = 3429834;
-            const fee = 0;
-            const hash = keccak256(
-                ethers.utils.defaultAbiCoder.encode([
-                    "address",
-                    "address",
-                    "bytes32",
-                    "uint256",
-                    "uint256",
-                    "uint256",
-                    "bytes32",
-                    "uint256"
-                ], [
-                    user.address,
-                    admin.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    utils.keccak256(utils.toUtf8Bytes("FALSE")),
-                    chainId
-                ])
-            )
-            const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
-            expect(
-                await reader.connect(admin).callStatic.getFlashAttributeGTE(
-                    user.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    sig)
-            ).to.equal(false);
+                await expect(
+                    reader.connect(admin).getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: 0})
+                ).to.be.revertedWith('INVALID_FEE');
 
-            // actually call once and then call a second time
-            await reader.connect(admin).getFlashAttributeGTE(
-                user.address,
-                ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                now,
-                400,
-                fee,
-                sig)
+                await expect(
+                    reader.connect(admin).getFlashAttributeGTE(
+                        user.address,
+                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+                        now,
+                        400,
+                        fee,
+                        sig, {value: fee + fee})
+                ).to.be.revertedWith('INVALID_FEE');
 
-            await expect(
-                reader.connect(admin).getFlashAttributeGTE(
-                    user.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    sig)
-            ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
-        });
-
-        it('authorizes once when dapp signs over TRUE with a fee', async () => {
-            const now = 3429834;
-            const fee = 100000;
-            const hash = keccak256(
-                ethers.utils.defaultAbiCoder.encode([
-                    "address",
-                    "address",
-                    "bytes32",
-                    "uint256",
-                    "uint256",
-                    "uint256",
-                    "bytes32",
-                    "uint256"
-                ], [
-                    user.address,
-                    admin.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    utils.keccak256(utils.toUtf8Bytes("TRUE")),
-                    chainId
-                ])
-            )
-            const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
-            expect(
-                await reader.connect(admin).callStatic.getFlashAttributeGTE(
-                    user.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    sig, {value: fee})
-            ).to.equal(true);
-
-            const balanceBefore = await ethers.provider.getBalance(issuerA.address)
-            // Actually make the call now instead of callstatic
-            const tx = await reader.connect(admin).getFlashAttributeGTE(
-                user.address,
-                ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                now,
-                400,
-                fee,
-                sig, {value: fee});
-            const balanceAfter = await ethers.provider.getBalance(issuerA.address)
-            expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
-
-            await expect(
-                reader.connect(admin).getFlashAttributeGTE(
-                    user.address,
-                    ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                    now,
-                    400,
-                    fee,
-                    sig, {value: fee})
-            ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
+            })
         });
     });
 });
