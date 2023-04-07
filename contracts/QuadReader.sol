@@ -9,12 +9,12 @@ import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadReaderStore.sol";
+import "./storage/QuadReaderStoreV2.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
- contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStoreV2 {
     constructor() initializer {
         // used to prevent logic contract self destruct take over
     }
@@ -242,7 +242,10 @@ import "./storage/QuadReaderStore.sol";
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
+
             emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, _fee, false);
+            _usedFlashSigHashes[extractionHash] = true;
             (bool sent,) = payable(signer).call{value: msg.value}("");
             require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return false;
@@ -253,7 +256,10 @@ import "./storage/QuadReaderStore.sol";
         signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+           require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
+
             emit FlashQueryEvent(_account, _sender, _attribute, _issuedAt, _threshold, _fee, true);
+            _usedFlashSigHashes[extractionHash] = true;
             (bool sent,) = payable(signer).call{value: msg.value}("");
             require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
             return true;

@@ -104,7 +104,7 @@ describe('Flash attributes', () => {
             ).to.equal(false);
         });
 
-        it.only('authorizes when dapp signs over TRUE with a fee', async () => {
+        it('authorizes when dapp signs over TRUE with a fee', async () => {
             const now = 3429834;
             const fee = 100000;
             const hash = keccak256(
