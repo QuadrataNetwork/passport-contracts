@@ -49,7 +49,6 @@ interface IQuadReader {
         bytes32 _attribute,
         uint256 _issuedAt,
         uint256 _threshold,
-        uint256 _fee,
         bytes calldata _flashSig
     ) external payable returns(bool);
 

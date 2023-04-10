@@ -222,7 +222,6 @@ import "./storage/QuadReaderStoreV2.sol";
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
     /// @param _verifiedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
-    /// @param _fee query fee
     /// @param _flashSig signature of the flash query
     /// @return true if the data is GTE to the threshold, false otherwise
     function getFlashAttributeGTE(
@@ -230,16 +229,14 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes32 _attribute,
         uint256 _verifiedAt,
         uint256 _threshold,
-        uint256 _fee,
         bytes calldata _flashSig
     ) public payable override returns(bool) {
         require(governance.preapproval(msg.sender), "SENDER_NOT_AUTHORIZED");
-        require(msg.value == _fee, "INVALID_FEE");
 
-        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _fee, _flashSig, keccak256('TRUE'))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('TRUE'))) {
             return true;
         }
-        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _fee, _flashSig, keccak256('FALSE'))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('FALSE'))) {
             return false;
         }
 
@@ -251,7 +248,6 @@ import "./storage/QuadReaderStoreV2.sol";
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
     /// @param _verifiedAt timestamp of whewn data was issued
     /// @param _threshold threshold to compare the data to
-    /// @param _fee query fee
     /// @param _flashSig signature of the flash query
     /// @param _expectedValue value of the flash query
     /// @return true if the signature is valid
@@ -260,11 +256,10 @@ import "./storage/QuadReaderStoreV2.sol";
         bytes32 _attribute,
         uint256 _verifiedAt,
         uint256 _threshold,
-        uint256 _fee,
         bytes calldata _flashSig,
         bytes32 _expectedValue
     ) internal returns(bool) {
-        bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _verifiedAt, _threshold, _fee, _expectedValue, block.chainid));
+        bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _verifiedAt, _threshold, msg.value, _expectedValue, block.chainid));
         require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
@@ -275,7 +270,7 @@ import "./storage/QuadReaderStoreV2.sol";
             require(governance.eligibleAttributes(_attribute), 'INVALID_ATTRIBUTE');
             require(governance.getIssuerAttributePermission(signer, _attribute), 'INVALID_ISSUER_ATTR_PERMISSION');
 
-            emit FlashQueryEvent(_account, msg.sender, _attribute, _fee);
+            emit FlashQueryEvent(_account, msg.sender, _attribute, msg.value);
             _usedFlashSigHashes[extractionHash] = true;
             (bool sent,) = payable(governance.issuersTreasury(signer)).call{value: msg.value}("");
             require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");

@@ -65,7 +65,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig)
                 ).to.equal(true);
 
@@ -77,7 +76,6 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
-                    fee,
                     sig)
 
                 const balanceAfter = await ethers.provider.getBalance(issuerATreasury.address)
@@ -89,7 +87,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig)
                 ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
             });
@@ -125,7 +122,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig)
                 ).to.equal(false);
 
@@ -137,7 +133,6 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
-                    fee,
                     sig)
 
                 const balanceAfter = await ethers.provider.getBalance(issuerATreasury.address)
@@ -149,7 +144,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig)
                 ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
             });
@@ -185,7 +179,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.equal(true);
 
@@ -196,7 +189,6 @@ describe('Flash attributes', () => {
                     ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                     now,
                     400,
-                    fee,
                     sig, {value: fee});
                 const balanceAfter = await ethers.provider.getBalance(issuerATreasury.address)
                 expect(balanceAfter.sub(balanceBefore).toNumber()).to.equal(fee)
@@ -207,7 +199,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('SIGNATURE_ALREADY_USED');
             });
@@ -245,9 +236,8 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: 0})
-                ).to.be.revertedWith('INVALID_FEE');
+                ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
 
                 await expect(
                     reader.connect(admin).getFlashAttributeGTE(
@@ -255,9 +245,8 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: fee + fee})
-                ).to.be.revertedWith('INVALID_FEE');
+                ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
             });
 
             it('is signed by an invalid issuer', async() =>{
@@ -292,7 +281,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
             });
@@ -328,7 +316,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
             });
@@ -364,7 +351,6 @@ describe('Flash attributes', () => {
                         ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('SENDER_NOT_AUTHORIZED');
             });
@@ -399,7 +385,6 @@ describe('Flash attributes', () => {
                         ethers.utils.id("RANDOM_ATTR"),
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('INVALID_ATTRIBUTE');
             });
@@ -435,7 +420,6 @@ describe('Flash attributes', () => {
                         ethers.utils.id("RANDOM_ATTR"),
                         now,
                         400,
-                        fee,
                         sig, {value: fee})
                 ).to.be.revertedWith('INVALID_ISSUER_ATTR_PERMISSION');
             });
