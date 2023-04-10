@@ -514,7 +514,8 @@ describe("QuadPassport.setAttributes", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        wrongTokenId
       );
 
       await passport.connect(minterA).setAttributes(
@@ -554,7 +555,8 @@ describe("QuadPassport.setAttributes", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        noMint
       );
 
       await passport

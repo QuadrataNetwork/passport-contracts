@@ -58,7 +58,8 @@ export const setAttributes = async (
     fee,
     opts.oldDid || did,
     passport.address,
-    chainId
+    chainId,
+    tokenId
   );
 
   const sigAccount = await signAccount(account);

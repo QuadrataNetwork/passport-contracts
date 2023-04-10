@@ -387,7 +387,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         passport,
         attributes,
         verifiedAt,
-        issuedAt
+        issuedAt,
+        newTokenId
       );
 
       const attributes2: any = {
@@ -1035,7 +1036,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        wrongTokenId
       );
 
       // set attrValues to values of attributes
@@ -1082,7 +1084,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        noMint
       );
 
       await passport

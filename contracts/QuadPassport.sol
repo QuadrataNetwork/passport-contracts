@@ -193,6 +193,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
+                _config.tokenId,
                 block.chainid,
                 address(this)
             )
