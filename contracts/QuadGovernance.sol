@@ -27,6 +27,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _setRoleAdmin(READER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(OPERATOR_ROLE, GOVERNANCE_ROLE);
         _setupRole(GOVERNANCE_ROLE, _msgSender());
+        _setupRole(OPERATOR_ROLE, _msgSender());
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
@@ -78,7 +79,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _eligibleStatus eligiblity boolean for the tokenId
     /// @param _uri URI of the IPFS link
     function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external override {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(hasRole(OPERATOR_ROLE, _msgSender()), "INVALID_ADMIN");
 
         if(_tokenId > _maxEligibleTokenId){
             require(_maxEligibleTokenId + 1 == _tokenId, "INCREMENT_TOKENID_BY_1");

@@ -204,14 +204,6 @@ export const deployQuadrata = async (
     if (verbose)
       console.log(`[QuadGovernance] grant GOVERNANCE_ROLE to ${timelock}`);
   });
-  await recursiveRetry(async () => {
-    const tx = await governance.grantRole(OPERATOR_ROLE, timelock, {
-      maxFeePerGas,
-    });
-    await tx.wait();
-    if (verbose)
-      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${timelock}`);
-  });
 
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock, {
