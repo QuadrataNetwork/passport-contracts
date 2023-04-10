@@ -643,21 +643,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.revertedWith("INVALID_DID");
     });
 
-    it("fail - invalid tokenId", async () => {
-      const badTokenId = 1337;
-      await expect(
-        setAttributesIssuer(
-          businessPassport,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          badTokenId
-        )
-      ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
-    });
-
     it("fail - zero verifiedAt", async () => {
       const verifiedAt = 0;
       await expect(

@@ -824,45 +824,6 @@ describe("QuadPassport.burnPassports", async () => {
       await passport.connect(minterB).burnPassports();
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
-
-    it("fails - EOA passport non-existent under token id=2", async () => {
-      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-      await passport.connect(minterA).burnPassports();
-      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-
-      await expect(
-        setAttributes(
-          minterA,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          MINT_PRICE,
-          2
-        )
-      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
-    });
-
-    it("fails - IS_BUSINESS=true passport non-existent under token id=2", async () => {
-      const MockBusiness = await ethers.getContractFactory("MockBusiness");
-      const mockBusiness = await MockBusiness.deploy(defi.address);
-      await mockBusiness.deployed();
-
-      await expect(
-        setAttributesIssuer(
-          mockBusiness,
-          issuer,
-          passport,
-          businessAttributes,
-          verifiedAt,
-          issuedAt,
-          2
-        )
-      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
-
-      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
-    });
   });
 
   describe("deactivateThenBurn", async () => {

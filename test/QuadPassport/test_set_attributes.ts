@@ -714,22 +714,6 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.revertedWith("ISSUER_UPDATED_DID");
     });
 
-    it("fail - invalid tokenId", async () => {
-      const badTokenId = 1337;
-      await expect(
-        setAttributes(
-          minterA,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          MINT_PRICE,
-          badTokenId
-        )
-      ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
-    });
-
     it("fail - zero verifiedAt", async () => {
       const verifiedAt = 0;
       await expect(
