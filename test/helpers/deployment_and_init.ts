@@ -1,7 +1,6 @@
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { Contract } from "ethers";
 import { ethers } from "hardhat";
-import { READER_ROLE } from "../../utils/constant";
 
 const { deployQuadrata } = require("../../utils/deployment.ts");
 

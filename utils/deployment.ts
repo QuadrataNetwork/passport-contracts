@@ -11,6 +11,7 @@ const {
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
   READER_ROLE,
   GOVERNANCE_ROLE,
+  OPERATOR_ROLE,
   DEFAULT_ADMIN_ROLE,
   PAUSER_ROLE,
 } = require("./constant.ts");
@@ -203,6 +204,15 @@ export const deployQuadrata = async (
     if (verbose)
       console.log(`[QuadGovernance] grant GOVERNANCE_ROLE to ${timelock}`);
   });
+  await recursiveRetry(async () => {
+    const tx = await governance.grantRole(OPERATOR_ROLE, timelock, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${timelock}`);
+  });
+
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock, {
       maxFeePerGas,
