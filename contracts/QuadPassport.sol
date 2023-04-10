@@ -174,7 +174,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
     ) internal view returns(address) {
-        require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
@@ -282,7 +281,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @dev Loop through all eligible token ids and burn passports if they exist
     /// @param _account address of user
     function _burnPassports(address _account) internal {
-        for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
+        // TODO: HUY
+        for (uint256 currTokenId = 1; currTokenId <= 10; currTokenId++){
             uint256 number = balanceOf(_account, currTokenId);
             if (number > 0){
                 _burn(_account, currTokenId, number);

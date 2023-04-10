@@ -62,8 +62,6 @@ describe("Dry Run Quad V3", () => {
 
         await governance.setIssuerAttributePermission(users[2].address, ATTRIBUTE_IS_BUSINESS, true);
 
-        await governance.setEligibleTokenId(TOKEN_ID, true, "www.quadrata.com");
-
         await setAttributes(
             users[0],
             users[2],
@@ -91,8 +89,6 @@ describe("Dry Run Quad V3", () => {
 
         await governance.setIssuerAttributePermission(users[2].address, ATTRIBUTE_IS_BUSINESS, true);
 
-        await governance.setEligibleTokenId(TOKEN_ID, true, "www.quadrata.com");
-
         await setAttributes(
             users[0],
             users[2],
@@ -116,8 +112,6 @@ describe("Dry Run Quad V3", () => {
         await governance.addIssuer(users[2].address, users[2].address);
 
         await governance.setIssuerAttributePermission(users[2].address, ATTRIBUTE_IS_BUSINESS, true);
-
-        await governance.setEligibleTokenId(TOKEN_ID, true, "www.quadrata.com");
 
         await setAttributes(
             users[0],
@@ -158,9 +152,6 @@ describe("Dry Run Quad V3", () => {
         await governance.setIssuerAttributePermission(users[3].address, ATTRIBUTE_AML, true);
         await governance.setIssuerAttributePermission(users[3].address, ATTRIBUTE_COUNTRY, true);
         await governance.setIssuerAttributePermission(users[3].address, ATTRIBUTE_IS_BUSINESS, true);
-
-
-        await governance.setEligibleTokenId(TOKEN_ID, true, "www.quadrata.com");
 
         await setAttributes(
             users[0],

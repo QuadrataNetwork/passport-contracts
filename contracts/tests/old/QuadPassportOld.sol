@@ -73,7 +73,6 @@ contract QuadPassportOld is IQuadPassportOld, ERC1155Upgradeable, UUPSUpgradeabl
         bytes calldata _sigAccount
     ) external payable override {
         require(msg.value == governance.mintPrice(), "INVALID_MINT_PRICE");
-        require(governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
         require(_config.account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
@@ -148,7 +147,6 @@ contract QuadPassportOld is IQuadPassportOld, ERC1155Upgradeable, UUPSUpgradeabl
         uint256 _issuedAt,
         address _issuer
     ) internal {
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
         require(_attribute != keccak256("DID"), "MUST_BURN_AND_MINT");
         require(governance.eligibleAttributes(_attribute)

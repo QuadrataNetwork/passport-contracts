@@ -5,6 +5,8 @@ const { Signer, DataHexString } = require("ethers");
 
 const { DIGEST_TO_SIGN, HARDHAT_CHAIN_ID } = require("../../utils/constant.ts");
 
+const DEFAULT_TOKEN_ID = 1;
+
 export const signMessage = async (
   signer: typeof Signer,
   message: typeof DataHexString
@@ -31,7 +33,7 @@ export const signSetAttributes = async (
   did: string,
   passportAddress: string,
   chainId: number = HARDHAT_CHAIN_ID,
-  tokenId: number = 1
+  tokenId: number = DEFAULT_TOKEN_ID
 ): Promise<typeof DataHexString> => {
   const attrKeys: string[] = [];
   const attrValues: string[] = [];

@@ -399,7 +399,6 @@ import "./storage/QuadGovernanceStoreOld.sol";
         bytes32 _attribute
     ) internal view {
         require(_account != address(0), "ACCOUNT_ADDRESS_ZERO");
-        require(governance.eligibleTokenId(_tokenId), "PASSPORT_TOKENID_INVALID");
         require(passport.balanceOf(_account, _tokenId) == 1, "PASSPORT_DOES_NOT_EXIST");
         require(governance.eligibleAttributes(_attribute)
             || governance.eligibleAttributesByDID(_attribute),

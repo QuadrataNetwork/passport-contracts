@@ -196,8 +196,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance.connect(admin).setEligibleTokenId(2, true, "");
-
       await setAttributesIssuer(
         businessPassport,
         issuer2,
@@ -379,8 +377,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
-
       await setAttributesIssuer(
         businessPassport,
         issuer,
@@ -1018,9 +1014,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
 
     it("success - tokenId not included in signature", async () => {
       const wrongTokenId = 2;
-      await governance
-        .connect(admin)
-        .setEligibleTokenId(wrongTokenId, true, "");
 
       const did = attributes[ATTRIBUTE_DID];
       //remove first key-value mapping in attributes
@@ -1071,7 +1064,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
 
     it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
-      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
       const did = attributes[ATTRIBUTE_DID];
       delete attributes[ATTRIBUTE_DID]

@@ -41,8 +41,6 @@ describe("QuadGovernance.initialize", async () => {
 
   describe("initialize", async () => {
     it("success", async () => {
-      expect(await governance.eligibleTokenId(TOKEN_ID)).to.equal(true);
-
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributesByDID(ATTRIBUTE_DID)).to.equal(
         false

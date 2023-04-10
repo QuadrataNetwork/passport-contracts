@@ -6,7 +6,6 @@ import "../storage/QuadGovernanceStore.sol";
 interface IQuadGovernance {
     event AttributePriceUpdatedFixed(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdatedFixed(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
-    event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
     event IssuerAdded(address indexed _issuer, address indexed _newTreasury);
@@ -23,8 +22,6 @@ interface IQuadGovernance {
     function setPassportContractAddress(address _passportAddr) external;
 
     function updateGovernanceInPassport(address _newGovernance) external;
-
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external;
 
     function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) external;
 
@@ -45,10 +42,6 @@ interface IQuadGovernance {
     function setIssuerAttributePermission(address _issuer, bytes32 _attribute, bool _permission) external;
 
     function getEligibleAttributesLength() external view returns(uint256);
-
-    function getMaxEligibleTokenId() external view returns(uint256);
-
-    function eligibleTokenId(uint256) external view returns(bool);
 
     function issuersTreasury(address) external view returns (address);
 

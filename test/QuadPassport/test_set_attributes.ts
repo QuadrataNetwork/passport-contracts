@@ -183,8 +183,6 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance.connect(admin).setEligibleTokenId(2, true, "");
-
       await setAttributes(
         minterA,
         issuer2,
@@ -373,7 +371,6 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
       await setAttributes(
         minterA,
         issuer,
@@ -492,10 +489,6 @@ describe("QuadPassport.setAttributes", async () => {
 
     it("success - tokenId not included in signature", async () => {
       const wrongTokenId = 2;
-      await governance
-        .connect(admin)
-        .setEligibleTokenId(wrongTokenId, true, "");
-
       // attributes has too many key-value mappings (including did)
       // in order for sig to pass verification
       // we must sign the attributes without the did
@@ -539,7 +532,6 @@ describe("QuadPassport.setAttributes", async () => {
 
     it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
-      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
       const did = attributes[ATTRIBUTE_DID];
       // remove first key-value mapping in attributes

@@ -17,7 +17,6 @@ contract QuadGovernanceOld is IQuadGovernanceOld, AccessControlUpgradeable, UUPS
     event AttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event AttributeMintPriceUpdated(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
-    event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
     event IssuerAdded(address indexed _issuer, address indexed _newTreasury);
@@ -39,8 +38,6 @@ contract QuadGovernanceOld is IQuadGovernanceOld, AccessControlUpgradeable, UUPS
     function initialize(address _admin) public initializer {
         require(_admin != address(0), "ADMIN_ADDRESS_ZERO");
         __AccessControl_init_unchained();
-
-        _eligibleTokenId[1] = true;   // INITIAL PASSPORT_ID
 
         // Add DID, COUNTRY, AML as valid attributes
         _eligibleAttributes[keccak256("DID")] = true;
@@ -126,18 +123,6 @@ contract QuadGovernanceOld is IQuadGovernanceOld, AccessControlUpgradeable, UUPS
         uint256 oldMintPrice = config.mintPrice;
         config.mintPrice = _mintPrice;
         emit PassportMintPriceUpdated(oldMintPrice, config.mintPrice);
-    }
-
-    /// @dev Set the eligibility status for a tokenId passport
-    /// @notice Restricted behind a TimelockController
-    /// @param _tokenId tokenId of the passport
-    /// @param _eligibleStatus eligiblity boolean for the tokenId
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external override {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-        require(_eligibleTokenId[_tokenId] != _eligibleStatus, "TOKEN_ELIGIBILITY_ALREADY_SET");
-
-        _eligibleTokenId[_tokenId] = _eligibleStatus;
-        emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }
 
     /// @dev Set the eligibility status for an attribute type
@@ -426,12 +411,6 @@ contract QuadGovernanceOld is IQuadGovernanceOld, AccessControlUpgradeable, UUPS
     /// @return eligible attribute element
     function eligibleAttributesArray(uint256 _value) override public view returns(bytes32) {
         return _eligibleAttributesArray[_value];
-    }
-
-    /// @dev Get active tokenId
-    /// @return tokenId eligibility
-    function eligibleTokenId(uint256 _value) override public view returns(bool) {
-        return _eligibleTokenId[_value];
     }
 
     /// @dev Get mint price for an attribute

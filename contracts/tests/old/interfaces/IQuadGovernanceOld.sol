@@ -12,8 +12,6 @@ interface IQuadGovernanceOld {
 
     function setMintPrice(uint256 _mintPrice) external;
 
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus) external;
-
     function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) external;
 
     function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus) external;
@@ -44,8 +42,6 @@ interface IQuadGovernanceOld {
     function getPriceETH() external view returns (uint256);
 
     function mintPrice() external view returns (uint256);
-
-    function eligibleTokenId(uint256) external view returns(bool);
 
     function issuersTreasury(address) external view returns (address);
 

@@ -25,7 +25,7 @@ contract QuadGovernanceStoreOld {
 
     // Admin Functions
     bytes32[] internal _eligibleAttributesArray;
-    mapping(uint256 => bool) internal _eligibleTokenId;
+    mapping(uint256 => bool) internal _eligibleTokenId;  // deprecated
     mapping(bytes32 => bool) internal _eligibleAttributes;
     mapping(bytes32 => bool) internal _eligibleAttributesByDID;
     // Price in $USD (1e6 decimals)
