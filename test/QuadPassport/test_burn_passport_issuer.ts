@@ -151,7 +151,7 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
-      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address);
+      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         0
       );
@@ -427,7 +427,7 @@ describe("QuadPassport.burnPassports", async () => {
         .withArgs(issuer.address, true);
 
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterB).burnPassports();
+      await passport.connect(minterB).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
 
       await assertGetAttributes(
@@ -547,7 +547,7 @@ describe("QuadPassport.burnPassports", async () => {
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+        passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID)
       )
         .to.emit(passport, "TransferSingle")
         .withArgs(
@@ -679,7 +679,7 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+        passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID)
       )
         .to.emit(passport, "BurnPassportsIssuer")
         .withArgs(issuer.address, minterA.address)
@@ -731,7 +731,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
 
       await expect(
-        passport.connect(issuerB).burnPassportsIssuer(minterA.address)
+        passport.connect(issuerB).burnPassportsIssuer(minterA.address, TOKEN_ID)
       )
         .to.emit(passport, "TransferSingle")
         .withArgs(
@@ -935,7 +935,7 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
-      await passport.connect(issuerB).burnPassportsIssuer(mockBusiness.address);
+      await passport.connect(issuerB).burnPassportsIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
@@ -953,7 +953,7 @@ describe("QuadPassport.burnPassports", async () => {
         .withArgs(ATTRIBUTE_COUNTRY, false);
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
+      await passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await expect(
@@ -1166,7 +1166,7 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
-      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address);
+      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
@@ -1248,7 +1248,7 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
+      await passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       const attributesCopy = Object.assign({}, attributes);
@@ -1336,7 +1336,7 @@ describe("QuadPassport.burnPassports", async () => {
     it("fail - passport non-existent (account never had attested data)", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterB.address)
+        passport.connect(issuer).burnPassportsIssuer(minterB.address, TOKEN_ID)
       ).to.not.be.reverted;
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
@@ -1353,14 +1353,14 @@ describe("QuadPassport.burnPassports", async () => {
           MINT_PRICE
         )
       ).to.not.be.reverted;
-      expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
 
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+        passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID)
       ).to.not.be.reverted;
 
-      expect(await passport.balanceOf(minterA.address, 1)).to.equal(0);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
     });
 
@@ -1384,7 +1384,7 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
 
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(mockBusiness.address)
+        passport.connect(issuer).burnPassportsIssuer(mockBusiness.address, TOKEN_ID)
       ).to.not.be.reverted;
 
       expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(0);
@@ -1405,7 +1405,7 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       await expect(
-        passport.connect(admin).burnPassportsIssuer(minterA.address)
+        passport.connect(admin).burnPassportsIssuer(minterA.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
@@ -1473,7 +1473,7 @@ describe("QuadPassport.burnPassports", async () => {
         .addIssuer(freeAccount.address, freeAccount.address);
 
       expect(
-        await passport.connect(issuerB).burnPassportsIssuer(minterA.address)
+        await passport.connect(issuerB).burnPassportsIssuer(minterA.address, TOKEN_ID)
       );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
@@ -1540,7 +1540,7 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       await expect(
-        passport.connect(admin).burnPassportsIssuer(mockBusiness.address)
+        passport.connect(admin).burnPassportsIssuer(mockBusiness.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
 
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
@@ -1596,7 +1596,7 @@ describe("QuadPassport.burnPassports", async () => {
       await passport.connect(admin).pause();
 
       await expect(
-        passport.connect(admin).burnPassportsIssuer(minterA.address)
+        passport.connect(admin).burnPassportsIssuer(minterA.address, TOKEN_ID)
       ).to.revertedWith("Pausable: paused");
     });
   });

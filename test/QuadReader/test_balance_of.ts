@@ -256,7 +256,7 @@ describe("QuadReader.balanceOf", async () => {
     });
 
     it("success - after burning (themselves)", async () => {
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(1);
       expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
         0
       );
@@ -272,7 +272,7 @@ describe("QuadReader.balanceOf", async () => {
     });
 
     it("success - after burning (issuer)", async () => {
-      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
+      await passport.connect(issuer).burnPassportsIssuer(minterA.address, 1);
       expect(await reader.balanceOf(minterA.address, ATTRIBUTE_DID)).to.equal(
         0
       );
