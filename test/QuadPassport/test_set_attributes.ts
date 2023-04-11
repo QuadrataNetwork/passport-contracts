@@ -611,7 +611,7 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
-    it("fail - signature too old (must be used within 6 hours of issuance", async () => {
+    it("fail - signature too old (must be used within 1 day of issuance", async () => {
       // set block timestamp to be 5 hours passed issuedAt
       await ethers.provider.send("evm_setNextBlockTimestamp", [
         issuedAt + 5 * 60 * 60,
@@ -628,9 +628,9 @@ describe("QuadPassport.setAttributes", async () => {
         )
       ).to.not.be.reverted;
 
-      // set block timestamp to be 7 hours passed issuedAt
+      // set block timestamp to be 25 hours passed issuedAt
       await ethers.provider.send("evm_setNextBlockTimestamp", [
-        issuedAt + 7 * 60 * 60,
+        issuedAt + 25 * 60 * 60,
       ]);
 
       await expect(
