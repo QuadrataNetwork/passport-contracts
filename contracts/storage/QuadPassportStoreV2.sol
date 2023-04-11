@@ -13,5 +13,5 @@ contract QuadPassportStoreV2 is QuadPassportStore {
     mapping(bytes32 => Attribute) internal _attributesv2;
 
     IQuadReader public reader;
-
+    uint256 internal _maxTokenId;
 }

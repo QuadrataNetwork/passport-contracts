@@ -126,6 +126,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             _mint(_account, _config.tokenId, 1);
         }
         emit SetAttributeReceipt(_account, _issuer, _config.fee);
+        // Update maxTokenId
+        if(_config.tokenId > _maxTokenId) {
+            _maxTokenId = _config.tokenId;
+        }
     }
 
     /// @notice Internal function that validates supplied DID on updates do not change
@@ -281,8 +285,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @dev Loop through all eligible token ids and burn passports if they exist
     /// @param _account address of user
     function _burnPassports(address _account) internal {
-        // TODO: HUY
-        for (uint256 currTokenId = 1; currTokenId <= 10; currTokenId++){
+        for (uint256 currTokenId = 1; currTokenId <= _maxTokenId; currTokenId++){
             uint256 number = balanceOf(_account, currTokenId);
             if (number > 0){
                 _burn(_account, currTokenId, number);
@@ -290,7 +293,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
     }
 
-   /// @dev Allow an authorized readers to get all attribute information about a passport holder
+    /// @dev Allow an authorized readers to get all attribute information about a passport holder
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @return value of attribute from issuer
