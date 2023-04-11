@@ -27,6 +27,8 @@ interface IQuadGovernance {
 
     function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus) external;
 
+    function setTokenURI(uint256 _tokenId, string memory _uri) external;
+
     function setAttributePriceFixed(bytes32 _attribute, uint256 _price) external;
 
     function setBusinessAttributePriceFixed(bytes32 _attribute, uint256 _price) external;
