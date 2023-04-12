@@ -50,6 +50,7 @@ export const deployPassportEcosystem = async (
     admin.address,
     tokenIds,
     admin.address,
+    admin.address,
     false
   );
 

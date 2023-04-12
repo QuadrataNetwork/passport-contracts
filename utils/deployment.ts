@@ -26,6 +26,7 @@ export const deployQuadrata = async (
   multisig: string,
   tokenIds: any[],
   operator: string,
+  reader_only: string,
   verbose: boolean = false,
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
   governanceAddress: string = "",
@@ -43,6 +44,7 @@ export const deployQuadrata = async (
     return await deployPassport(governance, passportAddress);
   });
   if (verbose) console.log(`QuadPassport is deployed: ${passport.address}`);
+
   // Deploy QuadReader
   const reader = await recursiveRetry(async () => {
     return await deployReader(governance, passport, readerAddress);
@@ -226,6 +228,15 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${operator}`);
+  });
+
+  await recursiveRetry(async () => {
+    const tx = await governance.grantRole(READER_ROLE, reader_only, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] grant READER_ROLE to ${reader_only}`);
   });
 
   // GRANT `PAUSER_ROLE` to MULTISIG

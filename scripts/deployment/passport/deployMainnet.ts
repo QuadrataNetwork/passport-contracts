@@ -73,11 +73,12 @@ const {
     multisigPerNetwork,
     TOKEN_IDS,
     OPERATOR,
+    READER_ONLY,
     true, // Verbose = true,
     maxGasPerNetwork,
     "",
     "",
-    READER_ONLY,
+    "",
     false
   );
 
