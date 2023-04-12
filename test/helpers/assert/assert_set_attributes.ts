@@ -49,6 +49,6 @@ export const assertSetAttribute = async (
     });
   }
 
-  expect(await passport.balanceOf(account.address, TOKEN_ID)).to.equal(1);
+  expect(await passport.balanceOf(account.address, tokenId)).to.equal(1);
   expect(await ethers.provider.getBalance(passport.address)).to.equal(totalFee);
 };

@@ -65,6 +65,6 @@ contract MockBusiness {
     }
 
     function burnPassports() public {
-        IQuadPassport(defi.passport()).burnPassports();
+        IQuadPassport(defi.passport()).burnPassports(1);
     }
 }

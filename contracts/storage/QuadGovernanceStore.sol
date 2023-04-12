@@ -12,7 +12,7 @@ contract QuadGovernanceStore is QuadConstant {
     mapping(bytes32 => bool) internal _eligibleAttributesByDID;
 
     // TokenId
-    mapping(uint256 => bool) internal _eligibleTokenId;
+    mapping(uint256 => bool) internal _eligibleTokenId; // deprecated
 
     // Pricing
     mapping(bytes32 => uint256) internal _pricePerBusinessAttributeFixed;
@@ -26,7 +26,7 @@ contract QuadGovernanceStore is QuadConstant {
 
     // Others
     uint256 internal _revSplitIssuer; // 50 means 50%;
-    uint256 internal _maxEligibleTokenId;
+    uint256 internal _maxEligibleTokenId; // deprecated
     IQuadPassport internal _passport;
     address internal _treasury;
 }

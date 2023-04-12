@@ -9,6 +9,9 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
+
+  ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+  ATTRIBUTE_ACCREDITED_INVESTOR_US,
   READER_ROLE,
   GOVERNANCE_ROLE,
   OPERATOR_ROLE,
@@ -67,23 +70,6 @@ export const deployQuadrata = async (
       );
   });
 
-  // Set Eligible TokenId
-  for (let i = 0; i < tokenIds.length; i++) {
-    await recursiveRetry(async () => {
-      const tx = await governance.setEligibleTokenId(
-        tokenIds[i].id,
-        true,
-        tokenIds[i].uri,
-        { maxFeePerGas }
-      );
-      await tx.wait();
-      if (verbose)
-        console.log(
-          `[QuadGovernance] setEligibleTokenId for ${tokenIds[i].id} with URI (${tokenIds[i].uri})`
-        );
-    });
-  }
-
   // Set Eligible Attributes
   await recursiveRetry(async () => {
     const tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true, {
@@ -92,6 +78,24 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_DID`);
+  });
+  await recursiveRetry(async () => {
+    const tx = await governance.setEligibleAttribute(ATTRIBUTE_ACCREDITED_INVESTOR_US, true, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_ACCREDITED_INVESTOR_US`);
+  });
+
+  await recursiveRetry(async () => {
+
+    const tx = await governance.setEligibleAttribute(ATTRIBUTE_TRANSUNION_CREDIT_SCORE, true, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_TRANSUNION_CREDIT_SCORE`);
   });
 
   await recursiveRetry(async () => {

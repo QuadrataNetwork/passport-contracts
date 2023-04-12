@@ -73,22 +73,12 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _passport.acceptGovernance();
     }
 
-    /// @dev Set the eligibility status for a tokenId passport
-    /// @notice Restricted behind a TimelockController
+    /// @dev Set the uri for a tokenId passport
     /// @param _tokenId tokenId of the passport
-    /// @param _eligibleStatus eligiblity boolean for the tokenId
-    /// @param _uri URI of the IPFS link
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external override {
-        require(hasRole(OPERATOR_ROLE, _msgSender()), "INVALID_ADMIN");
-
-        if(_tokenId > _maxEligibleTokenId){
-            require(_maxEligibleTokenId + 1 == _tokenId, "INCREMENT_TOKENID_BY_1");
-            _maxEligibleTokenId = _tokenId;
-        }
-        _eligibleTokenId[_tokenId] = _eligibleStatus;
+    /// @param _uri uri for token
+    function setTokenURI(uint256 _tokenId, string memory _uri) external override {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
         _passport.setTokenURI(_tokenId, _uri);
-
-        emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }
 
     /// @dev Set the eligibility status for an attribute type
@@ -323,19 +313,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @return length of eligible attributes
     function getEligibleAttributesLength() override external view returns(uint256) {
         return _eligibleAttributesArray.length;
-    }
-
-    /// @dev Get list of eligible tokenIds currently supported
-    /// @return length of eligible attributes
-    function getMaxEligibleTokenId() override external view returns(uint256) {
-        return _maxEligibleTokenId;
-    }
-
-    /// @dev Get active tokenId
-    /// @param _tokenId TokenId
-    /// @return tokenId eligibility
-    function eligibleTokenId(uint256 _tokenId) override public view returns(bool) {
-        return _eligibleTokenId[_tokenId];
     }
 
     /// @dev Get query price for an attribute in eth
