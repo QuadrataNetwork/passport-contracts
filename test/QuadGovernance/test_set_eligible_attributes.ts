@@ -12,6 +12,8 @@ const {
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
   ATTRIBUTE_AML,
+  ATTRIBUTE_ACCREDITED_INVESTOR_US,
+  ATTRIBUTE_TRANSUNION_CREDIT_SCORE
 } = require("../../utils/constant.ts");
 
 describe("QuadGovernance.setEligibleAttribute", async () => {
@@ -81,17 +83,18 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
     });
 
     it("succeed (turn false)", async () => {
-      expect(await governance.getEligibleAttributesLength()).to.equal(4);
+      expect(await governance.getEligibleAttributesLength()).to.equal(6);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
-      expect(await governance.eligibleAttributesArray(0)).to.equal(
-        ATTRIBUTE_DID
+      expect(await governance.eligibleAttributes(ATTRIBUTE_ACCREDITED_INVESTOR_US)).to.equal(
+        true
       );
-      expect(await governance.eligibleAttributesArray(1)).to.equal(
-        ATTRIBUTE_COUNTRY
+      expect(await governance.eligibleAttributes(ATTRIBUTE_TRANSUNION_CREDIT_SCORE)).to.equal(
+        true
       );
+
       await expect(
         governance.connect(admin).setEligibleAttribute(ATTRIBUTE_COUNTRY, false)
       )
@@ -102,27 +105,23 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         false
       );
-      expect(await governance.eligibleAttributesArray(0)).to.equal(
-        ATTRIBUTE_DID
-      );
-      expect(await governance.eligibleAttributesArray(1)).to.equal(
-        ATTRIBUTE_CRED_PROTOCOL_SCORE
-      );
-      expect(await governance.getEligibleAttributesLength()).to.equal(3);
+
+      expect(await governance.getEligibleAttributesLength()).to.equal(5);
     });
 
     it("succeed (turn false  - first element)", async () => {
-      expect(await governance.getEligibleAttributesLength()).to.equal(4);
+      expect(await governance.getEligibleAttributesLength()).to.equal(6);
       expect(await governance.eligibleAttributes(ATTRIBUTE_DID)).to.equal(true);
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
-      expect(await governance.eligibleAttributesArray(0)).to.equal(
-        ATTRIBUTE_DID
+      expect(await governance.eligibleAttributes(ATTRIBUTE_ACCREDITED_INVESTOR_US)).to.equal(
+        true
       );
-      expect(await governance.eligibleAttributesArray(1)).to.equal(
-        ATTRIBUTE_COUNTRY
+      expect(await governance.eligibleAttributes(ATTRIBUTE_TRANSUNION_CREDIT_SCORE)).to.equal(
+        true
       );
+
       await expect(
         governance.connect(admin).setEligibleAttribute(ATTRIBUTE_DID, false)
       )
@@ -134,19 +133,17 @@ describe("QuadGovernance.setEligibleAttribute", async () => {
       expect(await governance.eligibleAttributes(ATTRIBUTE_COUNTRY)).to.equal(
         true
       );
-      expect(await governance.eligibleAttributesArray(0)).to.equal(
-        ATTRIBUTE_CRED_PROTOCOL_SCORE
-      );
-      expect(await governance.getEligibleAttributesLength()).to.equal(3);
+
+      expect(await governance.getEligibleAttributesLength()).to.equal(5);
     });
 
     it("succeed (getEligibleAttributesLength)", async () => {
-      expect(await governance.getEligibleAttributesLength()).to.equal(4);
+      expect(await governance.getEligibleAttributesLength()).to.equal(6);
       const newAttribute = ethers.utils.id("CREDIT");
       expect(
         await governance.connect(admin).setEligibleAttribute(newAttribute, true)
       );
-      expect(await governance.getEligibleAttributesLength()).to.equal(5);
+      expect(await governance.getEligibleAttributesLength()).to.equal(7);
     });
 
     it("fail (not admin)", async () => {

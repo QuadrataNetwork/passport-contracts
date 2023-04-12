@@ -9,6 +9,9 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
+
+  ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+  ATTRIBUTE_ACCREDITED_INVESTOR_US,
   READER_ROLE,
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
@@ -74,6 +77,24 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_DID`);
+  });
+  await recursiveRetry(async () => {
+    const tx = await governance.setEligibleAttribute(ATTRIBUTE_ACCREDITED_INVESTOR_US, true, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_ACCREDITED_INVESTOR_US`);
+  });
+
+  await recursiveRetry(async () => {
+
+    const tx = await governance.setEligibleAttribute(ATTRIBUTE_TRANSUNION_CREDIT_SCORE, true, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_TRANSUNION_CREDIT_SCORE`);
   });
 
   await recursiveRetry(async () => {
