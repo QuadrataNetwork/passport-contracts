@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
-
+import { BytesLike } from '@ethersproject/bytes';
 
 
 describe("StorageSlotOnContractUpgrade", async () => {
