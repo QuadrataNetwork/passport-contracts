@@ -200,7 +200,7 @@ export const deployQuadrata = async (
       console.log(`[QuadGovernance] grant READER_ROLE to ${reader.address}`);
   });
 
-  // Grant `GOVERNANCE_ROLE`, 'OPERATOR_ROLE' and `DEFAULT_ADMIN_ROLE` to Timelock
+  // Grant `GOVERNANCE_ROLE` and `DEFAULT_ADMIN_ROLE` to Timelock
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(GOVERNANCE_ROLE, timelock, {
       maxFeePerGas,
@@ -211,21 +211,21 @@ export const deployQuadrata = async (
   });
 
   await recursiveRetry(async () => {
-    const tx = await governance.grantRole(OPERATOR_ROLE, operator, {
-      maxFeePerGas,
-    });
-    await tx.wait();
-    if (verbose)
-      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${operator}`);
-  });
-
-  await recursiveRetry(async () => {
     const tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock, {
       maxFeePerGas,
     });
     await tx.wait();
     if (verbose)
       console.log(`[QuadGovernance] grant DEFAULT_ADMIN_ROLE to ${timelock}`);
+  });
+
+  await recursiveRetry(async () => {
+    const tx = await governance.grantRole(OPERATOR_ROLE, operator, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${operator}`);
   });
 
   // GRANT `PAUSER_ROLE` to MULTISIG
