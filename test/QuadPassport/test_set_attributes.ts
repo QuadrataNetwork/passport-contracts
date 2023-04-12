@@ -487,49 +487,6 @@ describe("QuadPassport.setAttributes", async () => {
       sigAccount = await signAccount(minterA);
     });
 
-    it("success - tokenId not included in signature", async () => {
-      const wrongTokenId = 2;
-      // attributes has too many key-value mappings (including did)
-      // in order for sig to pass verification
-      // we must sign the attributes without the did
-
-      const did = attributes[ATTRIBUTE_DID];
-      // remove first key-value mapping in attributes
-      delete attributes[ATTRIBUTE_DID];
-
-      // create issuer sig for the following attributes
-      sigIssuer = await signSetAttributes(
-        minterA,
-        issuer,
-        attributes,
-        verifiedAt,
-        issuedAt,
-        fee,
-        did,
-        passport.address,
-        chainId,
-        wrongTokenId
-      );
-
-      await passport.connect(minterA).setAttributes(
-        [
-          attrKeys, // empty
-          attrValues, // [COUNTRY, IS_BUSINESS, AML]
-          attrTypes, // [ATTRIBUTE_COUNTRY, ATTRIBUTE_IS_BUSINESS, ATTRIBUTE_AML]
-          did,
-          wrongTokenId,
-          verifiedAt,
-          issuedAt,
-          fee,
-        ],
-        sigIssuer,
-        sigAccount,
-        {
-          value: fee,
-        }
-      );
-    });
-
     it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
 

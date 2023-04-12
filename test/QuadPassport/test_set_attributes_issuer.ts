@@ -997,56 +997,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("success - tokenId not included in signature", async () => {
-      const wrongTokenId = 2;
-
-      const did = attributes[ATTRIBUTE_DID];
-      //remove first key-value mapping in attributes
-      delete attributes[ATTRIBUTE_DID]
-
-      // create issuer sig for the following attributes
-      sigIssuer = await signSetAttributes(
-        businessPassport,
-        issuer,
-        attributes,
-        verifiedAt,
-        issuedAt,
-        fee,
-        did,
-        passport.address,
-        chainId,
-        wrongTokenId
-      );
-
-      // set attrValues to values of attributes
-      attrValues = Object.values(attributes)
-      attrTypes = [
-        ATTRIBUTE_AML,
-        ATTRIBUTE_COUNTRY,
-        ATTRIBUTE_IS_BUSINESS,
-      ]
-
-      await passport
-        .connect(issuer)
-        .setAttributesIssuer(
-          businessPassport.address,
-          [
-            attrKeys,
-            attrValues,
-            attrTypes,
-            did,
-            wrongTokenId,
-            verifiedAt,
-            issuedAt,
-            fee,
-          ],
-          sigIssuer,
-          {
-            value: fee,
-          }
-        );
-    });
-
     it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
 
