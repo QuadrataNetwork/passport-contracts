@@ -3,18 +3,18 @@ pragma solidity 0.8.16;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./interfaces/IQuadReader.sol";
 import "./interfaces/IQuadPassportStore.sol";
-import "./storage/QuadReaderStore.sol";
+import "./storage/QuadReaderStoreV2.sol";
 
 /// @title Data Reader Contract for Quadrata Passport
 /// @author Fabrice Cheng, Theodore Clapp
 /// @notice All accessor functions for reading and pricing quadrata attributes
-
- contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStore {
+ contract QuadReader is IQuadReader, UUPSUpgradeable, QuadReaderStoreV2 {
     constructor() initializer {
         // used to prevent logic contract self destruct take over
     }
@@ -215,6 +215,67 @@ import "./storage/QuadReaderStore.sol";
 
     function _authorizeUpgrade(address) internal view override {
         require(IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, msg.sender), "INVALID_ADMIN");
+    }
+
+    /// @dev Returns if a user's data is greater than or equal to (GTE) a certain threshold
+    /// @param _account user whose data is being checked
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
+    /// @param _verifiedAt timestamp of whewn data was issued
+    /// @param _threshold threshold to compare the data to
+    /// @param _flashSig signature of the flash query
+    /// @return true if the data is GTE to the threshold, false otherwise
+    function getFlashAttributeGTE(
+        address _account,
+        bytes32 _attribute,
+        uint256 _verifiedAt,
+        uint256 _threshold,
+        bytes calldata _flashSig
+    ) public payable override returns(bool) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('TRUE'))) {
+            return true;
+        }
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('FALSE'))) {
+            return false;
+        }
+
+        revert("INVALID_ISSUER_OR_PARAMS");
+    }
+
+    /// @dev Returns true if the signature is valid
+    /// @param _account user whose data is being checked
+    /// @param _attribute keccak256 of the attribute type (ex: keccak256("TU_CREDIT_SCORE"))
+    /// @param _verifiedAt timestamp of whewn data was issued
+    /// @param _threshold threshold to compare the data to
+    /// @param _flashSig signature of the flash query
+    /// @param _expectedValue value of the flash query
+    /// @return true if the signature is valid
+    function _validateFlashAttrSignature(
+        address _account,
+        bytes32 _attribute,
+        uint256 _verifiedAt,
+        uint256 _threshold,
+        bytes calldata _flashSig,
+        bytes32 _expectedValue
+    ) internal returns(bool) {
+        bytes32 extractionHash = keccak256(abi.encode(_account, msg.sender, _attribute, _verifiedAt, _threshold, msg.value, _expectedValue, block.chainid));
+        require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
+
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
+        address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
+
+        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            require(governance.getIssuerStatus(signer), 'ISSUER_NOT_ACTIVE');
+            require(governance.eligibleAttributes(_attribute), 'INVALID_ATTRIBUTE');
+            require(governance.getIssuerAttributePermission(signer, _attribute), 'INVALID_ISSUER_ATTR_PERMISSION');
+
+            emit FlashQueryEvent(_account, msg.sender, _attribute, msg.value);
+            _usedFlashSigHashes[extractionHash] = true;
+            (bool sent,) = payable(governance.issuersTreasury(signer)).call{value: msg.value}("");
+            require(sent, "FAILED_TO_TRANSFER_NATIVE_ETH");
+            return true;
+        }
+        return false;
+
     }
 
     /// @dev Returns boolean indicating whether an attribute has been attested to a wallet for a given issuer.
