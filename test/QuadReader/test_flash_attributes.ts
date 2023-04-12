@@ -319,41 +319,6 @@ describe('Flash attributes', () => {
                         sig, {value: fee})
                 ).to.be.revertedWith('INVALID_ISSUER_OR_PARAMS');
             });
-            it('sender is not preapproved', async () => {
-                const now = 3429834;
-                const fee = 0;
-                const hash = keccak256(
-                    ethers.utils.defaultAbiCoder.encode([
-                        "address",
-                        "address",
-                        "bytes32",
-                        "uint256",
-                        "uint256",
-                        "uint256",
-                        "bytes32",
-                        "uint256"
-                    ], [
-                        user.address,
-                        admin.address,
-                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                        now,
-                        400,
-                        fee,
-                        utils.keccak256(utils.toUtf8Bytes("TRUE")),
-                        chainId
-                    ])
-                )
-                const sig = await issuerA.signMessage(ethers.utils.arrayify(hash));
-                const randomSigner = ethers.Wallet.createRandom().connect(ethers.provider);
-                await expect(
-                    reader.connect(randomSigner).callStatic.getFlashAttributeGTE(
-                        user.address,
-                        ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-                        now,
-                        400,
-                        sig, {value: fee})
-                ).to.be.revertedWith('SENDER_NOT_AUTHORIZED');
-            });
             it('attribute is not eligible', async () => {
                 const now = 3429834;
                 const fee = 0;

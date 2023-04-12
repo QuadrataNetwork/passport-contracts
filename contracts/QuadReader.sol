@@ -231,8 +231,6 @@ import "./storage/QuadReaderStoreV2.sol";
         uint256 _threshold,
         bytes calldata _flashSig
     ) public payable override returns(bool) {
-        require(governance.preapproval(msg.sender), "SENDER_NOT_AUTHORIZED");
-
         if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('TRUE'))) {
             return true;
         }
