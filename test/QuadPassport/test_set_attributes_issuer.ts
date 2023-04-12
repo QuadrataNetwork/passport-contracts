@@ -196,8 +196,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance.connect(admin).setEligibleTokenId(2, true, "");
-
       await setAttributesIssuer(
         businessPassport,
         issuer2,
@@ -379,15 +377,14 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
-
       await setAttributesIssuer(
         businessPassport,
         issuer,
         passport,
         attributes,
         verifiedAt,
-        issuedAt
+        issuedAt,
+        newTokenId
       );
 
       const attributes2: any = {
@@ -585,7 +582,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.not.be.reverted;
     });
 
-    it("fail - signature too old (must be used within 6 hours of issuance", async () => {
+    it("fail - signature too old (must be used within 1 day of issuance", async () => {
       // set block timestamp to be 5 hours passed issuedAt
       await ethers.provider.send("evm_setNextBlockTimestamp", [
         issuedAt + 5 * 60 * 60,
@@ -601,9 +598,9 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         )
       ).to.not.be.reverted;
 
-      // set block timestamp to be 7 hours passed issuedAt
+      // set block timestamp to be 26 hours passed issuedAt
       await ethers.provider.send("evm_setNextBlockTimestamp", [
-        issuedAt + 7 * 60 * 60,
+        issuedAt + 26 * 60 * 60,
       ]);
       await expect(
         setAttributesIssuer(
@@ -644,21 +641,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           issuedAt + 1
         )
       ).to.revertedWith("INVALID_DID");
-    });
-
-    it("fail - invalid tokenId", async () => {
-      const badTokenId = 1337;
-      await expect(
-        setAttributesIssuer(
-          businessPassport,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          badTokenId
-        )
-      ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
     it("fail - zero verifiedAt", async () => {
@@ -1015,61 +997,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("success - tokenId not included in signature", async () => {
-      const wrongTokenId = 2;
-      await governance
-        .connect(admin)
-        .setEligibleTokenId(wrongTokenId, true, "");
-
-      const did = attributes[ATTRIBUTE_DID];
-      //remove first key-value mapping in attributes
-      delete attributes[ATTRIBUTE_DID]
-
-      // create issuer sig for the following attributes
-      sigIssuer = await signSetAttributes(
-        businessPassport,
-        issuer,
-        attributes,
-        verifiedAt,
-        issuedAt,
-        fee,
-        did,
-        passport.address,
-        chainId
-      );
-
-      // set attrValues to values of attributes
-      attrValues = Object.values(attributes)
-      attrTypes = [
-        ATTRIBUTE_AML,
-        ATTRIBUTE_COUNTRY,
-        ATTRIBUTE_IS_BUSINESS,
-      ]
-
-      await passport
-        .connect(issuer)
-        .setAttributesIssuer(
-          businessPassport.address,
-          [
-            attrKeys,
-            attrValues,
-            attrTypes,
-            did,
-            wrongTokenId,
-            verifiedAt,
-            issuedAt,
-            fee,
-          ],
-          sigIssuer,
-          {
-            value: fee,
-          }
-        );
-    });
-
     it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
-      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
       const did = attributes[ATTRIBUTE_DID];
       delete attributes[ATTRIBUTE_DID]
@@ -1082,7 +1011,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        noMint
       );
 
       await passport

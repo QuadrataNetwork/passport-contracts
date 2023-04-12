@@ -46,9 +46,9 @@ interface IQuadPassport is IQuadSoulbound {
         bytes32[] memory _attributes
     ) external view returns (bool[] memory);
 
-    function burnPassports() external;
+    function burnPassports(uint256 _tokenId) external;
 
-    function burnPassportsIssuer(address _account) external;
+    function burnPassportsIssuer(address _account, uint256 _tokenId) external;
 
     function setGovernance(address _governanceContract) external;
 

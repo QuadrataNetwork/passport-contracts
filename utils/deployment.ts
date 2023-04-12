@@ -69,23 +69,6 @@ export const deployQuadrata = async (
       );
   });
 
-  // Set Eligible TokenId
-  for (let i = 0; i < tokenIds.length; i++) {
-    await recursiveRetry(async () => {
-      const tx = await governance.setEligibleTokenId(
-        tokenIds[i].id,
-        true,
-        tokenIds[i].uri,
-        { maxFeePerGas }
-      );
-      await tx.wait();
-      if (verbose)
-        console.log(
-          `[QuadGovernance] setEligibleTokenId for ${tokenIds[i].id} with URI (${tokenIds[i].uri})`
-        );
-    });
-  }
-
   // Set Eligible Attributes
   await recursiveRetry(async () => {
     const tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true, {

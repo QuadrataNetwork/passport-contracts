@@ -56,7 +56,8 @@ export const setAttributesIssuer = async (
     fee,
     did,
     passport.address,
-    chainId
+    chainId,
+    tokenId
   );
 
   await expect(

@@ -168,14 +168,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   // Check that tokenId have been correctly set
   TOKEN_IDS.forEach(async (tokenId: any) => {
     await delay(1000);
-    expect(await governance.eligibleTokenId(tokenId.id)).equals(true); // Default Quadrata Passport
-
     expect(await passport.uri(tokenId.id)).equals(tokenId.uri);
   });
-  expect(
-    await governance.eligibleTokenId(TOKEN_IDS[TOKEN_IDS.length - 1].id + 1)
-  ).equals(false);
-  expect(await governance.getMaxEligibleTokenId()).to.equal(TOKEN_IDS.length);
   console.log("[QuadGovernance] TokenId have been correctly set: OK");
 
   // Check attribute eligibility

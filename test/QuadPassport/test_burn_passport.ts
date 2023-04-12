@@ -156,7 +156,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await expect(passport.connect(minterA).burnPassports())
+      await expect(passport.connect(minterA).burnPassports(TOKEN_ID))
         .to.emit(passport, "TransferSingle")
         .withArgs(
           minterA.address,
@@ -269,7 +269,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await assertGetAttributes(
@@ -690,7 +690,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
 
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterB).burnPassports();
+      await passport.connect(minterB).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
 
       await assertGetAttributes(
@@ -752,7 +752,7 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       const attributesCopy = Object.assign({}, attributes);
@@ -821,47 +821,8 @@ describe("QuadPassport.burnPassports", async () => {
 
     it("does nothing - passport non-existent", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
-      await passport.connect(minterB).burnPassports();
+      await passport.connect(minterB).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
-    });
-
-    it("fails - EOA passport non-existent under token id=2", async () => {
-      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-      await passport.connect(minterA).burnPassports();
-      expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
-
-      await expect(
-        setAttributes(
-          minterA,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          MINT_PRICE,
-          2
-        )
-      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
-    });
-
-    it("fails - IS_BUSINESS=true passport non-existent under token id=2", async () => {
-      const MockBusiness = await ethers.getContractFactory("MockBusiness");
-      const mockBusiness = await MockBusiness.deploy(defi.address);
-      await mockBusiness.deployed();
-
-      await expect(
-        setAttributesIssuer(
-          mockBusiness,
-          issuer,
-          passport,
-          businessAttributes,
-          verifiedAt,
-          issuedAt,
-          2
-        )
-      ).to.revertedWith("PASSPORT_TOKENID_INVALID");
-
-      expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
     });
   });
 
@@ -1048,7 +1009,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await governance
@@ -1573,7 +1534,7 @@ describe("QuadPassport.burnPassports", async () => {
         .withArgs(issuer.address, false);
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await expect(
@@ -1714,7 +1675,7 @@ describe("QuadPassport.burnPassports", async () => {
         .withArgs(issuer.address);
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await expect(
@@ -1840,7 +1801,7 @@ describe("QuadPassport.burnPassports", async () => {
       );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterA).burnPassports();
+      await passport.connect(minterA).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await assertGetAttributes(
@@ -1953,7 +1914,7 @@ describe("QuadPassport.burnPassports", async () => {
     it("fail - when paused", async () => {
       await passport.connect(admin).pause();
 
-      await expect(passport.connect(admin).burnPassports()).to.revertedWith(
+      await expect(passport.connect(admin).burnPassports(TOKEN_ID)).to.revertedWith(
         "Pausable: paused"
       );
     });

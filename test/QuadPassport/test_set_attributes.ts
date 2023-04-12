@@ -183,8 +183,6 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
 
-      await governance.connect(admin).setEligibleTokenId(2, true, "");
-
       await setAttributes(
         minterA,
         issuer2,
@@ -373,7 +371,6 @@ describe("QuadPassport.setAttributes", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
       await setAttributes(
         minterA,
         issuer,
@@ -490,55 +487,8 @@ describe("QuadPassport.setAttributes", async () => {
       sigAccount = await signAccount(minterA);
     });
 
-    it("success - tokenId not included in signature", async () => {
-      const wrongTokenId = 2;
-      await governance
-        .connect(admin)
-        .setEligibleTokenId(wrongTokenId, true, "");
-
-      // attributes has too many key-value mappings (including did)
-      // in order for sig to pass verification
-      // we must sign the attributes without the did
-
-      const did = attributes[ATTRIBUTE_DID];
-      // remove first key-value mapping in attributes
-      delete attributes[ATTRIBUTE_DID];
-
-      // create issuer sig for the following attributes
-      sigIssuer = await signSetAttributes(
-        minterA,
-        issuer,
-        attributes,
-        verifiedAt,
-        issuedAt,
-        fee,
-        did,
-        passport.address,
-        chainId
-      );
-
-      await passport.connect(minterA).setAttributes(
-        [
-          attrKeys, // empty
-          attrValues, // [COUNTRY, IS_BUSINESS, AML]
-          attrTypes, // [ATTRIBUTE_COUNTRY, ATTRIBUTE_IS_BUSINESS, ATTRIBUTE_AML]
-          did,
-          wrongTokenId,
-          verifiedAt,
-          issuedAt,
-          fee,
-        ],
-        sigIssuer,
-        sigAccount,
-        {
-          value: fee,
-        }
-      );
-    });
-
     it("success - with no mint with tokenId = 0", async () => {
       const noMint = 0;
-      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
 
       const did = attributes[ATTRIBUTE_DID];
       // remove first key-value mapping in attributes
@@ -554,7 +504,8 @@ describe("QuadPassport.setAttributes", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        noMint
       );
 
       await passport
@@ -617,7 +568,7 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
-    it("fail - signature too old (must be used within 6 hours of issuance", async () => {
+    it("fail - signature too old (must be used within 1 day of issuance", async () => {
       // set block timestamp to be 5 hours passed issuedAt
       await ethers.provider.send("evm_setNextBlockTimestamp", [
         issuedAt + 5 * 60 * 60,
@@ -634,9 +585,9 @@ describe("QuadPassport.setAttributes", async () => {
         )
       ).to.not.be.reverted;
 
-      // set block timestamp to be 7 hours passed issuedAt
+      // set block timestamp to be 25 hours passed issuedAt
       await ethers.provider.send("evm_setNextBlockTimestamp", [
-        issuedAt + 7 * 60 * 60,
+        issuedAt + 25 * 60 * 60,
       ]);
 
       await expect(
@@ -718,22 +669,6 @@ describe("QuadPassport.setAttributes", async () => {
           }
         )
       ).to.revertedWith("ISSUER_UPDATED_DID");
-    });
-
-    it("fail - invalid tokenId", async () => {
-      const badTokenId = 1337;
-      await expect(
-        setAttributes(
-          minterA,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          MINT_PRICE,
-          badTokenId
-        )
-      ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
     it("fail - zero verifiedAt", async () => {

@@ -29,6 +29,7 @@ describe("QuadSoulbound.balanceOf", async () => {
 
   describe("QuadSoulbound.balanceOf (SUCCESS CASES)", async () => {
     it("success - uri for token that doesn't exist yet", async () => {
+      await governance.connect(admin).setTokenURI(1, 'https://wwww.quadrata.com/ipfs')
       expect(await passport.uri(2)).equals("https://wwww.quadrata.com/ipfs");
     });
   });
