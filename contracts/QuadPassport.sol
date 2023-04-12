@@ -216,7 +216,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
         if (governance.eligibleAttributesByDID(_attribute)){
             if (_did == bytes32(0)) {
-                Attribute memory did = attribute(_account, ATTRIBUTE_DID);
+                Attribute memory did = _attribute(_account, ATTRIBUTE_DID);
                 if (did.value != bytes32(0)) {
                     _did = did.value;
                 }
@@ -348,6 +348,14 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32 _attribute
     ) public view override returns (Attribute memory) {
         require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+
+        return _attribute(_account, _attribute);
+    }
+
+    function _attribute(
+        address _account,
+        bytes32 _attribute
+    ) internal view returns(Attribute memory) {
         address[] memory issuers = governance.getIssuers();
         for (uint256 i = 0; i < issuers.length; i++) {
             bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);
@@ -358,6 +366,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             }
         }
         return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
+
     }
 
 
