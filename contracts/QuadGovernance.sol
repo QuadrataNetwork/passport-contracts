@@ -28,7 +28,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _setRoleAdmin(OPERATOR_ROLE, GOVERNANCE_ROLE);
 
         _setupRole(GOVERNANCE_ROLE, _msgSender());
-        _setupRole(OPERATOR_ROLE, _msgSender());
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 

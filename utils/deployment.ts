@@ -25,6 +25,7 @@ export const deployQuadrata = async (
   treasury: string,
   multisig: string,
   tokenIds: any[],
+  operator: string,
   verbose: boolean = false,
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
   governanceAddress: string = "",
@@ -210,12 +211,12 @@ export const deployQuadrata = async (
   });
 
   await recursiveRetry(async () => {
-    const tx = await governance.grantRole(OPERATOR_ROLE, timelock, {
+    const tx = await governance.grantRole(OPERATOR_ROLE, operator, {
       maxFeePerGas,
     });
     await tx.wait();
     if (verbose)
-      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${timelock}`);
+      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${operator}`);
   });
 
   await recursiveRetry(async () => {

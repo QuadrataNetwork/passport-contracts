@@ -14,6 +14,8 @@ const {
   MULTISIG,
   TOKEN_IDS,
   MAX_GAS_FEE,
+  OPERATOR,
+  READER_ONLY,
 } = require("../../data/mainnet.ts");
 
 (async () => {
@@ -26,6 +28,14 @@ const {
 
   if (!TIMELOCK) {
     throw new Error("TIMELOCK not set");
+  }
+
+  if (!OPERATOR) {
+    throw new Error("OPERATOR not set");
+  }
+
+  if (!READER_ONLY) {
+    throw new Error("READER_ONLY not set");
   }
 
   if (!MULTISIG) {
@@ -62,8 +72,13 @@ const {
     treasuryPerNetwork,
     multisigPerNetwork,
     TOKEN_IDS,
+    OPERATOR,
     true, // Verbose = true,
-    maxGasPerNetwork
+    maxGasPerNetwork,
+    "",
+    "",
+    READER_ONLY,
+    false
   );
 
   let tx = await governance

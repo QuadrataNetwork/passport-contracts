@@ -9,11 +9,13 @@ const {
 
 const {
   QUADRATA_TREASURY,
+  ISSUERS,
   TIMELOCK,
   MULTISIG,
   TOKEN_IDS,
-  ISSUERS,
   MAX_GAS_FEE,
+  OPERATOR,
+  READER_ONLY,
 } = require("../../data/testnet.ts");
 
 (async () => {
@@ -28,6 +30,14 @@ const {
     throw new Error("TIMELOCK not set");
   }
 
+  if (!OPERATOR) {
+    throw new Error("OPERATOR not set");
+  }
+
+  if (!READER_ONLY) {
+    throw new Error("READER_ONLY not set");
+  }
+
   if (!MULTISIG) {
     throw new Error("MULTISIG not set");
   }
@@ -35,6 +45,7 @@ const {
   if (TOKEN_IDS.length === 0) {
     throw new Error("TOKEN_IDS not set");
   }
+
   if (!MAX_GAS_FEE) {
     throw new Error("MAX_GAS_FEE not set");
   }
@@ -57,12 +68,13 @@ const {
     treasuryPerNetwork,
     multisigPerNetwork,
     TOKEN_IDS,
+    OPERATOR,
     true, // Verbose = true,
-    MAX_GAS_FEE,
+    maxGasPerNetwork,
     "",
     "",
-    "",
-    true // useGovTestMock = true
+    READER_ONLY,
+    false
   );
 
   let tx = await governance
