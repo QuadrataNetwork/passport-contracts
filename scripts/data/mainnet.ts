@@ -84,3 +84,6 @@ export const ISSUERS: any[] = [
     ],
   },
 ];
+
+export const OPERATOR = "0x5b88baae69b810df88A53aB5e1400A92d4d2BD28";
+export const READER_ONLY = "0x1A01f08Ef4Ee82313FaceF33bCEC1C399f92bF57";

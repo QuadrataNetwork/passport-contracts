@@ -25,6 +25,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(READER_ROLE, GOVERNANCE_ROLE);
+        _setRoleAdmin(OPERATOR_ROLE, GOVERNANCE_ROLE);
+
         _setupRole(GOVERNANCE_ROLE, _msgSender());
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
@@ -75,7 +77,7 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     /// @param _tokenId tokenId of the passport
     /// @param _uri uri for token
     function setTokenURI(uint256 _tokenId, string memory _uri) external override {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(hasRole(OPERATOR_ROLE, _msgSender()), "INVALID_ADMIN");
         _passport.setTokenURI(_tokenId, _uri);
     }
 
