@@ -10,7 +10,7 @@ import "./storage/QuadGovernanceStore.sol";
 import "./storage/QuadGovernanceStoreV2.sol";
 
 /// @title Governance Contract for Quadrata Passport
-/// @author Fabrice Cheng, Theodore Clapp
+/// @author Fabrice Cheng
 /// @notice All admin functions to govern the QuadPassport contract
 contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStoreV2 {
 
