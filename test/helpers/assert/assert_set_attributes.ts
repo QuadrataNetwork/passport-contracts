@@ -4,6 +4,8 @@ import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { parseEther } from "ethers/lib/utils";
 
+const { resolvePromisesSeq } = require("../resolve_promises.ts");
+
 const { TOKEN_ID } = require("../../../utils/constant.ts");
 
 export const assertSetAttribute = async (
@@ -32,20 +34,28 @@ export const assertSetAttribute = async (
     totalFee = totalFee.add(fee[i]);
   }
 
+  let respPromises: any[];
+  let respResult: any[];
+
   for (let i = 0; i < issuers.length; i++) {
+    respPromises = [];
     Object.keys(attributes[i]).forEach(async (attrType) => {
-      const response = await passport
-        .connect(mockReader)
-        .attributes(account.address, attrType);
+      respPromises.push(
+        passport.connect(mockReader).attributes(account.address, attrType)
+      );
+    });
+    respResult = await resolvePromisesSeq(respPromises);
 
-      expect(response.length).equals(attrTypeCounter[attrType]);
-
-      for (let j = 0; j < response.length; j++) {
-        const attrResp = response[j];
+    let k = 0;
+    Object.keys(attributes[i]).forEach((attrType) => {
+      expect(respResult[k].length).equals(attrTypeCounter[attrType]);
+      for (let j = 0; j < respResult[k].length; j++) {
+        const attrResp = respResult[k][j];
         expect(attrResp.value).equals(attributes[j][attrType]);
         expect(attrResp.issuer).equals(issuers[j].address);
-        expect(attrResp.epoch).equals(verifiedAt[j]);
+        expect(attrResp.epoch).to.equal(verifiedAt[j]);
       }
+      k += 1;
     });
   }
 
