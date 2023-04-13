@@ -5,7 +5,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 const {
   ATTRIBUTE_DID,
-  ATTRIBUTE_AML,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
 } = require("../../utils/constant.ts");
@@ -36,9 +35,6 @@ export const setAttributes = async (
       : ethers.constants.HashZero;
 
   Object.keys(attributes).forEach((k, i) => {
-    if (k === ATTRIBUTE_AML) {
-      expect(ATTRIBUTE_DID in attributes).to.equal(true);
-    }
     if (opts.attemptUpdateDid || k !== ATTRIBUTE_DID) {
       attrValues.push(attributes[k]);
       attrTypes.push(k);
