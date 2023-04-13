@@ -15,11 +15,13 @@ describe("StorageSlotOnContractUpgrade", async () => {
         unsafeAllow: ["constructor"],
       })
       await originalContract.deployed();
+
       expect(await originalContract.foo()).to.equal(1);
       expect(await ethers.provider.getStorageAt(originalContract.address, 101)).to.equal(ethers.utils.hexZeroPad(69 as unknown as BytesLike,32));
       expect(await ethers.provider.getStorageAt(originalContract.address, 102)).to.equal(ethers.utils.hexZeroPad(1337 as unknown as BytesLike,32));
       expect(await originalContract.someVal()).to.equal(69);
       expect(await originalContract.someOtherVal()).to.equal(1337);
+
       const TestQuadUpgrade = await ethers.getContractFactory(
         "TestQuadUpgraded"
       );
@@ -28,6 +30,7 @@ describe("StorageSlotOnContractUpgrade", async () => {
         TestQuadUpgrade,
         { unsafeAllow: ["constructor"] }
       );
+
       expect(await upgradeContract.foo()).to.equal(2);
       expect(await ethers.provider.getStorageAt(originalContract.address, 101)).to.equal(ethers.utils.hexZeroPad(69 as unknown as BytesLike,32));
       expect(await ethers.provider.getStorageAt(originalContract.address, 102)).to.equal(ethers.utils.hexZeroPad(1337 as unknown as BytesLike,32));
