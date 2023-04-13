@@ -5,6 +5,7 @@ export const ISSUER_ROLE = ethers.utils.id("ISSUER_ROLE");
 export const PAUSER_ROLE = ethers.utils.id("PAUSER_ROLE");
 export const READER_ROLE = ethers.utils.id("READER_ROLE");
 export const GOVERNANCE_ROLE = ethers.utils.id("GOVERNANCE_ROLE");
+export const OPERATOR_ROLE = ethers.utils.id("OPERATOR_ROLE");
 export const DEFAULT_ADMIN_ROLE = ethers.constants.HashZero;
 export const TIMELOCK_ADMIN_ROLE =
   "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5";
@@ -31,6 +32,7 @@ export const ATTRIBUTE_TRANSUNION_CREDIT_SCORE = ethers.utils.id("TRANSUNION_CRE
 export const TOKEN_ID = 1;
 
 export const ALL_ROLES = [
+  OPERATOR_ROLE,
   GOVERNANCE_ROLE,
   PAUSER_ROLE,
   ISSUER_ROLE,
@@ -140,4 +142,5 @@ export const reversePrint = {
   [PAUSER_ROLE]: "PAUSER_ROLE",
   [ISSUER_ROLE]: "ISSUER_ROLE",
   [GOVERNANCE_ROLE]: "GOVERNANCE_ROLE",
+  [OPERATOR_ROLE]: "OPERATOR_ROLE",
 };

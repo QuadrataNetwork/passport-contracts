@@ -96,3 +96,7 @@ export const ISSUERS = [
     ],
   },
 ];
+
+
+export const OPERATOR = "0x0C19DFd4Edc2545b456AdFF3f4948929a06a206C";
+export const READER_ONLY = "0xA88948CA8912c1D3C5639f1694adbc1907F9A931";

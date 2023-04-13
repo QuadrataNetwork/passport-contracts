@@ -14,6 +14,7 @@ const {
   ATTRIBUTE_ACCREDITED_INVESTOR_US,
   READER_ROLE,
   GOVERNANCE_ROLE,
+  OPERATOR_ROLE,
   DEFAULT_ADMIN_ROLE,
   PAUSER_ROLE,
 } = require("./constant.ts");
@@ -24,6 +25,8 @@ export const deployQuadrata = async (
   treasury: string,
   multisig: string,
   tokenIds: any[],
+  operator: string,
+  reader_only: string,
   verbose: boolean = false,
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
   governanceAddress: string = "",
@@ -41,6 +44,7 @@ export const deployQuadrata = async (
     return await deployPassport(governance, passportAddress);
   });
   if (verbose) console.log(`QuadPassport is deployed: ${passport.address}`);
+
   // Deploy QuadReader
   const reader = await recursiveRetry(async () => {
     return await deployReader(governance, passport, readerAddress);
@@ -207,6 +211,7 @@ export const deployQuadrata = async (
     if (verbose)
       console.log(`[QuadGovernance] grant GOVERNANCE_ROLE to ${timelock}`);
   });
+
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock, {
       maxFeePerGas,
@@ -214,6 +219,24 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(`[QuadGovernance] grant DEFAULT_ADMIN_ROLE to ${timelock}`);
+  });
+
+  await recursiveRetry(async () => {
+    const tx = await governance.grantRole(OPERATOR_ROLE, operator, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${operator}`);
+  });
+
+  await recursiveRetry(async () => {
+    const tx = await governance.grantRole(READER_ROLE, reader_only, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] grant READER_ROLE to ${reader_only}`);
   });
 
   // GRANT `PAUSER_ROLE` to MULTISIG
