@@ -36,16 +36,6 @@ interface IQuadPassport is IQuadSoulbound {
         address _issuer
     ) external view returns (bytes32);
 
-    function attributeMetadata(
-        address _account,
-        bytes32[] memory _attributes
-    ) external view returns (bytes32[] memory attributeTypes, address[] memory issuers, uint256[] memory issuedAts);
-
-    function attributesExist(
-        address _account,
-        bytes32[] memory _attributes
-    ) external view returns (bool[] memory);
-
     function burnPassports(uint256 _tokenId) external;
 
     function burnPassportsIssuer(address _account, uint256 _tokenId) external;

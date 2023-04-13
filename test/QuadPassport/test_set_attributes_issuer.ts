@@ -73,7 +73,10 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ]);
 
     // set issued at to current block timestamp
-    issuedAt = await ethers.provider.getBlock("latest").then((block) => block.timestamp) - 100;
+    issuedAt =
+      (await ethers.provider
+        .getBlock("latest")
+        .then((block) => block.timestamp)) - 100;
     verifiedAt = issuedAt;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
@@ -143,6 +146,39 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [issuer],
         passport,
         [attributes],
+        [verifiedAt],
+        [zeroFee],
+        mockReader
+      );
+    });
+
+    it("setAttributesIssuer (Update AML by passing DID(0))", async () => {
+      const attributesToUpdate: any = {
+        [ATTRIBUTE_AML]: formatBytes32String("5"),
+      };
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt
+      );
+
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributesToUpdate,
+        verifiedAt,
+        issuedAt
+      );
+
+      await assertSetAttribute(
+        businessPassport,
+        [issuer],
+        passport,
+        [attributesToUpdate],
         [verifiedAt],
         [zeroFee],
         mockReader
@@ -1001,7 +1037,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       const noMint = 0;
 
       const did = attributes[ATTRIBUTE_DID];
-      delete attributes[ATTRIBUTE_DID]
+      delete attributes[ATTRIBUTE_DID];
       sigIssuer = await signSetAttributes(
         businessPassport,
         issuer,
@@ -1206,10 +1242,10 @@ describe("QuadPassport.setAttributesIssuer", async () => {
     });
   });
 
-    // clean up test state and reset hardhat network
-    after(async () => {
-      await network.provider.request({
-        method: "hardhat_reset",
-      });
+  // clean up test state and reset hardhat network
+  after(async () => {
+    await network.provider.request({
+      method: "hardhat_reset",
     });
+  });
 });

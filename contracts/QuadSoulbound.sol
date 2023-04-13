@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC1155/extensions/IERC1155Met
 import "./interfaces/IQuadSoulbound.sol";
 
 /// @title Quadrata Soulbound NFT
-/// @author Fabrice Cheng, Theodore Clapp
+/// @author Fabrice Cheng
 /// @notice This represents Quadrata Soulbound NFT
 contract QuadSoulbound is IQuadSoulbound, ContextUpgradeable {
 

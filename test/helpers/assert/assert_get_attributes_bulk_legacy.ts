@@ -52,7 +52,6 @@ export const assertGetAttributesBulkLegacyStatic = async (
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
 ) => {
-
   // Safety Check
   expect(expectedIssuers.length).to.equal(expectedAttributes.length);
   expect(expectedIssuers.length).to.equal(expectedVerifiedAt.length);
@@ -130,13 +129,10 @@ export const assertGetAttributesBulkLegacyEvents = async (
 
   let counterResponse = 0;
 
-  attributesToQuery.forEach(async (attrType) => {
+  attributesToQuery.forEach((attrType) => {
     for (let i = 0; i < expectedAttributes.length; i++) {
       if (attrType in expectedAttributes[i]) {
-        const attrQueryFee = await reader.queryFee(account.address, attrType);
-        if (attrQueryFee > 0) {
-          counterResponse += 1;
-        }
+        counterResponse += 1;
         matchingAttributeTypes.push(attrType);
         matchingIssuers.push(expectedIssuers[i].address);
         break;

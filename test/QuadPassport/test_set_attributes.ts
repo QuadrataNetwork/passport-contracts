@@ -133,6 +133,41 @@ describe("QuadPassport.setAttributes", async () => {
       );
     });
 
+    it("setAttributes (Update AML by passing DID(0))", async () => {
+      const attributesToUpdate: any = {
+        [ATTRIBUTE_AML]: formatBytes32String("5"),
+      };
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+
+      await setAttributes(
+        minterA,
+        issuer,
+        passport,
+        attributesToUpdate,
+        verifiedAt,
+        issuedAt,
+        MINT_PRICE
+      );
+
+      await assertSetAttribute(
+        minterA,
+        [issuer],
+        passport,
+        [attributesToUpdate],
+        [verifiedAt],
+        [MINT_PRICE],
+        mockReader
+      );
+    });
+
     it("setAttributes (Multiple issuers for exact same Attribute)", async () => {
       await setAttributes(
         minterA,

@@ -72,28 +72,6 @@ library QuadReaderUtils {
     return(uint256(_attrValue) < _upperBound && uint256(_attrValue) > _lowerBound);
   }
 
-  /// @dev Checks if supplied hash is above threshold of Vantage Score value
-  /// @param _attrValue return value of query
-  /// @param _startingHiddenScore starting hidden score hash
-  /// @param _iteratorThreshold maximum number of hashing to meet criteria
-  function vantageScoreIteratorGreaterThan(bytes32 _attrValue, bytes32 _startingHiddenScore, uint256 _iteratorThreshold) public pure returns (bool){
-    if(_attrValue == bytes32(0)){
-      return false;
-    }
-
-    uint256 count = 0 ;
-    bytes32 hashIterator = _startingHiddenScore;
-
-    for(uint256 i = 0; i < 25; i++){
-      if(hashIterator==_attrValue){
-        return(count > _iteratorThreshold);
-      }
-      hashIterator = keccak256(abi.encodePacked(hashIterator));
-      count += 1;
-    }
-
-    return false;
-  }
 
   /// @dev Checks if CredProtocolScore return value is equal to a given uint256 value
   /// @param _attrValue return value of query
