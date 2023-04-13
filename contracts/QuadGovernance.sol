@@ -270,8 +270,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         emit IssuerAttributePermission(_issuer, _attribute, _permission);
     }
 
-
-
     function _authorizeUpgrade(address) override internal view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
     }
