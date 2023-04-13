@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { ethers, upgrades } from "hardhat";
 import { network } from "hardhat";
 import { expect } from "chai";
