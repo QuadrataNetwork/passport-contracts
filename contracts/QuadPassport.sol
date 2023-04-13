@@ -13,7 +13,7 @@ import "./storage/QuadPassportStoreV2.sol";
 import "./QuadSoulbound.sol";
 
 /// @title Quadrata Web3 Identity Passport
-/// @author Fabrice Cheng, Theodore Clapp
+/// @author Fabrice Cheng
 /// @notice This represents a Quadrata NFT Passport
 contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStoreV2 {
 
@@ -216,7 +216,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         }
         if (governance.eligibleAttributesByDID(_attribute)){
             if (_did == bytes32(0)) {
-                Attribute memory did = _attribute(_account, ATTRIBUTE_DID);
+                Attribute memory did = _attributeInternal(_account, ATTRIBUTE_DID);
                 if (did.value != bytes32(0)) {
                     _did = did.value;
                 }
@@ -349,10 +349,10 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) public view override returns (Attribute memory) {
         require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
 
-        return _attribute(_account, _attribute);
+        return _attributeInternal(_account, _attribute);
     }
 
-    function _attribute(
+    function _attributeInternal(
         address _account,
         bytes32 _attribute
     ) internal view returns(Attribute memory) {
@@ -394,86 +394,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         pendingGovernance = _governanceContract;
         emit SetPendingGovernance(pendingGovernance);
     }
-
-    /// @dev Gets the count of attestations for the given attribute(s)
-    /// @param _account address of user
-    /// @param _attribute attribute to get the counts from
-    /// @return count of attestations for the given attribute(s)
-    function _attributeLength(
-        address _account,
-        bytes32[] memory _attribute
-    ) internal view returns (uint256) {
-        uint256 attributeLength;
-        for(uint256 i = 0; i < _attribute.length; i++) {
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attKey = attributeKey(_account, _attribute[i], governance.getIssuers()[j]);
-                IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
-                if (attribute.epoch != uint256(0)) {
-                    attributeLength += 1;
-                }
-            }
-        }
-        return attributeLength;
-    }
-
-    /// @dev Allow users to grab all the metadata for a given attribute(s)
-    /// @param _account address of user
-    /// @param _attributes attributes to get respective non-value data from
-    /// @return attributeNames list of attribute names encoded as keccack256("AML") for example
-    /// @return issuers list of issuers for the attribute[i]
-    /// @return issuedAts list of epochs for the attribute[i]
-    function attributeMetadata(
-        address _account,
-        bytes32[] memory _attributes
-    ) public view override returns (bytes32[] memory attributeNames, address[] memory issuers, uint256[] memory issuedAts) {
-
-        uint256 attributeLength = _attributeLength(_account, _attributes);
-
-        // allocate arrays and set length
-        attributeNames = new bytes32[](attributeLength);
-        issuers = new address[](attributeLength);
-        issuedAts = new uint256[](attributeLength);
-        uint256 attributeIndex;
-
-        // second pass fill arrays
-        for(uint256 i = 0; i < _attributes.length; i++) {
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
-                IQuadPassportStore.Attribute memory attribute = _attributesv2[attKey];
-                if (attribute.epoch != 0) {
-                    attributeNames[attributeIndex] = _attributes[i];
-                    issuers[attributeIndex] = governance.getIssuers()[j];
-                    issuedAts[attributeIndex] = attribute.epoch;
-                    attributeIndex++;
-                }
-            }
-        }
-    }
-
-    /// @dev Allow users to grab all existences for a given attribute(s)
-    /// @param _account address of user
-    /// @param _attributes attributes to get respective bool data from
-    /// @return existences list of bools for the attribute[i]
-    function attributesExist(
-        address _account,
-        bytes32[] memory _attributes
-    ) public view override returns(bool[] memory existences) {
-
-        // allocate array and set length
-        existences = new bool[](_attributes.length);
-
-        for(uint256 i = 0; i < _attributes.length; i++) {
-            for(uint256 j = 0; j < governance.getIssuersLength(); j++) {
-                bytes32 attKey = attributeKey(_account, _attributes[i], governance.getIssuers()[j]);
-                // set existence to true if attribute exists
-                if (_attributesv2[attKey].epoch != 0) {
-                    existences[i] = true;
-                    break;
-                }
-            }
-        }
-    }
-
 
     /// @dev Withdraw to an issuer's treasury
     /// @notice Restricted behind a TimelockController
