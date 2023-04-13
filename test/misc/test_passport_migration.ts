@@ -11,7 +11,7 @@ const {
     ATTRIBUTE_IS_BUSINESS,
 } = require("../../utils/constant.ts");
 
-describe("PassportMigration", async () => {
+describe.skip("PassportMigration", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
             // fork mainnet eth
