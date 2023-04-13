@@ -128,13 +128,10 @@ export const assertGetAttributesBulkEvents = async (
 
   let counterResponse = 0;
 
-  attributesToQuery.forEach(async (attrType) => {
+  attributesToQuery.forEach((attrType) => {
     for (let i = 0; i < expectedAttributes.length; i++) {
       if (attrType in expectedAttributes[i]) {
-        const attrQueryFee = await reader.queryFee(account.address, attrType);
-        if (attrQueryFee > 0) {
-          counterResponse += 1;
-        }
+        counterResponse += 1;
         matchingAttributeTypes.push(attrType);
         matchingIssuers.push(expectedIssuers[i].address);
         break;

@@ -152,7 +152,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       );
     });
 
-    it.only("setAttributesIssuer (Update AML by passing DID(0))", async () => {
+    it("setAttributesIssuer (Update AML by passing DID(0))", async () => {
       const attributesToUpdate: any = {
         [ATTRIBUTE_AML]: formatBytes32String("5"),
       };
