@@ -480,14 +480,14 @@ describe("QuadPassport.setAttributes", async () => {
       attrValues = [];
       attrTypes = [];
 
-      const did = formatBytes32String("0");
-
       attributes = {
         [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
         [ATTRIBUTE_AML]: formatBytes32String("1"),
         [ATTRIBUTE_COUNTRY]: id("FRANCE"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
+
+      const did = attributes[ATTRIBUTE_DID];
 
       // Deep Copy to avoid mutating the object
       attributesCopy = Object.assign({}, attributes);
@@ -516,14 +516,15 @@ describe("QuadPassport.setAttributes", async () => {
         fee,
         did,
         passport.address,
-        chainId
+        chainId,
+        tokenId
       );
 
       sigAccount = await signAccount(minterA);
     });
 
-    it("success - with no mint with tokenId = 0", async () => {
-      const noMint = 0;
+    it("success - with tokenId = 0", async () => {
+      const tokenId = 0;
 
       const did = attributes[ATTRIBUTE_DID];
       // remove first key-value mapping in attributes
@@ -540,7 +541,7 @@ describe("QuadPassport.setAttributes", async () => {
         did,
         passport.address,
         chainId,
-        noMint
+        tokenId
       );
 
       await passport
@@ -551,7 +552,7 @@ describe("QuadPassport.setAttributes", async () => {
             attrValues,
             attrTypes,
             did,
-            noMint,
+            tokenId,
             verifiedAt,
             issuedAt,
             fee,
@@ -563,9 +564,8 @@ describe("QuadPassport.setAttributes", async () => {
           }
         );
 
-      expect(await passport.balanceOf(minterA.address, 0)).equals(0);
+      expect(await passport.balanceOf(minterA.address, 0)).equals(1);
       expect(await passport.balanceOf(minterA.address, 1)).equals(0);
-      expect(await passport.balanceOf(minterA.address, 2)).equals(0);
 
       await assertGetAttributes(
         minterA,
@@ -884,8 +884,8 @@ describe("QuadPassport.setAttributes", async () => {
       ).to.be.revertedWith("MISMATCH_LENGTH");
     });
 
-    it("fail - invalid signature (attrKeys)", async () => {
-      attrKeys[0] = id("wrong");
+    it("fail - invalid signature (attrTypes)", async () => {
+      attrTypes[0] = id("wrong");
 
       await expect(
         passport
