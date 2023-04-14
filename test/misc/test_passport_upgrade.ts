@@ -11,9 +11,16 @@ const {
     ATTRIBUTE_AML,
     ATTRIBUTE_COUNTRY,
     ATTRIBUTE_IS_BUSINESS,
+    NETWORK_IDS,
 } = require("../../utils/constant.ts");
 
-describe.skip("PassportMigration", async () => {
+const {
+    QUAD_PASSPORT,
+    QUAD_READER,
+    QUAD_GOVERNANCE
+} = require("../../scripts/data/mainnet.ts");
+
+describe("PassportUpgrade", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
             // fork mainnet eth
@@ -28,22 +35,21 @@ describe.skip("PassportMigration", async () => {
                     },
                 ],
             });
+
             // Preapproved address
+            const preapprovedAddr = '0xbA80003B975D1C82d64Efc7F8d2daC393E79B3f9';
             await network.provider.request({
               method: "hardhat_impersonateAccount",
-              params: ["0xbA80003B975D1C82d64Efc7F8d2daC393E79B3f9"],
+              params: [preapprovedAddr],
             });
-
-            const quadPassport = await ethers.getContractAt("QuadPassport", "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d");
-            const quadReader = await ethers.getContractAt("QuadReader", "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
-            const quadGovernance = await ethers.getContractAt("QuadGovernance", "0xBfa59A31b379A62304327386bC2b03096D7695B3");
+            const preapproved = await ethers.getSigner(preapprovedAddr)
+            const quadPassport = await ethers.getContractAt("QuadPassport",  QUAD_PASSPORT[NETWORK_IDS.MAINNET]);
+            const quadReader = await ethers.getContractAt("QuadReader",  QUAD_READER[NETWORK_IDS.MAINNET]);
+            const quadGovernance = await ethers.getContractAt("QuadGovernance", QUAD_GOVERNANCE[NETWORK_IDS.MAINNET]);
 
             const oldPassportImplAddress = await getImplementationAddress(network.provider, quadPassport.address);
             const oldReaderImplAddress = await getImplementationAddress(network.provider, quadReader.address);
             const oldGovernanceImplAddress = await getImplementationAddress(network.provider, quadGovernance.address);
-
-
-            const preapproved = await ethers.getSigner("0xbA80003B975D1C82d64Efc7F8d2daC393E79B3f9")
 
             const didResults = await quadReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_DID)
             const amlResults = await quadReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_AML)
@@ -64,11 +70,12 @@ describe.skip("PassportMigration", async () => {
             expect(await quadGovernance.issuersTreasury('0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF'), '0xb93b22B75ac3EA6B5066c169B747DF249034F467')
             expect(await quadGovernance.issuersTreasury('0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
 
+            const timelockAddress = "0x76694A182dB047067521c73161Ebf3Db5Ca988d3";
             await network.provider.request({
               method: "hardhat_impersonateAccount",
-              params: ["0x76694A182dB047067521c73161Ebf3Db5Ca988d3"],
+              params: [timelockAddress],
             });
-            const timelock = await ethers.getSigner("0x76694A182dB047067521c73161Ebf3Db5Ca988d3")
+            const timelock = await ethers.getSigner(timelockAddress)
 
             const deployer = (await ethers.getSigners())[0];
             await deployer.sendTransaction({
