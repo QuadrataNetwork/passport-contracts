@@ -1032,8 +1032,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("success - with no mint with tokenId = 0", async () => {
-      const noMint = 0;
+    it("success - with tokenId = 0", async () => {
+      const tokenId = 0;
 
       const did = attributes[ATTRIBUTE_DID];
       delete attributes[ATTRIBUTE_DID];
@@ -1047,7 +1047,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         did,
         passport.address,
         chainId,
-        noMint
+        tokenId
       );
 
       await passport
@@ -1059,7 +1059,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             attrValues,
             attrTypes,
             did,
-            noMint,
+            tokenId,
             verifiedAt,
             issuedAt,
             fee,
@@ -1070,7 +1070,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           }
         );
 
-      expect(await passport.balanceOf(businessPassport.address, 0)).equals(0);
+      expect(await passport.balanceOf(businessPassport.address, 0)).equals(1);
       expect(await passport.balanceOf(businessPassport.address, 1)).equals(0);
       expect(await passport.balanceOf(businessPassport.address, 2)).equals(0);
 
