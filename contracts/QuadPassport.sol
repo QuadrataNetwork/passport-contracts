@@ -186,7 +186,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32 extractionHash = keccak256(
             abi.encode(
                 _account,
-                _config.attrKeys,
+                _config.attrTypes,
                 _config.attrValues,
                 _config.did,
                 _config.verifiedAt,
