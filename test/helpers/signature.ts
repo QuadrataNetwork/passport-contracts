@@ -35,11 +35,12 @@ export const signSetAttributes = async (
   chainId: number = HARDHAT_CHAIN_ID,
   tokenId: number = DEFAULT_TOKEN_ID
 ): Promise<typeof DataHexString> => {
-  const attrKeys: string[] = [];
+  const attrTypes: string[] = [];
   const attrValues: string[] = [];
 
   Object.keys(attributes).forEach((k, i) => {
     attrValues.push(attributes[k]);
+    attrTypes.push(k);
   });
 
   const hash = ethers.utils.keccak256(
@@ -58,7 +59,7 @@ export const signSetAttributes = async (
       ],
       [
         account.address,
-        attrKeys,
+        attrTypes,
         attrValues,
         did,
         verifiedAt,

@@ -76,7 +76,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     }
 
-    /// @notice Set attributes for a Quadrata Passport (only by Issuers)
+    /// @notice Set attributes for a Quadrata Passport
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
@@ -122,7 +122,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _config.verifiedAt);
         }
 
-        if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
+        if (balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
         }
         emit SetAttributeReceipt(_account, _issuer, _config.fee);
@@ -146,7 +146,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     }
 
     /// @notice Internal function that writes the attribute value and issuer position to storage
-    /// @param _attrKey attribute key (i.e. keccak256(address, keccak256("AML")))
+    /// @param _attrKey attribute key (i.e. keccak256(userAddress, keccak256("AML"), issuerAddress))
     /// @param _attrValue attribute value
     /// @param _verifiedAt timestamp of when attribute was verified at
     function _writeAttrToStorage(
@@ -186,7 +186,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32 extractionHash = keccak256(
             abi.encode(
                 _account,
-                _config.attrKeys,
+                _config.attrTypes,
                 _config.attrValues,
                 _config.did,
                 _config.verifiedAt,
@@ -238,7 +238,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             for(uint256 j = 0; j < issuers.length; j++) {
                 bytes32 attributeType = governance.eligibleAttributesArray(i);
                 address issuer = issuers[j];
-                bytes32 attrKey = attributeKey(account, attributeType, issuer);
+                bytes32 attrKey = _attributeKey(account, attributeType, issuer);
                 delete _attributesv2[attrKey];
             }
         }
@@ -261,13 +261,13 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         // surface pass only delete attributes from issuer
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            bytes32 attrKey = attributeKey(_account, attributeType, issuer);
+            bytes32 attrKey = _attributeKey(_account, attributeType, issuer);
             delete _attributesv2[attrKey];
             // second depth checks if account still has attributes from other issuers
             for(uint256 j = 0; isEmpty && j < allIssuers.length; j++) {
                 address otherIssuer = allIssuers[j];
                 if (otherIssuer != issuer) {
-                    attrKey = attributeKey(_account, attributeType, otherIssuer);
+                    attrKey = _attributeKey(_account, attributeType, otherIssuer);
                     if (_attributesv2[attrKey].value != bytes32(0)) {
                         isEmpty = false;
                     }
@@ -358,7 +358,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     ) internal view returns(Attribute memory) {
         address[] memory issuers = governance.getIssuers();
         for (uint256 i = 0; i < issuers.length; i++) {
-            bytes32 attrKey = attributeKey(_account, _attribute, issuers[i]);
+            bytes32 attrKey = _attributeKey(_account, _attribute, issuers[i]);
             Attribute memory attr = _attributesv2[attrKey];
             if (attr.epoch != uint256(0)) {
                 attr.issuer = issuers[i];
@@ -375,11 +375,11 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     /// @param _attribute attribute to get respective value from
     /// @param _issuer address of issuer
     /// @return key for attribute
-    function attributeKey(
+    function _attributeKey(
         address _account,
         bytes32 _attribute,
         address _issuer
-    ) public view override returns (bytes32) {
+    ) internal view returns (bytes32) {
         bytes32 did = governance.eligibleAttributesByDID(_attribute) ? _attributesv2[keccak256(abi.encode(_account, ATTRIBUTE_DID, _issuer))].value : bytes32(0);
         return did != bytes32(0) ? keccak256(abi.encode(did, _attribute, _issuer)) : keccak256(abi.encode(_account, _attribute, _issuer));
     }
