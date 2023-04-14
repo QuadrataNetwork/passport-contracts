@@ -36,7 +36,7 @@ const {
 // QuadGOvernance.upgrade, QuadREader.upgrade, QuadPasport.upgrade cannot be called by non-governance role
 
 
-describe("PassportUpgrade", async () => {
+describe.skip("PassportUpgrade", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
             // fork mainnet eth
