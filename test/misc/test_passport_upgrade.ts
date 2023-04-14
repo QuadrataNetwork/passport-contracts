@@ -20,6 +20,22 @@ const {
     QUAD_GOVERNANCE
 } = require("../../scripts/data/mainnet.ts");
 
+
+
+// 5 previous individual passports + 5 business passports can still be queried with the exact same values
+// a preapproved wallet can still query before and after upgrade
+// a non-preapproved wallet CANNOT query before and after upgrade
+// all QuadGovernance storage values remain the same before and after upgrade
+// all QuadPassport storage values remain the same before and after upgrade
+// an admin can still update some QuadGovernance values before and after upgrade
+// a non-admin CANNOT update some admin QuadGovernance values before and after upgrade
+// an operator can still call setTokenURI after upgrade
+// all assigned roles for DEFAULT_ADMIN, GOVERNANCE, READER, OPERATOR, ISSUER remain the same before and after upgrade
+// an unassigned role remain unassigned for DEFAULT_ADMIN, GOVERNANCE, READER, OPERATOR, ISSUER remain the same before and after upgrade
+// QuadPassport.attributes & QuadPassport.attribute cannot be called by a NON-READER role before and after upgrade
+// QuadGOvernance.upgrade, QuadREader.upgrade, QuadPasport.upgrade cannot be called by non-governance role
+
+
 describe("PassportUpgrade", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
