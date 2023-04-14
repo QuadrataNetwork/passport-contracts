@@ -122,7 +122,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
                 _config.verifiedAt);
         }
 
-        if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
+        if (balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
         }
         emit SetAttributeReceipt(_account, _issuer, _config.fee);
@@ -186,7 +186,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes32 extractionHash = keccak256(
             abi.encode(
                 _account,
-                _config.attrKeys,
+                _config.attrTypes,
                 _config.attrValues,
                 _config.did,
                 _config.verifiedAt,

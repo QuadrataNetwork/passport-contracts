@@ -830,9 +830,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("MISMATCH_LENGTH");
     });
 
-    it("fail - invalid signature (attrKeys)", async () => {
-      attrKeys[0] = id("wrong");
-
+    it("fail - invalid signature (attrTypes)", async () => {
+      attrTypes[0] = id("wrong");
       await expect(
         passport
           .connect(issuer)
