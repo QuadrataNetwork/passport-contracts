@@ -166,7 +166,7 @@ import "./storage/QuadReaderStoreV2.sol";
        return passport.attributes(_account, _attribute).length;
     }
 
-    /// @dev Returns the number of attestations for an attribute about a Passport holder
+    /// @dev (DEPRECATED) Returns the number of attestations for an attribute about a Passport holder
     /// @param _account account getting requested for attributes
     /// @param _attribute keccak256 of the attribute type (ex: keccak256("COUNTRY"))
     /// @return the amount of existing attributes
