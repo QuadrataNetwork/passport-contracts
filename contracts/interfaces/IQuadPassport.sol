@@ -7,7 +7,7 @@ import "./IQuadSoulbound.sol";
 interface IQuadPassport is IQuadSoulbound {
     event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
     event SetPendingGovernance(address indexed _pendingGovernance);
-    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
+    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee, uint256 _tokenId);
     event BurnPassportsIssuer(address indexed _issuer, address indexed _account);
     event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee);
 

@@ -78,5 +78,5 @@ export const setAttributesIssuer = async (
       )
   )
     .to.emit(passport, "SetAttributeReceipt")
-    .withArgs(account.address, issuer.address, fee);
+    .withArgs(account.address, issuer.address, fee, tokenId);
 };
