@@ -23,7 +23,6 @@ const {
 
 
 // 5 business passports can still be queried with the exact same values
-// a preapproved wallet can still query before and after upgrade
 // a non-preapproved wallet CANNOT query before and after upgrade
 // all QuadGovernance storage values remain the same before and after upgrade
 // all QuadPassport storage values remain the same before and after upgrade
@@ -41,7 +40,10 @@ const INDIVIDUAL_ADDRESS_3 = '0x743d89a62248b787a23c663894b8cd36ac2049ec'
 const INDIVIDUAL_ADDRESS_4 = '0xea0bac222acd0c364fb0d6ec6d4110231ad6eeb3'
 const INDIVIDUAL_ADDRESS_5 = '0xb802f2e0e43438bdf64ee736f135f94ee071c087'
 
-const EXPECTED_INDIVIDUAL_RESULTS = {
+
+const BUSINESS_ADDRESS_1 = '0x3bAe075c8728a976E69e6F2E45e9682D1BA063d2'
+
+const EXPECTED_WALLET_RESULTS = {
     [INDIVIDUAL_ADDRESS_1]: {
         'did': '0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1',
         'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -72,7 +74,14 @@ const EXPECTED_INDIVIDUAL_RESULTS = {
         'country': '0xfef58748d1dea6ebd1e61c2e5413397c0158d086bee02a41ba00125b4664ddf6',
         'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
     },
+    [BUSINESS_ADDRESS_1]: {
+        'did': '0xdec2862c74474c7c71c078149c7332d6aa6257f7950b940a0ff84c8888cfacf0',
+        'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
+        'country': '0x32a63c4c805a578620c21134057f327a17922ae1831d86fc8ca0ea168bc25ce3',
+        'isBusiness': '0x7749ed7587e6dbf171ce6be50bea67236732d7ccfd51e327bc28b612ec06faa7',
+    },
 }
+
 
 const fetchResults = async (quadReader, preapproved, address) => {
     return {
@@ -131,11 +140,11 @@ describe("PassportUpgrade", async () => {
             const oldReaderImplAddress = await getImplementationAddress(network.provider, quadReader.address);
             const oldGovernanceImplAddress = await getImplementationAddress(network.provider, quadGovernance.address);
 
-            for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5]){
+            for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5, BUSINESS_ADDRESS_1]){
                 let results = await fetchResults(quadReader, preapproved, wallet)
-                expect(results['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['did'])
-                expect(results['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['aml'])
-                expect(results['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['country'])
+                expect(results['did'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['did'])
+                expect(results['aml'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['aml'])
+                expect(results['country'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['country'])
             }
 
             await assertGovernanceValues(quadGovernance)
@@ -189,11 +198,11 @@ describe("PassportUpgrade", async () => {
             expect(newReaderImplAddress).to.not.eql(oldReaderImplAddress)
             expect(newGovernanceImplAddress).to.not.eql(oldGovernanceImplAddress)
 
-            for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5]){
+            for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5, BUSINESS_ADDRESS_1]){
                 let results = await fetchResults(upgradedReader, preapproved, wallet)
-                expect(results['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['did'])
-                expect(results['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['aml'])
-                expect(results['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['country'])
+                expect(results['did'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['did'])
+                expect(results['aml'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['aml'])
+                expect(results['country'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['country'])
             }
 
             await assertGovernanceValues(upgradedGovernance)
