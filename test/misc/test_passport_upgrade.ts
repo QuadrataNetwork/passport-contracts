@@ -36,12 +36,17 @@ const {
 // QuadGOvernance.upgrade, QuadREader.upgrade, QuadPasport.upgrade cannot be called by non-governance role
 
 const INDIVIDUAL_ADDRESS_1 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
+const INDIVIDUAL_ADDRESS_2 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
+const INDIVIDUAL_ADDRESS_3 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
+const INDIVIDUAL_ADDRESS_4 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
+const INDIVIDUAL_ADDRESS_5 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
 
 const EXPECTED_INDIVIDUAL_RESULTS = {
     [INDIVIDUAL_ADDRESS_1]: {
         'did': '0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1',
         'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
         'country': '0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189',
+        'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
     }
 }
 
@@ -50,10 +55,12 @@ const fetchResults = async (quadReader, preapproved, address) => {
         'did': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_DID),
         'aml': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_AML),
         'country': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_COUNTRY),
+        'isBusiness': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_IS_BUSINESS),
+
     };
 };
 
-const assertGovernance = async (quadGovernance) => {
+const assertGovernanceValues = async (quadGovernance) => {
     expect(await quadGovernance.treasury(), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
     expect(await quadGovernance.revSplitIssuer(), '50')
     expect(await quadGovernance.passport(), '0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d ')
@@ -67,6 +74,9 @@ const assertGovernance = async (quadGovernance) => {
 }
 
 /// To get this test to work, you have to copy/paste .openzeppelin/mainnet.json into unknown-31337.json
+/// or just run in the project root dir:
+///
+/// cp -r .openzeppelin/mainnet.json .openzeppelin/unknown-31337.json; npx hardhat test test/misc/test_passport_upgrade.ts
 describe("PassportUpgrade", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
@@ -103,7 +113,7 @@ describe("PassportUpgrade", async () => {
             expect(individualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
             expect(individualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
 
-            await assertGovernance(quadGovernance)
+            await assertGovernanceValues(quadGovernance)
 
             const timelockAddress = "0x76694A182dB047067521c73161Ebf3Db5Ca988d3";
             await network.provider.request({
@@ -159,7 +169,7 @@ describe("PassportUpgrade", async () => {
             expect(upgradedIndividualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
             expect(upgradedIndividualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
 
-            await assertGovernance(upgradedGovernance)
+            await assertGovernanceValues(upgradedGovernance)
         });
     });
 });
