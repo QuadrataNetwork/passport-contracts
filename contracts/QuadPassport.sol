@@ -125,7 +125,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         if (balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
         }
-        emit SetAttributeReceipt(_account, _issuer, _config.fee);
+        emit SetAttributeReceipt(_account, _issuer, _config.fee,  _config.tokenId);
     }
 
     /// @notice Internal function that validates supplied DID on updates do not change
