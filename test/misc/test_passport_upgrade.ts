@@ -6,6 +6,9 @@ import { expect } from "chai";
 import { getImplementationAddress } from '@openzeppelin/upgrades-core';
 
 const {
+    READER_ROLE,
+    DEFAULT_ADMIN_ROLE,
+    OPERATOR_ROLE,
     GOVERNANCE_ROLE,
     ATTRIBUTE_DID,
     ATTRIBUTE_AML,
@@ -21,23 +24,15 @@ const {
 } = require("../../scripts/data/mainnet.ts");
 
 
-
-// an operator can still call setTokenURI after upgrade
-// all assigned roles for DEFAULT_ADMIN, GOVERNANCE, READER, OPERATOR, ISSUER remain the same before and after upgrade
-// an unassigned role remain unassigned for DEFAULT_ADMIN, GOVERNANCE, READER, OPERATOR, ISSUER remain the same before and after upgrade
-// QuadPassport.attributes & QuadPassport.attribute cannot be called by a NON-READER role before and after upgrade
-// QuadGOvernance.upgrade, QuadREader.upgrade, QuadPasport.upgrade cannot be called by non-governance role
-
 const INDIVIDUAL_ADDRESS_1 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
 const INDIVIDUAL_ADDRESS_2 = '0x560c9baf6487b9c237afe82213b92287261be5f8'
 const INDIVIDUAL_ADDRESS_3 = '0x743d89a62248b787a23c663894b8cd36ac2049ec'
 const INDIVIDUAL_ADDRESS_4 = '0xea0bac222acd0c364fb0d6ec6d4110231ad6eeb3'
 const INDIVIDUAL_ADDRESS_5 = '0xb802f2e0e43438bdf64ee736f135f94ee071c087'
 
-
 const BUSINESS_ADDRESS_1 = '0x3bAe075c8728a976E69e6F2E45e9682D1BA063d2'
 
-const EXPECTED_WALLET_RESULTS = {
+const EXPECTED_ADDRESS_RESULTS = {
     [INDIVIDUAL_ADDRESS_1]: {
         'did': '0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1',
         'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -111,7 +106,7 @@ const assertGovernanceValues = async (quadGovernance) => {
 /// or just run in the project root dir:
 ///
 /// cp -r .openzeppelin/mainnet.json .openzeppelin/unknown-31337.json; npx hardhat test test/misc/test_passport_upgrade.ts
-describe("PassportUpgrade", async () => {
+describe.skip("PassportUpgrade", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
             // fork mainnet eth
@@ -126,7 +121,7 @@ describe("PassportUpgrade", async () => {
                     },
                 ],
             });
-
+            const signers = await ethers.getSigners()
             // Setup Preapproved address
             const preapprovedAddr = '0xbA80003B975D1C82d64Efc7F8d2daC393E79B3f9';
             await network.provider.request({
@@ -143,7 +138,12 @@ describe("PassportUpgrade", async () => {
             });
             const timelock = await ethers.getSigner(timelockAddress)
 
-            const deployer = (await ethers.getSigners())[0];
+            const readerOnlyAddr = '0x1A01f08Ef4Ee82313FaceF33bCEC1C399f92bF57';
+
+            const deployer = signers[0];
+            const operator = signers[1]
+
+            // Send ETH to transaction submitters
             await deployer.sendTransaction({
                 to: timelock.address,
                 value: ethers.utils.parseEther("100.0"),
@@ -151,6 +151,11 @@ describe("PassportUpgrade", async () => {
 
             await deployer.sendTransaction({
                 to: preapproved.address,
+                value: ethers.utils.parseEther("100.0"),
+            });
+
+            await deployer.sendTransaction({
+                to: operator.address,
                 value: ethers.utils.parseEther("100.0"),
             });
 
@@ -164,35 +169,54 @@ describe("PassportUpgrade", async () => {
 
             // Admin can still set role pre-upgrade
             await quadGovernance.connect(timelock).grantRole(GOVERNANCE_ROLE, deployer.address)
+            await quadGovernance.connect(timelock).grantRole(OPERATOR_ROLE, operator.address)
+
             // Non-admin cannot set role
             await expect(quadGovernance.connect(preapproved).grantRole(GOVERNANCE_ROLE, deployer.address)).to.be.revertedWith('AccessControl: account 0xba80003b975d1c82d64efc7f8d2dac393e79b3f9 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000')
 
             // Not preapproved addresses should fail pre-upgrade
             await expect(quadReader.connect(timelock).callStatic.getAttributes(INDIVIDUAL_ADDRESS_1, ATTRIBUTE_DID)).to.be.revertedWith('SENDER_NOT_AUTHORIZED')
 
+            // Assert roles pre-upgrade
+            expect(await quadGovernance.hasRole(GOVERNANCE_ROLE, timelock.address)).eql(true)
+            expect(await quadGovernance.hasRole(DEFAULT_ADMIN_ROLE, timelock.address)).eql(true)
+            expect(await quadGovernance.hasRole(READER_ROLE, readerOnlyAddr)).eql(true)
+
+            // Assert burn address does not have any roles pre-upgrade
+            expect(await quadGovernance.hasRole(GOVERNANCE_ROLE, '0x0000000000000000000000000000000000000000')).eql(false)
+            expect(await quadGovernance.hasRole(DEFAULT_ADMIN_ROLE, '0x0000000000000000000000000000000000000000')).eql(false)
+            expect(await quadGovernance.hasRole(READER_ROLE, '0x0000000000000000000000000000000000000000')).eql(false)
+
+            // Assert non-readers cannot call QuadPassport.attributes()
+            await expect(quadPassport.connect(deployer).attributes(deployer.address, ATTRIBUTE_AML)).to.be.revertedWith('INVALID_READER')
+
             // Assert wallets have expected DID, AML and COUNTRY
             for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5, BUSINESS_ADDRESS_1]){
                 let results = await fetchResults(quadReader, preapproved, wallet)
-                expect(results['did'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['did'])
-                expect(results['aml'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['aml'])
-                expect(results['country'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['country'])
+                expect(results['did'][0].value).eql(EXPECTED_ADDRESS_RESULTS[wallet]['did'])
+                expect(results['aml'][0].value).eql(EXPECTED_ADDRESS_RESULTS[wallet]['aml'])
+                expect(results['country'][0].value).eql(EXPECTED_ADDRESS_RESULTS[wallet]['country'])
             }
 
             await assertGovernanceValues(quadGovernance)
             await assertPassportValues(quadPassport)
 
+            // Should not be able to call upgrade from non-governance
+            await expect(quadPassport.connect(preapproved).upgradeTo(deployer.address)).to.be.revertedWith('INVALID_ADMIN')
+            await expect(quadGovernance.connect(preapproved).upgradeTo(deployer.address)).to.be.revertedWith('INVALID_ADMIN')
+            await expect(quadReader.connect(preapproved).upgradeTo(deployer.address)).to.be.revertedWith('INVALID_ADMIN')
 
-            await quadGovernance.connect(timelock).grantRole(GOVERNANCE_ROLE, deployer.address)
 
+
+            // Perform upgrade
             const QuadPassport = await ethers.getContractFactory(
                 "QuadPassport"
             );
             const upgradedPassport = await upgrades.upgradeProxy(
                 quadPassport.address,
                 QuadPassport,
-                { unsafeAllow: ["constructor"] }
+                { unsafeAllow: ["constructor"]}
             );
-
             const QuadReader = await ethers.getContractFactory(
                 "QuadReader"
             );
@@ -201,7 +225,6 @@ describe("PassportUpgrade", async () => {
                 QuadReader,
                 { unsafeAllow: ["constructor"] }
             );
-
             const QuadGovernance = await ethers.getContractFactory(
                 "QuadGovernance"
             );
@@ -227,15 +250,35 @@ describe("PassportUpgrade", async () => {
             // Assert wallets have same DID, AML and COUNTRY post-upgrade
             for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5, BUSINESS_ADDRESS_1]){
                 let results = await fetchResults(upgradedReader, preapproved, wallet)
-                expect(results['did'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['did'])
-                expect(results['aml'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['aml'])
-                expect(results['country'][0].value).eql(EXPECTED_WALLET_RESULTS[wallet]['country'])
+                expect(results['did'][0].value).eql(EXPECTED_ADDRESS_RESULTS[wallet]['did'])
+                expect(results['aml'][0].value).eql(EXPECTED_ADDRESS_RESULTS[wallet]['aml'])
+                expect(results['country'][0].value).eql(EXPECTED_ADDRESS_RESULTS[wallet]['country'])
             }
             // Not preapproved addresses should fail pre-upgrade
-            await expect(quadReader.connect(timelock).callStatic.getAttributes(INDIVIDUAL_ADDRESS_1, ATTRIBUTE_DID)).to.be.revertedWith('SENDER_NOT_AUTHORIZED')
+            await expect(upgradedReader.connect(timelock).getAttributes(INDIVIDUAL_ADDRESS_1, ATTRIBUTE_DID)).to.be.revertedWith('SENDER_NOT_AUTHORIZED')
+            await upgradedGovernance.connect(operator).setTokenURI('69', 'https://www.whatever.com')
+
+            // Assert roles pre-upgrade
+            expect(await upgradedGovernance.hasRole(GOVERNANCE_ROLE, timelock.address)).eql(true)
+            expect(await upgradedGovernance.hasRole(DEFAULT_ADMIN_ROLE, timelock.address)).eql(true)
+            expect(await upgradedGovernance.hasRole(READER_ROLE, readerOnlyAddr)).eql(true)
+
+            // Assert burn address does not have any roles post-upgrade
+            expect(await upgradedGovernance.hasRole(GOVERNANCE_ROLE, '0x0000000000000000000000000000000000000000')).eql(false)
+            expect(await upgradedGovernance.hasRole(DEFAULT_ADMIN_ROLE, '0x0000000000000000000000000000000000000000')).eql(false)
+            expect(await upgradedGovernance.hasRole(READER_ROLE, '0x0000000000000000000000000000000000000000')).eql(false)
+
+            // Assert non-readers cannot call QuadPassport.attributes()
+            await expect(upgradedPassport.connect(deployer).attributes(deployer.address, ATTRIBUTE_AML)).to.be.revertedWith('INVALID_READER')
 
             await assertGovernanceValues(upgradedGovernance)
             await assertPassportValues(upgradedPassport)
+
+            // Should not be able to call upgrade from non-governance
+            await expect(upgradedPassport.connect(preapproved).upgradeTo(deployer.address)).to.be.revertedWith('INVALID_ADMIN')
+            await expect(upgradedGovernance.connect(preapproved).upgradeTo(deployer.address)).to.be.revertedWith('INVALID_ADMIN')
+            await expect(upgradedReader.connect(preapproved).upgradeTo(deployer.address)).to.be.revertedWith('INVALID_ADMIN')
+
         });
     });
 });
