@@ -36,10 +36,10 @@ const {
 // QuadGOvernance.upgrade, QuadREader.upgrade, QuadPasport.upgrade cannot be called by non-governance role
 
 const INDIVIDUAL_ADDRESS_1 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
-const INDIVIDUAL_ADDRESS_2 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
-const INDIVIDUAL_ADDRESS_3 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
-const INDIVIDUAL_ADDRESS_4 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
-const INDIVIDUAL_ADDRESS_5 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
+const INDIVIDUAL_ADDRESS_2 = '0x560c9baf6487b9c237afe82213b92287261be5f8'
+const INDIVIDUAL_ADDRESS_3 = '0x743d89a62248b787a23c663894b8cd36ac2049ec'
+const INDIVIDUAL_ADDRESS_4 = '0xea0bac222acd0c364fb0d6ec6d4110231ad6eeb3'
+const INDIVIDUAL_ADDRESS_5 = '0xb802f2e0e43438bdf64ee736f135f94ee071c087'
 
 const EXPECTED_INDIVIDUAL_RESULTS = {
     [INDIVIDUAL_ADDRESS_1]: {
@@ -47,7 +47,31 @@ const EXPECTED_INDIVIDUAL_RESULTS = {
         'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
         'country': '0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189',
         'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
-    }
+    },
+    [INDIVIDUAL_ADDRESS_2]: {
+        'did': '0xad455feaa57a630819dfcd91a4f8cae0e1eadb7e6097b4081c2bb8bfab50cbb9',
+        'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
+        'country': '0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189',
+        'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
+    },
+    [INDIVIDUAL_ADDRESS_3]: {
+        'did': '0x6b564ef28df70adcc70aa23db3b80c9dc3c678ac14ec83a4d80e2bc0c40d2a36',
+        'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
+        'country': '0x32a63c4c805a578620c21134057f327a17922ae1831d86fc8ca0ea168bc25ce3',
+        'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
+    },
+    [INDIVIDUAL_ADDRESS_4]: {
+        'did': '0x3b154246dac915d8dd6135bf2512145415d286d346465366a3bd71094050c29c',
+        'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
+        'country': '0xa58de32261c1daca7d9359f64242e87c5d42b10589f30dafe0c3cf007786f64a',
+        'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
+    },
+    [INDIVIDUAL_ADDRESS_5]: {
+        'did': '0x0dfd20819935177fc9a663466f53229f489720f706aac054580323190f9a785f',
+        'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
+        'country': '0xfef58748d1dea6ebd1e61c2e5413397c0158d086bee02a41ba00125b4664ddf6',
+        'isBusiness': '0xa357fcb91396b2afa7ab60192e270c625a2eb250b8f839ddb179f207b40459b4',
+    },
 }
 
 const fetchResults = async (quadReader, preapproved, address) => {
@@ -56,7 +80,6 @@ const fetchResults = async (quadReader, preapproved, address) => {
         'aml': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_AML),
         'country': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_COUNTRY),
         'isBusiness': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_IS_BUSINESS),
-
     };
 };
 
@@ -87,7 +110,7 @@ describe("PassportUpgrade", async () => {
                     {
                         forking: {
                             jsonRpcUrl: process.env.MAINNET_URI,
-                            blockNumber: 17039224,
+                            blockNumber: 17082401,
                         },
                     },
                 ],
@@ -108,10 +131,12 @@ describe("PassportUpgrade", async () => {
             const oldReaderImplAddress = await getImplementationAddress(network.provider, quadReader.address);
             const oldGovernanceImplAddress = await getImplementationAddress(network.provider, quadGovernance.address);
 
-            const individualResults1 = await fetchResults(quadReader, preapproved, INDIVIDUAL_ADDRESS_1)
-            expect(individualResults1['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['did'])
-            expect(individualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
-            expect(individualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
+            for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5]){
+                let results = await fetchResults(quadReader, preapproved, wallet)
+                expect(results['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['did'])
+                expect(results['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['aml'])
+                expect(results['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['country'])
+            }
 
             await assertGovernanceValues(quadGovernance)
 
@@ -164,10 +189,12 @@ describe("PassportUpgrade", async () => {
             expect(newReaderImplAddress).to.not.eql(oldReaderImplAddress)
             expect(newGovernanceImplAddress).to.not.eql(oldGovernanceImplAddress)
 
-            const upgradedIndividualResults1 = await fetchResults(upgradedReader, preapproved, INDIVIDUAL_ADDRESS_1)
-            expect(upgradedIndividualResults1['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['did'])
-            expect(upgradedIndividualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
-            expect(upgradedIndividualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
+            for (const wallet of [INDIVIDUAL_ADDRESS_1, INDIVIDUAL_ADDRESS_2, INDIVIDUAL_ADDRESS_3, INDIVIDUAL_ADDRESS_4, INDIVIDUAL_ADDRESS_5]){
+                let results = await fetchResults(upgradedReader, preapproved, wallet)
+                expect(results['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['did'])
+                expect(results['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['aml'])
+                expect(results['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[wallet]['country'])
+            }
 
             await assertGovernanceValues(upgradedGovernance)
         });
