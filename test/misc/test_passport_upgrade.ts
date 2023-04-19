@@ -38,7 +38,7 @@ const {
 const INDIVIDUAL_ADDRESS_1 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
 
 const EXPECTED_INDIVIDUAL_RESULTS = {
-    INDIVIDUAL_ADDRESS_1: {
+    [INDIVIDUAL_ADDRESS_1]: {
         'did': '0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1',
         'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
         'country': '0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189',
@@ -52,6 +52,19 @@ const fetchResults = async (quadReader, preapproved, address) => {
         'country': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_COUNTRY),
     };
 };
+
+const assertGovernance = async (quadGovernance) => {
+    expect(await quadGovernance.treasury(), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
+    expect(await quadGovernance.revSplitIssuer(), '50')
+    expect(await quadGovernance.passport(), '0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d ')
+    expect(await quadGovernance.getIssuersLength(), '3')
+    expect(await quadGovernance.getAllIssuersLength(), '3')
+    expect(await quadGovernance.getEligibleAttributesLength(), '4')
+    expect(await quadGovernance.getIssuers(), ['0x38a08d73153F32DBB2f867338d0BD6E3746E3391','0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF','0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'])
+    expect(await quadGovernance.issuersTreasury('0x38a08d73153F32DBB2f867338d0BD6E3746E3391'), '0x5F3f69808772C56Daee7A5d3176990733C67A123')
+    expect(await quadGovernance.issuersTreasury('0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF'), '0xb93b22B75ac3EA6B5066c169B747DF249034F467')
+    expect(await quadGovernance.issuersTreasury('0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
+}
 
 /// To get this test to work, you have to copy/paste .openzeppelin/mainnet.json into unknown-31337.json
 describe("PassportUpgrade", async () => {
@@ -90,16 +103,7 @@ describe("PassportUpgrade", async () => {
             expect(individualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
             expect(individualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
 
-            expect(await quadGovernance.treasury(), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
-            expect(await quadGovernance.revSplitIssuer(), '50')
-            expect(await quadGovernance.passport(), '0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d ')
-            expect(await quadGovernance.getIssuersLength(), '3')
-            expect(await quadGovernance.getAllIssuersLength(), '3')
-            expect(await quadGovernance.getEligibleAttributesLength(), '4')
-            expect(await quadGovernance.getIssuers(), ['0x38a08d73153F32DBB2f867338d0BD6E3746E3391','0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF','0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'])
-            expect(await quadGovernance.issuersTreasury('0x38a08d73153F32DBB2f867338d0BD6E3746E3391'), '0x5F3f69808772C56Daee7A5d3176990733C67A123')
-            expect(await quadGovernance.issuersTreasury('0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF'), '0xb93b22B75ac3EA6B5066c169B747DF249034F467')
-            expect(await quadGovernance.issuersTreasury('0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
+            await assertGovernance(quadGovernance)
 
             const timelockAddress = "0x76694A182dB047067521c73161Ebf3Db5Ca988d3";
             await network.provider.request({
@@ -155,16 +159,7 @@ describe("PassportUpgrade", async () => {
             expect(upgradedIndividualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
             expect(upgradedIndividualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
 
-            expect(await upgradedGovernance.treasury(), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
-            expect(await upgradedGovernance.revSplitIssuer(), '50')
-            expect(await upgradedGovernance.passport(), '0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d ')
-            expect(await upgradedGovernance.getIssuersLength(), '3')
-            expect(await upgradedGovernance.getAllIssuersLength(), '3')
-            expect(await upgradedGovernance.getEligibleAttributesLength(), '4')
-            expect(await upgradedGovernance.getIssuers(), ['0x38a08d73153F32DBB2f867338d0BD6E3746E3391','0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF','0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'])
-            expect(await upgradedGovernance.issuersTreasury('0x38a08d73153F32DBB2f867338d0BD6E3746E3391'), '0x5F3f69808772C56Daee7A5d3176990733C67A123')
-            expect(await upgradedGovernance.issuersTreasury('0xA095585b1EF2310B4EcBe198a6A6CB86Ef386aBF'), '0xb93b22B75ac3EA6B5066c169B747DF249034F467')
-            expect(await upgradedGovernance.issuersTreasury('0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5'), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
+            await assertGovernance(upgradedGovernance)
         });
     });
 });
