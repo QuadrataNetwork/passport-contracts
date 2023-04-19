@@ -22,7 +22,7 @@ const {
 
 
 
-// 5 previous individual passports + 5 business passports can still be queried with the exact same values
+// 5 business passports can still be queried with the exact same values
 // a preapproved wallet can still query before and after upgrade
 // a non-preapproved wallet CANNOT query before and after upgrade
 // all QuadGovernance storage values remain the same before and after upgrade
