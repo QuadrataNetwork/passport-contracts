@@ -35,8 +35,26 @@ const {
 // QuadPassport.attributes & QuadPassport.attribute cannot be called by a NON-READER role before and after upgrade
 // QuadGOvernance.upgrade, QuadREader.upgrade, QuadPasport.upgrade cannot be called by non-governance role
 
+const INDIVIDUAL_ADDRESS_1 = '0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526'
 
-describe.skip("PassportUpgrade", async () => {
+const EXPECTED_INDIVIDUAL_RESULTS = {
+    INDIVIDUAL_ADDRESS_1: {
+        'did': '0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1',
+        'aml': '0x0000000000000000000000000000000000000000000000000000000000000001',
+        'country': '0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189',
+    }
+}
+
+const fetchResults = async (quadReader, preapproved, address) => {
+    return {
+        'did': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_DID),
+        'aml': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_AML),
+        'country': await quadReader.connect(preapproved).callStatic.getAttributes(address, ATTRIBUTE_COUNTRY),
+    };
+};
+
+/// To get this test to work, you have to copy/paste .openzeppelin/mainnet.json into unknown-31337.json
+describe("PassportUpgrade", async () => {
     describe("upgrade", async () => {
         it("succeed", async () => {
             // fork mainnet eth
@@ -59,21 +77,18 @@ describe.skip("PassportUpgrade", async () => {
               params: [preapprovedAddr],
             });
             const preapproved = await ethers.getSigner(preapprovedAddr)
-            const quadPassport = await ethers.getContractAt("QuadPassport",  QUAD_PASSPORT[NETWORK_IDS.MAINNET]);
-            const quadReader = await ethers.getContractAt("QuadReader",  QUAD_READER[NETWORK_IDS.MAINNET]);
+            const quadPassport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT[NETWORK_IDS.MAINNET]);
+            const quadReader = await ethers.getContractAt("QuadReader", QUAD_READER[NETWORK_IDS.MAINNET]);
             const quadGovernance = await ethers.getContractAt("QuadGovernance", QUAD_GOVERNANCE[NETWORK_IDS.MAINNET]);
 
             const oldPassportImplAddress = await getImplementationAddress(network.provider, quadPassport.address);
             const oldReaderImplAddress = await getImplementationAddress(network.provider, quadReader.address);
             const oldGovernanceImplAddress = await getImplementationAddress(network.provider, quadGovernance.address);
 
-            const didResults = await quadReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_DID)
-            const amlResults = await quadReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_AML)
-            const countryResults = await quadReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_COUNTRY)
-
-            expect(didResults[0].value).eql('0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1')
-            expect(amlResults[0].value).eql('0x0000000000000000000000000000000000000000000000000000000000000001')
-            expect(countryResults[0].value).eql('0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189')
+            const individualResults1 = await fetchResults(quadReader, preapproved, INDIVIDUAL_ADDRESS_1)
+            expect(individualResults1['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['did'])
+            expect(individualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
+            expect(individualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
 
             expect(await quadGovernance.treasury(), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
             expect(await quadGovernance.revSplitIssuer(), '50')
@@ -135,13 +150,10 @@ describe.skip("PassportUpgrade", async () => {
             expect(newReaderImplAddress).to.not.eql(oldReaderImplAddress)
             expect(newGovernanceImplAddress).to.not.eql(oldGovernanceImplAddress)
 
-            const upgradedDidResults = await upgradedReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_DID)
-            const upgradedAmlResults = await upgradedReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_AML)
-            const upgradedCountryResults = await upgradedReader.connect(preapproved).callStatic.getAttributes('0xbb0D3aD3ba60EeE1F8d33F00A7f1F2c384Ae7526', ATTRIBUTE_COUNTRY)
-
-            expect(upgradedDidResults[0].value).eql('0xf7b171699fd929a3c0a2795659d9b10bc2cab64b934fe49686d5b0ab909a8ee1')
-            expect(upgradedAmlResults[0].value).eql('0x0000000000000000000000000000000000000000000000000000000000000001')
-            expect(upgradedCountryResults[0].value).eql('0x627fe66dd064a0a7d686e05b87b04d5a7c585907afae1f0c65ab27fa379ca189')
+            const upgradedIndividualResults1 = await fetchResults(upgradedReader, preapproved, INDIVIDUAL_ADDRESS_1)
+            expect(upgradedIndividualResults1['did'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['did'])
+            expect(upgradedIndividualResults1['aml'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['aml'])
+            expect(upgradedIndividualResults1['country'][0].value).eql(EXPECTED_INDIVIDUAL_RESULTS[INDIVIDUAL_ADDRESS_1]['country'])
 
             expect(await upgradedGovernance.treasury(), '0xa011eB50e03CaeCb9b551Df9Df478b6a513e0d21')
             expect(await upgradedGovernance.revSplitIssuer(), '50')
