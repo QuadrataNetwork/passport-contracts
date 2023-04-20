@@ -131,11 +131,9 @@ export const assertGetAttributesEvents = async (
     attributeToQuery
   );
 
-  const tx = await reader
-    .connect(treasury)
-    .getAttributes(account.address, attributeToQuery, {
-      value: queryFee,
-    });
+  const tx = await reader.getAttributes(account.address, attributeToQuery, {
+    value: queryFee,
+  });
 
   const receipt = await tx.wait();
 
