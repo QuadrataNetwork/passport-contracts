@@ -70,6 +70,7 @@ export const deployPassportEcosystem = async (
       defi.address,
       mockbusiness.address,
       admin.address,
+      deployer.address,
     ];
     const preapprovalStatuses = addressesToApprove.map(() => true);
     await governance

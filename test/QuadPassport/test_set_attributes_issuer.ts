@@ -1079,7 +1079,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1092,7 +1092,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1102,7 +1102,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]

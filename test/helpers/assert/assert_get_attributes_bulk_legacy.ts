@@ -11,7 +11,7 @@ export const assertGetAttributesBulkLegacy = async (
   attributesToQuery: string[],
   reader: Contract,
   defi: Contract,
-  treasury: SignerWithAddress,
+  admin: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
@@ -20,7 +20,7 @@ export const assertGetAttributesBulkLegacy = async (
     account,
     attributesToQuery,
     reader,
-    treasury,
+    admin,
     expectedIssuers,
     expectedAttributes,
     expectedVerifiedAt
@@ -105,7 +105,7 @@ export const assertGetAttributesBulkLegacyEvents = async (
   account: SignerWithAddress,
   attributesToQuery: string[],
   reader: Contract,
-  treasury: SignerWithAddress,
+  admin: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
@@ -141,7 +141,7 @@ export const assertGetAttributesBulkLegacyEvents = async (
   });
 
   const tx = await reader
-    .connect(treasury)
+    .connect(admin)
     .getAttributesBulkLegacy(account.address, attributesToQuery, {
       value: queryFee,
     });
@@ -153,7 +153,7 @@ export const assertGetAttributesBulkLegacyEvents = async (
     expect(receipt.events.length).to.equal(1);
     expect(receipt.events[0].event).to.equal("QueryBulkEvent");
     expect(receipt.events[0].args[0]).to.equal(account.address);
-    expect(receipt.events[0].args[1]).to.equal(treasury.address);
+    expect(receipt.events[0].args[1]).to.equal(admin.address);
     expect(receipt.events[0].args[2]).to.eql(attributesToQuery);
   } else {
     expect(receipt.events.length).to.equal(counterResponse + 2);
@@ -178,7 +178,7 @@ export const assertGetAttributesBulkLegacyEvents = async (
     }
 
     expect(receipt.events[counterResponse].event).to.equal("QueryFeeReceipt");
-    expect(receipt.events[counterResponse].args[0]).to.equal(treasury.address);
+    expect(receipt.events[counterResponse].args[0]).to.equal(admin.address);
     expect(receipt.events[counterResponse].args[1]).to.equal(
       queryFee.sub(totalFeeIssuer)
     );
@@ -189,9 +189,7 @@ export const assertGetAttributesBulkLegacyEvents = async (
     expect(receipt.events[counterResponse + 1].args[0]).to.equal(
       account.address
     );
-    expect(receipt.events[counterResponse + 1].args[1]).to.equal(
-      treasury.address
-    );
+    expect(receipt.events[counterResponse + 1].args[1]).to.equal(admin.address);
     expect(receipt.events[counterResponse + 1].args[2]).to.eql(
       attributesToQuery
     );
