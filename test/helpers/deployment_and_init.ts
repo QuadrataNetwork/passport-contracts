@@ -42,13 +42,11 @@ export const deployPassportEcosystem = async (
 
   const signers = await ethers.getSigners();
   const deployer = signers[0];
-  const tokenIds = [{ id: 1, uri: "https://wwww.quadrata.com/ipfs" }];
   const [governance, passport, reader] = await deployQuadrata(
     admin.address,
     issuersToAdd,
     treasury.address,
     admin.address,
-    tokenIds,
     admin.address,
     admin.address,
     false
@@ -65,12 +63,14 @@ export const deployPassportEcosystem = async (
   await mockbusiness.deployed();
 
   // let all signers be preapproved
-  if(!opts.skipPreapproval) {
+  if (!opts.skipPreapproval) {
     const signerAddresses = signers.map((signer) => signer.address);
     signerAddresses.push(defi.address);
     signerAddresses.push(mockbusiness.address);
     const preapprovalStatuses = signerAddresses.map((address) => true);
-    await governance.connect(admin).setPreapprovals(signerAddresses, preapprovalStatuses);
+    await governance
+      .connect(admin)
+      .setPreapprovals(signerAddresses, preapprovalStatuses);
   }
 
   // Revoke Deployer Role

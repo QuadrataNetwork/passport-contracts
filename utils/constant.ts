@@ -27,7 +27,9 @@ export const ATTRIBUTE_ACCREDITED_INVESTOR_US = ethers.utils.id(
 export const ATTRIBUTE_IS_QUALIFIEDPURCHASER_US = ethers.utils.id(
   "IS_QUALIFIEDPURCHASER_US"
 );
-export const ATTRIBUTE_TRANSUNION_CREDIT_SCORE = ethers.utils.id("TRANSUNION_CREDIT_SCORE");
+export const ATTRIBUTE_TRANSUNION_CREDIT_SCORE = ethers.utils.id(
+  "TRANSUNION_CREDIT_SCORE"
+);
 
 export const TOKEN_ID = 1;
 
@@ -71,6 +73,7 @@ export const NETWORK_IDS = {
   POLYGON: 137,
   MUMBAI: 80001,
   GOERLI: 5,
+  FUJI: 43113,
 };
 
 export const HARDHAT_CHAIN_ID = 31337;
