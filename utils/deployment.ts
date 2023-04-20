@@ -227,8 +227,7 @@ export const deployQuadrata = async (
       maxFeePerGas,
     });
     await tx.wait();
-    if (verbose)
-      console.log(`[QuadGovernance] grant READER_ROLE to ${readerOnly}`);
+    if (verbose) console.log(`[QuadGovernance] preApproved ${readerOnly}`);
   });
 
   // Grant `GOVERNANCE_ROLE` and `DEFAULT_ADMIN_ROLE` to Timelock
