@@ -30,7 +30,7 @@ describe("QuadPassport.burnPassports", async () => {
   let defi: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
-    treasury: SignerWithAddress,
+    treasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
@@ -76,7 +76,7 @@ describe("QuadPassport.burnPassports", async () => {
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
       [issuer, issuerB],
-      treasury,
+      admin,
       [issuerTreasury, issuerBTreasury]
     );
 
@@ -116,7 +116,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -127,7 +127,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -138,7 +138,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -149,7 +149,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -172,7 +172,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -183,7 +183,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -194,7 +194,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -205,7 +205,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -230,7 +230,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -241,7 +241,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -251,7 +251,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -262,7 +262,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -277,7 +277,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -288,7 +288,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -298,7 +298,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -309,7 +309,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -337,7 +337,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -349,7 +349,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -361,7 +361,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -373,7 +373,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -393,7 +393,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -405,7 +405,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -417,7 +417,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -429,7 +429,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -458,7 +458,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -470,7 +470,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -482,7 +482,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -494,7 +494,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -517,7 +517,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -529,7 +529,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -541,7 +541,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -553,7 +553,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -573,7 +573,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -585,7 +585,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -597,7 +597,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -609,7 +609,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -650,7 +650,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -661,7 +661,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -672,7 +672,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -683,7 +683,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -698,7 +698,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -709,7 +709,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -720,7 +720,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -731,7 +731,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -777,7 +777,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -788,7 +788,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -799,7 +799,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -810,7 +810,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -851,7 +851,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -862,7 +862,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -873,18 +873,18 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
-      )
+      );
 
       await assertGetAttributes(
         mockBusiness,
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -907,7 +907,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -918,7 +918,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -929,7 +929,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -940,7 +940,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -969,7 +969,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -980,7 +980,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -991,18 +991,18 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
-      )
+      );
 
       await assertGetAttributes(
         minterA,
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1021,7 +1021,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1032,7 +1032,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1043,7 +1043,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1054,7 +1054,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1082,7 +1082,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -1094,7 +1094,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -1106,7 +1106,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -1118,7 +1118,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -1150,7 +1150,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1162,7 +1162,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1174,7 +1174,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1198,7 +1198,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -1238,7 +1238,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1250,7 +1250,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1262,7 +1262,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1274,7 +1274,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1306,7 +1306,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1318,7 +1318,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1330,7 +1330,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1354,7 +1354,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB, issuer],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1394,7 +1394,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1406,7 +1406,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1418,7 +1418,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1430,7 +1430,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1462,7 +1462,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1488,7 +1488,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1499,7 +1499,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1510,7 +1510,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1521,7 +1521,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1548,7 +1548,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1559,7 +1559,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1570,7 +1570,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1594,7 +1594,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1631,7 +1631,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -1642,7 +1642,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -1653,7 +1653,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -1664,7 +1664,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -1691,7 +1691,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1702,7 +1702,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1713,7 +1713,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1736,7 +1736,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB, issuer],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -1761,7 +1761,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1772,7 +1772,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1783,7 +1783,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1794,7 +1794,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1809,7 +1809,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1820,7 +1820,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1831,7 +1831,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1842,7 +1842,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -1871,7 +1871,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -1882,7 +1882,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -1893,7 +1893,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -1904,7 +1904,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -1914,9 +1914,9 @@ describe("QuadPassport.burnPassports", async () => {
     it("fail - when paused", async () => {
       await passport.connect(admin).pause();
 
-      await expect(passport.connect(admin).burnPassports(TOKEN_ID)).to.revertedWith(
-        "Pausable: paused"
-      );
+      await expect(
+        passport.connect(admin).burnPassports(TOKEN_ID)
+      ).to.revertedWith("Pausable: paused");
     });
   });
 });

@@ -12,7 +12,6 @@ const {
   ISSUERS,
   TIMELOCK,
   MULTISIG,
-  TOKEN_IDS,
   MAX_GAS_FEE,
   OPERATOR,
   READER_ONLY,
@@ -42,10 +41,6 @@ const {
     throw new Error("MULTISIG not set");
   }
 
-  if (TOKEN_IDS.length === 0) {
-    throw new Error("TOKEN_IDS not set");
-  }
-
   if (!MAX_GAS_FEE) {
     throw new Error("MAX_GAS_FEE not set");
   }
@@ -58,20 +53,20 @@ const {
   const network = await signers[0].provider.getNetwork();
   const treasuryPerNetwork = QUADRATA_TREASURY[network.chainId];
   const multisigPerNetwork = MULTISIG[network.chainId];
+  const timelockPerNetwork = TIMELOCK[network.chainId];
 
   const deployer = signers[0];
   console.log(`Deployer address: ${deployer.address}`);
 
   const [governance] = await deployQuadrata(
-    TIMELOCK,
+    timelockPerNetwork,
     ISSUERS,
     treasuryPerNetwork,
     multisigPerNetwork,
-    TOKEN_IDS,
     OPERATOR,
     READER_ONLY,
     true, // Verbose = true,
-    maxGasPerNetwork,
+    MAX_GAS_FEE,
     "",
     "",
     "",

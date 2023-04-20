@@ -82,15 +82,15 @@ describe("QuadReader", async () => {
 
     it("getAttribute", async () => {
       const attribute = attributeToQuery[0];
-      await reader.connect(minterA).getAttribute(minterA.address, attribute);
+      await reader.connect(admin).getAttribute(minterA.address, attribute);
     });
 
     it("getAttributes", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader
-        .connect(minterA)
+        .connect(admin)
         .queryFee(minterA.address, attribute);
-      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+      await reader.connect(admin).getAttributes(minterA.address, attribute, {
         value: fee,
       });
     });
@@ -98,7 +98,7 @@ describe("QuadReader", async () => {
     it("getAttributesLegacy", async () => {
       const attribute = attributeToQuery[0];
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesLegacy(minterA.address, attribute, {
           value: 0,
         });
@@ -106,7 +106,7 @@ describe("QuadReader", async () => {
 
     it("getAttributesBulkLegacy", async () => {
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
           value: 0,
         });
@@ -114,7 +114,7 @@ describe("QuadReader", async () => {
 
     it("getAttributesBulk", async () => {
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulk(minterA.address, attributeToQuery, {
           value: 0,
         });
@@ -180,7 +180,7 @@ describe("QuadReader", async () => {
     it("getAttributes", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader.queryFee(minterA.address, attribute);
-      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+      await reader.connect(admin).getAttributes(minterA.address, attribute, {
         value: fee,
       });
     });
@@ -189,7 +189,7 @@ describe("QuadReader", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader.queryFee(minterA.address, attribute);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesLegacy(minterA.address, attribute, {
           value: fee,
         });
@@ -198,7 +198,7 @@ describe("QuadReader", async () => {
     it("getAttributesBulkLegacy", async () => {
       const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
           value: fee,
         });
@@ -207,7 +207,7 @@ describe("QuadReader", async () => {
     it("getAttributesBulk", async () => {
       const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulk(minterA.address, attributeToQuery, {
           value: fee,
         });

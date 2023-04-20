@@ -7,7 +7,9 @@ const {
   deployPassportEcosystem,
 } = require("../helpers/deployment_and_init.ts");
 
-describe("QuadSoulbound.balanceOf", async () => {
+const { OPERATOR_ROLE } = require("../../utils/constant.ts");
+
+describe("QuadSoulbound.uri", async () => {
   let passport: Contract;
   let governance: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
@@ -25,11 +27,15 @@ describe("QuadSoulbound.balanceOf", async () => {
       treasury,
       [issuerTreasury]
     );
+
+    await governance.connect(admin).grantRole(OPERATOR_ROLE, admin.address);
   });
 
-  describe("QuadSoulbound.balanceOf (SUCCESS CASES)", async () => {
+  describe("QuadSoulbound.uri (SUCCESS CASES)", async () => {
     it("success - uri for token that doesn't exist yet", async () => {
-      await governance.connect(admin).setTokenURI(1, 'https://wwww.quadrata.com/ipfs')
+      await governance
+        .connect(admin)
+        .setTokenURI(1, "https://wwww.quadrata.com/ipfs");
       expect(await passport.uri(2)).equals("https://wwww.quadrata.com/ipfs");
     });
   });

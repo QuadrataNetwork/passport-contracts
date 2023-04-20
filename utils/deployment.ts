@@ -24,9 +24,8 @@ export const deployQuadrata = async (
   issuers: any[],
   treasury: string,
   multisig: string,
-  tokenIds: any[],
   operator: string,
-  reader_only: string,
+  readerOnly: string,
   verbose: boolean = false,
   maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
   governanceAddress: string = "",
@@ -83,22 +82,18 @@ export const deployQuadrata = async (
       console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_DID`);
   });
   await recursiveRetry(async () => {
-    const tx = await governance.setEligibleAttribute(ATTRIBUTE_ACCREDITED_INVESTOR_US, true, {
-      maxFeePerGas,
-    });
+    const tx = await governance.setEligibleAttribute(
+      ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+      true,
+      {
+        maxFeePerGas,
+      }
+    );
     await tx.wait();
     if (verbose)
-      console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_ACCREDITED_INVESTOR_US`);
-  });
-
-  await recursiveRetry(async () => {
-
-    const tx = await governance.setEligibleAttribute(ATTRIBUTE_TRANSUNION_CREDIT_SCORE, true, {
-      maxFeePerGas,
-    });
-    await tx.wait();
-    if (verbose)
-      console.log(`[QuadGovernance] setEligibleAttribute for ATTRIBUTE_TRANSUNION_CREDIT_SCORE`);
+      console.log(
+        `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_TRANSUNION_CREDIT_SCORE`
+      );
   });
 
   await recursiveRetry(async () => {
@@ -152,6 +147,21 @@ export const deployQuadrata = async (
       );
   });
 
+  await recursiveRetry(async () => {
+    const tx = await governance.setEligibleAttributeByDID(
+      ATTRIBUTE_ACCREDITED_INVESTOR_US,
+      true,
+      {
+        maxFeePerGas,
+      }
+    );
+    await tx.wait();
+    if (verbose)
+      console.log(
+        `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_ACCREDITED_INVESTOR_US`
+      );
+  });
+
   // Add all Issuers & their respective treasury
   for (let i = 0; i < issuers.length; i++) {
     await recursiveRetry(async () => {
@@ -202,6 +212,24 @@ export const deployQuadrata = async (
       console.log(`[QuadGovernance] grant READER_ROLE to ${reader.address}`);
   });
 
+  // Set ReaderOnly as READER_ROLE
+  await recursiveRetry(async () => {
+    const tx = await governance.grantRole(READER_ROLE, readerOnly, {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose)
+      console.log(`[QuadGovernance] grant READER_ROLE to ${readerOnly}`);
+  });
+  // PreApproved ReaderOnly
+  await recursiveRetry(async () => {
+    const tx = await governance.setPreapprovals([readerOnly], [true], {
+      maxFeePerGas,
+    });
+    await tx.wait();
+    if (verbose) console.log(`[QuadGovernance] preApproved ${readerOnly}`);
+  });
+
   // Grant `GOVERNANCE_ROLE` and `DEFAULT_ADMIN_ROLE` to Timelock
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(GOVERNANCE_ROLE, timelock, {
@@ -221,6 +249,7 @@ export const deployQuadrata = async (
       console.log(`[QuadGovernance] grant DEFAULT_ADMIN_ROLE to ${timelock}`);
   });
 
+  // Grant `OPERATOR_ROLE` to OPERATOR
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(OPERATOR_ROLE, operator, {
       maxFeePerGas,
@@ -228,15 +257,6 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(`[QuadGovernance] grant OPERATOR_ROLE to ${operator}`);
-  });
-
-  await recursiveRetry(async () => {
-    const tx = await governance.grantRole(READER_ROLE, reader_only, {
-      maxFeePerGas,
-    });
-    await tx.wait();
-    if (verbose)
-      console.log(`[QuadGovernance] grant READER_ROLE to ${reader_only}`);
   });
 
   // GRANT `PAUSER_ROLE` to MULTISIG
