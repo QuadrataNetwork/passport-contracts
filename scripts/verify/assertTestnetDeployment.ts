@@ -16,8 +16,8 @@ const {
   ISSUER_ROLE,
   DEFAULT_ADMIN_ROLE,
   READER_ROLE,
-  PRICE_PER_ATTRIBUTES,
-  PRICE_PER_BUSINESS_ATTRIBUTES,
+  // PRICE_PER_ATTRIBUTES,
+  // PRICE_PER_BUSINESS_ATTRIBUTES,
   TIMELOCK_ADMIN_ROLE,
   PROPOSER_ROLE,
   EXECUTOR_ROLE,
@@ -29,23 +29,18 @@ const {
   QUADRATA_TREASURY,
   TIMELOCK,
   MULTISIG,
-  TOKEN_IDS,
   ISSUERS,
 } = require("../data/testnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("0xCF6bA3a3d18bA1e35A41db79B3dBF2F6023F6071"); // Goerli / Mumbai Testnet Address
-const QUAD_PASSPORT = getAddress("0xB8Bc4cE2d3FB9b0c474affFdf018D120632B2ACc"); // Goerli / Mumbai Testnet Address
-const QUAD_READER = getAddress("0x1950814a8fB4a69Eb4f77A28f22FAfBfb9a4a6CA"); // Goerli / Mumbai Testnet Address
+const QUAD_GOV = getAddress("0x43bC53688b77D85DA13cbf7817C2168f64d70841"); // Goerli / Mumbai Testnet Address
+const QUAD_PASSPORT = getAddress("0x518979e5456960d316e4e78b0d7A565D95E6EFa3"); // Goerli / Mumbai Testnet Address
+const QUAD_READER = getAddress("0x6077Bc1FD85D041F6235893B895E0cC038AC70E2"); // Goerli / Mumbai Testnet Address
 
-const DEPLOYER = getAddress("0xBe7903A33682ACe2d77bbC0FDEb80c58B5b42C0F");
+const DEPLOYER = getAddress("0x5bc97877ede3C748Aec6EaF747f09b5bB48766bD");
 
 // Multisig accounts
 const FAB_MULTISIG = getAddress("0x4A0BF9Dcb73636A75b325d33E8700A1945523CE7");
-// Passport Holders
-const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
-const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
-const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 // ------------ END - TO MODIFY --------------- //
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,13 +51,15 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const network = await signers[0].provider.getNetwork();
 
   const EXPECTED_ROLES_QUAD_GOVERNANCE = [
-    { USER: TEDDY, ROLES: [] },
     { USER: FAB_MULTISIG, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: DEPLOYER, ROLES: [] },
-    { USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE] },
+    {
+      USER: TIMELOCK[network.chainId],
+      ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE],
+    },
     { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
     { USER: QUAD_READER, ROLES: [READER_ROLE] },
     { USER: QUAD_GOV, ROLES: [] },
@@ -71,14 +68,11 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const EXPECTED_ROLES_TIMELOCK = [
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
-    { USER: TEDDY, ROLES: [] },
-    { USER: DANIEL, ROLES: [] },
-    { USER: TRAVIS, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: DEPLOYER, ROLES: [] },
-    { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
+    { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
     { USER: QUAD_READER, ROLES: [] },
     { USER: QUAD_GOV, ROLES: [] },
@@ -92,7 +86,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const reader = await ethers.getContractAt("QuadReader", QUAD_READER);
   const timelock = await ethers.getContractAt(
     "IAccessControlUpgradeable",
-    TIMELOCK
+    TIMELOCK[network.chainId]
   );
 
   // --------------- QuadPassport --------------------
@@ -153,30 +147,17 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   expect(await governance.revSplitIssuer()).equals(ISSUER_SPLIT);
   console.log("[QuadGovernance] revSplitIssuer correctly set: OK");
 
-  // Check that Price have been correctly set
-  ALL_ATTRIBUTES.forEach(async (attrType: string) => {
-    await delay(1000);
-    expect(await governance.pricePerAttributeFixed(attrType)).equals(
-      PRICE_PER_ATTRIBUTES[network.chainId][attrType]
-    );
-    expect(await governance.pricePerBusinessAttributeFixed(attrType)).equals(
-      PRICE_PER_BUSINESS_ATTRIBUTES[network.chainId][attrType]
-    );
-  });
-  console.log("[QuadGovernance] Price for query correctly set: OK");
-
-  // Check that tokenId have been correctly set
-  TOKEN_IDS.forEach(async (tokenId: any) => {
-    await delay(1000);
-    expect(await governance.eligibleTokenId(tokenId.id)).equals(true); // Default Quadrata Passport
-
-    expect(await passport.uri(tokenId.id)).equals(tokenId.uri);
-  });
-  expect(
-    await governance.eligibleTokenId(TOKEN_IDS[TOKEN_IDS.length - 1].id + 1)
-  ).equals(false);
-  expect(await governance.getMaxEligibleTokenId()).to.equal(TOKEN_IDS.length);
-  console.log("[QuadGovernance] TokenId have been correctly set: OK");
+  // // Check that Price have been correctly set
+  // ALL_ATTRIBUTES.forEach(async (attrType: string) => {
+  //   await delay(1000);
+  //   expect(await governance.pricePerAttributeFixed(attrType)).equals(
+  //     PRICE_PER_ATTRIBUTES[network.chainId][attrType]
+  //   );
+  //   expect(await governance.pricePerBusinessAttributeFixed(attrType)).equals(
+  //     PRICE_PER_BUSINESS_ATTRIBUTES[network.chainId][attrType]
+  //   );
+  // });
+  // console.log("[QuadGovernance] Price for query correctly set: OK");
 
   // Check attribute eligibility
   for (const attribute of ALL_ATTRIBUTES) {

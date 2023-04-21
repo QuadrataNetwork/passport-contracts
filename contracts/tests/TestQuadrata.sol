@@ -18,7 +18,6 @@ contract TestQuadrata {
     function checkValues(address _account, bytes32 _attribute, bytes32 _value, uint256 i) public payable {
         uint256 queryFee = reader.queryFee(_account, _attribute);
 
-        require(msg.value >= queryFee, "NOT_ENOUGH_FEE");
         IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: queryFee}(_account, _attribute);
         require(attributes.length > i, "NO_ATTRIBUTE_FOUND");
         require(attributes[i].value == _value, "MISMATCH_VALUE");
@@ -27,7 +26,6 @@ contract TestQuadrata {
     function checkValuesInt(address _account, bytes32 _attribute, uint256 _value, uint256 i) public payable {
         uint256 queryFee = reader.queryFee(_account, _attribute);
 
-        require(msg.value >= queryFee, "NOT_ENOUGH_FEE");
         IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: queryFee}(_account, _attribute);
         require(attributes.length > i, "NO_ATTRIBUTE_FOUND");
         require(uint256(attributes[i].value) == _value, "MISMATCH_VALUE");
@@ -36,7 +34,6 @@ contract TestQuadrata {
     function checkIssuer(address _account, bytes32 _attribute, address _issuer, uint256 i) public payable {
         uint256 queryFee = reader.queryFee(_account, _attribute);
 
-        require(msg.value >= queryFee, "NOT_ENOUGH_FEE");
         IQuadPassportStore.Attribute[] memory attributes = reader.getAttributes{value: queryFee}(_account, _attribute);
         require(attributes.length > i, "NO_ATTRIBUTE_FOUND");
         require(attributes[i].issuer == _issuer, "MISMATCH_ISSUER");

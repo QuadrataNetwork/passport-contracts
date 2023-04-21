@@ -11,7 +11,7 @@ export const assertGetAttributesBulk = async (
   attributesToQuery: string[],
   reader: Contract,
   defi: Contract,
-  treasury: SignerWithAddress,
+  admin: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
@@ -20,7 +20,7 @@ export const assertGetAttributesBulk = async (
     account,
     attributesToQuery,
     reader,
-    treasury,
+    admin,
     expectedIssuers,
     expectedAttributes,
     expectedVerifiedAt
@@ -104,7 +104,7 @@ export const assertGetAttributesBulkEvents = async (
   account: SignerWithAddress,
   attributesToQuery: string[],
   reader: Contract,
-  treasury: SignerWithAddress,
+  admin: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
@@ -128,13 +128,10 @@ export const assertGetAttributesBulkEvents = async (
 
   let counterResponse = 0;
 
-  attributesToQuery.forEach(async (attrType) => {
+  attributesToQuery.forEach((attrType) => {
     for (let i = 0; i < expectedAttributes.length; i++) {
       if (attrType in expectedAttributes[i]) {
-        const attrQueryFee = await reader.queryFee(account.address, attrType);
-        if (attrQueryFee > 0) {
-          counterResponse += 1;
-        }
+        counterResponse += 1;
         matchingAttributeTypes.push(attrType);
         matchingIssuers.push(expectedIssuers[i].address);
         break;
@@ -143,7 +140,7 @@ export const assertGetAttributesBulkEvents = async (
   });
 
   const tx = await reader
-    .connect(treasury)
+    .connect(admin)
     .getAttributesBulk(account.address, attributesToQuery, {
       value: queryFee,
     });
@@ -155,7 +152,7 @@ export const assertGetAttributesBulkEvents = async (
     expect(receipt.events.length).to.equal(1);
     expect(receipt.events[0].event).to.equal("QueryBulkEvent");
     expect(receipt.events[0].args[0]).to.equal(account.address);
-    expect(receipt.events[0].args[1]).to.equal(treasury.address);
+    expect(receipt.events[0].args[1]).to.equal(admin.address);
     expect(receipt.events[0].args[2]).to.eql(attributesToQuery);
   } else {
     expect(receipt.events.length).to.equal(counterResponse + 2);
@@ -181,7 +178,7 @@ export const assertGetAttributesBulkEvents = async (
     }
 
     expect(receipt.events[counterResponse].event).to.equal("QueryFeeReceipt");
-    expect(receipt.events[counterResponse].args[0]).to.equal(treasury.address);
+    expect(receipt.events[counterResponse].args[0]).to.equal(admin.address);
     expect(receipt.events[counterResponse].args[1]).to.equal(
       queryFee.sub(totalFeeIssuer)
     );
@@ -192,9 +189,7 @@ export const assertGetAttributesBulkEvents = async (
     expect(receipt.events[counterResponse + 1].args[0]).to.equal(
       account.address
     );
-    expect(receipt.events[counterResponse + 1].args[1]).to.equal(
-      treasury.address
-    );
+    expect(receipt.events[counterResponse + 1].args[1]).to.equal(admin.address);
     expect(receipt.events[counterResponse + 1].args[2]).to.eql(
       attributesToQuery
     );

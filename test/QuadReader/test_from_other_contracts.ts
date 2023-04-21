@@ -65,8 +65,8 @@ describe("QuadReader.getAttributes", async () => {
       [issuerTreasury, issuerTreasury2]
     );
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -84,6 +84,8 @@ describe("QuadReader.getAttributes", async () => {
     await testContract.deployed();
     await testContract.setReader(reader.address);
     expect(await testContract.reader()).equals(reader.address);
+
+    await governance.connect(admin).setPreapprovals([testContract.address], [true]);
   });
 
   describe("TestQuadrata - 1 issuer / 1 attributes", async () => {

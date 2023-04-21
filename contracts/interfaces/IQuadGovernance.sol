@@ -6,7 +6,6 @@ import "../storage/QuadGovernanceStore.sol";
 interface IQuadGovernance {
     event AttributePriceUpdatedFixed(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
     event BusinessAttributePriceUpdatedFixed(bytes32 _attribute, uint256 _oldPrice, uint256 _price);
-    event EligibleTokenUpdated(uint256 _tokenId, bool _eligibleStatus);
     event EligibleAttributeUpdated(bytes32 _attribute, bool _eligibleStatus);
     event EligibleAttributeByDIDUpdated(bytes32 _attribute, bool _eligibleStatus);
     event IssuerAdded(address indexed _issuer, address indexed _newTreasury);
@@ -16,6 +15,7 @@ interface IQuadGovernance {
     event PassportAddressUpdated(address indexed _oldAddress, address indexed _address);
     event RevenueSplitIssuerUpdated(uint256 _oldSplit, uint256 _split);
     event TreasuryUpdated(address indexed _oldAddress, address indexed _address);
+    event PreapprovalUpdated(address indexed _account, bool _status);
 
     function setTreasury(address _treasury) external;
 
@@ -23,11 +23,11 @@ interface IQuadGovernance {
 
     function updateGovernanceInPassport(address _newGovernance) external;
 
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external;
-
     function setEligibleAttribute(bytes32 _attribute, bool _eligibleStatus) external;
 
     function setEligibleAttributeByDID(bytes32 _attribute, bool _eligibleStatus) external;
+
+    function setTokenURI(uint256 _tokenId, string memory _uri) external;
 
     function setAttributePriceFixed(bytes32 _attribute, uint256 _price) external;
 
@@ -45,10 +45,6 @@ interface IQuadGovernance {
 
     function getEligibleAttributesLength() external view returns(uint256);
 
-    function getMaxEligibleTokenId() external view returns(uint256);
-
-    function eligibleTokenId(uint256) external view returns(bool);
-
     function issuersTreasury(address) external view returns (address);
 
     function eligibleAttributes(bytes32) external view returns(bool);
@@ -56,6 +52,10 @@ interface IQuadGovernance {
     function eligibleAttributesByDID(bytes32) external view returns(bool);
 
     function eligibleAttributesArray(uint256) external view returns(bytes32);
+
+    function setPreapprovals(address[] calldata, bool[] calldata) external;
+
+    function preapproval(address) external view returns(bool);
 
     function pricePerAttributeFixed(bytes32) external view returns(uint256);
 
@@ -67,7 +67,11 @@ interface IQuadGovernance {
 
     function getIssuersLength() external view returns (uint256);
 
+    function getAllIssuersLength() external view returns (uint256);
+
     function getIssuers() external view returns (address[] memory);
+
+    function getAllIssuers() external view returns (address[] memory);
 
     function issuers(uint256) external view returns(address);
 

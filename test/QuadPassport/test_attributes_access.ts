@@ -61,8 +61,8 @@ describe("QuadPassport.attributes", async () => {
       [issuerTreasury, issuerTreasury2]
     );
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -219,17 +219,16 @@ describe("QuadPassport.attributes", async () => {
       ).to.be.revertedWith("INVALID_READER");
     });
 
-    it("fail - ineligible attributes", async () => {
+    it("success - ineligible attributes can be returned", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
 
-      // TODO: Figure out why it's wrong exception thrown
       await expect(
         passport
           .connect(mockReader)
           .attributes(minterA.address, ATTRIBUTE_COUNTRY)
-      ).to.be.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+      ).to.not.be.reverted;
     });
   });
 });

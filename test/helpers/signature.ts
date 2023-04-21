@@ -3,11 +3,9 @@ import { keccak256 } from "ethers/lib/utils";
 const { ethers } = require("hardhat");
 const { Signer, DataHexString } = require("ethers");
 
-const {
-  ATTRIBUTE_AML,
-  DIGEST_TO_SIGN,
-  HARDHAT_CHAIN_ID,
-} = require("../../utils/constant.ts");
+const { DIGEST_TO_SIGN, HARDHAT_CHAIN_ID } = require("../../utils/constant.ts");
+
+const DEFAULT_TOKEN_ID = 1;
 
 export const signMessage = async (
   signer: typeof Signer,
@@ -34,27 +32,15 @@ export const signSetAttributes = async (
   fee: any,
   did: string,
   passportAddress: string,
-  chainId: number = HARDHAT_CHAIN_ID
+  chainId: number = HARDHAT_CHAIN_ID,
+  tokenId: number = DEFAULT_TOKEN_ID
 ): Promise<typeof DataHexString> => {
-  const attrKeys: string[] = [];
+  const attrTypes: string[] = [];
   const attrValues: string[] = [];
 
   Object.keys(attributes).forEach((k, i) => {
-    let attrKey;
-    if (k === ATTRIBUTE_AML) {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [did, k])
-      );
-    } else {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["address", "bytes32"],
-          [account.address, k]
-        )
-      );
-    }
-    attrKeys.push(attrKey);
     attrValues.push(attributes[k]);
+    attrTypes.push(k);
   });
 
   const hash = ethers.utils.keccak256(
@@ -68,16 +54,18 @@ export const signSetAttributes = async (
         "uint256",
         "uint256",
         "uint256",
+        "uint256",
         "address",
       ],
       [
         account.address,
-        attrKeys,
+        attrTypes,
         attrValues,
         did,
         verifiedAt,
         issuedAt,
         fee,
+        tokenId,
         chainId,
         passportAddress,
       ]

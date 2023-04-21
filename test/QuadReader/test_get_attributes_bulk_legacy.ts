@@ -32,7 +32,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
   let businessPassport: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
-    treasury: SignerWithAddress,
+    treasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
@@ -61,13 +61,13 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
       issuerTreasury2,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi, businessPassport] =
-      await deployPassportEcosystem(admin, [issuer, issuer2], treasury, [
+      await deployPassportEcosystem(admin, [issuer, issuer2], admin, [
         issuerTreasury,
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -87,7 +87,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_COUNTRY],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -98,7 +98,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_IS_BUSINESS],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -109,7 +109,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_DID],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -120,7 +120,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_AML],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -138,7 +138,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -171,10 +171,28 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
+      );
+    });
+
+    it("success - all callers have preapproval", async () => {
+      await assertGetAttributesBulkLegacy(
+        minterA,
+        [
+          ATTRIBUTE_AML,
+          ATTRIBUTE_COUNTRY,
+          ATTRIBUTE_DID,
+          ATTRIBUTE_IS_BUSINESS,
+        ],
+        reader,
+        defi,
+        admin,
+        [issuer],
+        [attributes],
+        [verifiedAt]
       );
     });
 
@@ -190,7 +208,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -221,7 +239,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer2],
         [attrIssuers2],
         [verifiedAt + 1]
@@ -253,7 +271,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -288,7 +306,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -342,7 +360,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, attributeByIssuer2],
         [verifiedAt + 1, verifiedAt + 10]
@@ -376,7 +394,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, updatedAttrIssuer2],
         [verifiedAt + 1, verifiedAt + 15]
@@ -409,7 +427,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer],
         [updatedAttributes, attributes],
         [verifiedAt + 1, verifiedAt]
@@ -438,7 +456,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -513,7 +531,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("fail - not eligible attributes", async () => {
+    it("sucess - non-eligible attributes may be queried", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
@@ -522,16 +540,16 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         reader.getAttributesBulkLegacy(minterA.address, [ATTRIBUTE_COUNTRY], {
           value: queryFee,
         })
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+      ).to.not.be.reverted;
     });
 
-    it("fail - wrong query Fee", async () => {
+    it("success - wrong query Fee can be accepted as a donation", async () => {
       const queryFee = PRICE_PER_ATTRIBUTES_ETH[ATTRIBUTE_COUNTRY];
       await expect(
         reader.getAttributesBulkLegacy(minterA.address, [ATTRIBUTE_COUNTRY], {
-          value: queryFee.sub(1),
+          value: queryFee.add(1),
         })
-      ).to.revertedWith("INVALID_QUERY_FEE");
+      ).to.not.be.reverted;
     });
   });
 });

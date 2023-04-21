@@ -9,12 +9,13 @@ import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./storage/QuadPassportStore.sol";
+import "./storage/QuadPassportStoreV2.sol";
 import "./QuadSoulbound.sol";
 
 /// @title Quadrata Web3 Identity Passport
-/// @author Fabrice Cheng, Theodore Clapp
+/// @author Fabrice Cheng
 /// @notice This represents a Quadrata NFT Passport
-contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStore {
+contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, QuadSoulbound, QuadPassportStoreV2 {
 
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
@@ -31,7 +32,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
     }
 
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
-    /// @notice If passing a `DID` in _config.attrTypes, make sure that it's always first in the list
     /// @dev Only when authorized by an eligible issuer
     /// @param _config Input paramters required to authorize attributes to be set
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
@@ -41,6 +41,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer,
         bytes calldata _sigAccount
     ) external payable override whenNotPaused {
+        require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
+
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
         address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
         address issuer = _setAttributesVerify(account, _config, _sigIssuer);
@@ -48,8 +50,33 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         _setAttributesInternal(account, _config, issuer);
     }
 
+    /// @notice Set attributes from multiple issuers for a Quadrata Passport (Only Individuals)
+    /// @dev Only when authorized by an eligible issuer
+    /// @param _configs List of input paramters required to authorize attributes to be set
+    /// @param _sigIssuers List of ECDSA signature computed by an eligible issuer to authorize the mint
+    /// @param _sigAccounts List of ECDSA signature computed by an eligible EOA to prove ownership
+    function setAttributesBulk(
+        AttributeSetterConfig[] memory _configs,
+        bytes[] calldata _sigIssuers,
+        bytes[] calldata _sigAccounts
+    ) external payable override whenNotPaused {
+        require(_configs.length == _sigIssuers.length, "INVALID_BULK_ATTRIBUTES_LENGTH");
+        require(_configs.length == _sigAccounts.length, "INVALID_BULK_ATTRIBUTES_LENGTH");
 
-    /// @notice Set attributes for a Quadrata Passport (only by Issuers)
+        bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
+        uint256 totalFee;
+
+        for(uint256 i = 0; i < _configs.length; i++){
+            address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
+            address issuer = _setAttributesVerify(account, _configs[i], _sigIssuers[i]);
+            totalFee += _configs[i].fee;
+            _setAttributesInternal(account, _configs[i], issuer);
+        }
+        require(msg.value == totalFee,  "INVALID_SET_ATTRIBUTE_BULK_FEE");
+
+    }
+
+    /// @notice Set attributes for a Quadrata Passport
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
@@ -59,6 +86,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         bytes calldata _sigIssuer
     ) external payable override whenNotPaused {
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
+        require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
+
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
 
         _setAttributesInternal(_account, _config, issuer);
@@ -78,79 +107,62 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             require(governance.getIssuerAttributePermission(_issuer, ATTRIBUTE_DID), "ISSUER_ATTR_PERMISSION_INVALID");
             _validateDid(_account, _config.did);
             _writeAttrToStorage(
-                _computeAttrKey(_account, ATTRIBUTE_DID, _config.did),
+                _computeAttrKey(_account, ATTRIBUTE_DID, _config.did, _issuer),
                 _config.did,
-                _issuer,
                 _config.verifiedAt);
         }
 
-        for (uint256 i = 0; i < _config.attrKeys.length; i++) {
+        for (uint256 i = 0; i < _config.attrTypes.length; i++) {
             require(governance.getIssuerAttributePermission(_issuer, _config.attrTypes[i]), "ISSUER_ATTR_PERMISSION_INVALID");
             require(_config.attrTypes[i] != ATTRIBUTE_DID, "ISSUER_UPDATED_DID");
 
-            // Verify attrKeys computation
-            _verifyAttrKey(_account, _config.attrTypes[i], _config.attrKeys[i], _config.did);
             _writeAttrToStorage(
-                _config.attrKeys[i],
+                _computeAttrKey(_account, _config.attrTypes[i], _config.did, _issuer),
                 _config.attrValues[i],
-                _issuer,
                 _config.verifiedAt);
-
         }
 
-        if (_config.tokenId != 0 && balanceOf(_account, _config.tokenId) == 0) {
+        if (balanceOf(_account, _config.tokenId) == 0) {
             _mint(_account, _config.tokenId, 1);
         }
-        emit SetAttributeReceipt(_account, _issuer, msg.value);
+        emit SetAttributeReceipt(_account, _issuer, _config.fee,  _config.tokenId);
     }
 
     /// @notice Internal function that validates supplied DID on updates do not change
     /// @param _account address of entity being attested to
     /// @param _did new DID value
     function _validateDid(address _account, bytes32 _did) internal view {
-        Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-        if(dIDAttrs.length > 0){
-            require(dIDAttrs[0].value == _did, "INVALID_DID");
+        // check if DID is already set from issuers
+        address[] memory issuers = governance.getIssuers();
+        for(uint256 i = 0; i < issuers.length; i++) {
+            address issuer = issuers[i];
+            bytes32 attrKey = keccak256(abi.encode(_account, ATTRIBUTE_DID, issuer));
+            bytes32 possibleDid = _attributesv2[attrKey].value;
+            if(possibleDid != bytes32(0)) {
+                require(possibleDid == _did, "INVALID_DID");
+            }
+
         }
     }
 
     /// @notice Internal function that writes the attribute value and issuer position to storage
-    /// @param _attrKey attribute key (i.e. keccak256(address, keccak256("AML")))
+    /// @param _attrKey attribute key (i.e. keccak256(userAddress, keccak256("AML"), issuerAddress))
     /// @param _attrValue attribute value
-    /// @param _issuer address of issuer who verified attribute
     /// @param _verifiedAt timestamp of when attribute was verified at
     function _writeAttrToStorage(
         bytes32 _attrKey,
         bytes32 _attrValue,
-        address _issuer,
         uint256 _verifiedAt
     ) internal {
-        uint256 issuerPosition = _position[keccak256(abi.encode(_attrKey, _issuer))];
         Attribute memory attr = Attribute({
             value:  _attrValue,
             epoch: _verifiedAt,
-            issuer: _issuer
+            issuer: address(0)
         });
 
-        if (issuerPosition == 0) {
-        // Means the issuer hasn't yet attested to that attribute type
-            _attributes[_attrKey].push(attr);
-            _position[keccak256(abi.encode(_attrKey, _issuer))] = _attributes[_attrKey].length;
-        } else {
-            // Issuer already attested to that attribute - override
-            _attributes[_attrKey][issuerPosition-1] = attr;
-        }
+        _attributesv2[_attrKey] = attr;
     }
 
-    /// @notice Verify that the attrKey has been correctly computed based on account and attrType
-    /// @param _account Address of the Quadrata Passport holder
-    /// @param _attrType bytes32 of the attribute type
-    /// @param _attrKey bytes32 of the attrKey to compare against/verify
-    function _verifyAttrKey(address _account, bytes32 _attrType, bytes32 _attrKey, bytes32 _did) internal view {
-        bytes32 expectedAttrKey = _computeAttrKey(_account, _attrType, _did);
-
-        require(_attrKey == expectedAttrKey, "MISMATCH_ATTR_KEY");
-    }
 
     /// @notice Internal helper to check setAttributes process
     /// @param _account Address of the Quadrata Passport holder
@@ -161,136 +173,125 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
-    ) internal returns(address) {
-        require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
-        require(_config.tokenId == 0 || governance.eligibleTokenId(_config.tokenId), "PASSPORT_TOKENID_INVALID");
+    ) internal view returns(address) {
         require(_config.verifiedAt != 0, "VERIFIED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt != 0, "ISSUED_AT_CANNOT_BE_ZERO");
         require(_config.issuedAt <= block.timestamp, "INVALID_ISSUED_AT");
 
         require(_config.verifiedAt <= block.timestamp, "INVALID_VERIFIED_AT");
         require(block.timestamp <= _config.issuedAt + 1 days, "EXPIRED_ISSUED_AT");
-        require(_config.attrKeys.length == _config.attrTypes.length, "MISMATCH_LENGTH");
-        require(_config.attrKeys.length == _config.attrValues.length, "MISMATCH_LENGTH");
+        require(_config.attrValues.length == _config.attrTypes.length, "MISMATCH_LENGTH");
 
         // Verify signature
         bytes32 extractionHash = keccak256(
             abi.encode(
                 _account,
-                _config.attrKeys,
+                _config.attrTypes,
                 _config.attrValues,
                 _config.did,
                 _config.verifiedAt,
                 _config.issuedAt,
                 _config.fee,
+                _config.tokenId,
                 block.chainid,
                 address(this)
             )
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
-        bytes32 issuerMintHash = keccak256(abi.encode(extractionHash, issuer));
 
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
-        require(!_usedSigHashes[issuerMintHash], "SIGNATURE_ALREADY_USED");
-
-        _usedSigHashes[issuerMintHash] = true;
 
         return issuer;
     }
 
-    /// @notice Compute the attrKey for the mapping `_attributes`
+    /// @notice Compute the attrKey for the mapping `_attributesv2`
     /// @param _account address of the wallet owner
     /// @param _attribute attribute type (ex: keccak256("COUNTRY"))
     /// @param _did DID of the passport (optional - could be pass as bytes32(0))
-    function _computeAttrKey(address _account, bytes32 _attribute, bytes32 _did) internal view returns(bytes32) {
+    /// @param _issuer address of the issuer
+    function _computeAttrKey(address _account, bytes32 _attribute, bytes32 _did, address _issuer) internal view returns(bytes32) {
         if (governance.eligibleAttributes(_attribute)) {
-            return keccak256(abi.encode(_account, _attribute));
+            return keccak256(abi.encode(_account, _attribute, _issuer));
         }
         if (governance.eligibleAttributesByDID(_attribute)){
-            if(_did == bytes32(0)){
-                Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-                require(dIDAttrs.length > 0 && dIDAttrs[0].value != bytes32(0), "MISSING_DID");
-                _did = dIDAttrs[0].value;
-
+            if (_did == bytes32(0)) {
+                Attribute memory did = _attributeInternal(_account, ATTRIBUTE_DID);
+                if (did.value != bytes32(0)) {
+                    _did = did.value;
+                }
             }
-            return keccak256(abi.encode(_did, _attribute));
+            require(_did != bytes32(0), "MISSING_DID");
+            return keccak256(abi.encode(_did, _attribute, _issuer));
         }
 
         revert("ATTRIBUTE_NOT_ELIGIBLE");
     }
 
-    /// @notice Burn your Quadrata passport
+    /// @notice Burn your Quadrata passport and preserve did level attributes
     /// @dev Only owner of the passport
-    function burnPassports() external override whenNotPaused {
+    /// @param _tokenId tokenId to burn
+    function burnPassports(uint256 _tokenId) external override whenNotPaused {
+        address account = _msgSender();
+        address[] memory issuers = governance.getAllIssuers();
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
-            bytes32 attributeType = governance.eligibleAttributesArray(i);
-
-            bytes32 attrKey = keccak256(abi.encode(_msgSender(), attributeType));
-
-            IQuadPassportStore.Attribute[] storage attrs = _attributes[attrKey];
-
-            for(uint256 j = attrs.length; j > 0; j--){
-                _position[keccak256(abi.encode(attrKey, attrs[j-1].issuer))] = 0;
-                attrs.pop();
+            for(uint256 j = 0; j < issuers.length; j++) {
+                bytes32 attributeType = governance.eligibleAttributesArray(i);
+                address issuer = issuers[j];
+                bytes32 attrKey = _attributeKey(account, attributeType, issuer);
+                delete _attributesv2[attrKey];
             }
         }
-        _burnPassports(_msgSender());
+        _burnPassports(account, _tokenId);
     }
 
     /// @notice Issuer can burn an account's Quadrata passport when requested
     /// @dev Only issuer role
     /// @param _account address of the wallet to burn
+    /// @param _tokenId tokenId to burn
     function burnPassportsIssuer(
-        address _account
+        address _account,
+        uint256 _tokenId
     ) external override whenNotPaused {
         require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, _msgSender()), "INVALID_ISSUER");
-
+        address issuer = _msgSender();
+        address[] memory allIssuers = governance.getAllIssuers();
         bool isEmpty = true;
 
-        // only delete attributes from issuer
+        // surface pass only delete attributes from issuer
         for (uint256 i = 0; i < governance.getEligibleAttributesLength(); i++) {
             bytes32 attributeType = governance.eligibleAttributesArray(i);
-            bytes32 attrKey = keccak256(abi.encode(_account, attributeType));
-            uint256 position = _position[keccak256(abi.encode(attrKey, _msgSender()))];
-            Attribute[] storage attrs = _attributes[attrKey];
-            if (position > 0) {
-
-                // Swap last attribute position with position of attribute to delete before calling pop()
-                Attribute memory attrToDelete = attrs[position-1];
-                Attribute memory attrToSwap = attrs[attrs.length-1];
-
-                _position[keccak256(abi.encode(attrKey, attrToSwap.issuer))] = position;
-                _position[keccak256(abi.encode(attrKey, attrToDelete.issuer))] = 0;
-
-                attrs[position-1] = attrToSwap;
-
-                attrs.pop();
-
-            }
-            if (attrs.length > 0) {
-                isEmpty = false;
+            bytes32 attrKey = _attributeKey(_account, attributeType, issuer);
+            delete _attributesv2[attrKey];
+            // second depth checks if account still has attributes from other issuers
+            for(uint256 j = 0; isEmpty && j < allIssuers.length; j++) {
+                address otherIssuer = allIssuers[j];
+                if (otherIssuer != issuer) {
+                    attrKey = _attributeKey(_account, attributeType, otherIssuer);
+                    if (_attributesv2[attrKey].value != bytes32(0)) {
+                        isEmpty = false;
+                    }
+                }
             }
         }
 
         if (isEmpty){
-            _burnPassports(_account);
+            _burnPassports(_account, _tokenId);
         }
-        emit BurnPassportsIssuer(_msgSender(), _account);
+        emit BurnPassportsIssuer(issuer, _account);
     }
 
     /// @dev Loop through all eligible token ids and burn passports if they exist
     /// @param _account address of user
-    function _burnPassports(address _account) internal {
-        for (uint256 currTokenId = 1; currTokenId <= governance.getMaxEligibleTokenId(); currTokenId++){
-            uint256 number = balanceOf(_account, currTokenId);
-            if (number > 0){
-                _burn(_account, currTokenId, number);
-            }
+    /// @param _tokenId tokenId to burn
+    function _burnPassports(address _account, uint256 _tokenId) internal {
+        uint256 amount = balanceOf(_account, _tokenId);
+        if(amount > 0) {
+            _burn(_account, _tokenId, amount);
         }
     }
 
-    /// @dev Allow an authorized readers to get attribute information about a passport holder for a specific issuer
+    /// @dev Allow an authorized readers to get all attribute information about a passport holder
     /// @param _account address of user
     /// @param _attribute attribute to get respective value from
     /// @return value of attribute from issuer
@@ -298,23 +299,89 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         bytes32 _attribute
     ) public view override returns (Attribute[] memory) {
-        require(IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
-
-        require(governance.eligibleAttributes(_attribute)
-            || governance.eligibleAttributesByDID(_attribute),
-            "ATTRIBUTE_NOT_ELIGIBLE"
-        );
+        require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+        bool groupByDID = governance.eligibleAttributesByDID(_attribute);
+        address[] memory issuers = governance.getIssuers();
+        Attribute memory did;
+        if (groupByDID)
+            did = attribute(_account, ATTRIBUTE_DID);
+        uint256 counter = 0;
         bytes32 attrKey;
-        if (governance.eligibleAttributes(_attribute)) {
-            attrKey = keccak256(abi.encode(_account, _attribute));
-        } else {
-            Attribute[] memory dIDAttrs = _attributes[keccak256(abi.encode(_account, ATTRIBUTE_DID))];
-            if (dIDAttrs.length == 0 || dIDAttrs[0].value == bytes32(0))
-                return new Attribute[](0);
-            attrKey = keccak256(abi.encode(dIDAttrs[0].value, _attribute));
+        for (uint256 i = 0; i < issuers.length; i++) {
+            if (groupByDID)
+                attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+            else
+                attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
+            Attribute memory attr = _attributesv2[attrKey];
+            if (attr.epoch != uint256(0)) {
+                counter += 1;
+            }
         }
 
-        return _attributes[attrKey];
+        Attribute[] memory attrs = new Attribute[](counter);
+        if (counter > 0) {
+            uint256 j;
+            for (uint256 i = 0; i < issuers.length; i++) {
+                if (groupByDID)
+                    attrKey = keccak256(abi.encode(did.value, _attribute, issuers[i]));
+                else
+                    attrKey = keccak256(abi.encode(_account, _attribute, issuers[i]));
+                Attribute memory attr = _attributesv2[attrKey];
+                attr.issuer = issuers[i];
+                if (attr.epoch != uint256(0)) {
+                    attrs[j] = attr;
+                    j += 1;
+                }
+            }
+        }
+
+        return attrs;
+    }
+
+
+    /// @dev Allow an authorized readers to get one attribute information about a passport holder
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @return value of attribute from issuer
+    function attribute(
+        address _account,
+        bytes32 _attribute
+    ) public view override returns (Attribute memory) {
+        require(msg.sender == address(reader) || IAccessControlUpgradeable(address(governance)).hasRole(READER_ROLE, _msgSender()), "INVALID_READER");
+
+        return _attributeInternal(_account, _attribute);
+    }
+
+    function _attributeInternal(
+        address _account,
+        bytes32 _attribute
+    ) internal view returns(Attribute memory) {
+        address[] memory issuers = governance.getIssuers();
+        for (uint256 i = 0; i < issuers.length; i++) {
+            bytes32 attrKey = _attributeKey(_account, _attribute, issuers[i]);
+            Attribute memory attr = _attributesv2[attrKey];
+            if (attr.epoch != uint256(0)) {
+                attr.issuer = issuers[i];
+                return attr;
+            }
+        }
+        return Attribute({value: bytes32(0), epoch: uint256(0), issuer: address(0)});
+
+    }
+
+
+    /// @dev Allow an a user to generate a key for an attribute
+    /// @param _account address of user
+    /// @param _attribute attribute to get respective value from
+    /// @param _issuer address of issuer
+    /// @return key for attribute
+    function _attributeKey(
+        address _account,
+        bytes32 _attribute,
+        address _issuer
+    ) internal view returns (bytes32) {
+        bytes32 did = governance.eligibleAttributesByDID(_attribute) ? _attributesv2[keccak256(abi.encode(_account, ATTRIBUTE_DID, _issuer))].value : bytes32(0);
+        return did != bytes32(0) ? keccak256(abi.encode(did, _attribute, _issuer)) : keccak256(abi.encode(_account, _attribute, _issuer));
     }
 
     /// @dev Admin function to set the new pending Governance address
@@ -406,5 +473,13 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
             "INVALID_ADMIN"
         );
+    }
+
+    function setQuadReader(IQuadReader _reader) external {
+        require(
+            IAccessControlUpgradeable(address(governance)).hasRole(GOVERNANCE_ROLE, _msgSender()),
+            "INVALID_ADMIN"
+        );
+        reader = _reader;
     }
 }

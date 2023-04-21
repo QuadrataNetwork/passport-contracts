@@ -58,8 +58,8 @@ describe("QuadPassport.withdraw", async () => {
       [issuerTreasury, issuerTreasury2]
     );
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -157,20 +157,6 @@ describe("QuadPassport.withdraw", async () => {
           .connect(admin)
           .withdraw(ethers.constants.AddressZero, MINT_PRICE)
       ).to.revertedWith("WITHDRAW_ADDRESS_ZERO");
-    });
-
-    it("fail - withdraw balance 0", async () => {
-      await passport
-        .connect(admin)
-        .withdraw(issuerTreasury2.address, MINT_PRICE);
-      const newBalancePassport = await ethers.provider.getBalance(
-        passport.address
-      );
-
-      expect(newBalancePassport).to.equal(0);
-      await expect(
-        passport.connect(admin).withdraw(issuerTreasury.address, MINT_PRICE)
-      ).to.revertedWith("INSUFFICIENT_BALANCE");
     });
 
     it("fail - withdraw higher amount than balance", async () => {

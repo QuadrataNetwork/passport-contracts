@@ -40,7 +40,6 @@ describe("QuadReader", async () => {
     [ATTRIBUTE_DID]: formatBytes32String("quad:did:helllo"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
-    [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
   };
 
   beforeEach(async () => {
@@ -64,8 +63,8 @@ describe("QuadReader", async () => {
       [issuerTreasury]
     );
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -79,55 +78,53 @@ describe("QuadReader", async () => {
   });
 
   describe("calculate Gas - 1 issuer | 4 attributes", async () => {
-    const attributeToQuery = [
-      ATTRIBUTE_DID,
-      ATTRIBUTE_COUNTRY,
-      ATTRIBUTE_IS_BUSINESS,
-      ATTRIBUTE_AML,
-    ];
+    const attributeToQuery = [ATTRIBUTE_DID, ATTRIBUTE_COUNTRY, ATTRIBUTE_AML];
+
+    it("getAttribute", async () => {
+      const attribute = attributeToQuery[0];
+      await reader.connect(admin).getAttribute(minterA.address, attribute);
+    });
 
     it("getAttributes", async () => {
       const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
-      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+      const fee = await reader
+        .connect(admin)
+        .queryFee(minterA.address, attribute);
+      await reader.connect(admin).getAttributes(minterA.address, attribute, {
         value: fee,
       });
     });
 
     it("getAttributesLegacy", async () => {
       const attribute = attributeToQuery[0];
-      const fee = await reader.queryFee(minterA.address, attribute);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesLegacy(minterA.address, attribute, {
-          value: fee,
+          value: 0,
         });
     });
 
     it("getAttributesBulkLegacy", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
-          value: fee,
+          value: 0,
         });
     });
 
     it("getAttributesBulk", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulk(minterA.address, attributeToQuery, {
-          value: fee,
+          value: 0,
         });
     });
 
     it("getAttributesBulk (DeFi)", async () => {
-      const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await defi
         .connect(minterA)
         .depositBulk(minterA.address, attributeToQuery, {
-          value: fee,
+          value: 0,
         });
     });
 
@@ -183,7 +180,7 @@ describe("QuadReader", async () => {
     it("getAttributes", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader.queryFee(minterA.address, attribute);
-      await reader.connect(minterA).getAttributes(minterA.address, attribute, {
+      await reader.connect(admin).getAttributes(minterA.address, attribute, {
         value: fee,
       });
     });
@@ -192,7 +189,7 @@ describe("QuadReader", async () => {
       const attribute = attributeToQuery[0];
       const fee = await reader.queryFee(minterA.address, attribute);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesLegacy(minterA.address, attribute, {
           value: fee,
         });
@@ -201,7 +198,7 @@ describe("QuadReader", async () => {
     it("getAttributesBulkLegacy", async () => {
       const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulkLegacy(minterA.address, attributeToQuery, {
           value: fee,
         });
@@ -210,7 +207,7 @@ describe("QuadReader", async () => {
     it("getAttributesBulk", async () => {
       const fee = await reader.queryFeeBulk(minterA.address, attributeToQuery);
       await reader
-        .connect(minterA)
+        .connect(admin)
         .getAttributesBulk(minterA.address, attributeToQuery, {
           value: fee,
         });

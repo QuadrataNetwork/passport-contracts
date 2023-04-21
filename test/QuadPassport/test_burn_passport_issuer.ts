@@ -1,9 +1,8 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { formatBytes32String, hexZeroPad, id } from "ethers/lib/utils";
-import {QuadGovernance} from "../../types"
 
 const {
   ATTRIBUTE_AML,
@@ -26,12 +25,12 @@ const {
 
 describe("QuadPassport.burnPassports", async () => {
   let passport: Contract;
-  let governance: QuadGovernance; // eslint-disable-line no-unused-vars
+  let governance: Contract; // eslint-disable-line no-unused-vars
   let reader: Contract; // eslint-disable-line no-unused-vars
   let defi: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
-    treasury: SignerWithAddress,
+    treasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
@@ -74,12 +73,12 @@ describe("QuadPassport.burnPassports", async () => {
       dataChecker,
       issuerB,
       issuerBTreasury,
-      freeAccount
+      freeAccount,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi] = await deployPassportEcosystem(
       admin,
       [issuer, issuerB],
-      treasury,
+      admin,
       [issuerTreasury, issuerBTreasury]
     );
 
@@ -110,7 +109,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -121,7 +120,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -132,7 +131,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -143,7 +142,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -152,7 +151,9 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
-      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address);
+      await passport
+        .connect(issuer)
+        .burnPassportsIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         0
       );
@@ -162,7 +163,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -173,7 +174,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -184,7 +185,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -207,7 +208,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -247,7 +248,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -258,7 +259,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -269,7 +270,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -280,7 +281,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -303,7 +304,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -314,7 +315,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -325,7 +326,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -336,7 +337,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -376,7 +377,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -387,7 +388,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -398,7 +399,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -409,7 +410,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -428,7 +429,7 @@ describe("QuadPassport.burnPassports", async () => {
         .withArgs(issuer.address, true);
 
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(minterB).burnPassports();
+      await passport.connect(minterB).burnPassports(TOKEN_ID);
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
 
       await assertGetAttributes(
@@ -436,7 +437,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -447,7 +448,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -458,7 +459,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -482,7 +483,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -507,7 +508,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -518,7 +519,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -529,7 +530,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -540,7 +541,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -548,7 +549,7 @@ describe("QuadPassport.burnPassports", async () => {
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+        passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID)
       )
         .to.emit(passport, "TransferSingle")
         .withArgs(
@@ -568,7 +569,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -579,7 +580,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -590,7 +591,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -601,7 +602,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -638,7 +639,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -649,7 +650,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -660,7 +661,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -671,7 +672,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -680,7 +681,7 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+        passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID)
       )
         .to.emit(passport, "BurnPassportsIssuer")
         .withArgs(issuer.address, minterA.address)
@@ -692,7 +693,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [attributes, attributes],
         [verifiedAt, verifiedAt]
@@ -703,7 +704,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB],
         [attributes],
         [verifiedAt]
@@ -714,7 +715,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB],
         [attributes],
         [verifiedAt]
@@ -725,14 +726,14 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB],
         [attributes],
         [verifiedAt]
       );
 
       await expect(
-        passport.connect(issuerB).burnPassportsIssuer(minterA.address)
+        passport.connect(issuerB).burnPassportsIssuer(minterA.address, TOKEN_ID)
       )
         .to.emit(passport, "TransferSingle")
         .withArgs(
@@ -752,7 +753,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -763,7 +764,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -774,7 +775,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -785,7 +786,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -836,7 +837,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -848,7 +849,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -860,7 +861,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -872,7 +873,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -884,7 +885,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt],
@@ -896,7 +897,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt],
@@ -908,7 +909,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt],
@@ -920,7 +921,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt],
@@ -936,7 +937,9 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
-      await passport.connect(issuerB).burnPassportsIssuer(mockBusiness.address);
+      await passport
+        .connect(issuerB)
+        .burnPassportsIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
@@ -954,7 +957,9 @@ describe("QuadPassport.burnPassports", async () => {
         .withArgs(ATTRIBUTE_COUNTRY, false);
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
+      await passport
+        .connect(issuer)
+        .burnPassportsIssuer(minterA.address, TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       await expect(
@@ -968,7 +973,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -980,7 +985,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -992,7 +997,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt],
@@ -1015,7 +1020,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1027,7 +1032,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt],
@@ -1039,7 +1044,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1051,7 +1056,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         [],
@@ -1075,7 +1080,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt],
@@ -1115,7 +1120,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1127,7 +1132,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1139,7 +1144,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1151,7 +1156,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt],
@@ -1167,7 +1172,9 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
-      await passport.connect(issuer).burnPassportsIssuer(mockBusiness.address);
+      await passport
+        .connect(issuer)
+        .burnPassportsIssuer(mockBusiness.address, TOKEN_ID);
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
         1
       );
@@ -1183,7 +1190,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB],
         [businessAttributes],
         [verifiedAt]
@@ -1194,7 +1201,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt]
@@ -1205,7 +1212,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuerB],
         [businessAttributes],
         [verifiedAt]
@@ -1228,7 +1235,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuerB],
         [businessAttributes, businessAttributes],
         [verifiedAt, verifiedAt]
@@ -1249,7 +1256,9 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
-      await passport.connect(issuer).burnPassportsIssuer(minterA.address);
+      await passport
+        .connect(issuer)
+        .burnPassportsIssuer(minterA.address, TOKEN_ID);
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
 
       const attributesCopy = Object.assign({}, attributes);
@@ -1277,7 +1286,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -1288,7 +1297,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -1299,7 +1308,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -1310,7 +1319,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [newVerifiedAt]
@@ -1337,7 +1346,7 @@ describe("QuadPassport.burnPassports", async () => {
     it("fail - passport non-existent (account never had attested data)", async () => {
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterB.address)
+        passport.connect(issuer).burnPassportsIssuer(minterB.address, TOKEN_ID)
       ).to.not.be.reverted;
       expect(await passport.balanceOf(minterB.address, TOKEN_ID)).to.equal(0);
     });
@@ -1354,14 +1363,14 @@ describe("QuadPassport.burnPassports", async () => {
           MINT_PRICE
         )
       ).to.not.be.reverted;
-      expect(await passport.balanceOf(minterA.address, 1)).to.equal(1);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
 
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(minterA.address)
+        passport.connect(issuer).burnPassportsIssuer(minterA.address, TOKEN_ID)
       ).to.not.be.reverted;
 
-      expect(await passport.balanceOf(minterA.address, 1)).to.equal(0);
+      expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(0);
       expect(await passport.balanceOf(minterA.address, 2)).to.equal(0);
     });
 
@@ -1385,7 +1394,9 @@ describe("QuadPassport.burnPassports", async () => {
       expect(await passport.balanceOf(mockBusiness.address, 2)).to.equal(0);
 
       await expect(
-        passport.connect(issuer).burnPassportsIssuer(mockBusiness.address)
+        passport
+          .connect(issuer)
+          .burnPassportsIssuer(mockBusiness.address, TOKEN_ID)
       ).to.not.be.reverted;
 
       expect(await passport.balanceOf(mockBusiness.address, 1)).to.equal(0);
@@ -1406,7 +1417,7 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       await expect(
-        passport.connect(admin).burnPassportsIssuer(minterA.address)
+        passport.connect(admin).burnPassportsIssuer(minterA.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
@@ -1416,7 +1427,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1427,7 +1438,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1438,7 +1449,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1449,7 +1460,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1469,9 +1480,15 @@ describe("QuadPassport.burnPassports", async () => {
         )
       ).to.not.be.reverted;
 
-      await governance.connect(admin).addIssuer(freeAccount.address, freeAccount.address);
+      await governance
+        .connect(admin)
+        .addIssuer(freeAccount.address, freeAccount.address);
 
-      expect(await passport.connect(issuerB).burnPassportsIssuer(minterA.address))
+      expect(
+        await passport
+          .connect(issuerB)
+          .burnPassportsIssuer(minterA.address, TOKEN_ID)
+      );
 
       expect(await passport.balanceOf(minterA.address, TOKEN_ID)).to.equal(1);
 
@@ -1480,7 +1497,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1491,7 +1508,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1502,7 +1519,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1513,7 +1530,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1537,7 +1554,9 @@ describe("QuadPassport.burnPassports", async () => {
       ).to.not.be.reverted;
 
       await expect(
-        passport.connect(admin).burnPassportsIssuer(mockBusiness.address)
+        passport
+          .connect(admin)
+          .burnPassportsIssuer(mockBusiness.address, TOKEN_ID)
       ).to.revertedWith("INVALID_ISSUER");
 
       expect(await passport.balanceOf(mockBusiness.address, TOKEN_ID)).to.equal(
@@ -1549,7 +1568,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -1560,7 +1579,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -1571,7 +1590,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -1582,7 +1601,7 @@ describe("QuadPassport.burnPassports", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [businessAttributes],
         [verifiedAt]
@@ -1593,7 +1612,7 @@ describe("QuadPassport.burnPassports", async () => {
       await passport.connect(admin).pause();
 
       await expect(
-        passport.connect(admin).burnPassportsIssuer(minterA.address)
+        passport.connect(admin).burnPassportsIssuer(minterA.address, TOKEN_ID)
       ).to.revertedWith("Pausable: paused");
     });
   });

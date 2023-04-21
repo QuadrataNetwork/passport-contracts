@@ -11,7 +11,7 @@ export const assertGetAttributes = async (
   attributeToQuery: string,
   reader: Contract,
   defi: Contract,
-  treasury: SignerWithAddress,
+  admin: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
@@ -20,7 +20,7 @@ export const assertGetAttributes = async (
     account,
     attributeToQuery,
     reader,
-    treasury,
+    admin,
     expectedIssuers,
     expectedAttributes,
     expectedVerifiedAt
@@ -79,7 +79,9 @@ export const assertGetAttributesStatic = async (
   const staticResp = await reader.callStatic.getAttributes(
     account.address,
     attributeToQuery,
-    { value: queryFee }
+    {
+      value: queryFee,
+    }
   );
   const matchingAttributes =
     attributeToQuery in availableAttributesByTypes
@@ -99,7 +101,7 @@ export const assertGetAttributesEvents = async (
   account: SignerWithAddress,
   attributeToQuery: string,
   reader: Contract,
-  treasury: SignerWithAddress,
+  admin: SignerWithAddress,
   expectedIssuers: SignerWithAddress[],
   expectedAttributes: any[],
   expectedVerifiedAt: number[]
@@ -132,7 +134,7 @@ export const assertGetAttributesEvents = async (
   );
 
   const tx = await reader
-    .connect(treasury)
+    .connect(admin)
     .getAttributes(account.address, attributeToQuery, {
       value: queryFee,
     });
@@ -143,7 +145,7 @@ export const assertGetAttributesEvents = async (
     expect(receipt.events.length).to.equal(1);
     expect(receipt.events[0].event).to.equal("QueryEvent");
     expect(receipt.events[0].args[0]).to.equal(account.address);
-    expect(receipt.events[0].args[1]).to.equal(treasury.address);
+    expect(receipt.events[0].args[1]).to.equal(admin.address);
     expect(receipt.events[0].args[2]).to.equal(attributeToQuery);
   } else {
     let feeIssuer = parseEther("0");
@@ -163,16 +165,14 @@ export const assertGetAttributesEvents = async (
     }
 
     expect(receipt.events[numberOfAttrs].event).to.equal("QueryFeeReceipt");
-    expect(receipt.events[numberOfAttrs].args[0]).to.equal(treasury.address);
+    expect(receipt.events[numberOfAttrs].args[0]).to.equal(admin.address);
     expect(receipt.events[numberOfAttrs].args[1]).to.equal(
       queryFee.sub(feeIssuer.mul(numberOfAttrs))
     );
 
     expect(receipt.events[numberOfAttrs + 1].event).to.equal("QueryEvent");
     expect(receipt.events[numberOfAttrs + 1].args[0]).to.equal(account.address);
-    expect(receipt.events[numberOfAttrs + 1].args[1]).to.equal(
-      treasury.address
-    );
+    expect(receipt.events[numberOfAttrs + 1].args[1]).to.equal(admin.address);
     expect(receipt.events[numberOfAttrs + 1].args[2]).to.equal(
       attributeToQuery
     );

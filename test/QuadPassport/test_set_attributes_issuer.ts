@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { Contract } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-with-address";
 import { formatBytes32String, id } from "ethers/lib/utils";
@@ -46,13 +46,13 @@ describe("QuadPassport.setAttributesIssuer", async () => {
     mockReader: SignerWithAddress;
 
   let issuedAt: number, verifiedAt: number;
-  const zeroFee = ethers.utils.parseEther("0");
-  const attributes: any = {
+  let attributes: any = {
     [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
     [ATTRIBUTE_AML]: formatBytes32String("1"),
     [ATTRIBUTE_COUNTRY]: id("FRANCE"),
     [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
   };
+  const zeroFee = ethers.utils.parseEther("0");
 
   beforeEach(async () => {
     [
@@ -72,8 +72,12 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    // set issued at to current block timestamp
+    issuedAt =
+      (await ethers.provider
+        .getBlock("latest")
+        .then((block) => block.timestamp)) - 100;
+    verifiedAt = issuedAt;
 
     await governance.connect(admin).grantRole(READER_ROLE, mockReader.address);
   });
@@ -148,6 +152,39 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       );
     });
 
+    it("setAttributesIssuer (Update AML by passing DID(0))", async () => {
+      const attributesToUpdate: any = {
+        [ATTRIBUTE_AML]: formatBytes32String("5"),
+      };
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributes,
+        verifiedAt,
+        issuedAt
+      );
+
+      await setAttributesIssuer(
+        businessPassport,
+        issuer,
+        passport,
+        attributesToUpdate,
+        verifiedAt,
+        issuedAt
+      );
+
+      await assertSetAttribute(
+        businessPassport,
+        [issuer],
+        passport,
+        [attributesToUpdate],
+        [verifiedAt],
+        [zeroFee],
+        mockReader
+      );
+    });
+
     it("setAttributesIssuer (Multiple issuers for exact same Attribute)", async () => {
       await setAttributesIssuer(
         businessPassport,
@@ -194,8 +231,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_COUNTRY]: id("US"),
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
-
-      await governance.connect(admin).setEligibleTokenId(2, true, "");
 
       await setAttributesIssuer(
         businessPassport,
@@ -378,15 +413,14 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };
       const newTokenId = 2;
-      await governance.connect(admin).setEligibleTokenId(newTokenId, true, "");
-
       await setAttributesIssuer(
         businessPassport,
         issuer,
         passport,
         attributes,
         verifiedAt,
-        issuedAt
+        issuedAt,
+        newTokenId
       );
 
       const attributes2: any = {
@@ -451,31 +485,20 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       attrValues = [];
       attrTypes = [];
 
+      attributes = {
+        [ATTRIBUTE_DID]: formatBytes32String("quad:did:foobar"),
+        [ATTRIBUTE_AML]: formatBytes32String("1"),
+        [ATTRIBUTE_COUNTRY]: id("FRANCE"),
+        [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
+      };
       let did = attributes[ATTRIBUTE_DID];
-
       // Deep Copy to avoid mutating the object
       const attributesCopy = Object.assign({}, attributes);
       Object.keys(attributesCopy).forEach((k, i) => {
-        let attrKey;
         if (k === ATTRIBUTE_AML) {
           expect(ATTRIBUTE_DID in attributesCopy).to.equal(true);
-          did = attributes[ATTRIBUTE_DID];
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["bytes32", "bytes32"],
-              [did, k]
-            )
-          );
-        } else {
-          attrKey = ethers.utils.keccak256(
-            ethers.utils.defaultAbiCoder.encode(
-              ["address", "bytes32"],
-              [businessPassport.address, k]
-            )
-          );
         }
         if (k !== ATTRIBUTE_DID) {
-          attrKeys.push(attrKey);
           attrValues.push(attributesCopy[k]);
           attrTypes.push(k);
         }
@@ -595,15 +618,11 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.not.be.reverted;
     });
 
-    it("fail - signature already used", async () => {
-      await setAttributesIssuer(
-        businessPassport,
-        issuer,
-        passport,
-        attributes,
-        verifiedAt,
-        issuedAt
-      );
+    it("fail - signature too old (must be used within 1 day of issuance", async () => {
+      // set block timestamp to be 5 hours passed issuedAt
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        issuedAt + 5 * 60 * 60,
+      ]);
       await expect(
         setAttributesIssuer(
           businessPassport,
@@ -613,7 +632,22 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           verifiedAt,
           issuedAt
         )
-      ).to.be.revertedWith("SIGNATURE_ALREADY_USED");
+      ).to.not.be.reverted;
+
+      // set block timestamp to be 26 hours passed issuedAt
+      await ethers.provider.send("evm_setNextBlockTimestamp", [
+        issuedAt + 26 * 60 * 60,
+      ]);
+      await expect(
+        setAttributesIssuer(
+          businessPassport,
+          issuer,
+          passport,
+          attributes,
+          verifiedAt,
+          issuedAt
+        )
+      ).to.be.revertedWith("EXPIRED_ISSUED_AT");
     });
 
     it("fail - same wallet but diff DID)", async () => {
@@ -643,21 +677,6 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           issuedAt + 1
         )
       ).to.revertedWith("INVALID_DID");
-    });
-
-    it("fail - invalid tokenId", async () => {
-      const badTokenId = 1337;
-      await expect(
-        setAttributesIssuer(
-          businessPassport,
-          issuer,
-          passport,
-          attributes,
-          verifiedAt,
-          issuedAt,
-          badTokenId
-        )
-      ).to.be.revertedWith("PASSPORT_TOKENID_INVALID");
     });
 
     it("fail - zero verifiedAt", async () => {
@@ -761,8 +780,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_SET_ATTRIBUTE_FEE");
     });
 
-    it("fail - attrKeys.length != attrValues.length", async () => {
-      attrKeys.push(id("wrong"));
+    it("fail - attrTypes.length != attrValues.length", async () => {
+      attrTypes.push(id("wrong"));
       await expect(
         passport
           .connect(issuer)
@@ -811,9 +830,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("MISMATCH_LENGTH");
     });
 
-    it("fail - invalid signature (attrKeys)", async () => {
-      attrKeys[0] = id("wrong");
-
+    it("fail - invalid signature (attrTypes)", async () => {
+      attrTypes[0] = id("wrong");
       await expect(
         passport
           .connect(issuer)
@@ -1014,11 +1032,23 @@ describe("QuadPassport.setAttributesIssuer", async () => {
       ).to.be.revertedWith("INVALID_ISSUER");
     });
 
-    it("success - tokenId not included in signature", async () => {
-      const wrongTokenId = 2;
-      await governance
-        .connect(admin)
-        .setEligibleTokenId(wrongTokenId, true, "");
+    it("success - with tokenId = 0", async () => {
+      const tokenId = 0;
+
+      const did = attributes[ATTRIBUTE_DID];
+      delete attributes[ATTRIBUTE_DID];
+      sigIssuer = await signSetAttributes(
+        businessPassport,
+        issuer,
+        attributes,
+        verifiedAt,
+        issuedAt,
+        fee,
+        did,
+        passport.address,
+        chainId,
+        tokenId
+      );
 
       await passport
         .connect(issuer)
@@ -1028,33 +1058,8 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             attrKeys,
             attrValues,
             attrTypes,
-            attributes[ATTRIBUTE_DID],
-            wrongTokenId,
-            verifiedAt,
-            issuedAt,
-            fee,
-          ],
-          sigIssuer,
-          {
-            value: fee,
-          }
-        );
-    });
-
-    it("success - with no mint with tokenId = 0", async () => {
-      const noMint = 0;
-      await governance.connect(admin).setEligibleTokenId(noMint, true, "");
-
-      await passport
-        .connect(issuer)
-        .setAttributesIssuer(
-          businessPassport.address,
-          [
-            attrKeys,
-            attrValues,
-            attrTypes,
-            attributes[ATTRIBUTE_DID],
-            noMint,
+            did,
+            tokenId,
             verifiedAt,
             issuedAt,
             fee,
@@ -1065,7 +1070,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
           }
         );
 
-      expect(await passport.balanceOf(businessPassport.address, 0)).equals(0);
+      expect(await passport.balanceOf(businessPassport.address, 0)).equals(1);
       expect(await passport.balanceOf(businessPassport.address, 1)).equals(0);
       expect(await passport.balanceOf(businessPassport.address, 2)).equals(0);
 
@@ -1074,17 +1079,20 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
       );
+      // add DID back to attributes
+      attributes[ATTRIBUTE_DID] = did;
+
       await assertGetAttributes(
         businessPassport,
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1094,7 +1102,7 @@ describe("QuadPassport.setAttributesIssuer", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -1230,6 +1238,13 @@ describe("QuadPassport.setAttributesIssuer", async () => {
             }
           )
       ).to.be.revertedWith("ISSUER_ATTR_PERMISSION_INVALID");
+    });
+  });
+
+  // clean up test state and reset hardhat network
+  after(async () => {
+    await network.provider.request({
+      method: "hardhat_reset",
     });
   });
 });

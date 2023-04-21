@@ -67,8 +67,8 @@ describe("QuadReader.queryFeeBulk", async () => {
         issuerTreasury2,
       ]);
 
-    issuedAt = Math.floor(new Date().getTime() / 1000) - 100;
-    verifiedAt = Math.floor(new Date().getTime() / 1000) - 100;
+    issuedAt = Math.floor(new Date().getTime() / 1000) - 5000;
+    verifiedAt = Math.floor(new Date().getTime() / 1000) - 5000;
 
     await setAttributes(
       minterA,
@@ -94,22 +94,15 @@ describe("QuadReader.queryFeeBulk", async () => {
   });
 
   describe("queryFeeBulk", async () => {
-    it("success (EOA)", async () => {
+    it("success (EOA) - fee should always be zero", async () => {
       let totalFee = ethers.utils.parseEther("0");
-      Object.keys(attributes).forEach((attrType) => {
-        totalFee = totalFee.add(PRICE_PER_ATTRIBUTES_ETH[attrType]);
-      });
-
       expect(
         await reader.queryFeeBulk(minterA.address, Object.keys(attributes))
       ).to.equal(totalFee);
     });
 
-    it("success (Business SC)", async () => {
+    it("success (Business SC) - fee should always be zero", async () => {
       let totalFee = ethers.utils.parseEther("0");
-      Object.keys(attributes).forEach(async (attrType) => {
-        totalFee = totalFee.add(PRICE_PER_BUSINESS_ATTRIBUTES_ETH[attrType]);
-      });
 
       expect(
         await reader.queryFeeBulk(
@@ -119,7 +112,13 @@ describe("QuadReader.queryFeeBulk", async () => {
       ).to.equal(totalFee);
     });
 
-    it("fail - governance incorrectly set", async () => {
+    it("success - fee 0 when preapproved", async () => {
+      expect(
+        await reader.connect(minterA).queryFeeBulk(minterA.address, Object.keys(attributes))
+      ).to.equal(ethers.utils.parseEther("0"));
+    });
+
+    it("success - governance incorrectly set, queryFee is still a stub", async () => {
       const newGovernance = await deployGovernance();
       await newGovernance.grantRole(GOVERNANCE_ROLE, admin.address);
       await newGovernance.grantRole(DEFAULT_ADMIN_ROLE, admin.address);
@@ -137,10 +136,10 @@ describe("QuadReader.queryFeeBulk", async () => {
 
       await expect(
         reader.queryFeeBulk(minterA.address, Object.keys(attributes))
-      ).to.revertedWith("INVALID_READER");
+      ).to.not.be.revertedWith("INVALID_READER");
     });
 
-    it("fail - invalid attributes", async () => {
+    it("success - invalid attributes can be queried", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
@@ -150,7 +149,7 @@ describe("QuadReader.queryFeeBulk", async () => {
       );
       await expect(
         reader.queryFeeBulk(minterA.address, Object.keys(attributes))
-      ).to.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
+      ).to.not.be.revertedWith("ATTRIBUTE_NOT_ELIGIBLE");
     });
   });
 });

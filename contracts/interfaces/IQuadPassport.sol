@@ -7,7 +7,7 @@ import "./IQuadSoulbound.sol";
 interface IQuadPassport is IQuadSoulbound {
     event GovernanceUpdated(address indexed _oldGovernance, address indexed _governance);
     event SetPendingGovernance(address indexed _pendingGovernance);
-    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee);
+    event SetAttributeReceipt(address indexed _account, address indexed _issuer, uint256 _fee, uint256 _tokenId);
     event BurnPassportsIssuer(address indexed _issuer, address indexed _account);
     event WithdrawEvent(address indexed _issuer, address indexed _treasury, uint256 _fee);
 
@@ -17,19 +17,28 @@ interface IQuadPassport is IQuadSoulbound {
         bytes calldata _sigAccount
     ) external payable;
 
+    function setAttributesBulk(
+        IQuadPassportStore.AttributeSetterConfig[] memory _configs,
+        bytes[] calldata _sigIssuers,
+        bytes[] calldata _sigAccounts
+    ) external payable;
+
+
     function setAttributesIssuer(
         address _account,
         IQuadPassportStore.AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
     ) external payable;
 
-    function burnPassports() external;
+    function burnPassports(uint256 _tokenId) external;
 
-    function burnPassportsIssuer(address _account) external;
+    function burnPassportsIssuer(address _account, uint256 _tokenId) external;
 
     function setGovernance(address _governanceContract) external;
 
     function acceptGovernance() external;
+
+    function attribute(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute memory);
 
     function attributes(address _account, bytes32 _attribute) external view returns (IQuadPassportStore.Attribute[] memory);
 

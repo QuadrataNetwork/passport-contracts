@@ -7,11 +7,12 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
 import "./storage/QuadGovernanceStore.sol";
+import "./storage/QuadGovernanceStoreV2.sol";
 
 /// @title Governance Contract for Quadrata Passport
-/// @author Fabrice Cheng, Theodore Clapp
+/// @author Fabrice Cheng
 /// @notice All admin functions to govern the QuadPassport contract
-contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStore {
+contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgradeable, QuadGovernanceStoreV2 {
 
     // used to prevent logic contract self destruct take over
     constructor() initializer {}
@@ -24,6 +25,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _setRoleAdmin(PAUSER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(ISSUER_ROLE, GOVERNANCE_ROLE);
         _setRoleAdmin(READER_ROLE, GOVERNANCE_ROLE);
+        _setRoleAdmin(OPERATOR_ROLE, GOVERNANCE_ROLE);
+
         _setupRole(GOVERNANCE_ROLE, _msgSender());
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
@@ -70,22 +73,12 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         _passport.acceptGovernance();
     }
 
-    /// @dev Set the eligibility status for a tokenId passport
-    /// @notice Restricted behind a TimelockController
+    /// @dev Set the uri for a tokenId passport
     /// @param _tokenId tokenId of the passport
-    /// @param _eligibleStatus eligiblity boolean for the tokenId
-    /// @param _uri URI of the IPFS link
-    function setEligibleTokenId(uint256 _tokenId, bool _eligibleStatus, string memory _uri) external override {
-        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
-
-        if(_tokenId > _maxEligibleTokenId){
-            require(_maxEligibleTokenId + 1 == _tokenId, "INCREMENT_TOKENID_BY_1");
-            _maxEligibleTokenId = _tokenId;
-        }
-        _eligibleTokenId[_tokenId] = _eligibleStatus;
+    /// @param _uri uri for token
+    function setTokenURI(uint256 _tokenId, string memory _uri) external override {
+        require(hasRole(OPERATOR_ROLE, _msgSender()), "INVALID_ADMIN");
         _passport.setTokenURI(_tokenId, _uri);
-
-        emit EligibleTokenUpdated(_tokenId, _eligibleStatus);
     }
 
     /// @dev Set the eligibility status for an attribute type
@@ -122,6 +115,22 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         _eligibleAttributesByDID[_attribute] = _eligibleStatus;
         emit EligibleAttributeByDIDUpdated(_attribute, _eligibleStatus);
+    }
+
+
+    /// @dev Set the approval status for multiple users. If true, the users can query any attribute without paying in the current transaction
+    /// @notice Restricted behind a TimelockController. Array lengths must be equal
+    /// @param _accounts addresses of the users
+    /// @param _statuses approval status of the users
+    function setPreapprovals(address[] calldata _accounts, bool[] calldata _statuses) override external {
+        require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
+        require(_accounts.length == _statuses.length, "ARRAY_LENGTH_MISMATCH");
+
+        for (uint256 i = 0; i < _accounts.length; i++) {
+            require(_preapprovals[_accounts[i]] != _statuses[i], "PREAPPROVED_STATUS_ALREADY_SET");
+            _preapprovals[_accounts[i]] = _statuses[i];
+            emit PreapprovalUpdated(_accounts[i], _statuses[i]);
+        }
     }
 
     /// @dev Set the price for querying a single attribute after owning a passport
@@ -209,6 +218,18 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
                 revokeRole(ISSUER_ROLE, _issuer);
 
+                // check if deletedIssuer already exists
+                bool deletedIssuerExist = false;
+                for(uint256 j = 0; j < _deletedIssuers.length; j++) {
+                    if(_deletedIssuers[j] == _issuer) {
+                        deletedIssuerExist = true;
+                        break;
+                    }
+                }
+                if(!deletedIssuerExist) {
+                    _deletedIssuers.push(_issuer);
+                }
+
                 emit IssuerDeleted(_issuer);
                 return;
             }
@@ -248,6 +269,8 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
 
         emit IssuerAttributePermission(_issuer, _attribute, _permission);
     }
+
+
 
     function _authorizeUpgrade(address) override internal view {
         require(hasRole(GOVERNANCE_ROLE, _msgSender()), "INVALID_ADMIN");
@@ -292,19 +315,6 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         return _eligibleAttributesArray.length;
     }
 
-    /// @dev Get list of eligible tokenIds currently supported
-    /// @return length of eligible attributes
-    function getMaxEligibleTokenId() override external view returns(uint256) {
-        return _maxEligibleTokenId;
-    }
-
-    /// @dev Get active tokenId
-    /// @param _tokenId TokenId
-    /// @return tokenId eligibility
-    function eligibleTokenId(uint256 _tokenId) override public view returns(bool) {
-        return _eligibleTokenId[_tokenId];
-    }
-
     /// @dev Get query price for an attribute in eth
     /// @param _attribute Attribute Type
     /// @return attribute price for using getter in eth
@@ -325,10 +335,27 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
         return _issuers.length;
     }
 
+    /// @dev Get the length of _issuers array and _deletedIssuers array
+    /// @return total number of _issuers and _deletedIssuers
+    function getAllIssuersLength() override public view returns (uint256) {
+        return _issuers.length + _deletedIssuers.length;
+    }
+
     /// @dev Get the _issuers array
     /// @return list of issuers
     function getIssuers() override public view returns (address[] memory) {
         return _issuers;
+    }
+
+    function getAllIssuers() override public view returns (address[] memory) {
+        address[] memory allIssuers = new address[](getAllIssuersLength());
+        for(uint256 i = 0; i < _issuers.length; i++) {
+            allIssuers[i] = _issuers[i];
+        }
+        for(uint256 i = 0; i < _deletedIssuers.length; i++) {
+            allIssuers[i + _issuers.length] = _deletedIssuers[i];
+        }
+        return allIssuers;
     }
 
     /// @dev Get the status of an issuer
@@ -365,5 +392,13 @@ contract QuadGovernance is IQuadGovernance, AccessControlUpgradeable, UUPSUpgrad
     function issuersTreasury(address _issuer) override public view returns (address) {
         return _issuerTreasury[_issuer];
     }
+
+    /// @dev Get the approval status of an account
+    /// @param _account address of the account
+    /// @return approval status
+    function preapproval(address _account) override virtual public view returns (bool) {
+        return _preapprovals[_account];
+    }
+
 }
 

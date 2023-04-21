@@ -5,7 +5,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signer-wit
 
 const {
   ATTRIBUTE_DID,
-  ATTRIBUTE_AML,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
 } = require("../../utils/constant.ts");
@@ -36,28 +35,13 @@ export const setAttributes = async (
       : ethers.constants.HashZero;
 
   Object.keys(attributes).forEach((k, i) => {
-    let attrKey;
-    if (k === ATTRIBUTE_AML) {
-      expect(ATTRIBUTE_DID in attributes).to.equal(true);
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(["bytes32", "bytes32"], [opts.oldDid || did, k])
-      );
-    } else {
-      attrKey = ethers.utils.keccak256(
-        ethers.utils.defaultAbiCoder.encode(
-          ["address", "bytes32"],
-          [account.address, k]
-        )
-      );
-    }
     if (opts.attemptUpdateDid || k !== ATTRIBUTE_DID) {
-      attrKeys.push(attrKey);
       attrValues.push(attributes[k]);
       attrTypes.push(k);
     }
   });
 
-  if(!opts.attemptUpdateDid) {
+  if (!opts.attemptUpdateDid) {
     delete attributes[ATTRIBUTE_DID];
   }
 
@@ -70,7 +54,8 @@ export const setAttributes = async (
     fee,
     opts.oldDid || did,
     passport.address,
-    chainId
+    chainId,
+    tokenId
   );
 
   const sigAccount = await signAccount(account);
@@ -96,5 +81,5 @@ export const setAttributes = async (
       )
   )
     .to.emit(passport, "SetAttributeReceipt")
-    .withArgs(account.address, issuer.address, fee);
+    .withArgs(account.address, issuer.address, fee, tokenId);
 };
