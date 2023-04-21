@@ -32,7 +32,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
   let businessPassport: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
-    treasury: SignerWithAddress,
+    treasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
@@ -61,7 +61,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
       issuerTreasury2,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi, businessPassport] =
-      await deployPassportEcosystem(admin, [issuer, issuer2], treasury, [
+      await deployPassportEcosystem(admin, [issuer, issuer2], admin, [
         issuerTreasury,
         issuerTreasury2,
       ]);
@@ -87,7 +87,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_COUNTRY],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -98,7 +98,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_IS_BUSINESS],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -109,7 +109,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_DID],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -120,7 +120,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         [ATTRIBUTE_AML],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -138,7 +138,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -171,7 +171,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -189,7 +189,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -208,7 +208,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -239,7 +239,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer2],
         [attrIssuers2],
         [verifiedAt + 1]
@@ -271,7 +271,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -306,7 +306,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -360,7 +360,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, attributeByIssuer2],
         [verifiedAt + 1, verifiedAt + 10]
@@ -394,7 +394,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, updatedAttrIssuer2],
         [verifiedAt + 1, verifiedAt + 15]
@@ -427,7 +427,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer],
         [updatedAttributes, attributes],
         [verifiedAt + 1, verifiedAt]
@@ -456,7 +456,7 @@ describe("QuadReader.getAttributesBulkLegacy", async () => {
         ],
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]

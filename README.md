@@ -31,6 +31,10 @@ npx hardhat run scripts/deployment/passport/deployTestnet.ts --network <NETWORK>
 ```
 npx hardhat verify --network <NETWORK> <ADDRESS>
 ```
+4. Verify that the deployments is successful by filling in information and running
+```
+npx hardhat run scripts/verify/assertTestnetDeployment.ts --network <NETWORK>
+```
 
 # Gitbook Link for additional instructions
 For more advanced development details see [the documentation](https://docs.quadrata.com).

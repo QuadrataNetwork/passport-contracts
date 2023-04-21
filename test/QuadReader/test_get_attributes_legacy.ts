@@ -33,7 +33,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
   let businessPassport: Contract; // eslint-disable-line no-unused-vars
   let deployer: SignerWithAddress, // eslint-disable-line no-unused-vars
     admin: SignerWithAddress,
-    treasury: SignerWithAddress,
+    treasury: SignerWithAddress, // eslint-disable-line no-unused-vars
     minterA: SignerWithAddress,
     minterB: SignerWithAddress, // eslint-disable-line no-unused-vars
     issuer: SignerWithAddress,
@@ -62,7 +62,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
       issuerTreasury2,
     ] = await ethers.getSigners();
     [governance, passport, reader, defi, businessPassport] =
-      await deployPassportEcosystem(admin, [issuer, issuer2], treasury, [
+      await deployPassportEcosystem(admin, [issuer, issuer2], admin, [
         issuerTreasury,
         issuerTreasury2,
       ]);
@@ -88,7 +88,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -98,7 +98,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -108,7 +108,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -118,7 +118,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -146,7 +146,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -156,7 +156,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -166,7 +166,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -176,7 +176,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -190,7 +190,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -200,7 +200,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -210,7 +210,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -220,7 +220,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -247,7 +247,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -257,7 +257,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [],
         [],
         []
@@ -268,7 +268,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer2],
         [attrIssuers2],
         [verifiedAt + 1]
@@ -278,7 +278,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer2],
         [attrIssuers2],
         [verifiedAt + 1]
@@ -305,7 +305,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -315,7 +315,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -326,7 +326,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -336,7 +336,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [attributes, attrIssuers2],
         [verifiedAt, verifiedAt + 1]
@@ -349,7 +349,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -359,7 +359,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -369,7 +369,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -379,7 +379,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributes],
         [verifiedAt]
@@ -409,7 +409,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -419,7 +419,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -429,7 +429,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -439,7 +439,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -488,7 +488,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, attributeByIssuer2],
         [verifiedAt + 1, verifiedAt + 10]
@@ -498,7 +498,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, attributeByIssuer2],
         [verifiedAt + 1, verifiedAt + 10]
@@ -508,7 +508,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, attributeByIssuer2],
         [verifiedAt + 1, verifiedAt + 10]
@@ -518,7 +518,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, attributeByIssuer2],
         [verifiedAt + 1, verifiedAt + 10]
@@ -547,7 +547,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, updatedAttrIssuer2],
         [verifiedAt + 1, verifiedAt + 15]
@@ -557,7 +557,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, updatedAttrIssuer2],
         [verifiedAt + 1, verifiedAt + 15]
@@ -567,7 +567,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, updatedAttrIssuer2],
         [verifiedAt + 1, verifiedAt + 15]
@@ -577,7 +577,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer, issuer2],
         [updatedAttributes, updatedAttrIssuer2],
         [verifiedAt + 1, verifiedAt + 15]
@@ -605,7 +605,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -615,7 +615,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [updatedAttributes],
         [verifiedAt + 1]
@@ -639,7 +639,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_COUNTRY,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -649,7 +649,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_AML,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -659,7 +659,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_DID,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]
@@ -669,7 +669,7 @@ describe("QuadReader.getAttributesLegacy", async () => {
         ATTRIBUTE_IS_BUSINESS,
         reader,
         defi,
-        treasury,
+        admin,
         [issuer],
         [attributesCopy],
         [verifiedAt]

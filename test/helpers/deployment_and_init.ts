@@ -15,6 +15,8 @@ const {
   DEFAULT_ADMIN_ROLE,
 } = require("../../utils/constant.ts");
 
+const { OPERATOR, READER_ONLY } = require("../../scripts/data/testnet.ts");
+
 export const deployPassportEcosystem = async (
   admin: SignerWithAddress,
   issuers: SignerWithAddress[],
@@ -42,15 +44,13 @@ export const deployPassportEcosystem = async (
 
   const signers = await ethers.getSigners();
   const deployer = signers[0];
-  const tokenIds = [{ id: 1, uri: "https://wwww.quadrata.com/ipfs" }];
   const [governance, passport, reader] = await deployQuadrata(
     admin.address,
     issuersToAdd,
     treasury.address,
     admin.address,
-    tokenIds,
-    admin.address,
-    admin.address,
+    OPERATOR,
+    READER_ONLY,
     false
   );
 
@@ -64,13 +64,18 @@ export const deployPassportEcosystem = async (
   const mockbusiness = await MockBusiness.deploy(defi.address);
   await mockbusiness.deployed();
 
-  // let all signers be preapproved
-  if(!opts.skipPreapproval) {
-    const signerAddresses = signers.map((signer) => signer.address);
-    signerAddresses.push(defi.address);
-    signerAddresses.push(mockbusiness.address);
-    const preapprovalStatuses = signerAddresses.map((address) => true);
-    await governance.connect(admin).setPreapprovals(signerAddresses, preapprovalStatuses);
+  // let signers be preapproved
+  if (!opts.skipPreapproval) {
+    const addressesToApprove = [
+      defi.address,
+      mockbusiness.address,
+      admin.address,
+      deployer.address,
+    ];
+    const preapprovalStatuses = addressesToApprove.map(() => true);
+    await governance
+      .connect(admin)
+      .setPreapprovals(addressesToApprove, preapprovalStatuses);
   }
 
   // Revoke Deployer Role

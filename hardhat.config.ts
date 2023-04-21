@@ -58,8 +58,8 @@ const config = {
           : [],
       chainId: 44787,
     },
-    avax_testnet: {
-      url: "https://ava-testnet.public.blastapi.io/ext/bc/C/rpc",
+    fuji: {
+      url: "https://avalanche-fuji.infura.io/v3/f0e0276299f84378863e56b8daf7c4d8",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
           ? [process.env.TESTNET_DEPLOY_KEY]
