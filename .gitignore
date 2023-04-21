@@ -6,6 +6,7 @@ coverage.json
 .vscode
 .DS_Store
 types
+types/*
 
 #Hardhat files
 cache
