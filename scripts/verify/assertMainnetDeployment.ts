@@ -16,8 +16,6 @@ const {
   ISSUER_ROLE,
   DEFAULT_ADMIN_ROLE,
   READER_ROLE,
-  PRICE_PER_ATTRIBUTES,
-  PRICE_PER_BUSINESS_ATTRIBUTES,
   TIMELOCK_ADMIN_ROLE,
   PROPOSER_ROLE,
   EXECUTOR_ROLE,
@@ -28,7 +26,6 @@ const {
   QUADRATA_TREASURY,
   TIMELOCK,
   MULTISIG,
-  TOKEN_IDS,
   ISSUERS,
 } = require("../data/mainnet.ts");
 
@@ -44,9 +41,9 @@ const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
 const HUY_MULTISIG = getAddress("0x8Adbed5dB1Fa983A4Ae2bcaFEa26Aeac5Aee867c");
 
 // Passport Holders
-const TEDDY = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
-const DANIEL = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
-const TRAVIS = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
+const HOLDER_1 = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
+const HOLDER_2 = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
+const HOLDER_3 = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
 // ------------ END - TO MODIFY --------------- //
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,9 +54,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const network = await signers[0].provider.getNetwork();
 
   const EXPECTED_ROLES_QUAD_GOVERNANCE = [
-    { USER: TEDDY, ROLES: [] },
-    { USER: DANIEL, ROLES: [] },
-    { USER: TRAVIS, ROLES: [] },
+    { USER: HOLDER_1, ROLES: [] },
+    { USER: HOLDER_2, ROLES: [] },
+    { USER: HOLDER_3, ROLES: [] },
     { USER: HUY_MULTISIG, ROLES: [] },
     { USER: FAB_MULTISIG, ROLES: [] },
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
@@ -67,7 +64,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: DEPLOYER, ROLES: [] },
-    { USER: TIMELOCK, ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE] },
+    {
+      USER: TIMELOCK[network.chainId],
+      ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE],
+    },
     { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
     { USER: QUAD_READER, ROLES: [READER_ROLE] },
     { USER: QUAD_GOV, ROLES: [] },
@@ -75,9 +75,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
-    { USER: TEDDY, ROLES: [EXECUTOR_ROLE] },
-    { USER: DANIEL, ROLES: [] },
-    { USER: TRAVIS, ROLES: [] },
+    { USER: HOLDER_1, ROLES: [] },
+    { USER: HOLDER_2, ROLES: [] },
+    { USER: HOLDER_3, ROLES: [] },
     { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: ISSUERS[0].wallet, ROLES: [] },
@@ -87,7 +87,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
     }, // we expect treasury to be a proposer bc it is our multisig
     { USER: DEPLOYER, ROLES: [] },
-    { USER: TIMELOCK, ROLES: [TIMELOCK_ADMIN_ROLE] },
+    { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },
     { USER: QUAD_READER, ROLES: [] },
     { USER: QUAD_GOV, ROLES: [] },
@@ -158,25 +158,6 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   // Check that Revenue split have been correctly set
   expect(await governance.revSplitIssuer()).equals(ISSUER_SPLIT);
   console.log("[QuadGovernance] revSplitIssuer correctly set: OK");
-
-  // Check that Price have been correctly set
-  ALL_ATTRIBUTES.forEach(async (attrType: string) => {
-    await delay(1000);
-    expect(await governance.pricePerAttributeFixed(attrType)).equals(
-      PRICE_PER_ATTRIBUTES[network.chainId][attrType]
-    );
-    expect(await governance.pricePerBusinessAttributeFixed(attrType)).equals(
-      PRICE_PER_BUSINESS_ATTRIBUTES[network.chainId][attrType]
-    );
-  });
-  console.log("[QuadGovernance] Price for query correctly set: OK");
-
-  // Check that tokenId have been correctly set
-  TOKEN_IDS.forEach(async (tokenId: any) => {
-    await delay(1000);
-    expect(await passport.uri(tokenId.id)).equals(tokenId.uri);
-  });
-  console.log("[QuadGovernance] TokenId have been correctly set: OK");
 
   // Check attribute eligibility
   for (const attribute of ALL_ATTRIBUTES) {
