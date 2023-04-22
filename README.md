@@ -41,7 +41,8 @@ npx hardhat run scripts/verify/assertTestnetDeployment.ts --network <NETWORK>
 ```
 cp -r .openzeppelin/mainnet.json .openzeppelin/unknown-31337.json
 ```
-2. Run Safety tests
+2. Remove `skip` in the test `test/misc/test_passport_upgrade.ts` 
+3. Run Safety tests
 ```
 npx hardhat test test/misc/test_passport_upgrade.ts
 ```
