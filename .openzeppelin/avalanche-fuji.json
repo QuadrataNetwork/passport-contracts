@@ -1,0 +1,734 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0x43bC53688b77D85DA13cbf7817C2168f64d70841",
+      "txHash": "0x9b5b5f992b462ceb0dd51e0e7cef8968c4566fc71c38e59acad0f76cc1bd1d57",
+      "kind": "uups"
+    },
+    {
+      "address": "0x518979e5456960d316e4e78b0d7A565D95E6EFa3",
+      "txHash": "0x0ae3ab8346e39ec54f0b0d4be1e211cf0fbff57f552f65a86439f24a0a6dc772",
+      "kind": "uups"
+    },
+    {
+      "address": "0x6077Bc1FD85D041F6235893B895E0cC038AC70E2",
+      "txHash": "0xec030366f50cd9f0c21cdf275c19dbcc0fe9668edb91f3ac7c9eaf0455581fc4",
+      "kind": "uups"
+    },
+    {
+      "address": "0x0ec036A8801578B11413a9b3Aa2Be32078c93731",
+      "txHash": "0x61bffcb33af9ac4ed0fe768d54cb249cf28354b1207847a21d7afba0d134b0e0",
+      "kind": "uups"
+    },
+    {
+      "address": "0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC",
+      "txHash": "0x649b8a2e73ab4e3511ad3ad5ba5ad0d9855c386e65e3d0d8cc202818ac90f16a",
+      "kind": "uups"
+    },
+    {
+      "address": "0x4503f347595862Fa120D964D5F8c9DFBdc6B2731",
+      "txHash": "0xb0273a6500a24178e7b50368cef3d3e0f29165e3ab2277e4c67c105c877ac3ca",
+      "kind": "uups"
+    },
+    {
+      "address": "0xB793345C76D2Ca541902Fe4c47813427F62A671a",
+      "txHash": "0x63f2ca3dacf0a06167ca999a85504f58fd1516cecd5b9ba2660e6133f2b68a40",
+      "kind": "uups"
+    },
+    {
+      "address": "0x185cc335175B1E7E29e04A321E1873932379a4a0",
+      "txHash": "0x070f816c683b524aa1e33b728b3d65052990af1661a34ee193d8b0f363ea21e0",
+      "kind": "uups"
+    },
+    {
+      "address": "0x49CF5d391B223E9196A7f5927A44D57fec1244C8",
+      "txHash": "0xc31daf5083d310f36eef91d8a76f04dad0b1ab4cd75ccf6ceb348122f53d863b",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "90635f41d5dbb292159a36f85204f338468f5e855b4e6093ae224ac99ee7cb99": {
+      "address": "0x3938580bE6503e185cdCBf25Ddf0a638c68Ba7d5",
+      "txHash": "0x181732f331357022d5352fd1c2be7d66698b6a2cb65b77ebd28fcc0ce5732d5b",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)34_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:61"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:259"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "QuadConstant",
+            "src": "contracts/storage/QuadConstant.sol:17"
+          },
+          {
+            "label": "_eligibleAttributesArray",
+            "offset": 0,
+            "slot": "298",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:10"
+          },
+          {
+            "label": "_eligibleAttributes",
+            "offset": 0,
+            "slot": "299",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:11"
+          },
+          {
+            "label": "_eligibleAttributesByDID",
+            "offset": 0,
+            "slot": "300",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:12"
+          },
+          {
+            "label": "_eligibleTokenId",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:15"
+          },
+          {
+            "label": "_pricePerBusinessAttributeFixed",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_mapping(t_bytes32,t_uint256)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:18"
+          },
+          {
+            "label": "_pricePerAttributeFixed",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_mapping(t_bytes32,t_uint256)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:19"
+          },
+          {
+            "label": "_issuerTreasury",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_mapping(t_address,t_address)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:22"
+          },
+          {
+            "label": "_issuerStatus",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:23"
+          },
+          {
+            "label": "_issuerAttributePermission",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:24"
+          },
+          {
+            "label": "_issuers",
+            "offset": 0,
+            "slot": "307",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:25"
+          },
+          {
+            "label": "_revSplitIssuer",
+            "offset": 0,
+            "slot": "308",
+            "type": "t_uint256",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:28"
+          },
+          {
+            "label": "_maxEligibleTokenId",
+            "offset": 0,
+            "slot": "309",
+            "type": "t_uint256",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:29"
+          },
+          {
+            "label": "_passport",
+            "offset": 0,
+            "slot": "310",
+            "type": "t_contract(IQuadPassport)10173",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:30"
+          },
+          {
+            "label": "_treasury",
+            "offset": 0,
+            "slot": "311",
+            "type": "t_address",
+            "contract": "QuadGovernanceStore",
+            "src": "contracts/storage/QuadGovernanceStore.sol:31"
+          },
+          {
+            "label": "_deletedIssuers",
+            "offset": 0,
+            "slot": "312",
+            "type": "t_array(t_address)dyn_storage",
+            "contract": "QuadGovernanceStoreV2",
+            "src": "contracts/storage/QuadGovernanceStoreV2.sol:8"
+          },
+          {
+            "label": "_preapprovals",
+            "offset": 0,
+            "slot": "313",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "QuadGovernanceStoreV2",
+            "src": "contracts/storage/QuadGovernanceStoreV2.sol:10"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IQuadPassport)10173": {
+            "label": "contract IQuadPassport",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_address)": {
+            "label": "mapping(address => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)34_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)34_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "2e227b6d6bc75a21b479cfd57710c6c8d2483842ccc20c19ed7a8ccfb3429fbd": {
+      "address": "0xbF9cba982E86001e9E43Fd1513D8EB7eD05Fd2f6",
+      "txHash": "0x3efc0e608b8c5c304e7a9d9c991e2e212c7018b36ec8556e8956ba88772d96eb",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:116"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "QuadSoulbound",
+            "src": "contracts/QuadSoulbound.sol:16"
+          },
+          {
+            "label": "_uris",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_mapping(t_uint256,t_string_storage)",
+            "contract": "QuadSoulbound",
+            "src": "contracts/QuadSoulbound.sol:19"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "QuadSoulbound",
+            "src": "contracts/QuadSoulbound.sol:147"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "250",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "QuadConstant",
+            "src": "contracts/storage/QuadConstant.sol:17"
+          },
+          {
+            "label": "governance",
+            "offset": 0,
+            "slot": "297",
+            "type": "t_contract(IQuadGovernance)10039",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:11"
+          },
+          {
+            "label": "pendingGovernance",
+            "offset": 0,
+            "slot": "298",
+            "type": "t_address",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:12"
+          },
+          {
+            "label": "_usedSigHashes",
+            "offset": 0,
+            "slot": "299",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:15"
+          },
+          {
+            "label": "symbol",
+            "offset": 0,
+            "slot": "300",
+            "type": "t_string_storage",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:17"
+          },
+          {
+            "label": "name",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_string_storage",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:18"
+          },
+          {
+            "label": "_attributes",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_mapping(t_bytes32,t_array(t_struct(Attribute)10182_storage)dyn_storage)",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:21"
+          },
+          {
+            "label": "_position",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_mapping(t_bytes32,t_uint256)",
+            "contract": "QuadPassportStore",
+            "src": "contracts/storage/QuadPassportStore.sol:24"
+          },
+          {
+            "label": "_attributesv2",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_mapping(t_bytes32,t_struct(Attribute)10182_storage)",
+            "contract": "QuadPassportStoreV2",
+            "src": "contracts/storage/QuadPassportStoreV2.sol:13"
+          },
+          {
+            "label": "reader",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_contract(IQuadReader)10375",
+            "contract": "QuadPassportStoreV2",
+            "src": "contracts/storage/QuadPassportStoreV2.sol:15"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(Attribute)10182_storage)dyn_storage": {
+            "label": "struct IQuadPassportStore.Attribute[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IQuadGovernance)10039": {
+            "label": "contract IQuadGovernance",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IQuadReader)10375": {
+            "label": "contract IQuadReader",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_array(t_struct(Attribute)10182_storage)dyn_storage)": {
+            "label": "mapping(bytes32 => struct IQuadPassportStore.Attribute[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Attribute)10182_storage)": {
+            "label": "mapping(bytes32 => struct IQuadPassportStore.Attribute)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_string_storage)": {
+            "label": "mapping(uint256 => string)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Attribute)10182_storage": {
+            "label": "struct IQuadPassportStore.Attribute",
+            "members": [
+              {
+                "label": "value",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "epoch",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "issuer",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "da1f07630e907d2d0888972384c199e904c8cc4ddd974189bd9a240163802ecf": {
+      "address": "0x3AC6DE23e4799ddf2B60d82dd265e4251ea708e4",
+      "txHash": "0x3b3e23ec5ac0f6074745718839b54712d46e9935414dfb8f46d65292e6cae056",
+      "layout": {
+        "solcVersion": "0.8.16",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1967UpgradeUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/ERC1967/ERC1967UpgradeUpgradeable.sol:211"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "UUPSUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol:107"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)47_storage",
+            "contract": "QuadConstant",
+            "src": "contracts/storage/QuadConstant.sol:17"
+          },
+          {
+            "label": "governance",
+            "offset": 0,
+            "slot": "148",
+            "type": "t_contract(IQuadGovernance)10039",
+            "contract": "QuadReaderStore",
+            "src": "contracts/storage/QuadReaderStore.sol:10"
+          },
+          {
+            "label": "passport",
+            "offset": 0,
+            "slot": "149",
+            "type": "t_contract(IQuadPassport)10173",
+            "contract": "QuadReaderStore",
+            "src": "contracts/storage/QuadReaderStore.sol:11"
+          },
+          {
+            "label": "_usedFlashSigHashes",
+            "offset": 0,
+            "slot": "150",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "QuadReaderStoreV2",
+            "src": "contracts/storage/QuadReaderStoreV2.sol:11"
+          }
+        ],
+        "types": {
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]",
+            "numberOfBytes": "1504"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IQuadGovernance)10039": {
+            "label": "contract IQuadGovernance",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IQuadPassport)10173": {
+            "label": "contract IQuadPassport",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}
