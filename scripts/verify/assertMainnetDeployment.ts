@@ -7,6 +7,8 @@ const { constants } = require("ethers");
 const { ethers } = require("hardhat");
 
 const {
+  ATTRIBUTE_AML,
+  ATTRIBUTE_DID,
   ALL_ATTRIBUTES,
   ALL_ACCOUNT_LEVEL_ATTRIBUTES,
   ALL_ATTRIBUTES_BY_DID,
@@ -20,6 +22,8 @@ const {
   PROPOSER_ROLE,
   EXECUTOR_ROLE,
   ISSUER_SPLIT,
+  NETWORK_IDS,
+  OPERATOR_ROLE,
 } = require("../../utils/constant.ts");
 
 const {
@@ -41,9 +45,43 @@ const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
 const HUY_MULTISIG = getAddress("0x8Adbed5dB1Fa983A4Ae2bcaFEa26Aeac5Aee867c");
 
 // Passport Holders
-const HOLDER_1 = getAddress("0xffE462ed723275eF8E7655C4883e8cD428826669");
-const HOLDER_2 = getAddress("0x5501CC22Be0F12381489D0980f20f872e1E6bfb9");
-const HOLDER_3 = getAddress("0xD71bB1fF98D84ae00728f4A542Fa7A4d3257b33E");
+const ETH_HOLDER_1 = getAddress("0xfdfe44e9e9c80a1a5b14cfcd5d9259d294904ee7");
+const ETH_HOLDER_2 = getAddress("0x560c9baF6487b9c237afE82213b92287261Be5F8");
+const ETH_HOLDER_3 = getAddress("0x99e06477ab269a4e62c62442635FAf43016f234e");
+
+// Customers Contract
+const ETH_FRIGG = getAddress("0xBCc3dB2316d8793f84c822953B622Bd292424C68");
+const ETH_TRUFIN = getAddress("0x5701773567A4A903eF1DE459D0b542AdB2439937");
+
+const POLYGON_ENSURO = getAddress("0x0CE31c3BB29E33afbf8ae8f0912838C9d657AE12");
+const POLYGON_TELLER = getAddress("0x01cB63960553E220C14d8876c4c9689927239DBd");
+const POLYGON_TRUFIN = getAddress("0x9EeC6065a3Ffd02eB3d60d2113A876FC723D9BCD");
+const POLYGON_TRUFIN_2 = getAddress(
+  "0x32226F1Df2EFfFC190c5764219e1d1E9294f4d2b"
+);
+
+// Quadrata Operator Only
+const OPERATOR_ONLY = getAddress("0x5b88baae69b810df88A53aB5e1400A92d4d2BD28");
+
+// Quadrata Reader Only
+const READER_ONLY = getAddress("0x1A01f08Ef4Ee82313FaceF33bCEC1C399f92bF57");
+
+// List of contracts been preapproved
+const PREAPPROVED_ADDRESSES = {
+  [NETWORK_IDS.MAINNET]: [
+    READER_ONLY, // Reader Only
+    ETH_FRIGG, // Frigg
+    ETH_TRUFIN,
+  ],
+
+  [NETWORK_IDS.POLYGON]: [
+    READER_ONLY, // Reader Only
+    POLYGON_TRUFIN,
+    POLYGON_TRUFIN_2,
+    POLYGON_TELLER,
+    POLYGON_ENSURO,
+  ],
+};
 // ------------ END - TO MODIFY --------------- //
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -54,44 +92,86 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const network = await signers[0].provider.getNetwork();
 
   const EXPECTED_ROLES_QUAD_GOVERNANCE = [
-    { USER: HOLDER_1, ROLES: [] },
-    { USER: HOLDER_2, ROLES: [] },
-    { USER: HOLDER_3, ROLES: [] },
+    // Passport Holders
+    { USER: ETH_HOLDER_1, ROLES: [] },
+    { USER: ETH_HOLDER_2, ROLES: [] },
+    { USER: ETH_HOLDER_3, ROLES: [] },
+
+    // Customer smart contracts
+    { USER: ETH_FRIGG, ROLES: [] },
+    { USER: ETH_TRUFIN, ROLES: [] },
+    { USER: POLYGON_TELLER, ROLES: [] },
+    { USER: POLYGON_ENSURO, ROLES: [] },
+    { USER: POLYGON_TRUFIN, ROLES: [] },
+
+    // Multisig operators
     { USER: HUY_MULTISIG, ROLES: [] },
     { USER: FAB_MULTISIG, ROLES: [] },
+
+    // Issuers
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
+
+    // Deployer
     { USER: DEPLOYER, ROLES: [] },
+
+    // Timelock Contract
     {
       USER: TIMELOCK[network.chainId],
       ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE],
     },
+
+    // GnosisSafe
     { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
+
+    // Quadrata Contracts
     { USER: QUAD_READER, ROLES: [READER_ROLE] },
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
+
+    // Quadrata specific users
+    { USER: READER_ONLY, ROLE: [READER_ROLE] },
+    { USER: OPERATOR_ONLY, ROLE: [OPERATOR_ROLE] },
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
-    { USER: HOLDER_1, ROLES: [] },
-    { USER: HOLDER_2, ROLES: [] },
-    { USER: HOLDER_3, ROLES: [] },
+    { USER: ETH_HOLDER_1, ROLES: [] },
+    { USER: ETH_HOLDER_2, ROLES: [] },
+    { USER: ETH_HOLDER_3, ROLES: [] },
+
+    // Customer smart contracts
+    { USER: ETH_FRIGG, ROLES: [] },
+    { USER: ETH_TRUFIN, ROLES: [] },
+    { USER: POLYGON_TELLER, ROLES: [] },
+    { USER: POLYGON_ENSURO, ROLES: [] },
+    { USER: POLYGON_TRUFIN, ROLES: [] },
+
+    // Multisig operators
     { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+
+    // Issuer
     { USER: ISSUERS[0].wallet, ROLES: [] },
     { USER: ISSUERS[0].treasury, ROLES: [] },
     {
       USER: QUADRATA_TREASURY[network.chainId],
       ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
     }, // we expect treasury to be a proposer bc it is our multisig
+
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },
+
+    // Quadrata Contracts
     { USER: QUAD_READER, ROLES: [] },
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
+
+    // Quadrata specific users
+    { USER: READER_ONLY, ROLE: [] },
+    { USER: OPERATOR_ONLY, ROLE: [] },
   ];
 
   console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
@@ -177,7 +257,20 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   }
   console.log("[QuadGovernance] attribute ligibility correctly set: OK");
 
-  // Check AccessControl
+  // Check Preapproved addresses
+  for (const customerContractAddr of PREAPPROVED_ADDRESSES[network.chainId]) {
+    expect(await governance.preapproval(customerContractAddr)).equals(true);
+  }
+  expect(await governance.preapproval(ETH_HOLDER_1)).equals(false);
+  expect(await governance.preapproval(ETH_HOLDER_2)).equals(false);
+
+  // Check QueryFee
+  expect(await reader.queryFee(ETH_HOLDER_1, ATTRIBUTE_AML)).equals(0);
+  expect(
+    await reader.queryFeeBulk(ETH_HOLDER_2, [ATTRIBUTE_AML, ATTRIBUTE_DID])
+  ).equals(0);
+
+  // Check AccessControl (Roles)
   const checkUserRoles = async (accountRoles: any, contract: any) => {
     accountRoles.forEach(async (accRole: any) => {
       const account = accRole.USER;

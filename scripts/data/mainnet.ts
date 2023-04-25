@@ -7,6 +7,7 @@ const {
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_ACCREDITED_INVESTOR_US,
+  ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
   NETWORK_IDS,
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
 } = require("../../utils/constant.ts");
@@ -18,7 +19,7 @@ export const QUAD_PASSPORT = {
   [NETWORK_IDS.POLYGON]: getAddress(
     "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"
   ),
-}
+};
 
 export const QUAD_READER = {
   [NETWORK_IDS.MAINNET]: getAddress(
@@ -27,7 +28,7 @@ export const QUAD_READER = {
   [NETWORK_IDS.POLYGON]: getAddress(
     "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"
   ),
-}
+};
 
 export const QUAD_GOVERNANCE = {
   [NETWORK_IDS.MAINNET]: getAddress(
@@ -36,7 +37,7 @@ export const QUAD_GOVERNANCE = {
   [NETWORK_IDS.POLYGON]: getAddress(
     "0xBfa59A31b379A62304327386bC2b03096D7695B3"
   ),
-}
+};
 
 export const QUADRATA_TREASURY = {
   [NETWORK_IDS.MAINNET]: getAddress(
@@ -82,6 +83,16 @@ export const ISSUERS: any[] = [
       ATTRIBUTE_IS_BUSINESS,
       ATTRIBUTE_CRED_PROTOCOL_SCORE,
       ATTRIBUTE_ACCREDITED_INVESTOR_US,
+    ],
+  },
+  {
+    wallet: getAddress("0xaa0a9bEa892E11C5F5E7786B510F4A78d23C2682"), // SpringLabs
+    treasury: getAddress("0x5F3f69808772C56Daee7A5d3176990733C67A123"),
+    attributesPermission: [
+      ATTRIBUTE_DID,
+      ATTRIBUTE_AML,
+      ATTRIBUTE_COUNTRY,
+      ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
     ],
   },
 ];

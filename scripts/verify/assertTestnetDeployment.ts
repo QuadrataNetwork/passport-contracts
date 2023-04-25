@@ -7,6 +7,8 @@ const { constants } = require("ethers");
 const { ethers } = require("hardhat");
 
 const {
+  ATTRIBUTE_AML,
+  ATTRIBUTE_DID,
   ALL_ATTRIBUTES,
   ALL_ACCOUNT_LEVEL_ATTRIBUTES,
   ALL_ATTRIBUTES_BY_DID,
@@ -16,12 +18,11 @@ const {
   ISSUER_ROLE,
   DEFAULT_ADMIN_ROLE,
   READER_ROLE,
-  // PRICE_PER_ATTRIBUTES,
-  // PRICE_PER_BUSINESS_ATTRIBUTES,
   TIMELOCK_ADMIN_ROLE,
   PROPOSER_ROLE,
   EXECUTOR_ROLE,
   ISSUER_SPLIT,
+  OPERATOR_ROLE,
   // reversePrint,
 } = require("../../utils/constant.ts");
 
@@ -33,14 +34,27 @@ const {
 } = require("../data/testnet.ts");
 
 // ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("0x43bC53688b77D85DA13cbf7817C2168f64d70841"); // Goerli / Mumbai Testnet Address
-const QUAD_PASSPORT = getAddress("0x518979e5456960d316e4e78b0d7A565D95E6EFa3"); // Goerli / Mumbai Testnet Address
-const QUAD_READER = getAddress("0x6077Bc1FD85D041F6235893B895E0cC038AC70E2"); // Goerli / Mumbai Testnet Address
+// AWS DEV ENVIRONMENT
+const QUAD_GOV = getAddress("0x0ec036A8801578B11413a9b3Aa2Be32078c93731"); // Goerli / Mumbai Testnet Address
+const QUAD_PASSPORT = getAddress("0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC"); // Goerli / Mumbai Testnet Address
+const QUAD_READER = getAddress("0x4503f347595862Fa120D964D5F8c9DFBdc6B2731"); // Goerli / Mumbai Testnet Address
 
-const DEPLOYER = getAddress("0x5bc97877ede3C748Aec6EaF747f09b5bB48766bD");
+const DEPLOYER = getAddress("0x1F5A2c30A77D9B8613204E8f0244a98572679692");
 
-// Multisig accounts
-const FAB_MULTISIG = getAddress("0x4A0BF9Dcb73636A75b325d33E8700A1945523CE7");
+// GnosisSafe multisig
+const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
+const HUY_MULTISIG = getAddress("0x8Adbed5dB1Fa983A4Ae2bcaFEa26Aeac5Aee867c");
+
+// Passport Holders
+const ETH_HOLDER_1 = getAddress("0x1BF3Ed394b904D53Db85FDdF931132f22c430829");
+const ETH_HOLDER_2 = getAddress("0x3e49fEe0402ed32F80DF4A72E13B705C2E007DEa");
+const ETH_HOLDER_3 = getAddress("0x93979d24056f3dC64FB3802BdFCF03bdc232632a");
+
+// Quadrata Operator Only
+const OPERATOR_ONLY = getAddress("0x0C19DFd4Edc2545b456AdFF3f4948929a06a206C");
+
+// Quadrata Reader Only
+const READER_ONLY = getAddress("0xA88948CA8912c1D3C5639f1694adbc1907F9A931");
 // ------------ END - TO MODIFY --------------- //
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,32 +65,72 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const network = await signers[0].provider.getNetwork();
 
   const EXPECTED_ROLES_QUAD_GOVERNANCE = [
+    // Passport Holders
+    { USER: ETH_HOLDER_1, ROLES: [] },
+    { USER: ETH_HOLDER_2, ROLES: [] },
+    { USER: ETH_HOLDER_3, ROLES: [] },
+
+    // Multisig operators
+    { USER: HUY_MULTISIG, ROLES: [] },
     { USER: FAB_MULTISIG, ROLES: [] },
+
+    // Issuers
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
+    { USER: ISSUERS[0].treasury, ROLES: [] },
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
+
+    // Deployer
     { USER: DEPLOYER, ROLES: [] },
+
+    // Timelock Contract
     {
       USER: TIMELOCK[network.chainId],
       ROLES: [DEFAULT_ADMIN_ROLE, GOVERNANCE_ROLE],
     },
+
+    // GnosisSafe
     { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
+
+    // Quadrata Contracts
     { USER: QUAD_READER, ROLES: [READER_ROLE] },
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
+
+    // Quadrata specific users
+    { USER: READER_ONLY, ROLE: [READER_ROLE] },
+    { USER: OPERATOR_ONLY, ROLE: [OPERATOR_ROLE] },
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
+    { USER: ETH_HOLDER_1, ROLES: [] },
+    { USER: ETH_HOLDER_2, ROLES: [] },
+    { USER: ETH_HOLDER_3, ROLES: [] },
+
+    // Multisig operators
+    { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
     { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+
+    // Issuer
     { USER: ISSUERS[0].wallet, ROLES: [] },
-    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
     { USER: ISSUERS[0].treasury, ROLES: [] },
+    {
+      USER: QUADRATA_TREASURY[network.chainId],
+      ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
+    }, // we expect treasury to be a proposer bc it is our multisig
+
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
-    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },
+
+    // Quadrata Contracts
     { USER: QUAD_READER, ROLES: [] },
     { USER: QUAD_GOV, ROLES: [] },
     { USER: QUAD_PASSPORT, ROLES: [] },
+
+    // Quadrata specific users
+    { USER: READER_ONLY, ROLE: [] },
+    { USER: OPERATOR_ONLY, ROLE: [] },
   ];
 
   console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
@@ -176,6 +230,17 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     );
   }
   console.log("[QuadGovernance] attributeeligibility correctly set: OK");
+
+  // Check Preapproved addresses
+  // All addresses are preApproved on testnet
+  expect(await governance.preapproval(ETH_HOLDER_1)).equals(true);
+  expect(await governance.preapproval(ETH_HOLDER_2)).equals(true);
+
+  // Check QueryFee
+  expect(await reader.queryFee(ETH_HOLDER_1, ATTRIBUTE_AML)).equals(0);
+  expect(
+    await reader.queryFeeBulk(ETH_HOLDER_2, [ATTRIBUTE_AML, ATTRIBUTE_DID])
+  ).equals(0);
 
   // Check AccessControl
   const checkUserRoles = async (accountRoles: any, contract: any) => {
