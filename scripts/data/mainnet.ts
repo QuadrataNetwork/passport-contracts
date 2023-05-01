@@ -75,13 +75,14 @@ export const MAX_GAS_FEE = {
 export const ISSUERS: any[] = [
   {
     wallet: getAddress("0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5"), // Quadrata
-    treasury: getAddress("0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5"),
+    treasury: getAddress("0x6d0E07D8b8F698EFcDb7F118F050717F9075f2ca"),
     attributesPermission: [
       ATTRIBUTE_DID,
       ATTRIBUTE_AML,
       ATTRIBUTE_COUNTRY,
       ATTRIBUTE_IS_BUSINESS,
-      ATTRIBUTE_CRED_PROTOCOL_SCORE,
+      // Quadrata does not have yet the authorization to post CRED_PROTOCOL_SCORE
+      // ATTRIBUTE_CRED_PROTOCOL_SCORE,
       ATTRIBUTE_ACCREDITED_INVESTOR_US,
     ],
   },

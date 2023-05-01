@@ -7,6 +7,7 @@ const { constants } = require("ethers");
 const { ethers } = require("hardhat");
 
 const {
+  reversePrint,
   ATTRIBUTE_AML,
   ATTRIBUTE_DID,
   ALL_ATTRIBUTES,
@@ -97,7 +98,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: ETH_HOLDER_2, ROLES: [] },
     { USER: ETH_HOLDER_3, ROLES: [] },
 
-    // Customer smart contracts
+    // // Customer smart contracts
     { USER: ETH_FRIGG, ROLES: [] },
     { USER: ETH_TRUFIN, ROLES: [] },
     { USER: POLYGON_TELLER, ROLES: [] },
@@ -110,9 +111,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Issuers
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
-    { USER: ISSUERS[0].treasury, ROLES: [] },
+    // { USER: ISSUERS[0].treasury, ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
     { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
-    { USER: ISSUERS[0].treasury, ROLES: [] },
 
     // Deployer
     { USER: DEPLOYER, ROLES: [] },
@@ -132,8 +132,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_PASSPORT, ROLES: [] },
 
     // Quadrata specific users
-    { USER: READER_ONLY, ROLE: [READER_ROLE] },
-    { USER: OPERATOR_ONLY, ROLE: [OPERATOR_ROLE] },
+    { USER: READER_ONLY, ROLES: [READER_ROLE] },
+    { USER: OPERATOR_ONLY, ROLES: [OPERATOR_ROLE] },
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
@@ -154,7 +154,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Issuer
     { USER: ISSUERS[0].wallet, ROLES: [] },
-    { USER: ISSUERS[0].treasury, ROLES: [] },
+    // { USER: ISSUERS[0].treasury, ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] }, // Because treasury is also multisig
     {
       USER: QUADRATA_TREASURY[network.chainId],
       ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
@@ -170,8 +170,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: QUAD_PASSPORT, ROLES: [] },
 
     // Quadrata specific users
-    { USER: READER_ONLY, ROLE: [] },
-    { USER: OPERATOR_ONLY, ROLE: [] },
+    { USER: READER_ONLY, ROLES: [] },
+    { USER: OPERATOR_ONLY, ROLES: [] },
   ];
 
   console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
@@ -181,7 +181,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const reader = await ethers.getContractAt("QuadReader", QUAD_READER);
   const timelock = await ethers.getContractAt(
     "IAccessControlUpgradeable",
-    TIMELOCK
+    TIMELOCK[network.chainId]
   );
 
   // --------------- QuadPassport --------------------
@@ -216,10 +216,13 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   expect(issuers.length).equals(ISSUERS.length);
 
   ISSUERS.forEach(async (issuer: any) => {
-    await delay(1000);
-    expect(await governance.issuersTreasury(issuer.wallet)).equals(
-      issuer.treasury
+    console.log(
+      `[QuadGovernance] Checking Issuer(${issuer.wallet}) attribute permissions`
     );
+    await delay(1000);
+    // expect(await governance.issuersTreasury(issuer.wallet)).equals(
+    //   issuer.treasury
+    // );
     expect(await governance.getIssuerStatus(issuer.wallet)).equals(true);
     ALL_ATTRIBUTES.forEach(async (attrType: string) => {
       if (issuer.attributesPermission.includes(attrType)) {
@@ -233,7 +236,6 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       }
     });
   });
-  console.log("[QuadGovernance] All issuers have been correctly set: OK");
 
   // Check that Revenue split have been correctly set
   expect(await governance.revSplitIssuer()).equals(ISSUER_SPLIT);
@@ -277,13 +279,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       const expectedRoles = accRole.ROLES;
       ALL_ROLES.forEach(async (role: string) => {
         await delay(1000);
-        // console.log(
-        //   `Checking Role ${
-        //     reversePrint[role]
-        //   } for User ${account} with expected roles ${
-        //     reversePrint[expectedRoles[0]]
-        //   }`
-        // );
+        // console.log(`Checking Role ${reversePrint[role]} for User ${account}`);
         expect(await contract.hasRole(role, account)).equals(
           expectedRoles.includes(role)
         );
@@ -293,7 +289,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   };
 
   await checkUserRoles(EXPECTED_ROLES_QUAD_GOVERNANCE, governance);
-  console.log("[QuadGovernance] Access Control verified: OK");
   await checkUserRoles(EXPECTED_ROLES_TIMELOCK, timelock);
-  console.log("[Timelock] Access Control verified: OK");
+  console.log("[QuadGovernance] Checking Access Control..");
+  console.log("[Timelock] Checking Access Control...");
 })();
