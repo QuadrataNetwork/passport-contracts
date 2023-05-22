@@ -32,12 +32,13 @@ const {
   TIMELOCK,
   MULTISIG,
   ISSUERS,
-} = require("../data/mainnet.ts");
+  OPERATOR,
+  READER_ONLY,
 
-// ------------ BEGIN - TO MODIFY --------------- //
-const QUAD_GOV = getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3");
-const QUAD_PASSPORT = getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d");
-const QUAD_READER = getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da");
+  QUAD_GOVERNANCE,
+  QUAD_PASSPORT,
+  QUAD_READER,
+} = require("../data/mainnet.ts");
 
 const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
 
@@ -45,6 +46,7 @@ const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
 const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
 const HUY_MULTISIG = getAddress("0x8Adbed5dB1Fa983A4Ae2bcaFEa26Aeac5Aee867c");
 
+// ------------ BEGIN - TO MODIFY --------------- //
 // Passport Holders
 const ETH_HOLDER_1 = getAddress("0xfdfe44e9e9c80a1a5b14cfcd5d9259d294904ee7");
 const ETH_HOLDER_2 = getAddress("0x560c9baF6487b9c237afE82213b92287261Be5F8");
@@ -61,12 +63,6 @@ const POLYGON_TRUFIN_2 = getAddress(
   "0x32226F1Df2EFfFC190c5764219e1d1E9294f4d2b"
 );
 
-// Quadrata Operator Only
-const OPERATOR_ONLY = getAddress("0x5b88baae69b810df88A53aB5e1400A92d4d2BD28");
-
-// Quadrata Reader Only
-const READER_ONLY = getAddress("0x1A01f08Ef4Ee82313FaceF33bCEC1C399f92bF57");
-
 // List of contracts been preapproved
 const PREAPPROVED_ADDRESSES = {
   [NETWORK_IDS.MAINNET]: [
@@ -82,6 +78,7 @@ const PREAPPROVED_ADDRESSES = {
     POLYGON_TELLER,
     POLYGON_ENSURO,
   ],
+  [NETWORK_IDS.AVALANCHE]: [READER_ONLY],
 };
 // ------------ END - TO MODIFY --------------- //
 
@@ -91,6 +88,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 (async () => {
   const signers = await ethers.getSigners();
   const network = await signers[0].provider.getNetwork();
+  const governanceAddress = QUAD_GOVERNANCE[network.chainId];
+  const passportAddress = QUAD_PASSPORT[network.chainId];
+  const readerAddress = QUAD_READER[network.chainId];
 
   const EXPECTED_ROLES_QUAD_GOVERNANCE = [
     // Passport Holders
@@ -127,13 +127,13 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
 
     // Quadrata Contracts
-    { USER: QUAD_READER, ROLES: [READER_ROLE] },
-    { USER: QUAD_GOV, ROLES: [] },
-    { USER: QUAD_PASSPORT, ROLES: [] },
+    { USER: readerAddress, ROLES: [READER_ROLE] },
+    { USER: governanceAddress, ROLES: [] },
+    { USER: passportAddress, ROLES: [] },
 
     // Quadrata specific users
     { USER: READER_ONLY, ROLES: [READER_ROLE] },
-    { USER: OPERATOR_ONLY, ROLES: [OPERATOR_ROLE] },
+    { USER: OPERATOR, ROLES: [OPERATOR_ROLE] },
   ];
 
   const EXPECTED_ROLES_TIMELOCK = [
@@ -149,36 +149,39 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: POLYGON_TRUFIN, ROLES: [] },
 
     // Multisig operators
-    { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
-    { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+    { USER: HUY_MULTISIG, ROLES: [] },
+    { USER: FAB_MULTISIG, ROLES: [] },
 
     // Issuer
     { USER: ISSUERS[0].wallet, ROLES: [] },
-    // { USER: ISSUERS[0].treasury, ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] }, // Because treasury is also multisig
+    // { USER: ISSUERS[0].treasury, ROLES: [PROPOSER_ROLE ] }, // Because treasury is also multisig
     {
       USER: QUADRATA_TREASURY[network.chainId],
-      ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE],
+      ROLES: [PROPOSER_ROLE],
     }, // we expect treasury to be a proposer bc it is our multisig
 
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
-    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE, EXECUTOR_ROLE] },
+    { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
 
     // Quadrata Contracts
-    { USER: QUAD_READER, ROLES: [] },
-    { USER: QUAD_GOV, ROLES: [] },
-    { USER: QUAD_PASSPORT, ROLES: [] },
+    { USER: readerAddress, ROLES: [] },
+    { USER: governanceAddress, ROLES: [] },
+    { USER: passportAddress, ROLES: [] },
 
     // Quadrata specific users
     { USER: READER_ONLY, ROLES: [] },
-    { USER: OPERATOR_ONLY, ROLES: [] },
+    { USER: OPERATOR, ROLES: [] },
   ];
 
   console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
   console.log("Starting Deployment Verification on Mainnet/Polygon ..");
-  const passport = await ethers.getContractAt("QuadPassport", QUAD_PASSPORT);
-  const governance = await ethers.getContractAt("QuadGovernance", QUAD_GOV);
-  const reader = await ethers.getContractAt("QuadReader", QUAD_READER);
+  const passport = await ethers.getContractAt("QuadPassport", passportAddress);
+  const governance = await ethers.getContractAt(
+    "QuadGovernance",
+    governanceAddress
+  );
+  const reader = await ethers.getContractAt("QuadReader", readerAddress);
   const timelock = await ethers.getContractAt(
     "IAccessControlUpgradeable",
     TIMELOCK[network.chainId]
@@ -188,19 +191,19 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   // Check Initialize
   expect(await passport.symbol()).equals("QP");
   expect(await passport.name()).equals("Quadrata Passport");
-  expect(await passport.governance()).equals(QUAD_GOV);
+  expect(await passport.governance()).equals(governanceAddress);
   expect(await passport.pendingGovernance()).equals(constants.AddressZero);
   console.log("[QuadPassport] Initializer: OK");
 
   // --------------- QuadReader --------------------
   // Check Initialize
-  expect(await reader.governance()).equals(QUAD_GOV);
-  expect(await reader.passport()).equals(QUAD_PASSPORT);
+  expect(await reader.governance()).equals(governanceAddress);
+  expect(await reader.passport()).equals(passportAddress);
   console.log("[QuadReader] Initializer: OK");
 
   // --------------- QuadGovernance --------------------
   // Check Passport Correctly linked
-  expect(await governance.passport()).equals(QUAD_PASSPORT);
+  expect(await governance.passport()).equals(passportAddress);
   console.log("[QuadGovernance] QuadPassport correctly linked: OK");
 
   // Check Treasury correctly set
