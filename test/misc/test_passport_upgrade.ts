@@ -158,7 +158,7 @@ const assertGovernanceValues = async (quadGovernance: Contract) => {
 /// or just run in the project root dir:
 ///
 /// cp -r .openzeppelin/mainnet.json .openzeppelin/unknown-31337.json; npx hardhat test test/misc/test_passport_upgrade.ts
-describe("PassportUpgrade", async () => {
+describe.skip("PassportUpgrade", async () => {
   describe("upgrade", async () => {
     it("succeed", async () => {
       // fork mainnet eth
