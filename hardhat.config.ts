@@ -129,6 +129,9 @@ const config = {
       // polygon
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+
+      avalancheFujiTestnet: process.env.ETHERSCAN_API_KEY || "",
+      avalanche: process.env.ETHERSCAN_API_KEY || "",
     },
   },
   typechain: {
