@@ -114,6 +114,14 @@ const config = {
           : [],
       chainId: 137,
     },
+    avalanche: {
+      url: process.env.AVALANCHE_URI || "",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 43114,
+    },
   },
   gasReporter: {
     enabled: true,
@@ -129,6 +137,9 @@ const config = {
       // polygon
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
+
+      avalancheFujiTestnet: process.env.ETHERSCAN_API_KEY || "",
+      avalanche: process.env.AVALANCHE_ETHERSCAN_API_KEY || "",
     },
   },
   typechain: {

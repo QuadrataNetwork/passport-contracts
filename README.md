@@ -36,6 +36,17 @@ npx hardhat verify --network <NETWORK> <ADDRESS>
 npx hardhat run scripts/verify/assertTestnetDeployment.ts --network <NETWORK>
 ```
 
+# Instructions on running safety tests after upgrades
+1. Copy latest oz 
+```
+cp -r .openzeppelin/mainnet.json .openzeppelin/unknown-31337.json
+```
+2. Remove `skip` in the test `test/misc/test_passport_upgrade.ts` 
+3. Run Safety tests
+```
+npx hardhat test test/misc/test_passport_upgrade.ts
+```
+
 # Gitbook Link for additional instructions
 For more advanced development details see [the documentation](https://docs.quadrata.com).
 

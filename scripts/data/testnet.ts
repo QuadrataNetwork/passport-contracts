@@ -11,6 +11,34 @@ const {
   NETWORK_IDS,
 } = require("../../utils/constant.ts");
 
+export const QUAD_PASSPORT = {
+  [NETWORK_IDS.MAINNET]: getAddress(
+    "0x185cc335175B1E7E29e04A321E1873932379a4a0"
+  ),
+  [NETWORK_IDS.POLYGON]: getAddress(
+    "0x185cc335175B1E7E29e04A321E1873932379a4a0"
+  ),
+}
+
+export const QUAD_READER = {
+  [NETWORK_IDS.MAINNET]: getAddress(
+    "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
+  ),
+  [NETWORK_IDS.POLYGON]: getAddress(
+    "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
+  ),
+}
+
+export const QUAD_GOVERNANCE = {
+  [NETWORK_IDS.MAINNET]: getAddress(
+    "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
+  ),
+  [NETWORK_IDS.POLYGON]: getAddress(
+    "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
+  ),
+}
+
+
 // Treasury is the same as `MLTISIG` in testnet
 export const QUADRATA_TREASURY = {
   [NETWORK_IDS.MUMBAI]: getAddress(
