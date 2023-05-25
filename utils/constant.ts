@@ -77,6 +77,7 @@ export const NETWORK_IDS = {
   GOERLI: 5,
   FUJI: 43113,
   AVALANCHE: 43114,
+  SEPOLIA: 11155111,
 };
 
 export const HARDHAT_CHAIN_ID = 31337;

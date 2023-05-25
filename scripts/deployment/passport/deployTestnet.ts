@@ -70,7 +70,7 @@ const {
     "",
     "",
     "",
-    false
+    true // useGovTestMock
   );
 
   let tx = await governance

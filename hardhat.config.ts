@@ -122,6 +122,14 @@ const config = {
           : [],
       chainId: 43114,
     },
+    sepolia: {
+      url: "https://rpc2.sepolia.org",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 11155111,
+    },
   },
   gasReporter: {
     enabled: true,
@@ -133,6 +141,7 @@ const config = {
 
       goerli: process.env.ETHERSCAN_API_KEY || "",
       rinkeby: process.env.ETHERSCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || "",
 
       // polygon
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
