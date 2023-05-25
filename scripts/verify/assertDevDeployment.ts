@@ -37,12 +37,12 @@ const {
   QUAD_GOVERNANCE,
   QUAD_PASSPORT,
   QUAD_READER,
-} = require("../data/int_testnet.ts");
+} = require("../data/dev_testnet.ts");
 
 // Multisig accounts
 const FAB_MULTISIG = getAddress("0x4A0BF9Dcb73636A75b325d33E8700A1945523CE7");
 const HUY_MULTISIG = getAddress("0x303c6d0c96887650B2B1101aCb6b04ad4abC826D");
-const DEPLOYER = getAddress("0xAD35efcfDcb2C4274121Ac02D740E128c01FA98A");
+const DEPLOYER = getAddress("0x1F5A2c30A77D9B8613204E8f0244a98572679692");
 
 // ------------ BEGIN - TO MODIFY --------------- //
 // Passport Holders

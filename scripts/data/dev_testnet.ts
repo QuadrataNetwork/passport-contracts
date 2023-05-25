@@ -1,0 +1,51 @@
+import { getAddress } from "ethers/lib/utils";
+
+export const {
+  MULTISIG,
+  TIMELOCK,
+  MAX_GAS_FEE,
+  ISSUERS,
+  OPERATOR,
+  READER_ONLY,
+} = require("./int_testnet.ts");
+
+const { NETWORK_IDS } = require("../../utils/constant.ts");
+
+export const QUAD_GOVERNANCE = {
+  [NETWORK_IDS.GOERLI]: getAddress(
+    "0x0ec036A8801578B11413a9b3Aa2Be32078c93731"
+  ),
+  [NETWORK_IDS.SEPOLIA]: getAddress(
+    "0x0ec036A8801578B11413a9b3Aa2Be32078c93731"
+  ),
+  [NETWORK_IDS.MUMBAI]: getAddress(
+    "0x0ec036A8801578B11413a9b3Aa2Be32078c93731"
+  ),
+  [NETWORK_IDS.FUJI]: getAddress("0x0ec036A8801578B11413a9b3Aa2Be32078c93731"),
+};
+
+export const QUAD_PASSPORT = {
+  [NETWORK_IDS.GOERLI]: getAddress(
+    "0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC"
+  ),
+  [NETWORK_IDS.SEPOLIA]: getAddress(
+    "0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC"
+  ),
+  [NETWORK_IDS.MUMBAI]: getAddress(
+    "0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC"
+  ),
+  [NETWORK_IDS.FUJI]: getAddress("0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC"),
+};
+
+export const QUAD_READER = {
+  [NETWORK_IDS.GOERLI]: getAddress(
+    "0x4503f347595862Fa120D964D5F8c9DFBdc6B2731"
+  ),
+  [NETWORK_IDS.SEPOLIA]: getAddress(
+    "0x4503f347595862Fa120D964D5F8c9DFBdc6B2731"
+  ),
+  [NETWORK_IDS.MUMBAI]: getAddress(
+    "0x4503f347595862Fa120D964D5F8c9DFBdc6B2731"
+  ),
+  [NETWORK_IDS.FUJI]: getAddress("0x4503f347595862Fa120D964D5F8c9DFBdc6B2731"),
+};
