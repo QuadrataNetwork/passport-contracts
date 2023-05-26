@@ -15,7 +15,7 @@ const {
   DEFAULT_ADMIN_ROLE,
 } = require("../../utils/constant.ts");
 
-const { OPERATOR, READER_ONLY } = require("../../scripts/data/testnet.ts");
+const { OPERATOR, READER_ONLY } = require("../../scripts/data/int_testnet.ts");
 
 export const deployPassportEcosystem = async (
   admin: SignerWithAddress,

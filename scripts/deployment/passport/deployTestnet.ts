@@ -15,7 +15,7 @@ const {
   MAX_GAS_FEE,
   OPERATOR,
   READER_ONLY,
-} = require("../../data/testnet.ts");
+} = require("../../data/int_testnet.ts");
 
 (async () => {
   if (!QUADRATA_TREASURY) {
@@ -70,7 +70,7 @@ const {
     "",
     "",
     "",
-    false
+    true // useGovTestMock
   );
 
   let tx = await governance
