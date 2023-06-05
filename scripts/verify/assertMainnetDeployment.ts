@@ -78,6 +78,7 @@ const PREAPPROVED_ADDRESSES = {
     POLYGON_ENSURO,
   ],
   [NETWORK_IDS.AVALANCHE]: [READER_ONLY],
+  [NETWORK_IDS.EVMOS]: [READER_ONLY],
 };
 // ------------ END - TO MODIFY --------------- //
 

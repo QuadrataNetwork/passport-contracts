@@ -131,7 +131,7 @@ const config = {
       chainId: 11155111,
     },
     tevmos: {
-      url: "https://eth.bd.evmos.dev:8545	",
+      url: "https://eth.bd.evmos.dev:8545",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
           ? [process.env.TESTNET_DEPLOY_KEY]
