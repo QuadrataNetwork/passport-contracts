@@ -78,6 +78,8 @@ export const NETWORK_IDS = {
   FUJI: 43113,
   AVALANCHE: 43114,
   SEPOLIA: 11155111,
+  TEVMOS: 9000,
+  EVMOS: 9001,
 };
 
 export const HARDHAT_CHAIN_ID = 31337;

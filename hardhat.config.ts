@@ -130,6 +130,22 @@ const config = {
           : [],
       chainId: 11155111,
     },
+    tevmos: {
+      url: "https://eth.bd.evmos.dev:8545	",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 9000,
+    },
+    evmos: {
+      url: "https://eth.bd.evmos.org:8545",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 9001,
+    },
   },
   gasReporter: {
     enabled: true,
