@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Enable version updates for GitHub actions.
+  - package-ecosystem: "github-actions"
+    # Set the directory to "/" to check for workflow files in .github/workflows.
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "build(dep)"
