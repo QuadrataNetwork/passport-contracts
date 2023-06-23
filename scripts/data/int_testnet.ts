@@ -74,6 +74,12 @@ export const MULTISIG = {
   [NETWORK_IDS.TEVMOS]: getAddress(
     "0x97988955b61a2634528cdcBeffD4a90bB2D27d81"
   ),
+  [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
+    "0xE2020EB72f6FB1d4AD4A647dBc70fe61A2413d06"
+  ),
+  [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
+    "0x01Ddd1d82FD47A2fbd4374D984EFE1E2210cfB14"
+  ),
 };
 
 // Treasury is the same as `MLTISIG` in testnet
@@ -92,6 +98,12 @@ export const TIMELOCK = {
   ),
   [NETWORK_IDS.TEVMOS]: getAddress(
     "0x97988955b61a2634528cdcBeffD4a90bB2D27d81"
+  ),
+  [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
+    "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
+  ),
+  [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
+    "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
   ),
 };
 
