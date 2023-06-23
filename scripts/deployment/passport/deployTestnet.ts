@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-
+const { recursiveRetry } = require("../../utils/retries.ts");
 const { deployQuadrata } = require("../../../utils/deployment.ts");
 
 const {
@@ -73,14 +73,19 @@ const {
     true // useGovTestMock
   );
 
-  let tx = await governance
-    .connect(deployer)
-    .renounceRole(GOVERNANCE_ROLE, deployer.address);
-  await tx.wait();
-  console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
-  tx = await governance
-    .connect(deployer)
-    .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
-  await tx.wait();
-  console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  await recursiveRetry(async () => {
+    const tx = await governance
+      .connect(deployer)
+      .renounceRole(GOVERNANCE_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
+  });
+
+  await recursiveRetry(async () => {
+    const tx = await governance
+      .connect(deployer)
+      .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  });
 })();
