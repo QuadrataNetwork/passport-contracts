@@ -179,8 +179,17 @@ const config = {
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
 
+      // avalanche
       avalancheFujiTestnet: process.env.ETHERSCAN_API_KEY || "",
       avalanche: process.env.AVALANCHE_ETHERSCAN_API_KEY || "",
+
+      // arbitrum
+      arbitrumOne: process.env.ARBITRUM_ETHERSCAN_API_KEY || "",
+      arbitrumGoerli: process.env.ARBITRUM_ETHERSCAN_API_KEY || "",
+
+      // Optimism
+      optimisticEthereum: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
+      optimisticGoerli: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
     },
   },
   typechain: {
