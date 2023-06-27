@@ -75,12 +75,20 @@ const config = {
       chainId: 97,
     },
     arbitrum_goerli: {
-      url: "https://endpoints.omniatech.io/v1/arbitrum/goerli/public",
+      url: "https://arbitrum-goerli.publicnode.com",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 421613,
+    },
+    arbitrum: {
+      url: "https://arbitrum-one.publicnode.com",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 42161,
     },
     optimism_goerli: {
       url: "https://goerli.optimism.io",
@@ -89,6 +97,14 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 420,
+    },
+    optimism: {
+      url: "https://mainnet.optimism.io",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 10,
     },
     fantom_testnet: {
       url: "https://rpc.ankr.com/fantom_testnet",
@@ -163,8 +179,17 @@ const config = {
       polygon: process.env.POLYGON_ETHERSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGON_ETHERSCAN_API_KEY || "",
 
+      // avalanche
       avalancheFujiTestnet: process.env.ETHERSCAN_API_KEY || "",
       avalanche: process.env.AVALANCHE_ETHERSCAN_API_KEY || "",
+
+      // arbitrum
+      arbitrumOne: process.env.ARBITRUM_ETHERSCAN_API_KEY || "",
+      arbitrumGoerli: process.env.ARBITRUM_ETHERSCAN_API_KEY || "",
+
+      // Optimism
+      optimisticEthereum: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
+      optimisticGoerli: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
     },
   },
   typechain: {

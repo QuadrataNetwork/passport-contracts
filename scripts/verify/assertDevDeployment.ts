@@ -102,8 +102,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: ETH_HOLDER_3, ROLES: [] },
 
     // Multisig operators
-    { USER: FAB_MULTISIG, ROLES: [EXECUTOR_ROLE] },
-    { USER: HUY_MULTISIG, ROLES: [EXECUTOR_ROLE] },
+    { USER: FAB_MULTISIG, ROLES: [] },
+    { USER: HUY_MULTISIG, ROLES: [] },
 
     { USER: ISSUERS[0].wallet, ROLES: [] },
     // { USER: ISSUERS[0].treasury, ROLES: [] },
