@@ -9,7 +9,6 @@ const {
   ATTRIBUTE_ACCREDITED_INVESTOR_US,
   ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
   NETWORK_IDS,
-  ATTRIBUTE_CRED_PROTOCOL_SCORE,
 } = require("../../utils/constant.ts");
 
 export const QUAD_GOVERNANCE = {
@@ -62,6 +61,12 @@ export const MULTISIG = {
     "0xA8FD64E229B8685d55D726F934771800105ee587"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0x6E2b44A8F191cEE0ebD9F2dCA3592F205C235a3e"),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0x19a060d807c71434bB773f222555Dc46c87b42C3"
+  ),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0xB5c72f14a84b61dABCA38b22Ffa8d7e43E19E4a1"
+  ),
 };
 
 export const QUADRATA_TREASURY = MULTISIG;
@@ -77,6 +82,12 @@ export const TIMELOCK = {
     "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0x6E2b44A8F191cEE0ebD9F2dCA3592F205C235a3e"),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
+  ),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
+  ),
 };
 
 // Careful - this doesn't work for Contract Deployment today
@@ -85,6 +96,8 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.POLYGON]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.AVALANCHE]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.EVMOS]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.ARBITRUM]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.OPTIMISM]: ethers.utils.parseUnits("50.001", "gwei"),
 };
 
 export const ISSUERS: any[] = [

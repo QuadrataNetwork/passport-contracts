@@ -162,6 +162,22 @@ const config = {
           : [],
       chainId: 9001,
     },
+    kava_testnet: {
+      url: "https://evm.testnet.kava.io",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 2221,
+    },
+    kava: {
+      url: "https://evm.kava.io",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 2222,
+    },
   },
   gasReporter: {
     enabled: true,

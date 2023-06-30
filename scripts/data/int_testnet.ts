@@ -98,6 +98,8 @@ export const MULTISIG = {
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0x01Ddd1d82FD47A2fbd4374D984EFE1E2210cfB14"
   ),
+  [NETWORK_IDS.FUJI]: getAddress("0x767B123Bd05697d8Dda135D1D0092a94ac5a7510"),
+  [NETWORK_IDS.TKAVA]: getAddress(""),
 };
 
 // Treasury is the same as `MLTISIG` in testnet
@@ -123,6 +125,7 @@ export const TIMELOCK = {
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
   ),
+  [NETWORK_IDS.TKAVA]: getAddress(""),
 };
 
 // Careful - this doesn't work for Contract Deployment today
