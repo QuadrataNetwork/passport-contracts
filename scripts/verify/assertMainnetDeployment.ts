@@ -129,7 +129,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     },
 
     // GnosisSafe
-    { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
+    // /!\ for EVMOS: the GnosisSafe is already the `DEFAULT_ADMIN_ROLE` and `GOVERNANCE_ROLE`
+    // until we deploy a Timelock
+    {
+      USER: MULTISIG[network.chainId],
+      ROLES: [PAUSER_ROLE],
+    },
 
     // Quadrata Contracts
     { USER: readerAddress, ROLES: [READER_ROLE] },
@@ -166,6 +171,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
     // /!\ On Mainnet&Polygon, GnosiSafe has EXECUTOR_ROLE as well
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: ethers.constants.AddressZero, ROLES: [EXECUTOR_ROLE] },
 
     // Quadrata Contracts
     { USER: readerAddress, ROLES: [] },
@@ -178,7 +184,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ];
 
   console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
-  console.log("Starting Deployment Verification on Mainnet/Polygon ..");
+  console.log("Starting Deployment Verification ..");
   const passport = await ethers.getContractAt("QuadPassport", passportAddress);
   const governance = await ethers.getContractAt(
     "QuadGovernance",

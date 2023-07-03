@@ -85,6 +85,7 @@ export const MULTISIG = {
   [NETWORK_IDS.OPTIMISM]: getAddress(
     "0x19a060d807c71434bB773f222555Dc46c87b42C3"
   ),
+  [NETWORK_IDS.KAVA]: getAddress("0xE3898C7E51d7378aE891125B5D736bB0525a6108"),
 };
 
 export const QUADRATA_TREASURY = MULTISIG;
@@ -106,6 +107,7 @@ export const TIMELOCK = {
   [NETWORK_IDS.OPTIMISM]: getAddress(
     "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
   ),
+  [NETWORK_IDS.KAVA]: getAddress("0x76694A182dB047067521c73161Ebf3Db5Ca988d3"),
 };
 
 // Careful - this doesn't work for Contract Deployment today
@@ -116,6 +118,7 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.EVMOS]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.ARBITRUM]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.OPTIMISM]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.KAVA]: ethers.utils.parseUnits("50.001", "gwei"),
 };
 
 export const ISSUERS: any[] = [

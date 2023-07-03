@@ -99,7 +99,6 @@ export const MULTISIG = {
     "0x01Ddd1d82FD47A2fbd4374D984EFE1E2210cfB14"
   ),
   [NETWORK_IDS.FUJI]: getAddress("0x767B123Bd05697d8Dda135D1D0092a94ac5a7510"),
-  [NETWORK_IDS.TKAVA]: getAddress(""),
 };
 
 // Treasury is the same as `MLTISIG` in testnet
@@ -117,7 +116,7 @@ export const TIMELOCK = {
     "0x52Dada4AeEB5967Be24Ee4f4F8F410a1cB9DD50a"
   ),
   [NETWORK_IDS.TEVMOS]: getAddress(
-    "0x97988955b61a2634528cdcBeffD4a90bB2D27d81"
+    "0x803BE7aEd100c3E794B5A7447E52546d80a97336"
   ),
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
@@ -125,7 +124,6 @@ export const TIMELOCK = {
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
   ),
-  [NETWORK_IDS.TKAVA]: getAddress(""),
 };
 
 // Careful - this doesn't work for Contract Deployment today
