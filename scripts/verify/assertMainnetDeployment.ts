@@ -40,6 +40,9 @@ const {
 } = require("../data/mainnet.ts");
 
 const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
+const TIMELOCK_DEPLOYER = getAddress(
+  "0x375caB03eaaaf08228E4ac42c77e2820b8bc9e57"
+);
 
 // GnosisSafe multisig
 const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
@@ -163,6 +166,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     }, // we expect treasury to be a proposer bc it is our multisig
 
     { USER: DEPLOYER, ROLES: [] },
+    { USER: TIMELOCK_DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
 

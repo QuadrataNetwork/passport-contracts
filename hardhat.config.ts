@@ -99,7 +99,7 @@ const config = {
       chainId: 420,
     },
     optimism: {
-      url: "https://mainnet.optimism.io",
+      url: process.env.OPTIMISM_URI || "",
       accounts:
         process.env.MAINNET_PRIVATE_KEY !== undefined
           ? [process.env.MAINNET_PRIVATE_KEY]
