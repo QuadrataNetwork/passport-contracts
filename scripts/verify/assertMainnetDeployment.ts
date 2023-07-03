@@ -20,6 +20,7 @@ const {
   DEFAULT_ADMIN_ROLE,
   READER_ROLE,
   TIMELOCK_ADMIN_ROLE,
+  EXECUTOR_ROLE,
   PROPOSER_ROLE,
   ISSUER_SPLIT,
   NETWORK_IDS,
@@ -116,11 +117,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Issuers
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
-    // { USER: ISSUERS[0].treasury, ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
-    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
 
     // Deployer
     { USER: DEPLOYER, ROLES: [] },
+    { USER: TIMELOCK_DEPLOYER, ROLES: [] },
 
     // Timelock Contract
     {
@@ -146,6 +146,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: ETH_HOLDER_2, ROLES: [] },
     { USER: ETH_HOLDER_3, ROLES: [] },
 
+    // GnosisSafe operators
+    { USER: HUY_MULTISIG, ROLES: [] },
+    { USER: FAB_MULTISIG, ROLES: [] },
+
     // Customer smart contracts
     { USER: ETH_FRIGG, ROLES: [] },
     { USER: ETH_TRUFIN, ROLES: [] },
@@ -153,21 +157,14 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: POLYGON_ENSURO, ROLES: [] },
     { USER: POLYGON_TRUFIN, ROLES: [] },
 
-    // Multisig operators
-    { USER: HUY_MULTISIG, ROLES: [] },
-    { USER: FAB_MULTISIG, ROLES: [] },
-
     // Issuer
     { USER: ISSUERS[0].wallet, ROLES: [] },
-    // { USER: ISSUERS[0].treasury, ROLES: [PROPOSER_ROLE ] }, // Because treasury is also multisig
-    {
-      USER: QUADRATA_TREASURY[network.chainId],
-      ROLES: [PROPOSER_ROLE],
-    }, // we expect treasury to be a proposer bc it is our multisig
 
+    // Deployer
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK_DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
+    // /!\ On Mainnet&Polygon, GnosiSafe has EXECUTOR_ROLE as well
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
 
     // Quadrata Contracts
