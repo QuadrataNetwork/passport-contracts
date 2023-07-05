@@ -206,7 +206,28 @@ const config = {
       // Optimism
       optimisticEthereum: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
       optimisticGoerli: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
+
+      kava_testnet: "cannot_be_empty",
+      kava: "cannot_be_empty",
     },
+    customChains: [
+      {
+        network: "kava_testnet",
+        chainId: 2221,
+        urls: {
+          apiURL: "https://explorer.testnet.kava.io/api",
+          browserURL: "https://explorer.testnet.kava.io",
+        },
+      },
+      {
+        network: "kava",
+        chainId: 2222,
+        urls: {
+          apiURL: "https://explorer.kava.io/api",
+          browserURL: "https://explorer.kava.io",
+        },
+      },
+    ],
   },
   typechain: {
     outDir: "types",

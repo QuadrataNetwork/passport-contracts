@@ -118,7 +118,7 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.EVMOS]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.ARBITRUM]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.OPTIMISM]: ethers.utils.parseUnits("50.001", "gwei"),
-  [NETWORK_IDS.KAVA]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.KAVA]: undefined, // Cannot set maxFeePerGas on KAVA
 };
 
 export const ISSUERS: any[] = [

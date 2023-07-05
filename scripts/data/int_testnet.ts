@@ -32,6 +32,9 @@ export const QUAD_GOVERNANCE = {
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
     "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
   ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
+  ),
 };
 
 export const QUAD_PASSPORT = {
@@ -54,6 +57,9 @@ export const QUAD_PASSPORT = {
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
     "0x185cc335175B1E7E29e04A321E1873932379a4a0"
   ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x185cc335175B1E7E29e04A321E1873932379a4a0"
+  ),
 };
 
 export const QUAD_READER = {
@@ -74,6 +80,9 @@ export const QUAD_READER = {
     "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
   ),
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
+    "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
+  ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
   ),
 };
@@ -132,7 +141,16 @@ export const TIMELOCK = {
 };
 
 // Careful - this doesn't work for Contract Deployment today
-export const MAX_GAS_FEE = ethers.utils.parseUnits("70.1337", "gwei");
+export const MAX_GAS_FEE = {
+  [NETWORK_IDS.GOERLI]: ethers.utils.parseUnits("10.001", "gwei"),
+  [NETWORK_IDS.SEPOLIA]: ethers.utils.parseUnits("10.001", "gwei"),
+  [NETWORK_IDS.MUMBAI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.FUJI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.TEVMOS]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.ARBITRUM_GOERLI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.OPTIMISM_GOERLI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.KAVA_TESTNET]: undefined,
+};
 
 export const ISSUERS = [
   {
