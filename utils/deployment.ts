@@ -158,7 +158,7 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(
-        `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_ACCREDITED_INVESTOR_US`
+        `[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_ACCREDITED_INVESTOR_US`
       );
   });
 
