@@ -98,7 +98,9 @@ export const MULTISIG = {
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0x01Ddd1d82FD47A2fbd4374D984EFE1E2210cfB14"
   ),
-  [NETWORK_IDS.FUJI]: getAddress("0x767B123Bd05697d8Dda135D1D0092a94ac5a7510"),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B" // This is Fab's EOA as GnosisSafe isn't supported yet by KAVA Testnet
+  ),
 };
 
 // Treasury is the same as `MLTISIG` in testnet
@@ -123,6 +125,9 @@ export const TIMELOCK = {
   ),
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
+  ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x4166d01d928D2a2322201d84D8B30f3165d7F68e"
   ),
 };
 

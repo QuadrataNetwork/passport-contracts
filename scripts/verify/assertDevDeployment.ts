@@ -106,12 +106,11 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: HUY_MULTISIG, ROLES: [] },
 
     { USER: ISSUERS[0].wallet, ROLES: [] },
-    // { USER: ISSUERS[0].treasury, ROLES: [] },
-    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PROPOSER_ROLE] }, // we expect treasury to be a proposer bc it is our multisig
 
     { USER: DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: ethers.constants.AddressZero, ROLES: [EXECUTOR_ROLE] },
 
     // Quadrata contracts
     { USER: readerAddress, ROLES: [] },
