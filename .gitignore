@@ -7,6 +7,7 @@ coverage.json
 .DS_Store
 types
 types/*
+.openzeppelin/unknown-31337.json
 
 #Hardhat files
 cache
