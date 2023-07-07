@@ -5,8 +5,7 @@
     "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/contracts": ">=4.4.2",
-    "@openzeppelin/contracts-upgradeable": ">=4.4.2",
-    "@openzeppelin/hardhat-upgrades": "^1.12.0",
+    "@openzeppelin/contracts-upgradeable": "^4.9.2",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.2.22",
@@ -55,7 +54,7 @@
   },
   "dependencies": {
     "@defi-wonderland/smock": "^2.0.7",
-    "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "@openzeppelin/hardhat-upgrades": "1.28.0",
     "find-config": "^1.0.0"
   }
 }

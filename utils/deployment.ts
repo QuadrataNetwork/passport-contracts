@@ -27,7 +27,7 @@ export const deployQuadrata = async (
   operator: string,
   readerOnly: string,
   verbose: boolean = false,
-  maxFeePerGas: any = ethers.utils.parseUnits("3", "gwei"),
+  maxFeePerGas: any = undefined,
   governanceAddress: string = "",
   passportAddress: string = "",
   readerAddress: string = "",
@@ -158,7 +158,7 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(
-        `[QuadGovernance] setEligibleAttribute for ATTRIBUTE_ACCREDITED_INVESTOR_US`
+        `[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_ACCREDITED_INVESTOR_US`
       );
   });
 

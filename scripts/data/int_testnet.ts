@@ -32,6 +32,9 @@ export const QUAD_GOVERNANCE = {
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
     "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
   ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
+  ),
 };
 
 export const QUAD_PASSPORT = {
@@ -52,6 +55,9 @@ export const QUAD_PASSPORT = {
     "0x185cc335175B1E7E29e04A321E1873932379a4a0"
   ),
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
+    "0x185cc335175B1E7E29e04A321E1873932379a4a0"
+  ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x185cc335175B1E7E29e04A321E1873932379a4a0"
   ),
 };
@@ -76,6 +82,9 @@ export const QUAD_READER = {
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
     "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
   ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
+  ),
 };
 
 export const MULTISIG = {
@@ -98,6 +107,9 @@ export const MULTISIG = {
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0x01Ddd1d82FD47A2fbd4374D984EFE1E2210cfB14"
   ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B" // This is Fab's EOA as GnosisSafe isn't supported yet by KAVA Testnet
+  ),
 };
 
 // Treasury is the same as `MLTISIG` in testnet
@@ -115,7 +127,7 @@ export const TIMELOCK = {
     "0x52Dada4AeEB5967Be24Ee4f4F8F410a1cB9DD50a"
   ),
   [NETWORK_IDS.TEVMOS]: getAddress(
-    "0x97988955b61a2634528cdcBeffD4a90bB2D27d81"
+    "0x803BE7aEd100c3E794B5A7447E52546d80a97336"
   ),
   [NETWORK_IDS.OPTIMISM_GOERLI]: getAddress(
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
@@ -123,10 +135,22 @@ export const TIMELOCK = {
   [NETWORK_IDS.ARBITRUM_GOERLI]: getAddress(
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
   ),
+  [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x4166d01d928D2a2322201d84D8B30f3165d7F68e"
+  ),
 };
 
 // Careful - this doesn't work for Contract Deployment today
-export const MAX_GAS_FEE = ethers.utils.parseUnits("70.1337", "gwei");
+export const MAX_GAS_FEE = {
+  [NETWORK_IDS.GOERLI]: ethers.utils.parseUnits("10.001", "gwei"),
+  [NETWORK_IDS.SEPOLIA]: ethers.utils.parseUnits("10.001", "gwei"),
+  [NETWORK_IDS.MUMBAI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.FUJI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.TEVMOS]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.ARBITRUM_GOERLI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.OPTIMISM_GOERLI]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.KAVA_TESTNET]: undefined,
+};
 
 export const ISSUERS = [
   {

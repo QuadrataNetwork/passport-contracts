@@ -52,12 +52,14 @@ const {
   const maxGasPerNetwork = MAX_GAS_FEE[network.chainId];
   const timelockPerNetwork = TIMELOCK[network.chainId];
 
-  console.log(
-    `Set maxFeePerGas to ${ethers.utils.formatUnits(
-      maxGasPerNetwork,
-      "gwei"
-    )} Gwei`
-  );
+  if (maxGasPerNetwork) {
+    console.log(
+      `Set maxFeePerGas to ${ethers.utils.formatUnits(
+        maxGasPerNetwork,
+        "gwei"
+      )} Gwei`
+    );
+  }
 
   const deployer = signers[0];
   console.log(`Deployer address: ${deployer.address}`);

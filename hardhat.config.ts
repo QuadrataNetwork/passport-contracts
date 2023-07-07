@@ -99,7 +99,7 @@ const config = {
       chainId: 420,
     },
     optimism: {
-      url: "https://mainnet.optimism.io",
+      url: process.env.OPTIMISM_URI || "",
       accounts:
         process.env.MAINNET_PRIVATE_KEY !== undefined
           ? [process.env.MAINNET_PRIVATE_KEY]
@@ -147,7 +147,7 @@ const config = {
       chainId: 11155111,
     },
     tevmos: {
-      url: "https://eth.bd.evmos.dev:8545",
+      url: "https://jsonrpc-t.evmos.nodestake.top",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
           ? [process.env.TESTNET_DEPLOY_KEY]
@@ -155,12 +155,28 @@ const config = {
       chainId: 9000,
     },
     evmos: {
-      url: "https://eth.bd.evmos.org:8545",
+      url: "https://jsonrpc.evmos.nodestake.top",
       accounts:
         process.env.MAINNET_PRIVATE_KEY !== undefined
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 9001,
+    },
+    kava_testnet: {
+      url: "https://evm.testnet.kava.io",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 2221,
+    },
+    kava: {
+      url: "https://evm.kava.io",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 2222,
     },
   },
   gasReporter: {
@@ -190,7 +206,28 @@ const config = {
       // Optimism
       optimisticEthereum: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
       optimisticGoerli: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
+
+      kava_testnet: "cannot_be_empty",
+      kava: "cannot_be_empty",
     },
+    customChains: [
+      {
+        network: "kava_testnet",
+        chainId: 2221,
+        urls: {
+          apiURL: "https://explorer.testnet.kava.io/api",
+          browserURL: "https://explorer.testnet.kava.io",
+        },
+      },
+      {
+        network: "kava",
+        chainId: 2222,
+        urls: {
+          apiURL: "https://explorer.kava.io/api",
+          browserURL: "https://explorer.kava.io",
+        },
+      },
+    ],
   },
   typechain: {
     outDir: "types",

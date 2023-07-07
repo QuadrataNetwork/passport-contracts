@@ -20,6 +20,7 @@ const {
   DEFAULT_ADMIN_ROLE,
   READER_ROLE,
   TIMELOCK_ADMIN_ROLE,
+  EXECUTOR_ROLE,
   PROPOSER_ROLE,
   ISSUER_SPLIT,
   NETWORK_IDS,
@@ -40,6 +41,9 @@ const {
 } = require("../data/mainnet.ts");
 
 const DEPLOYER = getAddress("0x33CDAD2fB7eD4F37b2C9B8C3471786d417C0e5BD");
+const TIMELOCK_DEPLOYER = getAddress(
+  "0x375caB03eaaaf08228E4ac42c77e2820b8bc9e57"
+);
 
 // GnosisSafe multisig
 const FAB_MULTISIG = getAddress("0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B");
@@ -79,6 +83,9 @@ const PREAPPROVED_ADDRESSES = {
   ],
   [NETWORK_IDS.AVALANCHE]: [READER_ONLY],
   [NETWORK_IDS.EVMOS]: [READER_ONLY],
+  [NETWORK_IDS.ARBITRUM]: [READER_ONLY],
+  [NETWORK_IDS.OPTIMISM]: [READER_ONLY],
+  [NETWORK_IDS.KAVA]: [READER_ONLY],
 };
 // ------------ END - TO MODIFY --------------- //
 
@@ -111,11 +118,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Issuers
     { USER: ISSUERS[0].wallet, ROLES: [ISSUER_ROLE] },
-    // { USER: ISSUERS[0].treasury, ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
-    { USER: QUADRATA_TREASURY[network.chainId], ROLES: [PAUSER_ROLE] }, // we expect treasury to be a pauser bc it is our multisig
 
     // Deployer
     { USER: DEPLOYER, ROLES: [] },
+    { USER: TIMELOCK_DEPLOYER, ROLES: [] },
 
     // Timelock Contract
     {
@@ -124,7 +130,12 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     },
 
     // GnosisSafe
-    { USER: MULTISIG[network.chainId], ROLES: [PAUSER_ROLE] },
+    // /!\ for EVMOS: the GnosisSafe is already the `DEFAULT_ADMIN_ROLE` and `GOVERNANCE_ROLE`
+    // until we deploy a Timelock
+    {
+      USER: MULTISIG[network.chainId],
+      ROLES: [PAUSER_ROLE],
+    },
 
     // Quadrata Contracts
     { USER: readerAddress, ROLES: [READER_ROLE] },
@@ -141,6 +152,10 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: ETH_HOLDER_2, ROLES: [] },
     { USER: ETH_HOLDER_3, ROLES: [] },
 
+    // GnosisSafe operators
+    { USER: HUY_MULTISIG, ROLES: [] },
+    { USER: FAB_MULTISIG, ROLES: [] },
+
     // Customer smart contracts
     { USER: ETH_FRIGG, ROLES: [] },
     { USER: ETH_TRUFIN, ROLES: [] },
@@ -148,21 +163,16 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     { USER: POLYGON_ENSURO, ROLES: [] },
     { USER: POLYGON_TRUFIN, ROLES: [] },
 
-    // Multisig operators
-    { USER: HUY_MULTISIG, ROLES: [] },
-    { USER: FAB_MULTISIG, ROLES: [] },
-
     // Issuer
     { USER: ISSUERS[0].wallet, ROLES: [] },
-    // { USER: ISSUERS[0].treasury, ROLES: [PROPOSER_ROLE ] }, // Because treasury is also multisig
-    {
-      USER: QUADRATA_TREASURY[network.chainId],
-      ROLES: [PROPOSER_ROLE],
-    }, // we expect treasury to be a proposer bc it is our multisig
 
+    // Deployer
     { USER: DEPLOYER, ROLES: [] },
+    { USER: TIMELOCK_DEPLOYER, ROLES: [] },
     { USER: TIMELOCK[network.chainId], ROLES: [TIMELOCK_ADMIN_ROLE] },
+    // /!\ On Mainnet&Polygon, GnosiSafe has EXECUTOR_ROLE as well
     { USER: MULTISIG[network.chainId], ROLES: [PROPOSER_ROLE] },
+    { USER: ethers.constants.AddressZero, ROLES: [EXECUTOR_ROLE] },
 
     // Quadrata Contracts
     { USER: readerAddress, ROLES: [] },
@@ -175,7 +185,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   ];
 
   console.log("!!!!! Make sure you have updated all contract addresses !!!!!!");
-  console.log("Starting Deployment Verification on Mainnet/Polygon ..");
+  console.log("Starting Deployment Verification ..");
   const passport = await ethers.getContractAt("QuadPassport", passportAddress);
   const governance = await ethers.getContractAt(
     "QuadGovernance",

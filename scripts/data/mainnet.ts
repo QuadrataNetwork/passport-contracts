@@ -9,7 +9,6 @@ const {
   ATTRIBUTE_ACCREDITED_INVESTOR_US,
   ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
   NETWORK_IDS,
-  ATTRIBUTE_CRED_PROTOCOL_SCORE,
 } = require("../../utils/constant.ts");
 
 export const QUAD_GOVERNANCE = {
@@ -23,6 +22,13 @@ export const QUAD_GOVERNANCE = {
     "0x757d32e9384A8882c325D306edc93E2c82d52e29"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3"),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0xBfa59A31b379A62304327386bC2b03096D7695B3"
+  ),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0xBfa59A31b379A62304327386bC2b03096D7695B3"
+  ),
+  [NETWORK_IDS.KAVA]: getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3"),
 };
 
 export const QUAD_PASSPORT = {
@@ -36,6 +42,13 @@ export const QUAD_PASSPORT = {
     "0x97058A9B7D0ce525009083F9b2C219336ce97736"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"
+  ),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"
+  ),
+  [NETWORK_IDS.KAVA]: getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"),
 };
 
 export const QUAD_READER = {
@@ -49,6 +62,13 @@ export const QUAD_READER = {
     "0x673ab050Db82DB186e9D238Fb6969c88cd329aD1"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"
+  ),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"
+  ),
+  [NETWORK_IDS.KAVA]: getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"),
 };
 
 export const MULTISIG = {
@@ -62,6 +82,13 @@ export const MULTISIG = {
     "0xA8FD64E229B8685d55D726F934771800105ee587"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0x6E2b44A8F191cEE0ebD9F2dCA3592F205C235a3e"),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0xB5c72f14a84b61dABCA38b22Ffa8d7e43E19E4a1"
+  ),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0x19a060d807c71434bB773f222555Dc46c87b42C3"
+  ),
+  [NETWORK_IDS.KAVA]: getAddress("0xE3898C7E51d7378aE891125B5D736bB0525a6108"),
 };
 
 export const QUADRATA_TREASURY = MULTISIG;
@@ -77,6 +104,13 @@ export const TIMELOCK = {
     "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
   ),
   [NETWORK_IDS.EVMOS]: getAddress("0x6E2b44A8F191cEE0ebD9F2dCA3592F205C235a3e"),
+  [NETWORK_IDS.ARBITRUM]: getAddress(
+    "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
+  ),
+  [NETWORK_IDS.OPTIMISM]: getAddress(
+    "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
+  ),
+  [NETWORK_IDS.KAVA]: getAddress("0x76694A182dB047067521c73161Ebf3Db5Ca988d3"),
 };
 
 // Careful - this doesn't work for Contract Deployment today
@@ -85,6 +119,9 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.POLYGON]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.AVALANCHE]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.EVMOS]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.ARBITRUM]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.OPTIMISM]: ethers.utils.parseUnits("50.001", "gwei"),
+  [NETWORK_IDS.KAVA]: undefined, // Cannot set maxFeePerGas on KAVA
 };
 
 export const ISSUERS: any[] = [

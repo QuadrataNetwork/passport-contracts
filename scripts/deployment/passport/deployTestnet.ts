@@ -44,16 +44,23 @@ const {
   if (!MAX_GAS_FEE) {
     throw new Error("MAX_GAS_FEE not set");
   }
-  console.log(
-    `Set maxFeePerGas to ${ethers.utils.formatUnits(MAX_GAS_FEE, "gwei")} Gwei`
-  );
 
   // Retrieve address filter by Network
   const signers: any = await ethers.getSigners();
   const network = await signers[0].provider.getNetwork();
   const treasuryPerNetwork = QUADRATA_TREASURY[network.chainId];
   const multisigPerNetwork = MULTISIG[network.chainId];
+  const maxGasPerNetwork = MAX_GAS_FEE[network.chainId];
   const timelockPerNetwork = TIMELOCK[network.chainId];
+
+  if (maxGasPerNetwork) {
+    console.log(
+      `Set maxFeePerGas to ${ethers.utils.formatUnits(
+        maxGasPerNetwork,
+        "gwei"
+      )} Gwei`
+    );
+  }
 
   const deployer = signers[0];
   console.log(`Deployer address: ${deployer.address}`);
@@ -66,7 +73,7 @@ const {
     OPERATOR,
     READER_ONLY,
     true, // Verbose = true,
-    MAX_GAS_FEE,
+    maxGasPerNetwork,
     "",
     "",
     "",
