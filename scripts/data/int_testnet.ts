@@ -10,6 +10,7 @@ const {
   ATTRIBUTE_ACCREDITED_INVESTOR_US,
   ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
   NETWORK_IDS,
+  HARDHAT_CHAIN_ID,
 } = require("../../utils/constant.ts");
 
 export const QUAD_GOVERNANCE = {
@@ -34,6 +35,9 @@ export const QUAD_GOVERNANCE = {
   ),
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0xB793345C76D2Ca541902Fe4c47813427F62A671a"
+  ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0x596ce077ff6959d6b427AF70E2675d4E9BDd5A84"
   ),
 };
 
@@ -60,6 +64,9 @@ export const QUAD_PASSPORT = {
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x185cc335175B1E7E29e04A321E1873932379a4a0"
   ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0xaAeB1836e71f10Fb0435aF4852DC45D202C9F5E5"
+  ),
 };
 
 export const QUAD_READER = {
@@ -84,6 +91,9 @@ export const QUAD_READER = {
   ),
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x49CF5d391B223E9196A7f5927A44D57fec1244C8"
+  ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0xA41e864248d5e0C79F1d9b70909EF722516Ca22f"
   ),
 };
 
@@ -110,6 +120,10 @@ export const MULTISIG = {
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B" // This is Fab's EOA as GnosisSafe isn't supported yet by KAVA Testnet
   ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B" // This is Fab's EOA as GnosisSafe isn't supported yet by KAVA Testnet
+  ),
+
 };
 
 // Treasury is the same as `MLTISIG` in testnet
@@ -136,6 +150,9 @@ export const TIMELOCK = {
     "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
   ),
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
+    "0x4166d01d928D2a2322201d84D8B30f3165d7F68e"
+  ),
+  [HARDHAT_CHAIN_ID]: getAddress(
     "0x4166d01d928D2a2322201d84D8B30f3165d7F68e"
   ),
 };
