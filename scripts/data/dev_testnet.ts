@@ -10,7 +10,7 @@ export const {
   READER_ONLY,
 } = require("./int_testnet.ts");
 
-const { NETWORK_IDS } = require("../../utils/constant.ts");
+const { NETWORK_IDS, HARDHAT_CHAIN_ID } = require("../../utils/constant.ts");
 
 export const QUAD_GOVERNANCE = {
   [NETWORK_IDS.GOERLI]: getAddress(
@@ -34,6 +34,9 @@ export const QUAD_GOVERNANCE = {
   ),
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x0ec036A8801578B11413a9b3Aa2Be32078c93731"
+  ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0x596ce077ff6959d6b427AF70E2675d4E9BDd5A84"
   ),
 };
 
@@ -60,6 +63,9 @@ export const QUAD_PASSPORT = {
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x50602dd387511Dc85695f66bFE0A192D4c4BA7fC"
   ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0xaAeB1836e71f10Fb0435aF4852DC45D202C9F5E5"
+  ),
 };
 
 export const QUAD_READER = {
@@ -84,5 +90,8 @@ export const QUAD_READER = {
   ),
   [NETWORK_IDS.KAVA_TESTNET]: getAddress(
     "0x4503f347595862Fa120D964D5F8c9DFBdc6B2731"
+  ),
+  [HARDHAT_CHAIN_ID]: getAddress(
+    "0xA41e864248d5e0C79F1d9b70909EF722516Ca22f"
   ),
 };
