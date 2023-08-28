@@ -126,8 +126,8 @@ export const MAX_GAS_FEE = {
 
 export const ISSUERS: any[] = [
   {
-    wallet: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"), // Quadrata
-    treasury: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"),
+    wallet: getAddress("0x7256a9eE71fFFc02a92CAbBf950ea6e27f71bBF5"), // Quadrata
+    treasury: getAddress("0x6d0E07D8b8F698EFcDb7F118F050717F9075f2ca"),
     attributesPermission: [
       ATTRIBUTE_DID,
       ATTRIBUTE_AML,
@@ -139,8 +139,8 @@ export const ISSUERS: any[] = [
     ],
   },
   {
-    wallet: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"), // Quadrata
-    treasury: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"),
+    wallet: getAddress("0xaa0a9bEa892E11C5F5E7786B510F4A78d23C2682"), // SpringLabs
+    treasury: getAddress("0x5F3f69808772C56Daee7A5d3176990733C67A123"),
     attributesPermission: [
       ATTRIBUTE_DID,
       ATTRIBUTE_AML,

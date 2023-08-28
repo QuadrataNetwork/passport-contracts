@@ -171,7 +171,7 @@ export const MAX_GAS_FEE = {
 
 export const ISSUERS = [
   {
-    wallet: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"), // Quadrata
+    wallet: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"), // Local Quadrata
     treasury: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"),
     attributesPermission: [
       ATTRIBUTE_DID,
@@ -184,8 +184,35 @@ export const ISSUERS = [
   },
 
   {
-    wallet: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"), // Quadrata
+    wallet: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"), // Local Quadrata
     treasury: getAddress("0xED7313637da9ab88F894589b9332E1070fBB6500"),
+    attributesPermission: [
+      ATTRIBUTE_DID,
+      ATTRIBUTE_AML,
+      ATTRIBUTE_COUNTRY,
+      ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE,
+      ATTRIBUTE_ACCREDITED_INVESTOR_US,
+      ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
+    ],
+  },
+
+  {
+    wallet: getAddress("0x19c6525E6927554e311Cd83491d34623fF04605a"), // Int Quadrata
+    treasury: getAddress("0x19c6525E6927554e311Cd83491d34623fF04605a"),
+    attributesPermission: [
+      ATTRIBUTE_DID,
+      ATTRIBUTE_AML,
+      ATTRIBUTE_COUNTRY,
+      ATTRIBUTE_IS_BUSINESS,
+      ATTRIBUTE_CRED_PROTOCOL_SCORE,
+      ATTRIBUTE_ACCREDITED_INVESTOR_US,
+    ],
+  },
+
+  {
+    wallet: getAddress("0x1E56ceCC4115aC14dE1DE645B4d1bB98B1Bf071E"), // Int SpringLabs
+    treasury: getAddress("0x1E56ceCC4115aC14dE1DE645B4d1bB98B1Bf071E"),
     attributesPermission: [
       ATTRIBUTE_DID,
       ATTRIBUTE_AML,
