@@ -52,8 +52,10 @@ export const deployQuadrata = async (
 
   // Set Protocol Treasury
   await recursiveRetry(async () => {
+    console.log('Setting treasury', treasury)
     const tx = await governance.setTreasury(treasury, { maxFeePerGas });
     await tx.wait();
+    console.log('Done with treasury')
     if (verbose)
       console.log(
         `[QuadGovernance] Protocol Treasury has been set to ${treasury}`

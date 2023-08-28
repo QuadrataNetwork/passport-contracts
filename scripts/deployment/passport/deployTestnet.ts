@@ -16,7 +16,6 @@ const {
   OPERATOR,
   READER_ONLY,
 } = require("../../data/int_testnet.ts");
-
 (async () => {
   if (!QUADRATA_TREASURY) {
     throw new Error("QUADRATA_TREASURY not set");
