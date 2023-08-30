@@ -64,6 +64,11 @@ const {
   const deployer = signers[0];
   console.log(`Deployer address: ${deployer.address}`);
 
+  const opts = {
+    verbose: true,
+    maxFeePerGas: maxGasPerNetwork,
+  };
+
   const [governance] = await deployQuadrata(
     timelockPerNetwork,
     ISSUERS,
@@ -71,12 +76,7 @@ const {
     multisigPerNetwork,
     OPERATOR,
     READER_ONLY,
-    true, // Verbose = true,
-    maxGasPerNetwork,
-    "",
-    "",
-    "",
-    false
+    opts
   );
 
   let tx = await governance

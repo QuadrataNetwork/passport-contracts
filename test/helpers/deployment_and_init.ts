@@ -44,6 +44,7 @@ export const deployPassportEcosystem = async (
 
   const signers = await ethers.getSigners();
   const deployer = signers[0];
+
   const [governance, passport, reader] = await deployQuadrata(
     admin.address,
     issuersToAdd,
@@ -51,7 +52,7 @@ export const deployPassportEcosystem = async (
     admin.address,
     OPERATOR,
     READER_ONLY,
-    false
+    opts
   );
 
   // Deploy DeFi

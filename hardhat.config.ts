@@ -8,9 +8,20 @@ import "solidity-coverage";
 import "hardhat-contract-sizer";
 import "@openzeppelin/hardhat-upgrades";
 import "@nomiclabs/hardhat-ethers";
+import "@matterlabs/hardhat-zksync-deploy";
+import "@matterlabs/hardhat-zksync-solc";
+
+// import "@matterlabs/hardhat-zksync-verify";
+// upgradable plugin
+import "@matterlabs/hardhat-zksync-upgradable";
+
 require("dotenv").config({ path: require("find-config")(".env") });
 
 const config = {
+  zksolc: {
+    version: "latest", // Uses latest available in https://github.com/matter-labs/zksolc-bin/
+    settings: {},
+  },
   solidity: {
     compilers: [
       {
@@ -41,6 +52,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 80001,
+      zksync: false,
     },
     goerli: {
       url: process.env.GOERLI_URI || "",
@@ -49,6 +61,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 5,
+      zksync: false,
     },
     celo_testnet: {
       url: "https://alfajores-forno.celo-testnet.org",
@@ -57,6 +70,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 44787,
+      zksync: false,
     },
     fuji: {
       url: "https://avalanche-fuji.infura.io/v3/f0e0276299f84378863e56b8daf7c4d8",
@@ -65,6 +79,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 43113,
+      zksync: false,
     },
     bsc_testnet: {
       url: "https://data-seed-prebsc-2-s3.binance.org:8545",
@@ -73,6 +88,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 97,
+      zksync: false,
     },
     arbitrum_goerli: {
       url: "https://arbitrum-goerli.publicnode.com",
@@ -81,6 +97,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 421613,
+      zksync: false,
     },
     arbitrum: {
       url: "https://arbitrum-one.publicnode.com",
@@ -89,6 +106,7 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 42161,
+      zksync: false,
     },
     optimism_goerli: {
       url: "https://goerli.optimism.io",
@@ -97,6 +115,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 420,
+      zksync: false,
     },
     optimism: {
       url: process.env.OPTIMISM_URI || "",
@@ -105,6 +124,7 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 10,
+      zksync: false,
     },
     fantom_testnet: {
       url: "https://rpc.ankr.com/fantom_testnet",
@@ -113,6 +133,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 4002,
+      zksync: false,
     },
     mainnet: {
       url: process.env.MAINNET_URI || "",
@@ -121,6 +142,7 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 1,
+      zksync: false,
     },
     polygon: {
       url: process.env.POLYGON_URI || "",
@@ -129,6 +151,7 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 137,
+      zksync: false,
     },
     avalanche: {
       url: process.env.AVALANCHE_URI || "",
@@ -137,6 +160,7 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 43114,
+      zksync: false,
     },
     sepolia: {
       url: "https://rpc2.sepolia.org",
@@ -145,6 +169,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 11155111,
+      zksync: false,
     },
     tevmos: {
       url: "https://jsonrpc-t.evmos.nodestake.top",
@@ -153,6 +178,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 9000,
+      zksync: false,
     },
     evmos: {
       url: "https://jsonrpc.evmos.nodestake.top",
@@ -161,6 +187,7 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 9001,
+      zksync: false,
     },
     kava_testnet: {
       url: "https://evm.testnet.kava.io",
@@ -169,6 +196,7 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       chainId: 2221,
+      zksync: false,
     },
     kava: {
       url: "https://evm.kava.io",
@@ -177,6 +205,18 @@ const config = {
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
       chainId: 2222,
+      zksync: false,
+    },
+    zkSyncTestnet: {
+      url: "https://testnet.era.zksync.dev",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      ethNetwork: "goerli", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
+      // verifyURL:
+      //   "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+      zksync: true,
     },
   },
   gasReporter: {
@@ -209,6 +249,7 @@ const config = {
 
       kava_testnet: "cannot_be_empty",
       kava: "cannot_be_empty",
+      zkSyncTestnet: "cannot_be_empty",
     },
     customChains: [
       {
