@@ -59,6 +59,7 @@
     "find-config": "^1.0.0"
   },
   "scripts": {
+    "deploy_and_mine": "npx hardhat run scripts/deployment/passport/deployTestnet.ts --network localhost && npm run mine",
     "mine": "node scripts/utils/mine.js"
   }
 }
