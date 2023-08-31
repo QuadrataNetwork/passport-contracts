@@ -59,10 +59,8 @@ export const deployQuadrata = async (
 
   // Set Protocol Treasury
   await recursiveRetry(async () => {
-    console.log("Setting treasury", treasury);
     const tx = await governance.setTreasury(treasury, { maxFeePerGas });
     await tx.wait();
-    console.log("Done with treasury");
     if (verbose)
       console.log(
         `[QuadGovernance] Protocol Treasury has been set to ${treasury}`
@@ -302,17 +300,39 @@ export const deployPassport = async (
   if (passportAddress !== "") {
     return await ethers.getContractAt("QuadPassport", passportAddress);
   }
-  const QuadPassport = await ethers.getContractFactory("QuadPassport");
-  const passport = await recursiveRetry(async () => {
-    return await upgrades.deployProxy(QuadPassport, [governance.address], {
-      initializer: "initialize",
-      kind: "uups",
-      unsafeAllow: ["constructor"],
+  let passport: Contract;
+
+  if (zkSync) {
+    // @ts-ignore
+    const zkWallet = new Wallet(process.env.TESTNET_DEPLOY_KEY);
+    const deployer = new Deployer(hre, zkWallet);
+    const QuadPassport = await deployer.loadArtifact("QuadPassport");
+    passport = await recursiveRetry(async () => {
+      return await hre.zkUpgrades.deployProxy(
+        deployer.zkWallet,
+        QuadPassport,
+        [governance.address],
+        {
+          initializer: "initialize",
+          kind: "uups",
+          unsafeAllow: ["constructor"],
+        }
+      );
     });
-  });
-  await recursiveRetry(async () => {
-    await passport.deployed();
-  });
+  } else {
+    const QuadPassport = await ethers.getContractFactory("QuadPassport");
+    passport = await recursiveRetry(async () => {
+      return await upgrades.deployProxy(QuadPassport, [governance.address], {
+        initializer: "initialize",
+        kind: "uups",
+        unsafeAllow: ["constructor"],
+      });
+    });
+    await recursiveRetry(async () => {
+      await passport.deployed();
+    });
+  }
+
   return passport;
 };
 
@@ -330,12 +350,10 @@ export const deployGovernance = async (
     : "QuadGovernance";
 
   if (zkSync) {
-    console.log("ENTER ZKSYNC");
     // @ts-ignore
     const zkWallet = new Wallet(process.env.TESTNET_DEPLOY_KEY);
     const deployer = new Deployer(hre, zkWallet);
 
-    console.log("deployer in zkSync is", zkWallet.address);
     const QuadGovernance = await deployer.loadArtifact(contractName);
     governance = await recursiveRetry(async () => {
       return await hre.zkUpgrades.deployProxy(
@@ -349,7 +367,6 @@ export const deployGovernance = async (
         }
       );
     });
-    console.log("EXIT ZKSYNC");
   } else {
     const QuadGovernance = await ethers.getContractFactory(contractName);
     governance = await recursiveRetry(async () => {
@@ -375,17 +392,42 @@ export const deployReader = async (
   if (readerAddress !== "") {
     return await ethers.getContractAt("QuadReader", readerAddress);
   }
-  const QuadReader = await ethers.getContractFactory("QuadReader");
-  const reader = await recursiveRetry(async () => {
-    return await upgrades.deployProxy(
-      QuadReader,
-      [governance.address, passport.address],
-      { initializer: "initialize", kind: "uups", unsafeAllow: ["constructor"] }
-    );
-  });
-  await recursiveRetry(async () => {
-    await reader.deployed();
-  });
+  let reader: Contract;
+  if (zkSync) {
+    // @ts-ignore
+    const zkWallet = new Wallet(process.env.TESTNET_DEPLOY_KEY);
+    const deployer = new Deployer(hre, zkWallet);
+
+    const QuadReader = await deployer.loadArtifact("QuadReader");
+    reader = await recursiveRetry(async () => {
+      return await hre.zkUpgrades.deployProxy(
+        deployer.zkWallet,
+        QuadReader,
+        [governance.address, passport.address],
+        {
+          initializer: "initialize",
+          kind: "uups",
+          unsafeAllow: ["constructor"],
+        }
+      );
+    });
+  } else {
+    const QuadReader = await ethers.getContractFactory("QuadReader");
+    reader = await recursiveRetry(async () => {
+      return await upgrades.deployProxy(
+        QuadReader,
+        [governance.address, passport.address],
+        {
+          initializer: "initialize",
+          kind: "uups",
+          unsafeAllow: ["constructor"],
+        }
+      );
+    });
+    await recursiveRetry(async () => {
+      await reader.deployed();
+    });
+  }
   return reader;
 };
 

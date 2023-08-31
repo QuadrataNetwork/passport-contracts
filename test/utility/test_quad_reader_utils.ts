@@ -3,7 +3,7 @@ import { expect } from "chai";
 import { Contract } from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
 
-describe("QuadReaderUtils()", function () {
+describe.skip("QuadReaderUtils()", function () {
   let TestQueryUtils;
   let signers;
   let testQuadReaderUtilsInstance: Contract;

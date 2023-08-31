@@ -214,8 +214,8 @@ const config = {
           ? [process.env.TESTNET_DEPLOY_KEY]
           : [],
       ethNetwork: "goerli", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
-      // verifyURL:
-      //   "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+      verifyURL:
+        "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
       zksync: true,
     },
   },
@@ -249,7 +249,7 @@ const config = {
 
       kava_testnet: "cannot_be_empty",
       kava: "cannot_be_empty",
-      zkSyncTestnet: "cannot_be_empty",
+      zkSyncTestnet: process.env.ETHERSCAN_API_KEY,
     },
     customChains: [
       {

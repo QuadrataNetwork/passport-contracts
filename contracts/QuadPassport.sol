@@ -4,6 +4,7 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
@@ -44,7 +45,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
-        address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
+        (address account, ) = ECDSAUpgradeable.tryRecover(signedMsg, _sigAccount);
         address issuer = _setAttributesVerify(account, _config, _sigIssuer);
 
         _setAttributesInternal(account, _config, issuer);
@@ -67,7 +68,8 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         uint256 totalFee;
 
         for(uint256 i = 0; i < _configs.length; i++){
-            address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
+            (address account, ) = ECDSAUpgradeable.tryRecover(signedMsg, _sigAccounts[i]);
+            // address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
             address issuer = _setAttributesVerify(account, _configs[i], _sigIssuers[i]);
             totalFee += _configs[i].fee;
             _setAttributesInternal(account, _configs[i], issuer);
@@ -198,9 +200,13 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             )
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
+        (address issuer, ECDSAUpgradeable.RecoverError error) = ECDSAUpgradeable.tryRecover(signedMsg, _sigIssuer);
+        // address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
+        bool isValidERC1271SignatureNow = (
+            error == ECDSAUpgradeable.RecoverError.NoError
+          ) || SignatureCheckerUpgradeable.isValidERC1271SignatureNow(issuer, signedMsg, _sigIssuer);
 
-        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+        require(isValidERC1271SignatureNow && IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
 
         return issuer;
     }

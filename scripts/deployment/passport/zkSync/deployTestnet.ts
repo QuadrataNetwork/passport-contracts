@@ -68,7 +68,7 @@ const {
     verbose: true,
     useGovTestMock: true,
     maxFeePerGas: maxGasPerNetwork,
-    zkSync: false,
+    zkSync: true,
   };
 
   const [governance] = await deployQuadrata(
