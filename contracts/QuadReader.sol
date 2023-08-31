@@ -263,7 +263,6 @@ import "./storage/QuadReaderStoreV2.sol";
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         (address signer, ECDSAUpgradeable.RecoverError error) = ECDSAUpgradeable.tryRecover(signedMsg, _flashSig);
-        // address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
         bool isValidERC1271SignatureNow = (
             error == ECDSAUpgradeable.RecoverError.NoError
           ) || SignatureCheckerUpgradeable.isValidERC1271SignatureNow(signer, signedMsg, _flashSig);

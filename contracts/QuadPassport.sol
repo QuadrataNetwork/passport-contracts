@@ -69,7 +69,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
         for(uint256 i = 0; i < _configs.length; i++){
             (address account, ) = ECDSAUpgradeable.tryRecover(signedMsg, _sigAccounts[i]);
-            // address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
             address issuer = _setAttributesVerify(account, _configs[i], _sigIssuers[i]);
             totalFee += _configs[i].fee;
             _setAttributesInternal(account, _configs[i], issuer);
@@ -201,7 +200,6 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
         (address issuer, ECDSAUpgradeable.RecoverError error) = ECDSAUpgradeable.tryRecover(signedMsg, _sigIssuer);
-        // address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
         bool isValidERC1271SignatureNow = (
             error == ECDSAUpgradeable.RecoverError.NoError
           ) || SignatureCheckerUpgradeable.isValidERC1271SignatureNow(issuer, signedMsg, _sigIssuer);
