@@ -22,4 +22,4 @@ RUN npm install
 COPY --chown=node:node . ./
 
 # 8. Run
-CMD [ "npm", "run", "deploy_and_mine" ]
+CMD [ "npx", "hardhat", "run", "scripts/deployment/passport/deployTestnet.ts", "--network", "localhost" ]
