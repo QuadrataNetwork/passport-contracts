@@ -6,6 +6,7 @@
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/contracts": ">=4.4.2",
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
+    "@openzeppelin/test-helpers": "^0.5.16",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.2.22",
@@ -56,5 +57,9 @@
     "@defi-wonderland/smock": "^2.0.7",
     "@openzeppelin/hardhat-upgrades": "1.28.0",
     "find-config": "^1.0.0"
+  },
+  "scripts": {
+    "deploy_and_mine": "npx hardhat run scripts/deployment/passport/deployTestnet.ts --network localhost && npm run mine",
+    "mine": "node scripts/utils/mine.js"
   }
 }
