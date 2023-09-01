@@ -4,7 +4,6 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
@@ -45,7 +44,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash("Welcome to Quadrata! By signing, you agree to the Terms of Service.");
-        (address account,) = ECDSAUpgradeable.tryRecover(signedMsg, _sigAccount);
+        address account = ECDSAUpgradeable.recover(signedMsg, _sigAccount);
         address issuer = _setAttributesVerify(account, _config, _sigIssuer);
 
         _setAttributesInternal(account, _config, issuer);
@@ -68,7 +67,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         uint256 totalFee;
 
         for(uint256 i = 0; i < _configs.length; i++){
-            (address account,) = ECDSAUpgradeable.tryRecover(signedMsg, _sigAccounts[i]);
+            address account = ECDSAUpgradeable.recover(signedMsg, _sigAccounts[i]);
             address issuer = _setAttributesVerify(account, _configs[i], _sigIssuers[i]);
             totalFee += _configs[i].fee;
             _setAttributesInternal(account, _configs[i], issuer);
@@ -77,7 +76,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     }
 
-    /// @notice Set attributes for a Quadrata Passport
+    /// @notice Update attributes for an existing Quadrata Passport holder (Mainly used by Issuer)
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
@@ -92,6 +91,18 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
 
         _setAttributesInternal(_account, _config, issuer);
+    }
+
+    /// @notice Claim passport (Mainly used by end-users)
+    /// @param _account Address of the Quadrata Passport holder
+    /// @param _config Input paramters required to set attributes
+    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
+    function claimPassport(
+        address _account,
+        AttributeSetterConfig memory _config,
+        bytes calldata _sigIssuer
+    ) external payable override whenNotPaused {
+        setAttributesIssuer(_account, _config, _sigIssuer);
     }
 
     /// @notice Internal function for `setAttributes` and `setAttributesIssuer`
@@ -199,12 +210,9 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
             )
         );
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        (address issuer, ECDSAUpgradeable.RecoverError error) = ECDSAUpgradeable.tryRecover(signedMsg, _sigIssuer);
-        bool isValidERC1271SignatureNow = (
-            error == ECDSAUpgradeable.RecoverError.NoError
-          ) || SignatureCheckerUpgradeable.isValidERC1271SignatureNow(issuer, signedMsg, _sigIssuer);
+        address issuer = ECDSAUpgradeable.recover(signedMsg, _sigIssuer);
 
-        require(isValidERC1271SignatureNow && IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
+        require(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, issuer), "INVALID_ISSUER");
 
         return issuer;
     }
