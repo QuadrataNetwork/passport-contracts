@@ -68,6 +68,7 @@ const {
     verbose: true,
     useGovTestMock: true,
     maxFeePerGas: maxGasPerNetwork,
+    maxPriorityFeePerGas: ethers.utils.parseUnits("1.5", "gwei"),
   };
 
   const [governance] = await deployQuadrata(

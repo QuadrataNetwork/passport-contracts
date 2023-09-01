@@ -35,6 +35,7 @@ export const deployQuadrata = async (
   // opts
   const verbose: boolean = opts.verbose || false;
   const maxFeePerGas: any = opts.maxFeePerGas || undefined;
+  const maxPriorityFeePerGas: any = opts.maxPriorityFeePerGas || undefined;
   const governanceAddress: string = opts.governanceAddress || "";
   const passportAddress: string = opts.passportAddress || "";
   const readerAddress: string = opts.readerAddress || "";
@@ -60,7 +61,10 @@ export const deployQuadrata = async (
 
   // Set Protocol Treasury
   await recursiveRetry(async () => {
-    const tx = await governance.setTreasury(treasury, { maxFeePerGas });
+    const tx = await governance.setTreasury(treasury, {
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    });
     await tx.wait();
     if (verbose)
       console.log(
@@ -72,6 +76,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.setPassportContractAddress(passport.address, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -84,6 +89,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.setEligibleAttribute(ATTRIBUTE_DID, true, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -95,6 +101,7 @@ export const deployQuadrata = async (
       true,
       {
         maxFeePerGas,
+        maxPriorityFeePerGas,
       }
     );
     await tx.wait();
@@ -107,6 +114,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.setEligibleAttribute(ATTRIBUTE_COUNTRY, true, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -120,6 +128,7 @@ export const deployQuadrata = async (
       true,
       {
         maxFeePerGas,
+        maxPriorityFeePerGas,
       }
     );
     await tx.wait();
@@ -134,6 +143,7 @@ export const deployQuadrata = async (
       true,
       {
         maxFeePerGas,
+        maxPriorityFeePerGas,
       }
     );
     await tx.wait();
@@ -147,6 +157,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.setEligibleAttributeByDID(ATTRIBUTE_AML, true, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -161,6 +172,7 @@ export const deployQuadrata = async (
       true,
       {
         maxFeePerGas,
+        maxPriorityFeePerGas,
       }
     );
     await tx.wait();
@@ -176,7 +188,7 @@ export const deployQuadrata = async (
       const tx = await governance.addIssuer(
         issuers[i].wallet,
         issuers[i].treasury,
-        { maxFeePerGas }
+        { maxFeePerGas, maxPriorityFeePerGas }
       );
       await tx.wait();
       if (verbose)
@@ -191,7 +203,7 @@ export const deployQuadrata = async (
           issuers[i].wallet,
           issuers[i].attributesPermission[j],
           true,
-          { maxFeePerGas }
+          { maxFeePerGas, maxPriorityFeePerGas }
         );
         await tx.wait();
 
@@ -205,7 +217,10 @@ export const deployQuadrata = async (
 
   // Set Rev Split
   await recursiveRetry(async () => {
-    const tx = await governance.setRevSplitIssuer(50, { maxFeePerGas });
+    const tx = await governance.setRevSplitIssuer(50, {
+      maxFeePerGas,
+      maxPriorityFeePerGas,
+    });
     await tx.wait();
     if (verbose) console.log(`[QuadGovernance] setRevSplitIssuer with 50`);
   });
@@ -214,6 +229,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(READER_ROLE, reader.address, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -224,6 +240,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(READER_ROLE, readerOnly, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -233,6 +250,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.setPreapprovals([readerOnly], [true], {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose) console.log(`[QuadGovernance] preApproved ${readerOnly}`);
@@ -242,6 +260,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.setTokenURI(1, TOKEN_ID_1_URI, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose) console.log("[QuadGovernance] setTokenURI to tokenID(1)");
@@ -251,6 +270,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(GOVERNANCE_ROLE, timelock, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -260,6 +280,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(DEFAULT_ADMIN_ROLE, timelock, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -270,6 +291,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(OPERATOR_ROLE, operator, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)
@@ -280,6 +302,7 @@ export const deployQuadrata = async (
   await recursiveRetry(async () => {
     const tx = await governance.grantRole(PAUSER_ROLE, multisig, {
       maxFeePerGas,
+      maxPriorityFeePerGas,
     });
     await tx.wait();
     if (verbose)

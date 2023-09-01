@@ -39,6 +39,9 @@ export const QUAD_GOVERNANCE = {
   [NETWORK_IDS.ZKSYNC_ERA_GOERLI]: getAddress(
     "0xb736e004ef2Ae4EDAD07B16FDf46d046cF07bdF2"
   ),
+  [NETWORK_IDS.BASE_GOERLI]: getAddress(
+    "0x7D47557DD828A4034C08BA6c069F49382d746A36"
+  ),
   [HARDHAT_CHAIN_ID]: getAddress("0x596ce077ff6959d6b427AF70E2675d4E9BDd5A84"),
 };
 
@@ -67,6 +70,9 @@ export const QUAD_PASSPORT = {
   ),
   [NETWORK_IDS.ZKSYNC_ERA_GOERLI]: getAddress(
     "0xE730171A5D840bD2d86E745c50c390Cd79E51637"
+  ),
+  [NETWORK_IDS.BASE_GOERLI]: getAddress(
+    "0x1F9d2D7044b597b7d24947f8bc6422eB789F3525"
   ),
   [HARDHAT_CHAIN_ID]: getAddress("0xaAeB1836e71f10Fb0435aF4852DC45D202C9F5E5"),
 };
@@ -97,6 +103,9 @@ export const QUAD_READER = {
   [NETWORK_IDS.ZKSYNC_ERA_GOERLI]: getAddress(
     "0x74e5D65c2dC7e8d6f6725CFB4a1839a7c19a600D"
   ),
+  [NETWORK_IDS.BASE_GOERLI]: getAddress(
+    "0x40BB0E474ebD651D50D006F0b0b76Ca5cb5F87C6"
+  ),
   [HARDHAT_CHAIN_ID]: getAddress("0xA41e864248d5e0C79F1d9b70909EF722516Ca22f"),
 };
 
@@ -125,6 +134,9 @@ export const MULTISIG = {
   ),
   [NETWORK_IDS.ZKSYNC_ERA_GOERLI]: getAddress(
     "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B" // This is Fab's EOA as GnosisSafe isn't supported yet by zkSync TEstnet
+  ),
+  [NETWORK_IDS.BASE_GOERLI]: getAddress(
+    "0x3F249ace4351a33FD0F9c3fA1cE1e4B61568a148"
   ),
   [HARDHAT_CHAIN_ID]: getAddress(
     "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B" // This is Fab's EOA as GnosisSafe isn't supported yet by KAVA Testnet
@@ -160,6 +172,9 @@ export const TIMELOCK = {
   [NETWORK_IDS.ZKSYNC_ERA_GOERLI]: getAddress(
     "0xFd1a6CD600918625F8AC7A483215a316FC4031a3"
   ),
+  [NETWORK_IDS.BASE_GOERLI]: getAddress(
+    "0xB82cE1FdA39d68e42bdDC61e0F1Fca0C6302AbD8"
+  ),
   [HARDHAT_CHAIN_ID]: getAddress("0x4166d01d928D2a2322201d84D8B30f3165d7F68e"),
 };
 
@@ -174,6 +189,7 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.OPTIMISM_GOERLI]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.KAVA_TESTNET]: undefined,
   [NETWORK_IDS.ZKSYNC_ERA_GOERLI]: undefined,
+  [NETWORK_IDS.BASE_GOERLI]: ethers.utils.parseUnits("50.001", "gwei"),
 };
 
 export const ISSUERS = [

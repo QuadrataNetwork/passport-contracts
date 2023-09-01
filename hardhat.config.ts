@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
 
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-verify";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
@@ -11,7 +11,7 @@ import "@nomiclabs/hardhat-ethers";
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
 
-// import "@matterlabs/hardhat-zksync-verify";
+import "@matterlabs/hardhat-zksync-verify";
 // upgradable plugin
 import "@matterlabs/hardhat-zksync-upgradable";
 
@@ -218,6 +218,36 @@ const config = {
         "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
       zksync: true,
     },
+    zkSync: {
+      url: "https://mainnet.era.zksync.io",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      // ethNetwork: "goerli", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
+      verifyURL:
+        "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+      zksync: true,
+    },
+    baseGoerli: {
+      url: "https://goerli.base.org",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      chainId: 84531,
+      gasPrice: 1500000000,
+      zksync: false,
+    },
+    base: {
+      url: "https://mainnet.base.org",
+      accounts:
+        process.env.MAINNET_PRIVATE_KEY !== undefined
+          ? [process.env.MAINNET_PRIVATE_KEY]
+          : [],
+      chainId: 8453,
+      zksync: false,
+    },
   },
   gasReporter: {
     enabled: true,
@@ -247,9 +277,16 @@ const config = {
       optimisticEthereum: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
       optimisticGoerli: process.env.OPTIMISM_ETHERSCAN_API_KEY || "",
 
+      // kava
       kava_testnet: "cannot_be_empty",
       kava: "cannot_be_empty",
+
+      // zkSync
       // zkSyncTestnet: process.env.ETHERSCAN_API_KEY,
+
+      // base
+      baseGoerli: process.env.ETHERSCAN_API_KEY || "",
+      base: process.env.ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
