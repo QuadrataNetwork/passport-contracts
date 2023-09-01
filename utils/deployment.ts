@@ -20,6 +20,7 @@ const {
   OPERATOR_ROLE,
   DEFAULT_ADMIN_ROLE,
   PAUSER_ROLE,
+  TOKEN_ID_1_URI,
 } = require("./constant.ts");
 
 export const deployQuadrata = async (
@@ -239,13 +240,9 @@ export const deployQuadrata = async (
 
   // Set default tokenID(1) metadata
   await recursiveRetry(async () => {
-    const tx = await governance.setTokenURI(
-      1,
-      "https://cdn.quadrata.com/nft-passports/1.json",
-      {
-        maxFeePerGas,
-      }
-    );
+    const tx = await governance.setTokenURI(1, TOKEN_ID_1_URI, {
+      maxFeePerGas,
+    });
     await tx.wait();
     if (verbose) console.log("[QuadGovernance] setTokenURI to tokenID(1)");
   });

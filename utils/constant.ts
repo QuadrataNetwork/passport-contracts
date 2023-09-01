@@ -32,6 +32,7 @@ export const ATTRIBUTE_TRANSUNION_CREDIT_SCORE = ethers.utils.id(
 );
 
 export const TOKEN_ID = 1;
+export const TOKEN_ID_1_URI = "https://cdn.quadrata.com/nft-passports/1.json";
 
 export const ALL_ROLES = [
   OPERATOR_ROLE,

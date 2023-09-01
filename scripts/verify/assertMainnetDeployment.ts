@@ -25,6 +25,7 @@ const {
   ISSUER_SPLIT,
   NETWORK_IDS,
   OPERATOR_ROLE,
+  TOKEN_ID_1_URI,
 } = require("../../utils/constant.ts");
 
 const {
@@ -278,12 +279,17 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   }
   expect(await governance.preapproval(ETH_HOLDER_1)).equals(false);
   expect(await governance.preapproval(ETH_HOLDER_2)).equals(false);
+  console.log("[QuadGovernance] preApproved: OK");
 
   // Check QueryFee
   expect(await reader.queryFee(ETH_HOLDER_1, ATTRIBUTE_AML)).equals(0);
   expect(
     await reader.queryFeeBulk(ETH_HOLDER_2, [ATTRIBUTE_AML, ATTRIBUTE_DID])
   ).equals(0);
+
+  // Check tokenID (1)
+  expect(await passport.uri(1)).equals(TOKEN_ID_1_URI);
+  console.log("[QuadGovernance] tokenID (1) OK");
 
   // Check AccessControl (Roles)
   const checkUserRoles = async (accountRoles: any, contract: any) => {
