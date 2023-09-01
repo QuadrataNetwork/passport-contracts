@@ -4,7 +4,6 @@ pragma solidity 0.8.16;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol";
 
 import "./interfaces/IQuadPassport.sol";
 import "./interfaces/IQuadGovernance.sol";
@@ -232,10 +231,10 @@ import "./storage/QuadReaderStoreV2.sol";
         uint256 _threshold,
         bytes calldata _flashSig
     ) public payable override returns(bool) {
-        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256("TRUE"))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('TRUE'))) {
             return true;
         }
-        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256("FALSE"))) {
+        if (_validateFlashAttrSignature(_account, _attribute, _verifiedAt, _threshold, _flashSig, keccak256('FALSE'))) {
             return false;
         }
 
@@ -262,18 +261,12 @@ import "./storage/QuadReaderStoreV2.sol";
         require(!_usedFlashSigHashes[extractionHash], "SIGNATURE_ALREADY_USED");
 
         bytes32 signedMsg = ECDSAUpgradeable.toEthSignedMessageHash(extractionHash);
-        (address signer, ECDSAUpgradeable.RecoverError error) = ECDSAUpgradeable.tryRecover(signedMsg, _flashSig);
-        bool isValidERC1271SignatureNow = (
-            error == ECDSAUpgradeable.RecoverError.NoError
-          ) || SignatureCheckerUpgradeable.isValidERC1271SignatureNow(signer, signedMsg, _flashSig);
+        address signer = ECDSAUpgradeable.recover(signedMsg, _flashSig);
 
-        if (
-            isValidERC1271SignatureNow
-            && IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)
-        ) {
-            require(governance.getIssuerStatus(signer), "ISSUER_NOT_ACTIVE");
-            require(governance.eligibleAttributes(_attribute), "INVALID_ATTRIBUTE");
-            require(governance.getIssuerAttributePermission(signer, _attribute), "INVALID_ISSUER_ATTR_PERMISSION");
+        if(IAccessControlUpgradeable(address(governance)).hasRole(ISSUER_ROLE, signer)) {
+            require(governance.getIssuerStatus(signer), 'ISSUER_NOT_ACTIVE');
+            require(governance.eligibleAttributes(_attribute), 'INVALID_ATTRIBUTE');
+            require(governance.getIssuerAttributePermission(signer, _attribute), 'INVALID_ISSUER_ATTR_PERMISSION');
 
             emit FlashQueryEvent(_account, msg.sender, _attribute, msg.value);
             _usedFlashSigHashes[extractionHash] = true;

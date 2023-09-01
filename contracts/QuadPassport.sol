@@ -84,7 +84,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
-    ) external payable override whenNotPaused {
+    ) public payable override whenNotPaused {
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
 
