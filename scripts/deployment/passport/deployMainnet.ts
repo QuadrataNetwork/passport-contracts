@@ -69,6 +69,7 @@ const {
     verbose: true,
     maxFeePerGas: maxGasPerNetwork,
     maxPriorityFeePerGas: ethers.utils.parseUnits("0.025", "gwei"),
+    mainnet: true,
   };
 
   const [governance] = await deployQuadrata(

@@ -224,9 +224,9 @@ const config = {
         process.env.MAINNET_PRIVATE_KEY !== undefined
           ? [process.env.MAINNET_PRIVATE_KEY]
           : [],
-      // ethNetwork: "goerli", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
+      ethNetwork: "mainnet", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
       verifyURL:
-        "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+        "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
       zksync: true,
     },
     baseGoerli: {

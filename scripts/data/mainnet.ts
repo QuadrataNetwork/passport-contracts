@@ -90,6 +90,9 @@ export const MULTISIG = {
   ),
   [NETWORK_IDS.KAVA]: getAddress("0xE3898C7E51d7378aE891125B5D736bB0525a6108"),
   [NETWORK_IDS.BASE]: getAddress("0x2dFf5Da7281BDCbaC7Ee23d961C5a73eB1e7f2A5"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B"
+  ),
 };
 
 export const QUADRATA_TREASURY = MULTISIG;
@@ -113,6 +116,9 @@ export const TIMELOCK = {
   ),
   [NETWORK_IDS.KAVA]: getAddress("0x76694A182dB047067521c73161Ebf3Db5Ca988d3"),
   [NETWORK_IDS.BASE]: getAddress("0x76694A182dB047067521c73161Ebf3Db5Ca988d3"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0x1DCAD2C302b3340b66Ed024F8EbBC351521EB362"
+  ),
 };
 
 // Careful - this doesn't work for Contract Deployment today
@@ -124,8 +130,8 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.ARBITRUM]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.OPTIMISM]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.KAVA]: undefined, // Cannot set maxFeePerGas on KAVA
-  [NETWORK_IDS.BASE]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.ZKSYNC_ERA]: undefined, // Cannot set maxFeePerGas on KAVA
+  [NETWORK_IDS.BASE]: ethers.utils.parseUnits("50.001", "gwei"),
 };
 
 export const ISSUERS: any[] = [
