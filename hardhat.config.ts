@@ -247,6 +247,7 @@ const config = {
           : [],
       chainId: 8453,
       zksync: false,
+      gasPrice: 25000000,
     },
   },
   gasReporter: {
@@ -286,7 +287,7 @@ const config = {
 
       // base
       baseGoerli: process.env.ETHERSCAN_API_KEY || "",
-      base: process.env.ETHERSCAN_API_KEY || "",
+      base: process.env.BASE_ETHERSCAN_API_KEY || "",
     },
     customChains: [
       {
