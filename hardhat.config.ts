@@ -19,7 +19,7 @@ require("dotenv").config({ path: require("find-config")(".env") });
 
 const config = {
   zksolc: {
-    version: "latest", // Uses latest available in https://github.com/matter-labs/zksolc-bin/
+    version: "1.3.14", // Uses latest available in https://github.com/matter-labs/zksolc-bin/
     settings: {},
   },
   solidity: {
