@@ -1,95 +1,98 @@
-BUSINESS SOURCE LICENSE 1.1
-2022-07-05
+TO ALL USERS OF QUADRATA PASSPORTTM: BY THIS NOTICE THE PRIOR BUSINESS SOURCE LICENSE 1.1 IS HEREBY REVOKED AND LICENSEE’S CONTINUED USE OF QUADRATA PASSPORTTM CONSTITUTES AGREEMENT TO TERMINATION OF THE PRIOR LICENSE AND ACCEPTANCE OF THIS BUSINESS SOURCE LICENSE 2.1.  THIS AGREEMENT COMPRISES THE ENTIRE UNDERSTANDING AND AGREEMENT BETWEEN LICENSOR AND LICENSEE AND SUPERSEDES ALL PRIOR LICENSES AND AGREEMENTS WITH RESPECT TO QUADRATA PASSPORTTM IN ALL RESPECTS.
 
-Change Date: The earlier of 2024-11-01 or a date specified at https://quadrata.com/license/quadrata-passport-busl-1_1
+BUSINESS SOURCE LICENSE 2.1
+(2023_08_24)
 
-This BUSINESS SOURCE LICENSE 1.1. (aka INITIAL SOFTWARE LICENSE AGREEMENT) (“Agreement”) is made as of the Effective Date by and between Quadrata, Inc., a Delaware entity, having a place of business at 4136 Del Rey Avenue, Suite 639, Marina Del Rey, CA 90292 and website www.quadrata.com (“Website”) ( “Licensor”), and the user (“Licensee”) regarding the Quadrata Passport™ software (“Software”).  Each being referred to as a “Party” and collectively as the “Parties”.
+    This BUSINESS SOURCE LICENSE 2.1 (“Agreement”) is made as of the Effective Date by and between Quadrata, Inc., a Delaware entity, having a place of business at 4223 Glencoe Avenue, Suite C100, Marina Del Rey, CA 90292 and website www.quadrata.com (“Website”) ( “Licensor”), and the user (“Licensee”) regarding the Quadrata Passport™ software (“Software”).  Each being referred to as a “Party” and collectively as the “Parties”.
 
 1. BACKGROUND.
-    Licensor has developed the initial version of the Software which is proprietary software, but the Software will change to open source software pursuant to the terms of this Agreement by the “Conversion Date”.  This Agreement is the primary license for the Software and will be updated from time to time.  User’s continued use of the Software constitutes their agreement to the terms of any updated version of this Agreement then in place.  The updated version of this Agreement will be maintained on the Website and the intent of the Parties is to develop derivative works of the Software and new decentralized finance applications (“DeFi Apps” or “dApps”) based off of the Software subject to the terms and conditions of this Agreement.
+    Licensor has developed the Software, which is proprietary software.  This Agreement is the primary license for the Software and will be updated from time to time.  Licensee’s continued use of the Software constitutes Licensee’s agreement to the terms of any updated version of this Agreement then in place.  The updated version of this Agreement will be maintained on the Website and the intent of the Parties is to develop derivative works of the Software and new decentralized finance applications (“DeFi Apps” or “dApps”) based off of the Software subject to the terms and conditions of this Agreement.
 
 2. DEFINITIONS.
     Unless otherwise specifically provided, and in addition to the other defined terms set forth herein, the following terms shall have the meanings set forth below:
 
     “Additional Use Rights” means additional rights granted by Licensor to Licensee separate from this Agreement and listed on the Site.
-
-    “Agreement” means this Business Source License 1.1 (aka Initial Software License Agreement), together with all schedules, exhibits, and other attachments hereto, all of which are incorporated into this Agreement by reference, as the same may be modified, amended, or supplemented from time to time, as well as any updates to this Agreement.
-
-    “Authorized User” means persons authorized to use and access the Software in accordance with the terms and conditions of this Agreement.
-
-    “Confidential Information” means any information disclosed by or on behalf of the Discloser to the Recipient during the term of this Agreement, except information that Recipient can demonstrate:
-      (a)    is or becomes generally available to the public other than as a result of disclosure by the Recipient;
-      (b)    is already known by or in the possession of the Recipient at the time of disclosure by the Discloser as evidenced by written documentation in the Recipient’s possession prior to receipt of the Confidential Information;
-      (c)    is independently developed by the Recipient without use of or reference to the Confidential Information; or
-      (d)    is obtained by the Recipient from a third party that has not breached any obligations of confidentiality.
-      “Conversion Date” shall be 2024-11-01 or any date specified at https://quadrata.com/license/quadrata-passport-busl-1_1.
-
-    “Conversion License Agreement” means the license agreement that becomes controlling between the Parties upon the Conversion Date as set forth on the Site (aka the Lesser General Public License).
-
+    “Agreement” means this Business Source License 2.1, together with all schedules, exhibits, and other attachments hereto, all of which are incorporated into this Agreement by reference, as the same may be modified, amended, or supplemented from time to time, as well as any updates to this Agreement.
     “Party” means Licensor or Licensee individually, and collectively they are referred to herein as “Parties.”
-
-    “Recipient” means the Party receiving Confidential Information hereunder.
-
+    “Personal Information” means the same as the terms “personal information,” “personal data” or equivalent terms under applicable laws.
     “Software” means the Quadrata Passport™ software available on the Site including any updates thereto, e.g., including without limitation derivative works of same such as dApps, etc.
 
 3. SCOPE OF THE AGREEMENT.
-
-    3.1 Scope of Services.  This Agreement sets forth the terms and conditions that will govern Licensor’s Software license grant to Licensee.
-
-    3.2 Controlling Documents.  This Agreement is controlling and represents the entire understanding between the Parties with respect to the subject matter hereof, and supersedes all prior agreements and discussions concerning the subject matter hereof, whether oral or written.  As stated herein, the Business Source License (aka Initial Software License Agreement) governs the Parties relationship with respect to the licensed Software up to the Conversion Date, and thereafter the Conversion License Agreement governs the Parties relationship with respect to the licensed Software.
+    3.1. Scope of Services.  This Agreement sets forth the terms and conditions that will govern Licensor’s Software license grant to Licensee.
+    3.2. Controlling Documents.  This Agreement is controlling and represents the entire understanding between the Parties with respect to the subject matter hereof, and supersedes all prior agreements and discussions concerning the subject matter hereof, whether oral or written.  As stated herein, this Agreement governs the Parties relationship with respect to the licensed Software.
 
 4. LICENSE GRANT; RESERVATION OF RIGHTS.
+    4.1. License. Subject to and conditioned on the terms and conditions of this Agreement, Licensor hereby grants to Licensee the non-exclusive, revocable, non-transferable, non-sublicensable, limited right to use the Software solely for Licensee’s internal business use.  Licensor may grant “Additional Use Rights” permitting limited production of the Software separate from this Agreement.  All copies of the original and modified Software are subject to the terms of this Agreement. This Agreement and the license granted hereunder applies separately for each work created with or from the Software.
+    4.2. Retained Rights.  Except for the explicit license granted hereunder, Licensor retains and reserves all right, title and interest in and to the Software, and nothing in this Agreement shall restrict, impair, transfer, license, convey or otherwise alter or deprive Licensor of any of its rights or proprietary interests in any intellectual property, content, data, information or any other materials or rights, tangible or intangible.
+    4.3. Restrictions.  Except to the extent such restrictions are prohibited by applicable law, Licensee may not (i) copy, reproduce, modify, adapt, disassemble, reverse engineer, decompile, distribute, sell, create derivate works of, resell, lease, license, perform, display, transfer, transmit, stream, broadcast, create derivate works, translate, circumvent any anti-piracy technology or features that enforce limitations on use of, otherwise alter or attempt to discover the source code, object code, or other portion of, or otherwise use or exploit the Software, or (ii) use the Software to build or benchmark a competitive product or service, or copy any features, functions or graphics of the Software.
+    4.4. Notice.  Licensee shall conspicuously display notice of the license granted under this Agreement on each work utilizing the Software by including the phrase: “Notice: Subject to License of Quadrata Passport™ Software. © 2022 Quadrata, Inc.”  This Agreement does not grant Licensee any right in any trademark or logo of Licensor or its affiliates and any use of same subject to the terms of this Agreement inure to the benefit of the Licensor.  Licensee may not remove, destroy or obscure any copyright, trademark, or other intellectual property or other proprietary notices from any portion of the Software.
+    4.5. Acceptable Use.  Licensee may use the Software only for lawful purposes and in accordance with this Agreement.  Licensee agrees not to use the Software: (a) in any way that violates any applicable law or regulation (including any laws regarding export of data or software to and from the United States or other countries); (b) to impersonate or attempt to impersonate an employee of Licensor, another user, or any other person or entity; or (c) to engage in any other conduct that restricts or inhibits anyone's use or enjoyment of the Software, or the operation of the Software,  or which, as determined by Licensor, may harm Licensor or users of the Software, expose them to liability, or threaten the security of their personally identifiable information.
+    4.6. Non-compliant Use.  If Licensee’s use of the Software does not comply with the requirements currently in effect as described herein, Licensee must purchase a commercial license from the Licensor, its affiliated entities, or authorized resellers, or Licensee must refrain from using the Software.  Any use of the Software in violation of this Agreement will automatically terminate Licensee’s rights under this Agreement for the current and all other versions of the Software.
 
-    4.1 License. Subject to the terms and conditions of this Agreement, Licensor hereby grants to Licensee the right to copy, modify, create derivative works, redistribute, and make non-production use of the Software.  Licensor may grant “Additional Use Rights” permitting limited production of the Software separate from this Agreement.  All copies of the original and modified Software, and derivative works of the Software, are subject to the terms of this Agreement. This Agreement and the license granted hereunder applies separately for each work created with or from the Software and the Conversion Date may vary for each work.
+5. REPRESENTATIONS AND WARRANTIES.  Licensee represents and warrants that: (a) it has the full right, power and authority to enter into this Agreement and, in doing so, will not violate any other agreement to which Licensee is a party; and (b) this Agreement constitutes the legal, valid and binding obligation of Licensee, enforceable against Licensee in accordance with its terms.
 
-    4.2 Conversion License Agreement.  Effective on the Conversion Date, the Licensor hereby grants Licensee rights under the terms of the Conversion License Agreement set forth on the Site.  Except for the explicit license granted hereunder, Licensor retains all right, title and interest in and to the Software, and nothing in this Agreement shall restrict, impair, transfer, license, convey or otherwise alter or deprive Licensor of any of its rights or proprietary interests in any intellectual property, content, data, information or any other materials or rights, tangible or intangible.
+6. SANCTIONS.  Licensee represents and warrants that neither Licensee nor any individual, entity, or organization holding any material ownership interest in Licensee, nor any officer or director, is an individual, entity, or organization with whom any United States law, regulation, or executive order prohibits United States companies and individuals from dealing, including, without limitation, names appearing on the Office of Foreign Assets Control (“OFAC”)’s Specially Designated Nationals and Blocked Persons List (“SDN List”).  Licensee covenants to Licensor that it will not cause Licensor to be in violation of any regulation administered by OFAC.
 
-    4.3 Notice.  Licensee shall conspicuously display notice of the license granted under this Agreement on each work utilizing the Software by including the phrase: Notice: Subject to License of Quadrata Passport™ Software. © 2022 Quadrata, Inc.  This Agreement does not grant Licensee any right in any trademark or logo of Licensor or its affiliates and any use of same subject to the terms of this Agreement inure to the benefit of the Licensor.
+7. DISCLAIMER OF WARRANTIES.  TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED ON AN “AS IS” BASIS.  LICENSOR HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
 
-    4.4 Non-compliant Use.  If Licensee’s use of the Software does not comply with the requirements currently in effect as described herein, Licensee must purchase a commercial license from the Licensor, its affiliated entities, or authorized resellers, or Licensee must refrain from using the Software.  Any use of the Software in violation of this Agreement will automatically terminate Licensee’s rights under this Agreement for the current and all other versions of the Software.
+8. LIMITATION OF LIABILITY.
+    LICENSOR’S ENTIRE LIABILITY AND LICENSEE’S EXCLUSIVE REMEDY WITH RESPECT TO ANY DISPUTE WITH LICENSOR RELATING TO THIS AGREEMENT (INCLUDING WITHOUT LIMITATION LICENSEE’S USE OF THE SOFTWARE AND ANYTHING RELATED TO, DONE, OR NOT DONE IN WHOLE OR IN PART IN RELIANCE UPON THE WHOLE OR ANY PART OF THE SOFTWARE) IS TO DISCONTINUE LICENSEE’S USE OF THE SOFTWARE; PROVIDED, THAT TO THE EXTENT THE FOREGOING IS UNENFORCEABLE UNDER APPLICABLE LAW, LICENSOR’S ENTIRE LIABILITY, UNDER CONTRACT, TORT OR OTHERWISE, SHALL NOT EXCEED ONE HUNDRED DOLLARS ($100).   IN NO EVENT WILL LICENSOR, THEIR SERVICE PROVIDERS, EMPLOYEES, AGENTS, OFFICERS, MANAGERS, OR DIRECTORS, OR AFFILIATES OR THEIR LICENSORS OR DATA PROVIDERS, BE LIABLE FOR DAMAGES OF ANY KIND, UNDER ANY LEGAL THEORY, ARISING OUT OF OR IN CONNECTION WITH USE OF, OR INABILITY TO USE, THE SOFTWARE.  THIS LIMITATION INCLUDES ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO DAMAGES ARISING FROM PERSONAL INJURY, PAIN AND SUFFERING, EMOTIONAL DISTRESS, LOSS OF REVENUE, LOSS OF PROFITS, LOSS OF BUSINESS OR ANTICIPATED SAVINGS, LOSS OF USE, LOSS OF GOODWILL, AND LOSS OF DATA, WHETHER CAUSED BY TORT (INCLUDING NEGLIGENCE), BREACH OF CONTRACT OR OTHERWISE, EVEN IF FORESEEABLE AND EVEN IF LICENSOR HAD BEEN ADVISED OF THE POSSIBILITY THEREOF AND REGARDLESS OF THE LEGAL OR EQUITABLE THEORY UPON WHICH THE CLAIM IS BASED.  THE FOREGOING DOES NOT AFFECT ANY LIABILITY THAT CANNOT BE EXCLUDED OR LIMITED UNDER APPLICABLE LAW.
+LICENSEE UNDERSTANDS AND ACKNOWLEDGES THAT LICENSOR WOULD NOT BE ABLE TO PROVIDE THE SOFTWARE THEREIN ON AN ECONOMICALLY FEASIBLE BASIS WITHOUT THE FOREGOING EXCLUSIONS, LIMITATIONS, AND DISCLAIMERS OF WARRANTIES LIABILITY, AND THAT ACCORDINGLY, SUCH EXCLUSIONS, LIMITATIONS, AND DISCLAIMERS REFLECT A REASONABLE ALLOCATION OF RISK UNDER THE CIRCUMSTANCES, AND WILL APPLY TO THE GREATEST EXTENT PERMISSIBLE PURSUANT TO APPLICABLE LAW.
 
-    4.5 DISCLAIMER OF WARRANTIES.  TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED ON AN “AS IS” BASIS.  LICENSOR HEREBY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS OR IMPLIED, INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND TITLE.
+9. INDEMNIFICATION.
+    9.1. Indemnification by Licensee.  Licensee agrees to defend, indemnify and hold harmless Licensor and Licensor’s respective officers, directors, partners, managers, employees, contractors, and agents from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses or fees (including reasonable attorneys' fees) arising out of or relating to Licensee’s use of the Software, including any violation of this Agreement or applicable law in connection therewith, infringement of any intellectual property rights or other proprietary rights, or dealings or transactions with other persons resulting from Licensee’s use of the Software.
 
-5. COVENANTS OF LICENSOR
+10. TERMINATION.  Either Party may terminate this Agreement, for any reason or no reason, at any time. Licensor may terminate Licensee’s access to the Software in Licensor’s sole discretion, immediately and without prior notice. Licensor may also in its sole discretion and at any time discontinue providing the Software, or any part thereof, with or without notice.
 
-    5.1 Covenants.  In consideration of the right to use the Software granted under this Agreement, Licensee covenants to Licensor, and to all recipients of the Software:
-
-      5.1.1 Conversion License Agreement.  To specify as the Conversion License Agreement (aka the Lesser General Public License) or any later version, or a license that is compatible with the Conversion License Agreement where “compatible” means that software provided under the Conversion License Agreement can be included in a program with software provided under the Conversion License Agreement or later version thereof.  Licensor may specify additional Conversion License Agreements without limitation.
-
-      5.1.2 Additional grants.  To either: (a) specify an additional grant of rights to use that does not impose any additional restriction on the right granted in this Agreement, as the Additional Use Rights; or (b) specify “Not Applicable” if none.
-
-      5.1.3 Conversion Date.  To specify a Conversion Date.
-
-      5.1.4 No Further Modification.  Not to modify this Agreement in any other way.
-
-6. GENERAL PROVISIONS
-
-    6.1 Notices.  All notices required or permitted under this Agreement will be in writing and will be deemed received when (i) delivered personally; (ii) when sent by confirmed fax; (iii) three days after having been sent by registered or certified mail; or (iv) one day after deposit with a recognized commercial express courier specifying next day delivery.  All communications will be sent to the persons and addresses identified below or to such other address as may be designated in a SOW or by a Party by giving written notice to the other party pursuant to this paragraph.
+11. GENERAL PROVISIONS.
+    11.1. Notices.  All notices required or permitted under this Agreement will be in writing and will be deemed received when (i) delivered personally; (ii) when sent by confirmed fax; (iii) three days after having been sent by registered or certified mail; or (iv) one day after deposit with a recognized commercial express courier specifying next day delivery.  All communications will be sent to the persons and addresses identified below or to such other address as may be designated in a SOW or by a Party by giving written notice to the other party pursuant to this paragraph.
 
     If to Licensor:
     Quadrata, Inc.
-    4136 Del Rey Ave, Ste 639
+    4223 Glencoe Ave, Ste C100
     Marina Del Rey, CA 90292
 
     With a copy to:
     General Counsel
     Quadrata, Inc.
-    4136 Del Rey Ave, Ste 639
+    4223 Glencoe Ave, Ste C100
     Marina Del Rey, CA 90292
     jeffrey@quadrata.com
 
-    6.2 Assignment. Either Party shall have the right to assign its rights under this Agreement to any affiliate company or any entity purchasing all or substantially all of its assets to which this Agreement pertains without the other Party’s consent.  This Agreement shall be binding upon and inure to the benefit of the Parties and to their respective successors, assignees and licensees.
+    If to Licensee:
+    _________________
+    _________________
+    _________________
+    Attn: _____________
 
-    6.3 Relationship of Parties.  This Agreement shall not be construed as creating any agency, partnership, joint venture, or other similar legal relationship between the Parties; nor will either Party hold itself out as an agent, partner, or joint venture party of the other party.  Both Parties shall be, and shall act as, independent contractors.  Neither Party shall have authority to create any obligation for the other Party, except to the extent stated herein.
+    11.2. Assignment. Either Party shall have the right to assign its rights under this Agreement to any affiliate company or any entity purchasing all or substantially all of its assets to which this Agreement pertains without the other Party’s consent.  This Agreement shall be binding upon and inure to the benefit of the Parties and to their respective successors, assignees and licensees.
+    11.3. Relationship of Parties.  This Agreement shall not be construed as creating any agency, partnership, joint venture, or other similar legal relationship between the Parties; nor will either Party hold itself out as an agent, partner, or joint venture party of the other party.  Both Parties shall be, and shall act as, independent contractors.  Neither Party shall have authority to create any obligation for the other Party, except to the extent stated herein.
+    11.4. Section Headings.  The headings of the sections, paragraphs, and appendices herein are for the Parties’ convenient reference only and shall not define or limit any of the terms or provisions hereof.
+    11.5. Counterparts. This Agreement may be executed in any number of original or facsimile counterparts, each of which shall be deemed an original and all of which together shall constitute one instrument.  The Parties acknowledge and agree that the use of facsimile or electronic signatures and electronic records shall be of the same legal effect, validity and enforceability as a manually executed signature or paper-based record.
+    11.6. Severability.  If any provision or provisions of this Agreement shall, for any reason, be deemed unenforceable or in violation of law, such unenforceability or violation shall not affect the remaining provisions of this Agreement, which shall continue in full force and effect and be binding upon the Parties hereto.  If provisions are allowed in the jurisdiction of enforcement (e.g., blue penciling, red penciling, purple penciling, reformation, etc.) and the condition or term can be amended by the Parties to make the condition or term legal, valid and enforceable and in accordance with the Parties intent, the Parties agree to so amend the term or condition so that it remains part of the Agreement.
+    11.7. Governing Law.  This Agreement will be governed by and construed in accordance with the laws of the State of California, without regard to its conflict of law principles.  The parties irrevocably submit to the jurisdiction of the state and federal courts of the State of Delaware to resolve any disputes arising under or related to this Agreement.  The provisions of this Agreement shall be effective worldwide.
+    11.8. Mutual Negotiation.  The Parties agree that the terms and conditions of this Agreement are the result of negotiations between the Parties and that this Agreement shall not be construed in favor of or against any Party by reason of the extent to which any Party or its professional advisors participated in the preparation of this Agreement.  Each Party shall bear its own attorney’s fees and costs arising from this negotiation, this Agreement and the matters and documents referred to herein, and all related matters.
+    11.9. Rights & Remedies.  Any enumeration of a Party’s rights and remedies set forth in this Agreement is not intended to be exhaustive.  A Party’s exercise of any right or remedy under this Agreement does not preclude the exercise of any other right or remedy.  All of a Party’s rights and remedies are cumulative and are in addition to any other right or remedy set forth in this Agreement, any other agreement between the parties, or which may now or subsequently exist at law or in equity, by statute or otherwise.
+    11.10. Force Majeure. Licensee acknowledges and agrees that Licensor will not be liable for failures or delays in the Software, or other non-performance caused by such events as fires, telecommunications, utility, or power failures, equipment failures, supply chain issues, bank failures changes in law, cyberattacks, denial of service attacks, labor strife, strikes, lockouts, riots, war, nonperformance of Licensor’s vendors or suppliers, acts of God, pandemic or epidemic events, or other causes over which Licensor has no reasonable control.
 
-    6.4 Section Headings.  The headings of the sections, paragraphs, and appendices herein are for the Parties’ convenient reference only and shall not define or limit any of the terms or provisions hereof.
+    IN WITNESS WHEREOF, the Parties hereto have duly executed this Agreement as of the last date listed below.
 
-    6.5 Counterparts. This Agreement may be executed in any number of original or facsimile counterparts, each of which shall be deemed an original and all of which together shall constitute one instrument.  The Parties acknowledge and agree that the use of facsimile or electronic signatures and electronic records shall be of the same legal effect, validity and enforceability as a manually executed signature or paper-based record.
+    Quadrata, Inc. (Licensor)
+    By: _________________
 
-    6.6 Severability.  If any provision or provisions of this Agreement shall, for any reason, be deemed unenforceable or in violation of law, such unenforceability or violation shall not affect the remaining provisions of this Agreement, which shall continue in full force and effect and be binding upon the Parties hereto.  If provisions are allowed in the jurisdiction of enforcement (e.g., blue penciling, red penciling, purple penciling, reformation, etc.) and the condition or term can be amended by the Parties to make the condition or term legal, valid and enforceable and in accordance with the Parties intent, the Parties agree to so amend the term or condition so that it remains part of the Agreement.
+    Name: _________________
 
-    6.7 Governing Law.  This Agreement will be governed by and construed in accordance with the laws of the State of California, without regard to its conflict of law principles.  The parties irrevocably submit to the jurisdiction of the state and federal courts of the State of Delaware to resolve any disputes arising under or related to this Agreement.  The provisions of this Agreement shall be effective worldwide.
+    Title: _________________
 
-    6.8 Mutual Negotiation.  The Parties agree that the terms and conditions of this Agreement are the result of negotiations between the Parties and that this Agreement shall not be construed in favor of or against any Party by reason of the extent to which any Party or its professional advisors participated in the preparation of this Agreement.  Each Party shall bear its own attorney’s fees and costs arising from this negotiation, this Agreement and the matters and documents referred to herein, and all related matters.
+    Date: _________________
 
-    6.9 Rights & Remedies.  Any enumeration of a Party’s rights and remedies set forth in this Agreement is not intended to be exhaustive.  A Party’s exercise of any right or remedy under this Agreement does not preclude the exercise of any other right or remedy.  All of a Party’s rights and remedies are cumulative and are in addition to any other right or remedy set forth in this Agreement, any other agreement between the parties, or which may now or subsequently exist at law or in equity, by statute or otherwise.
+
+   ______[User]______ (Licensee)
+
+    By: _________________
+
+    Name: _________________
+
+    Title: _________________
+
+    Date: _________________
