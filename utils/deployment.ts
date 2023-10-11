@@ -14,7 +14,7 @@ const {
   ATTRIBUTE_CRED_PROTOCOL_SCORE,
 
   ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
-  ATTRIBUTE_ACCREDITED_INVESTOR_US,
+  ATTRIBUTE_INVESTOR_STATUS,
   READER_ROLE,
   GOVERNANCE_ROLE,
   OPERATOR_ROLE,
@@ -180,7 +180,7 @@ export const deployQuadrata = async (
 
   await recursiveRetry(async () => {
     const tx = await governance.setEligibleAttributeByDID(
-      ATTRIBUTE_ACCREDITED_INVESTOR_US,
+      ATTRIBUTE_INVESTOR_STATUS,
       true,
       {
         maxFeePerGas,
@@ -190,7 +190,7 @@ export const deployQuadrata = async (
     await tx.wait();
     if (verbose)
       console.log(
-        `[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_ACCREDITED_INVESTOR_US`
+        `[QuadGovernance] setEligibleAttributeByDID for ATTRIBUTE_INVESTOR_STATUS`
       );
   });
 

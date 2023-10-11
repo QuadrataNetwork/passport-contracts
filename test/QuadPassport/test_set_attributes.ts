@@ -10,6 +10,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_IS_BUSINESS,
   ATTRIBUTE_COUNTRY,
+  ATTRIBUTE_INVESTOR_STATUS,
   READER_ROLE,
   TOKEN_ID,
   HARDHAT_CHAIN_ID,
@@ -87,7 +88,7 @@ describe("QuadPassport.setAttributes", async () => {
   describe("QuadPassport.setAttributes (success)", async () => {
     beforeEach(async () => {});
 
-    it("setAttributes (Single Attribute)", async () => {
+    it.only("setAttributes (Single Attribute)", async () => {
       const attributes: any = {
         [ATTRIBUTE_IS_BUSINESS]: id("FALSE"),
       };

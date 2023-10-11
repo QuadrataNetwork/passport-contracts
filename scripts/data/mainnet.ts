@@ -6,7 +6,7 @@ const {
   ATTRIBUTE_AML,
   ATTRIBUTE_COUNTRY,
   ATTRIBUTE_IS_BUSINESS,
-  ATTRIBUTE_ACCREDITED_INVESTOR_US,
+  ATTRIBUTE_INVESTOR_STATUS,
   ATTRIBUTE_TRANSUNION_CREDIT_SCORE,
   NETWORK_IDS,
 } = require("../../utils/constant.ts");
@@ -157,7 +157,7 @@ export const ISSUERS: any[] = [
       ATTRIBUTE_IS_BUSINESS,
       // Quadrata does not have yet the authorization to post CRED_PROTOCOL_SCORE
       // ATTRIBUTE_CRED_PROTOCOL_SCORE,
-      ATTRIBUTE_ACCREDITED_INVESTOR_US,
+      ATTRIBUTE_INVESTOR_STATUS,
     ],
   },
   {
