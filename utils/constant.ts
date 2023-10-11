@@ -32,6 +32,7 @@ export const ATTRIBUTE_TRANSUNION_CREDIT_SCORE = ethers.utils.id(
 );
 
 export const TOKEN_ID = 1;
+export const TOKEN_ID_1_URI = "https://cdn.quadrata.com/nft-passports/1.json";
 
 export const ALL_ROLES = [
   OPERATOR_ROLE,
@@ -86,6 +87,10 @@ export const NETWORK_IDS = {
   ARBITRUM_GOERLI: 421613,
   KAVA_TESTNET: 2221,
   KAVA: 2222,
+  ZKSYNC_ERA_GOERLI: 280,
+  ZKSYNC_ERA: 324,
+  BASE_GOERLI: 84531,
+  BASE: 8453,
 };
 
 export const HARDHAT_CHAIN_ID = 31337;

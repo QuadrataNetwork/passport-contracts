@@ -29,6 +29,10 @@ export const QUAD_GOVERNANCE = {
     "0xBfa59A31b379A62304327386bC2b03096D7695B3"
   ),
   [NETWORK_IDS.KAVA]: getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3"),
+  [NETWORK_IDS.BASE]: getAddress("0xBfa59A31b379A62304327386bC2b03096D7695B3"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0xE49A00fa96A5F316E0C55658823D06ce14b6069d"
+  ),
 };
 
 export const QUAD_PASSPORT = {
@@ -49,6 +53,10 @@ export const QUAD_PASSPORT = {
     "0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"
   ),
   [NETWORK_IDS.KAVA]: getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"),
+  [NETWORK_IDS.BASE]: getAddress("0x2e779749c40CC4Ba1cAB4c57eF84d90755CC017d"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0x55ebc5A0e47e40aB0fB80508241a96A4d6C81590"
+  ),
 };
 
 export const QUAD_READER = {
@@ -69,6 +77,10 @@ export const QUAD_READER = {
     "0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"
   ),
   [NETWORK_IDS.KAVA]: getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"),
+  [NETWORK_IDS.BASE]: getAddress("0xFEB98861425C6d2819c0d0Ee70E45AbcF71b43Da"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0xB1FB6822d3FBf320a543DC8fE3E4Da16c9E18583"
+  ),
 };
 
 export const MULTISIG = {
@@ -89,6 +101,10 @@ export const MULTISIG = {
     "0x19a060d807c71434bB773f222555Dc46c87b42C3"
   ),
   [NETWORK_IDS.KAVA]: getAddress("0xE3898C7E51d7378aE891125B5D736bB0525a6108"),
+  [NETWORK_IDS.BASE]: getAddress("0x2dFf5Da7281BDCbaC7Ee23d961C5a73eB1e7f2A5"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0x1f0B49e4871e2f7aaB069d78a8Fa31687b1eA91B"
+  ),
 };
 
 export const QUADRATA_TREASURY = MULTISIG;
@@ -111,6 +127,10 @@ export const TIMELOCK = {
     "0x76694A182dB047067521c73161Ebf3Db5Ca988d3"
   ),
   [NETWORK_IDS.KAVA]: getAddress("0x76694A182dB047067521c73161Ebf3Db5Ca988d3"),
+  [NETWORK_IDS.BASE]: getAddress("0x76694A182dB047067521c73161Ebf3Db5Ca988d3"),
+  [NETWORK_IDS.ZKSYNC_ERA]: getAddress(
+    "0x1DCAD2C302b3340b66Ed024F8EbBC351521EB362"
+  ),
 };
 
 // Careful - this doesn't work for Contract Deployment today
@@ -122,6 +142,8 @@ export const MAX_GAS_FEE = {
   [NETWORK_IDS.ARBITRUM]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.OPTIMISM]: ethers.utils.parseUnits("50.001", "gwei"),
   [NETWORK_IDS.KAVA]: undefined, // Cannot set maxFeePerGas on KAVA
+  [NETWORK_IDS.ZKSYNC_ERA]: undefined, // Cannot set maxFeePerGas on KAVA
+  [NETWORK_IDS.BASE]: ethers.utils.parseUnits("50.001", "gwei"),
 };
 
 export const ISSUERS: any[] = [

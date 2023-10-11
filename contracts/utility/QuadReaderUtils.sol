@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: BUSL-1.1
-pragma solidity >= 0.5.0;
+pragma solidity ^0.8.0;
 
 library QuadReaderUtils {
   /// @dev Checks if IsBusiness return value is true

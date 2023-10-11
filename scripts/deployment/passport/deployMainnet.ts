@@ -1,5 +1,6 @@
 import { ethers } from "hardhat";
 
+const { recursiveRetry } = require("../../utils/retries.ts");
 const { deployQuadrata } = require("../../../utils/deployment.ts");
 
 const {
@@ -64,6 +65,13 @@ const {
   const deployer = signers[0];
   console.log(`Deployer address: ${deployer.address}`);
 
+  const opts = {
+    verbose: true,
+    maxFeePerGas: maxGasPerNetwork,
+    maxPriorityFeePerGas: ethers.utils.parseUnits("0.025", "gwei"),
+    mainnet: true,
+  };
+
   const [governance] = await deployQuadrata(
     timelockPerNetwork,
     ISSUERS,
@@ -71,22 +79,21 @@ const {
     multisigPerNetwork,
     OPERATOR,
     READER_ONLY,
-    true, // Verbose = true,
-    maxGasPerNetwork,
-    "",
-    "",
-    "",
-    false
+    opts
   );
 
-  let tx = await governance
-    .connect(deployer)
-    .renounceRole(GOVERNANCE_ROLE, deployer.address);
-  await tx.wait();
-  console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
-  tx = await governance
-    .connect(deployer)
-    .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
-  await tx.wait();
-  console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  await recursiveRetry(async () => {
+    const tx = await governance
+      .connect(deployer)
+      .renounceRole(GOVERNANCE_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
+  });
+  await recursiveRetry(async () => {
+    const tx = await governance
+      .connect(deployer)
+      .renounceRole(DEFAULT_ADMIN_ROLE, deployer.address);
+    await tx.wait();
+    console.log(`[QuadGovernance] deployer renounce DEFAULT_ADMIN_ROLE`);
+  });
 })();

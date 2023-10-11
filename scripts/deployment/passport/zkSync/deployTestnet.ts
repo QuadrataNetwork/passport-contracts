@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
-const { recursiveRetry } = require("../../utils/retries.ts");
-const { deployQuadrata } = require("../../../utils/deployment.ts");
+const { recursiveRetry } = require("../../..//utils/retries.ts");
+const { deployQuadrata } = require("../../../../utils/deployment.ts");
 
 const {
   GOVERNANCE_ROLE,
   DEFAULT_ADMIN_ROLE,
-} = require("../../../utils/constant.ts");
+} = require("../../../../utils/constant.ts");
 
 const {
   QUADRATA_TREASURY,
@@ -15,7 +15,7 @@ const {
   MAX_GAS_FEE,
   OPERATOR,
   READER_ONLY,
-} = require("../../data/int_testnet.ts");
+} = require("../../../data/int_testnet.ts");
 (async () => {
   if (!QUADRATA_TREASURY) {
     throw new Error("QUADRATA_TREASURY not set");
@@ -68,7 +68,7 @@ const {
     verbose: true,
     useGovTestMock: true,
     maxFeePerGas: maxGasPerNetwork,
-    maxPriorityFeePerGas: ethers.utils.parseUnits("1.5", "gwei"),
+    zkSync: true,
   };
 
   const [governance] = await deployQuadrata(
