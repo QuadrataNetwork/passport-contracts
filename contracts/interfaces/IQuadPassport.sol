@@ -30,6 +30,12 @@ interface IQuadPassport is IQuadSoulbound {
         bytes calldata _sigIssuer
     ) external payable;
 
+    function claimPassport(
+        address _account,
+        IQuadPassportStore.AttributeSetterConfig memory _config,
+        bytes calldata _sigIssuer
+    ) external payable;
+
     function burnPassports(uint256 _tokenId) external;
 
     function burnPassportsIssuer(address _account, uint256 _tokenId) external;

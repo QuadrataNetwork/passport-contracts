@@ -76,7 +76,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     }
 
-    /// @notice Set attributes for a Quadrata Passport
+    /// @notice Update attributes for an existing Quadrata Passport holder (Mainly used by Issuer)
     /// @param _account Address of the Quadrata Passport holder
     /// @param _config Input paramters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
@@ -84,13 +84,25 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
         address _account,
         AttributeSetterConfig memory _config,
         bytes calldata _sigIssuer
-    ) external payable override whenNotPaused {
+    ) public payable override whenNotPaused {
         require(_account != address(0), "ACCOUNT_CANNOT_BE_ZERO");
         require(msg.value == _config.fee,  "INVALID_SET_ATTRIBUTE_FEE");
 
         address issuer = _setAttributesVerify(_account, _config, _sigIssuer);
 
         _setAttributesInternal(_account, _config, issuer);
+    }
+
+    /// @notice Claim passport (Mainly used by end-users)
+    /// @param _account Address of the Quadrata Passport holder
+    /// @param _config Input paramters required to set attributes
+    /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
+    function claimPassport(
+        address _account,
+        AttributeSetterConfig memory _config,
+        bytes calldata _sigIssuer
+    ) external payable override whenNotPaused {
+        setAttributesIssuer(_account, _config, _sigIssuer);
     }
 
     /// @notice Internal function for `setAttributes` and `setAttributesIssuer`
