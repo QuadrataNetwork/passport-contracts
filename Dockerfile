@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# Deps
+RUN apk --no-cache add jq g++ make python
+
 # 1. Create the working directory at '/home/node/app' and give node use permissions
 RUN mkdir -p /home/node/app/node_modules
 
