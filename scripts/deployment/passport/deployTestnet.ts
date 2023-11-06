@@ -66,7 +66,7 @@ const {
 
   const opts = {
     verbose: true,
-    useGovTestMock: true,
+    useGovTestMock: false,
     maxFeePerGas: maxGasPerNetwork,
     maxPriorityFeePerGas: ethers.utils.parseUnits("1.5", "gwei"),
   };
