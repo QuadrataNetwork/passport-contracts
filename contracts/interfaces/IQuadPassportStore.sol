@@ -3,7 +3,7 @@ pragma solidity 0.8.16;
 
 interface IQuadPassportStore {
 
-    /// @dev Attribute store infomation as it relates to a single attribute
+    /// @dev Attribute store information as it relates to a single attribute
     /// `attrKeys` Array of keys defined by (wallet address/DID + data Type)
     /// `value` Attribute value
     /// `epoch` timestamp when the attribute has been verified by an Issuer
