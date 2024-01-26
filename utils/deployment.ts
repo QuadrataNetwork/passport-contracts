@@ -4,8 +4,6 @@ import { Deployer } from "@matterlabs/hardhat-zksync-deploy";
 import { Wallet } from "zksync-web3";
 const { ethers, upgrades } = require("hardhat");
 
-import * as hre from "hardhat";
-
 const {
   ATTRIBUTE_DID,
   ATTRIBUTE_COUNTRY,
@@ -42,6 +40,7 @@ export const deployQuadrata = async (
   const useGovTestMock: boolean = opts.useGovTestMock || false;
   const zkSync: boolean = opts.zkSync || false;
   const mainnet: boolean = opts.mainnet || false;
+  const hre = opts.hre || undefined;
 
   // Deploy QuadGovernance
   const governance = await recursiveRetry(async () => {
@@ -49,13 +48,20 @@ export const deployQuadrata = async (
       governanceAddress,
       useGovTestMock,
       zkSync,
-      mainnet
+      mainnet,
+      hre
     );
   });
   if (verbose) console.log(`QuadGovernance is deployed: ${governance.address}`);
   // Deploy QuadPassport
   const passport = await recursiveRetry(async () => {
-    return await deployPassport(governance, passportAddress, zkSync, mainnet);
+    return await deployPassport(
+      governance,
+      passportAddress,
+      zkSync,
+      mainnet,
+      hre
+    );
   });
   if (verbose) console.log(`QuadPassport is deployed: ${passport.address}`);
 
@@ -66,7 +72,8 @@ export const deployQuadrata = async (
       passport,
       readerAddress,
       zkSync,
-      mainnet
+      mainnet,
+      hre
     );
   });
   if (verbose) console.log("QuadReader is deployed: ", reader.address);
@@ -328,7 +335,8 @@ export const deployPassport = async (
   governance: Contract,
   passportAddress: string = "",
   zkSync: boolean = false,
-  mainnet: boolean = false
+  mainnet: boolean = false,
+  hre: any
 ): Promise<Contract> => {
   if (passportAddress !== "") {
     return await ethers.getContractAt("QuadPassport", passportAddress);
@@ -339,7 +347,7 @@ export const deployPassport = async (
     // @ts-ignore
     const zkWallet = mainnet
       ? new Wallet(process.env.MAINNET_PRIVATE_KEY)
-      : new Wallet(process.env.mainnet_DEPLOY_KEY);
+      : new Wallet(process.env.TESTNET_DEPLOY_KEY);
     const deployer = new Deployer(hre, zkWallet);
     const QuadPassport = await deployer.loadArtifact("QuadPassport");
     passport = await recursiveRetry(async () => {
@@ -375,21 +383,22 @@ export const deployGovernance = async (
   governanceAddress: string = "",
   useGovTestMock: boolean = false,
   zkSync: boolean = false,
-  mainnet: boolean = false
+  mainnet: boolean = false,
+  hre: any
 ): Promise<Contract> => {
   if (governanceAddress !== "") {
     return await ethers.getContractAt("QuadGovernance", governanceAddress);
   }
   let governance: Contract;
   const contractName = useGovTestMock
-    ? "QuadGovernancemainnet"
+    ? "QuadGovernanceTestnet"
     : "QuadGovernance";
 
   if (zkSync) {
     // @ts-ignore
     const zkWallet = mainnet
       ? new Wallet(process.env.MAINNET_PRIVATE_KEY)
-      : new Wallet(process.env.mainnet_DEPLOY_KEY);
+      : new Wallet(process.env.TESTNET_DEPLOY_KEY);
     const deployer = new Deployer(hre, zkWallet);
 
     const QuadGovernance = await deployer.loadArtifact(contractName);
@@ -426,7 +435,8 @@ export const deployReader = async (
   passport: Contract,
   readerAddress: string = "",
   zkSync: boolean = false,
-  mainnet: boolean = false
+  mainnet: boolean = false,
+  hre: any
 ): Promise<Contract> => {
   if (readerAddress !== "") {
     return await ethers.getContractAt("QuadReader", readerAddress);
@@ -436,7 +446,7 @@ export const deployReader = async (
     // @ts-ignore
     const zkWallet = mainnet
       ? new Wallet(process.env.MAINNET_PRIVATE_KEY)
-      : new Wallet(process.env.mainnet_DEPLOY_KEY);
+      : new Wallet(process.env.TESTNET_DEPLOY_KEY);
     const deployer = new Deployer(hre, zkWallet);
 
     const QuadReader = await deployer.loadArtifact("QuadReader");
