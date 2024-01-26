@@ -1,11 +1,9 @@
 import { ethers } from "hardhat";
-const { recursiveRetry } = require("../../..//utils/retries.ts");
-const { deployQuadrata } = require("../../../../utils/deployment.ts");
 
-const {
-  GOVERNANCE_ROLE,
-  DEFAULT_ADMIN_ROLE,
-} = require("../../../../utils/constant.ts");
+const { recursiveRetry } = require("../scripts/utils/retries.ts");
+const { deployQuadrata } = require("../utils/deployment.ts");
+
+const { GOVERNANCE_ROLE, DEFAULT_ADMIN_ROLE } = require("../utils/constant.ts");
 
 const {
   QUADRATA_TREASURY,
@@ -15,7 +13,8 @@ const {
   MAX_GAS_FEE,
   OPERATOR,
   READER_ONLY,
-} = require("../../../data/int_testnet.ts");
+} = require("../scripts/data/mainnet.ts");
+
 (async () => {
   if (!QUADRATA_TREASURY) {
     throw new Error("QUADRATA_TREASURY not set");
@@ -43,7 +42,6 @@ const {
   if (!MAX_GAS_FEE) {
     throw new Error("MAX_GAS_FEE not set");
   }
-
   // Retrieve address filter by Network
   const signers: any = await ethers.getSigners();
   const network = await signers[0].provider.getNetwork();
@@ -66,9 +64,9 @@ const {
 
   const opts = {
     verbose: true,
-    useGovTestMock: true,
     maxFeePerGas: maxGasPerNetwork,
     zkSync: true,
+    mainnet: true,
   };
 
   const [governance] = await deployQuadrata(
@@ -88,7 +86,6 @@ const {
     await tx.wait();
     console.log(`[QuadGovernance] deployer renounce GOVERNANCE_ROLE`);
   });
-
   await recursiveRetry(async () => {
     const tx = await governance
       .connect(deployer)

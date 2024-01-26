@@ -63,7 +63,7 @@ const config = {
       chainId: 5,
       zksync: false,
     },
-    celo_testnet: {
+    celoTestnet: {
       url: "https://alfajores-forno.celo-testnet.org",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -81,7 +81,7 @@ const config = {
       chainId: 43113,
       zksync: false,
     },
-    bsc_testnet: {
+    bscTestnet: {
       url: "https://data-seed-prebsc-2-s3.binance.org:8545",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -90,7 +90,7 @@ const config = {
       chainId: 97,
       zksync: false,
     },
-    arbitrum_goerli: {
+    arbitrumGoerli: {
       url: "https://arbitrum-goerli.publicnode.com",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -108,7 +108,7 @@ const config = {
       chainId: 42161,
       zksync: false,
     },
-    optimism_goerli: {
+    optimismGoerli: {
       url: "https://goerli.optimism.io",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -126,7 +126,7 @@ const config = {
       chainId: 10,
       zksync: false,
     },
-    fantom_testnet: {
+    fantomTestnet: {
       url: "https://rpc.ankr.com/fantom_testnet",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -189,7 +189,7 @@ const config = {
       chainId: 9001,
       zksync: false,
     },
-    kava_testnet: {
+    kavaTestnet: {
       url: "https://evm.testnet.kava.io",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -207,7 +207,7 @@ const config = {
       chainId: 2222,
       zksync: false,
     },
-    zkSyncTestnet: {
+    zkSyncGoerli: {
       url: "https://testnet.era.zksync.dev",
       accounts:
         process.env.TESTNET_DEPLOY_KEY !== undefined
@@ -216,6 +216,15 @@ const config = {
       ethNetwork: "goerli", // or a Goerli RPC endpoint from Infura/Alchemy/Chainstack etc.
       verifyURL:
         "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
+      zksync: true,
+    },
+    zkSyncSepolia: {
+      url: "https://sepolia.era.zksync.dev",
+      accounts:
+        process.env.TESTNET_DEPLOY_KEY !== undefined
+          ? [process.env.TESTNET_DEPLOY_KEY]
+          : [],
+      ethNetwork: "sepolia",
       zksync: true,
     },
     zkSync: {
@@ -229,6 +238,7 @@ const config = {
         "https://zksync2-mainnet-explorer.zksync.io/contract_verification",
       zksync: true,
     },
+
     baseGoerli: {
       url: "https://goerli.base.org",
       accounts:
