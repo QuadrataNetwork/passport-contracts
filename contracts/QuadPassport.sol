@@ -33,7 +33,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @notice Set attributes for a Quadrata Passport (Only Individuals)
     /// @dev Only when authorized by an eligible issuer
-    /// @param _config Input paramters required to authorize attributes to be set
+    /// @param _config Input parameters required to authorize attributes to be set
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccount ECDSA signature computed by an eligible EOA to prove ownership
     function setAttributes(
@@ -52,7 +52,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @notice Set attributes from multiple issuers for a Quadrata Passport (Only Individuals)
     /// @dev Only when authorized by an eligible issuer
-    /// @param _configs List of input paramters required to authorize attributes to be set
+    /// @param _configs List of input parameters required to authorize attributes to be set
     /// @param _sigIssuers List of ECDSA signature computed by an eligible issuer to authorize the mint
     /// @param _sigAccounts List of ECDSA signature computed by an eligible EOA to prove ownership
     function setAttributesBulk(
@@ -78,7 +78,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @notice Update attributes for an existing Quadrata Passport holder (Mainly used by Issuer)
     /// @param _account Address of the Quadrata Passport holder
-    /// @param _config Input paramters required to set attributes
+    /// @param _config Input parameters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
     function setAttributesIssuer(
         address _account,
@@ -95,7 +95,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @notice Claim passport (Mainly used by end-users)
     /// @param _account Address of the Quadrata Passport holder
-    /// @param _config Input paramters required to set attributes
+    /// @param _config Input parameters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
     function claimPassport(
         address _account,
@@ -107,7 +107,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @notice Internal function for `setAttributes` and `setAttributesIssuer`
     /// @param _account Address of the Quadrata Passport holder
-    /// @param _config Input paramters required to set attributes
+    /// @param _config Input parameters required to set attributes
     /// @param _issuer Extracted address of ECDSA signature computed by an eligible issuer to authorize the action
     function _setAttributesInternal(
         address _account,
@@ -178,7 +178,7 @@ contract QuadPassport is IQuadPassport, UUPSUpgradeable, PausableUpgradeable, Qu
 
     /// @notice Internal helper to check setAttributes process
     /// @param _account Address of the Quadrata Passport holder
-    /// @param _config Input paramters required to set attributes
+    /// @param _config Input parameters required to set attributes
     /// @param _sigIssuer ECDSA signature computed by an eligible issuer to authorize the action
     /// @return address of the issuer
     function _setAttributesVerify(

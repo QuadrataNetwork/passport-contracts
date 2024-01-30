@@ -531,7 +531,7 @@ describe("QuadReader.getAttributesBulk", async () => {
       ).to.revertedWith("ACCOUNT_ADDRESS_ZERO");
     });
 
-    it("sucess - non-eligible attributes may be queried", async () => {
+    it("success - non-eligible attributes may be queried", async () => {
       await governance
         .connect(admin)
         .setEligibleAttribute(ATTRIBUTE_COUNTRY, false);
